@@ -6,7 +6,7 @@
 //   </script>
 
 (function () {
-  var DEFAULT_ENDPOINT = "https://stats.colab.indevs.in/collect"; // TODO: set real URL
+  var DEFAULT_ENDPOINT = "https://stats.colab.indevs.in/collect";
   var DEFAULT_SECRET = null; // unused, kept for API compatibility
   var SESSION_KEY = "analytics_lab_session_id";
 
@@ -30,6 +30,38 @@
     return id;
   }
 
+  function getFingerprintTraits() {
+    var nav = (typeof navigator !== "undefined" && navigator) || {};
+    var scr = (typeof window !== "undefined" && window.screen) || {};
+    var intlOpts = {};
+    try {
+      if (window.Intl && Intl.DateTimeFormat) {
+        intlOpts = Intl.DateTimeFormat().resolvedOptions() || {};
+      }
+    } catch (e) {}
+
+    var pointerCoarse = false;
+    try {
+      if (window.matchMedia) {
+        pointerCoarse = window.matchMedia("(pointer: coarse)").matches;
+      }
+    } catch (e) {}
+
+    return {
+      hardwareConcurrency: nav.hardwareConcurrency || null,
+      deviceMemory: nav.deviceMemory || null, // GB on some browsers
+      colorDepth: scr.colorDepth || null,
+      maxTouchPoints:
+        typeof nav.maxTouchPoints === "number" ? nav.maxTouchPoints : null,
+      timeZone: intlOpts.timeZone || null,
+      languages: nav.languages || (nav.language ? [nav.language] : null),
+      pointerCoarse: pointerCoarse,
+      platform: nav.platform || null,
+      vendor: nav.vendor || null,
+      userAgent: nav.userAgent || null
+    };
+  }
+
   function buildBasePayload(config, eventName) {
     return {
       site: config.site || "analytics-lab",
@@ -48,7 +80,8 @@
         screenHeight: window.screen && window.screen.height,
         pixelRatio: window.devicePixelRatio || 1,
         touch: "ontouchstart" in window || navigator.maxTouchPoints > 0
-      }
+      },
+      fpTraits: getFingerprintTraits()
     };
   }
 
