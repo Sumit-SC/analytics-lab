@@ -1,0 +1,200 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Resources | Standalone Playground</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = { theme: { extend: { colors: { primary: '#4f46e5', accent: '#0ea5e9' } } } };
+	</script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+	<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+	<nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
+			<div class="flex items-center justify-between py-3">
+				<a href="./index.html" class="font-extrabold text-lg tracking-tight hover:text-primary">Standalone Playground</a>
+				<div class="flex items-center gap-4">
+					<a href="./resources.html?topic=python" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Resources</a>
+					<a href="./index.html" class="text-sm font-semibold text-gray-700 hover:text-primary">Playground</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+		<div id="resource-root"></div>
+		<div id="resource-not-found" class="hidden text-center py-12">
+			<p class="text-gray-600 mb-4">Topic not found.</p>
+			<a href="./index.html" class="text-primary hover:underline">Back to Playground</a>
+		</div>
+	</main>
+
+	<footer class="border-t border-gray-200 mt-12 py-6">
+		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
+			<p>Standalone Playground · Resources</p>
+		</div>
+	</footer>
+
+	<script>
+		(function() {
+			var params = new URLSearchParams(window.location.search);
+			var topic = (params.get('topic') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+			var topics = {
+				python: {
+					title: 'Python',
+					courses: [{ name: 'Kaggle Learn Python', url: 'https://www.kaggle.com/learn/python' }],
+					books: [{ name: 'Automate the Boring Stuff (free)', url: 'https://automatetheboringstuff.com' }],
+					youtube: [{ id: 'rfscVS0vtbw', title: 'Learn Python - Full Course (freeCodeCamp)', embed: true }]
+				},
+				sql: {
+					title: 'SQL',
+					courses: [{ name: 'Kaggle Intro to SQL', url: 'https://www.kaggle.com/learn/intro-to-sql' }],
+					books: [{ name: 'SQL (Wikipedia)', url: 'https://en.wikipedia.org/wiki/SQL' }],
+					youtube: [{ id: 'p3qvj9hO_Bo', title: 'SQL Tutorial (freeCodeCamp)', embed: true }]
+				},
+				pandas: {
+					title: 'Pandas',
+					courses: [{ name: 'Kaggle Pandas', url: 'https://www.kaggle.com/learn/pandas' }],
+					books: [{ name: 'Pandas docs', url: 'https://pandas.pydata.org/docs/' }],
+					youtube: [{ id: 'vmEHCJofslg', title: 'Pandas Tutorial (Corey Schafer)', embed: true }]
+				},
+				numpy: {
+					title: 'NumPy',
+					courses: [{ name: 'NumPy (practice)', url: 'https://www.kaggle.com/code' }],
+					books: [{ name: 'NumPy docs', url: 'https://numpy.org/doc/' }],
+					youtube: [{ id: 'QUT1VHIxAN4', title: 'NumPy Tutorial (Corey Schafer)', embed: true }]
+				},
+				matplotlib: {
+					title: 'Visualization',
+					courses: [{ name: 'Kaggle Data Visualization', url: 'https://www.kaggle.com/learn/data-visualization' }],
+					books: [{ name: 'Matplotlib docs', url: 'https://matplotlib.org/stable/' }],
+					youtube: [{ id: 'UO98lJQedQc', title: 'Matplotlib Tutorial (Corey Schafer)', embed: true }]
+				},
+				excel: {
+					title: 'Excel',
+					courses: [{ name: 'Excel Easy', url: 'https://www.excel-easy.com' }],
+					books: [{ name: 'Chandoo.org (Excel)', url: 'https://chandoo.org' }],
+					youtube: [{ id: 'Vl0H-qTclOg', title: 'Excel for Beginners (freeCodeCamp)', embed: true }]
+				},
+				'power-bi': {
+					title: 'Power BI',
+					courses: [{ name: 'Microsoft Learn Power BI', url: 'https://learn.microsoft.com/en-us/training/powerplatform/power-bi' }],
+					books: [{ name: 'Power BI docs', url: 'https://learn.microsoft.com/en-us/power-bi' }],
+					youtube: [{ id: '1c01f6T1_2E', title: 'Power BI Full Course (freeCodeCamp)', embed: true }]
+				},
+				tableau: {
+					title: 'Tableau',
+					courses: [{ name: 'Tableau Public', url: 'https://public.tableau.com' }],
+					books: [{ name: 'Tableau Help', url: 'https://help.tableau.com' }],
+					youtube: [{ id: '6xv6Y0rRES0', title: 'Tableau Full Course (freeCodeCamp)', embed: true }]
+				}
+			};
+
+			var t = topics[topic];
+			var root = document.getElementById('resource-root');
+			var notFound = document.getElementById('resource-not-found');
+			if (!t) {
+				root.classList.add('hidden');
+				notFound.classList.remove('hidden');
+				return;
+			}
+
+			document.title = t.title + ' | Resources | Standalone Playground';
+
+			var html = '<div class="mb-6"><a href="./index.html" class="text-primary hover:underline text-sm">← Back to Playground</a></div>';
+			html += '<h1 class="text-3xl font-bold mb-6">Learn ' + t.title + '</h1>';
+			html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">';
+
+			// YouTube
+			html += '<div class="rounded-xl border-2 border-gray-200 bg-white overflow-hidden">';
+			html += '<div class="p-4 border-b border-gray-200 bg-gray-50"><h2 class="text-lg font-bold flex items-center gap-2">▶ YouTube</h2></div>';
+			html += '<div class="p-4">';
+			if (t.youtube && t.youtube.length) {
+				var first = t.youtube.find(function(y){return y.embed;}) || t.youtube[0];
+				html += '<div class="rounded-lg overflow-hidden bg-black mb-3" style="aspect-ratio:16/9;"><iframe id="yt-embed" class="w-full h-full" src="https://www.youtube.com/embed/' + first.id + '?rel=0" allowfullscreen></iframe></div>';
+				html += '<p class="text-xs text-gray-500 mb-2">Tap a title to play it here</p><ul class="space-y-1">';
+				t.youtube.slice(0,10).forEach(function(y, idx){
+					html += '<li><button type="button" data-video-id="' + y.id + '" class="yt-select text-left w-full text-sm text-primary hover:underline block truncate' + (idx === 0 ? ' font-semibold' : '') + '">' + (y.title || 'Video') + '</button></li>';
+				});
+				html += '</ul>';
+			} else {
+				html += '<p class="text-sm text-gray-500">(none)</p>';
+			}
+			html += '</div></div>';
+
+			// Read
+			html += '<div class="rounded-xl border-2 border-gray-200 bg-white overflow-hidden">';
+			html += '<div class="p-4 border-b border-gray-200 bg-gray-50"><h2 class="text-lg font-bold flex items-center gap-2">📖 Book / Read</h2></div>';
+			html += '<div class="p-4">';
+			if (t.books && t.books.length) {
+				html += '<ul class="space-y-2">';
+				t.books.forEach(function(r){
+					html += '<li><a class="text-sm text-primary hover:underline block" target="_blank" rel="noopener" href="' + r.url + '">' + r.name + ' →</a></li>';
+				});
+				html += '</ul>';
+			} else {
+				html += '<p class="text-sm text-gray-500">(none)</p>';
+			}
+			html += '</div></div>';
+
+			// Course
+			html += '<div class="rounded-xl border-2 border-gray-200 bg-white overflow-hidden">';
+			html += '<div class="p-4 border-b border-gray-200 bg-gray-50"><h2 class="text-lg font-bold flex items-center gap-2">🎓 Course</h2></div>';
+			html += '<div class="p-4">';
+			if (t.courses && t.courses.length) {
+				html += '<ul class="space-y-2">';
+				t.courses.forEach(function(c){
+					html += '<li><a class="text-sm text-primary hover:underline block" target="_blank" rel="noopener" href="' + c.url + '">' + c.name + ' →</a></li>';
+				});
+				html += '</ul>';
+			} else {
+				html += '<p class="text-sm text-gray-500">(none)</p>';
+			}
+			html += '</div></div>';
+
+			// Global recommended repos & lists (same for all topics)
+			html += '<section class="mt-10 pt-6 border-t border-gray-200">';
+			html += '<h2 class="text-lg font-semibold text-gray-800 mb-2">Recommended repos & lists</h2>';
+			html += '<p class="text-xs text-gray-500 mb-3">High‑quality GitHub repos and curated lists for deeper learning. These are not owned or maintained by this site.</p>';
+			html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">';
+			html += '<div><h3 class="font-semibold mb-1">Awesome & lists</h3><ul class="space-y-1">';
+			html += '<li><a href="https://github.com/vinta/awesome-python" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-python</a> · Python ecosystem</li>';
+			html += '<li><a href="https://github.com/academic/awesome-datascience" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-datascience</a> · data science resources</li>';
+			html += '<li><a href="https://github.com/josephmisiti/awesome-machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-machine-learning</a> · ML libraries & papers</li>';
+			html += '<li><a href="https://github.com/awesomedata/awesome-public-datasets" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-public-datasets</a> · datasets to practice on</li>';
+			html += '</ul></div>';
+			html += '<div><h3 class="font-semibold mb-1">Books & code repos</h3><ul class="space-y-1">';
+			html += '<li><a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener" class="underline hover:text-primary">free-programming-books</a> · big list of free books</li>';
+			html += '<li><a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener" class="underline hover:text-primary">Hands‑On ML (code)</a> · practical ML notebook repo</li>';
+			html += '<li><a href="https://github.com/rasbt/python-machine-learning-book-3rd-edition" target="_blank" rel="noopener" class="underline hover:text-primary">Python ML book (code)</a> · Python ML examples</li>';
+			html += '<li><a href="https://github.com/fastai/fastbook" target="_blank" rel="noopener" class="underline hover:text-primary">fastbook</a> · Deep Learning for Coders (fast.ai)</li>';
+			html += '</ul></div>';
+			html += '</div></section>';
+
+			html += '</div>';
+			root.innerHTML = html;
+
+			// Wire up YouTube selectors to swap the embedded video in-place
+			var ytFrame = document.getElementById('yt-embed');
+			if (ytFrame) {
+				var buttons = document.querySelectorAll('.yt-select');
+				buttons.forEach(function(btn) {
+					btn.addEventListener('click', function() {
+						var vid = btn.getAttribute('data-video-id');
+						if (!vid) return;
+						ytFrame.src = 'https://www.youtube.com/embed/' + vid + '?rel=0';
+						buttons.forEach(function(b) { b.classList.remove('font-semibold'); });
+						btn.classList.add('font-semibold');
+					});
+				});
+			}
+		})();
+	</script>
+</body>
+</html>
+
