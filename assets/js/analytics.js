@@ -7,7 +7,7 @@
 
 (function () {
   var DEFAULT_ENDPOINT = "https://stats.colab.indevs.in/collect"; // TODO: set real URL
-  var DEFAULT_SECRET = null; // no client secret; don't send x-analytics-secret
+  var DEFAULT_SECRET = null; // unused, kept for API compatibility
   var SESSION_KEY = "analytics_lab_session_id";
 
   function generateSessionId() {
@@ -69,15 +69,15 @@
     try {
       // Prefer sendBeacon so the request is sent even on page unload
       if (navigator.sendBeacon) {
-        var blob = new Blob([body], { type: "text/plain" });
+        var blob = new Blob([body], { type: "application/json" });
         navigator.sendBeacon(config.endpoint, blob);
       } else {
-        // Fallback: fire-and-forget POST with no-cors and no custom headers
+        // Standard CORS-aware POST; Worker will send proper CORS headers
         fetch(config.endpoint, {
           method: "POST",
-          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
           keepalive: true,
-          body: body
+          credentials: "include"
         }).catch(function () {});
       }
     } catch (e) {
