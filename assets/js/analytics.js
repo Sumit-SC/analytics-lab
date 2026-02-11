@@ -65,19 +65,17 @@
     }
 
     var body = JSON.stringify(payload);
-    var headers = { "Content-Type": "application/json" };
-    if (config.secret) {
-      headers["x-analytics-secret"] = config.secret;
-    }
 
     try {
+      // Prefer sendBeacon so the request is sent even on page unload
       if (navigator.sendBeacon) {
-        var blob = new Blob([body], { type: "application/json" });
+        var blob = new Blob([body], { type: "text/plain" });
         navigator.sendBeacon(config.endpoint, blob);
       } else {
+        // Fallback: fire-and-forget POST with no-cors and no custom headers
         fetch(config.endpoint, {
           method: "POST",
-          headers: headers,
+          mode: "no-cors",
           keepalive: true,
           body: body
         }).catch(function () {});
