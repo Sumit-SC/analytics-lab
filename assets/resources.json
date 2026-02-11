@@ -339,5 +339,272 @@
         "embed": true
       }
     ]
+  },
+  "business-analytics": {
+    "title": "Business Analytics",
+    "summary": "Translating business questions into metrics, dashboards, and data stories. Mix of Excel, BI tools, and SQL.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Visualization & Data Cleaning",
+        "url": "https://www.kaggle.com/learn"
+      },
+      {
+        "name": "Google Data Analytics Professional Certificate",
+        "url": "https://www.coursera.org/professional-certificates/google-data-analytics"
+      }
+    ],
+    "books": [
+      {
+        "name": "Storytelling with Data",
+        "url": "https://www.storytellingwithdata.com/books"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Data Analyst roadmap",
+        "url": "https://roadmap.sh/data-analyst"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Excel + Analytics for Beginners (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Get comfortable with Excel → learn basic SQL → build 3–4 dashboards in Power BI or Tableau from public datasets.",
+      "Follow the roadmap.sh Data Analyst roadmap to fill any missing tools or concepts."
+    ]
+  },
+  "data-science": {
+    "title": "Data Science",
+    "summary": "End‑to‑end analytics and ML: cleaning data, modeling, evaluation, and communication.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Science micro-courses",
+        "url": "https://www.kaggle.com/learn"
+      },
+      {
+        "name": "IBM Data Science Professional Certificate",
+        "url": "https://www.coursera.org/professional-certificates/ibm-data-science"
+      }
+    ],
+    "books": [
+      {
+        "name": "Python Data Science Handbook",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/"
+      },
+      {
+        "name": "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow",
+        "url": "https://github.com/ageron/handson-ml3"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · AI & Data Scientist roadmap",
+        "url": "https://roadmap.sh/ai-data-scientist"
+      },
+      {
+        "name": "Towards Data Science",
+        "url": "https://towardsdatascience.com/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Data Science Crash Course (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Master Python + pandas + SQL → do 5–10 Kaggle projects → read through Hands-On ML while re‑implementing the notebooks.",
+      "Follow the roadmap.sh AI & Data Scientist roadmap to plan tools/libraries to learn next."
+    ]
+  },
+  "data-engineering": {
+    "title": "Data Engineering",
+    "summary": "Pipelines, warehouses, and tooling that make analytics and ML possible at scale.",
+    "courses": [
+      {
+        "name": "Data Engineering Zoomcamp",
+        "url": "https://github.com/DataTalksClub/data-engineering-zoomcamp"
+      },
+      {
+        "name": "Google Cloud · Data Engineer learning path",
+        "url": "https://cloud.google.com/learn/path-data-engineer"
+      }
+    ],
+    "books": [
+      {
+        "name": "Designing Data-Intensive Applications",
+        "url": "https://dataintensive.net/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Data Engineer roadmap",
+        "url": "https://roadmap.sh/data-engineer"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "pE4I5ysGEi8",
+        "title": "Data Engineering Crash Course (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Strengthen SQL + Python → learn one cloud (GCP/AWS) → complete Data Engineering Zoomcamp projects.",
+      "Use the roadmap.sh Data Engineer roadmap as a checklist for tools (orchestration, warehouses, streaming, etc.)."
+    ]
+  },
+  "machine-learning": {
+    "title": "Machine Learning",
+    "summary": "Classical ML: regression, trees, ensembles, model evaluation, and feature engineering.",
+    "courses": [
+      {
+        "name": "Kaggle · Intro to Machine Learning",
+        "url": "https://www.kaggle.com/learn/intro-to-machine-learning"
+      },
+      {
+        "name": "Andrew Ng · Machine Learning (Coursera)",
+        "url": "https://www.coursera.org/learn/machine-learning"
+      }
+    ],
+    "books": [
+      {
+        "name": "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow",
+        "url": "https://github.com/ageron/handson-ml3"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Machine Learning roadmap",
+        "url": "https://roadmap.sh/machine-learning"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "GwIo3gDZCVQ",
+        "title": "Machine Learning for Everybody (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Finish Kaggle Intro + Intermediate ML → re‑implement common models with scikit‑learn on your own datasets.",
+      "Read designing/feature‑engineering chapters from Hands-On ML while improving 2–3 Kaggle solutions."
+    ]
+  },
+  "deep-learning": {
+    "title": "Deep Learning",
+    "summary": "Neural networks, CNNs, RNNs, transformers, and training tricks.",
+    "courses": [
+      {
+        "name": "fast.ai · Practical Deep Learning for Coders",
+        "url": "https://course.fast.ai/"
+      },
+      {
+        "name": "DeepLearning.AI · Deep Learning Specialization",
+        "url": "https://www.coursera.org/specializations/deep-learning"
+      }
+    ],
+    "books": [
+      {
+        "name": "Deep Learning (Goodfellow, Bengio, Courville)",
+        "url": "https://www.deeplearningbook.org/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "fast.ai blog",
+        "url": "https://www.fast.ai/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "aircAruvnKk",
+        "title": "Neural Networks from Scratch (3Blue1Brown series)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Do fast.ai Practical DL → build 2–3 image or tabular DL projects → then read selected chapters of the Deep Learning book.",
+      "Experiment with training small models on Kaggle or Hugging Face datasets."
+    ]
+  },
+  "llms": {
+    "title": "LLMs & Generative AI",
+    "summary": "Working with large language models: prompting, fine‑tuning, retrieval, and evaluation.",
+    "courses": [
+      {
+        "name": "DeepLearning.AI · ChatGPT Prompt Engineering",
+        "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/"
+      },
+      {
+        "name": "DeepLearning.AI · LLM Applications",
+        "url": "https://www.deeplearning.ai/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Hugging Face · NLP Course (LLM-focused parts)",
+        "url": "https://huggingface.co/learn/nlp-course/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · AI Engineer roadmap",
+        "url": "https://roadmap.sh/ai-engineer"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "zizonToFXDs",
+        "title": "Build LLM Apps (freeCodeCamp + HF)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Learn basic prompting → build small tools using hosted LLM APIs → then explore RAG and evaluation.",
+      "Follow the roadmap.sh AI Engineer roadmap to explore deployment, vector DBs, and observability."
+    ]
+  },
+  "nlp": {
+    "title": "NLP (Natural Language Processing)",
+    "summary": "Text preprocessing, embeddings, sequence models, and modern transformer-based NLP.",
+    "courses": [
+      {
+        "name": "CS224n · Natural Language Processing with Deep Learning",
+        "url": "https://web.stanford.edu/class/cs224n/"
+      },
+      {
+        "name": "Hugging Face · NLP Course",
+        "url": "https://huggingface.co/learn/nlp-course/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Speech and Language Processing (Jurafsky & Martin)",
+        "url": "https://web.stanford.edu/~jurafsky/slp3/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "The Gradient · NLP articles",
+        "url": "https://thegradient.pub/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "8rXD5-xhemo",
+        "title": "NLP Course (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Complete the Hugging Face NLP course → implement a text classification and a QA model on your own data.",
+      "Watch CS224n lectures while skimming Jurafsky & Martin for theory details."
+    ]
   }
 }
