@@ -6,7 +6,10 @@
 	<title>Standalone Playground</title>
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script>
-		tailwind.config = { theme: { extend: { colors: { primary: '#4f46e5', accent: '#0ea5e9' } } } };
+		tailwind.config = {
+			darkMode: 'class',
+			theme: { extend: { colors: { primary: '#4f46e5', accent: '#0ea5e9' } } }
+		};
 	</script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,50 +41,51 @@
 		#assistant-overlay.show { opacity: 1; pointer-events: auto; }
 	</style>
 </head>
-<body class="bg-gray-50 text-gray-800 antialiased">
-	<nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
+	<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
 		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
-				<a href="./index.html" class="font-extrabold text-lg tracking-tight hover:text-primary">Standalone Playground</a>
+				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-4">
-					<a href="./resources.html?topic=python" class="text-sm font-semibold text-gray-700 hover:text-primary">Resources</a>
+					<a href="./resources.html?topic=python" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
 					<a href="./index.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Playground</a>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
 				</div>
 			</div>
 		</div>
 	</nav>
 
 	<div class="flex">
-		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 bg-gray-100 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto hidden lg:block w-[280px] shadow-sm">
-			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 hover:text-primary hover:bg-gray-200 border-b border-gray-200 bg-white flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources">
+		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto hidden lg:block w-[280px] shadow-sm">
+			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-200 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources">
 				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
 				<span class="sidebar-toggle-vertical">Resources</span>
 			</button>
 			<div class="sidebar-content p-3">
-				<h3 class="text-sm font-bold text-gray-800 mb-3 px-1 border-b border-gray-300 pb-2">Learn by topic</h3>
+				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
 				<nav class="space-y-1 text-sm">
-					<div class="resource-group rounded-lg hover:bg-gray-200 transition-colors">
-						<p class="font-semibold text-gray-800 py-2 px-2 cursor-default">Programming</p>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=python" class="text-gray-700 hover:text-primary block py-0.5">Python</a></li>
-							<li><a href="./resources.html?topic=sql" class="text-gray-700 hover:text-primary block py-0.5">SQL</a></li>
-							<li><a href="./resources.html?topic=git" class="text-gray-700 hover:text-primary block py-0.5">Git</a></li>
+							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
+							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
+							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
 						</ul>
 					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 transition-colors">
-						<p class="font-semibold text-gray-800 py-2 px-2 cursor-default">Data Analytics</p>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=pandas" class="text-gray-700 hover:text-primary block py-0.5">Pandas</a></li>
-							<li><a href="./resources.html?topic=numpy" class="text-gray-700 hover:text-primary block py-0.5">NumPy</a></li>
-							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 hover:text-primary block py-0.5">Visualization</a></li>
+							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
+							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
+							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization</a></li>
 						</ul>
 					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 transition-colors">
-						<p class="font-semibold text-gray-800 py-2 px-2 cursor-default">Business Intelligence</p>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=excel" class="text-gray-700 hover:text-primary block py-0.5">Excel</a></li>
-							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 hover:text-primary block py-0.5">Power BI</a></li>
-							<li><a href="./resources.html?topic=tableau" class="text-gray-700 hover:text-primary block py-0.5">Tableau</a></li>
+							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
+							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
+							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
 						</ul>
 					</div>
 				</nav>
@@ -90,56 +94,56 @@
 
 		<main class="flex-1 min-w-0 max-w-6xl mx-auto px-4 sm:px-6 py-8">
 			<div class="text-center mb-8">
-				<h1 class="text-3xl font-bold mb-3">Playground</h1>
-				<p class="text-gray-600">Run Python/JS/SQL in your browser. No backend. Heavy parts load only when used.</p>
+				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">Playground</h1>
+				<p class="text-gray-600 dark:text-gray-300">Run Python/JS/SQL in your browser. No backend. Heavy parts load only when used.</p>
 			</div>
 
-			<section class="mb-10 rounded-xl border-2 border-gray-200 bg-white p-4 sm:p-6">
-				<h2 class="text-xl font-semibold mb-2">Run code in the browser</h2>
-				<p class="text-sm text-gray-600 mb-3">Python uses Pyodide (first run downloads). SQL uses sql.js (SQLite in-browser). JS is instant.</p>
+			<section class="mb-10 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 sm:p-6">
+				<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Run code in the browser</h2>
+				<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Python uses Pyodide (first run downloads). SQL uses sql.js (SQLite in-browser). JS is instant.</p>
 
 				<div class="flex flex-wrap items-center gap-3 mb-2">
-					<label class="text-sm font-medium text-gray-700">Language:</label>
-					<select id="lang" class="rounded-lg border border-gray-300 bg-white text-gray-800 px-3 py-1.5 text-sm font-medium">
+					<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Language:</label>
+					<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 py-1.5 text-sm font-medium">
 						<option value="python">Python</option>
 						<option value="javascript">JavaScript</option>
 						<option value="sql">SQL (SQLite)</option>
 					</select>
 				</div>
 
-				<div class="code-editor-wrap">
+				<div class="code-editor-wrap dark:border-gray-700 dark:bg-gray-900">
 					<div id="line-nums" class="code-line-nums" aria-hidden="true">1</div>
-					<textarea id="code" spellcheck="false" placeholder="print('Hello')"></textarea>
+					<textarea id="code" class="text-gray-800 dark:text-gray-200" spellcheck="false" placeholder="print('Hello')"></textarea>
 				</div>
 
 				<div class="flex items-center gap-2 mt-2">
 					<button type="button" id="run" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">Run</button>
-					<span id="status" class="text-xs text-gray-500"></span>
+					<span id="status" class="text-xs text-gray-500 dark:text-gray-400"></span>
 				</div>
 
 				<div id="sql-actions" class="hidden mt-3 flex flex-wrap items-center gap-2">
-					<button type="button" id="sql-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs font-semibold hover:bg-gray-50">Reset DB</button>
-					<button type="button" id="sql-sample" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs font-semibold hover:bg-gray-50">Load sample data</button>
-					<span class="text-xs text-gray-500">Runs in-memory SQLite (no server).</span>
+					<button type="button" id="sql-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Reset DB</button>
+					<button type="button" id="sql-sample" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Load sample data</button>
+					<span class="text-xs text-gray-500 dark:text-gray-400">Runs in-memory SQLite (no server).</span>
 				</div>
 
-				<pre id="out" class="mt-2 p-3 rounded-lg bg-gray-100 text-gray-800 text-sm font-mono overflow-x-auto min-h-[2rem] hidden"></pre>
+				<pre id="out" class="mt-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-sm font-mono overflow-x-auto min-h-[2rem] hidden"></pre>
 			</section>
 
 			<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-				<a href="https://colab.new" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 bg-white hover:border-primary hover:shadow-lg transition-all text-left">
+				<a href="https://colab.new" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all text-left">
 					<div class="flex items-center gap-3 mb-2"><span class="text-2xl">&#128211;</span><h3 class="text-lg font-semibold">Google Colab</h3></div>
-					<p class="text-sm text-gray-600 mb-4">Blank notebook in a new tab.</p>
+					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Blank notebook in a new tab.</p>
 					<span class="text-sm font-medium text-primary">Open &#8594;</span>
 				</a>
-				<a href="https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/main?urlpath=lab" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 bg-white hover:border-primary hover:shadow-lg transition-all text-left">
+				<a href="https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/main?urlpath=lab" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all text-left">
 					<div class="flex items-center gap-3 mb-2"><span class="text-2xl">&#128187;</span><h3 class="text-lg font-semibold">Jupyter (Binder)</h3></div>
-					<p class="text-sm text-gray-600 mb-4">Temporary JupyterLab session.</p>
+					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Temporary JupyterLab session.</p>
 					<span class="text-sm font-medium text-primary">Open &#8594;</span>
 				</a>
-				<a href="https://jupyterlite.github.io/demo/lab/" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 bg-white hover:border-primary hover:shadow-lg transition-all text-left">
+				<a href="https://jupyterlite.github.io/demo/lab/" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all text-left">
 					<div class="flex items-center gap-3 mb-2"><span class="text-2xl">&#128218;</span><h3 class="text-lg font-semibold">JupyterLite</h3></div>
-					<p class="text-sm text-gray-600 mb-4">Notebook UI that runs in-browser.</p>
+					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Notebook UI that runs in-browser.</p>
 					<span class="text-sm font-medium text-primary">Open &#8594;</span>
 				</a>
 			</div>
@@ -155,20 +159,28 @@
 				</div>
 			</section>
 
-			<section class="mt-6 rounded-xl border border-gray-200 bg-white p-4 sm:p-6">
-				<h2 class="text-lg font-semibold text-gray-800 mb-2">Docs & repos</h2>
-				<p class="text-xs text-gray-500 mb-3">Quick links to docs and high‑quality open source learning repos. Nothing runs until you click a button.</p>
+			<section class="mt-6 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 sm:p-6">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Docs & repos</h2>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Quick links to docs and high‑quality open source learning repos. Nothing heavy runs until you click a button.</p>
 				<div class="flex flex-col sm:flex-row gap-3 mb-4">
-					<input id="docs-query" type="text" class="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder-gray-500" placeholder="Search docs (e.g. pandas groupby, SQL join)…">
+					<input id="docs-query" type="text" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Search docs (e.g. pandas groupby, SQL join)…">
 					<div class="flex gap-2">
-						<button type="button" id="docs-devdocs" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-800 hover:bg-gray-50">DevDocs</button>
-						<button type="button" id="docs-github" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-800 hover:bg-gray-50">GitHub repos</button>
+						<button type="button" id="docs-devdocs" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">DevDocs (in-page)</button>
+						<button type="button" id="docs-github" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">GitHub repos</button>
 					</div>
 				</div>
+
+				<div id="docs-frame-wrap" class="hidden mb-4 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
+						Docs are loaded from <span class="font-semibold">devdocs.io</span>. Tip: in DevDocs, enable Python / SQL / Pandas / PySpark in the filter panel for best results.
+					</div>
+					<iframe id="docs-frame" title="DevDocs embedded" class="w-full h-[480px] bg-white dark:bg-gray-900" loading="lazy" src="about:blank"></iframe>
+				</div>
+
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 					<div>
-						<h3 class="font-semibold text-gray-800 mb-1">Awesome & curated lists</h3>
-						<ul class="space-y-1 text-gray-700">
+						<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Awesome & curated lists</h3>
+						<ul class="space-y-1 text-gray-700 dark:text-gray-300">
 							<li><a href="https://github.com/vinta/awesome-python" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-python</a> · curated Python libs</li>
 							<li><a href="https://github.com/josephmisiti/awesome-machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-machine-learning</a> · ML resources</li>
 							<li><a href="https://github.com/awesomedata/awesome-public-datasets" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-public-datasets</a> · datasets to practice</li>
@@ -176,8 +188,8 @@
 						</ul>
 					</div>
 					<div>
-						<h3 class="font-semibold text-gray-800 mb-1">Free books & learning repos</h3>
-						<ul class="space-y-1 text-gray-700">
+						<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Free books & learning repos</h3>
+						<ul class="space-y-1 text-gray-700 dark:text-gray-300">
 							<li><a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener" class="underline hover:text-primary">free-programming-books</a> · huge list of free books</li>
 							<li><a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener" class="underline hover:text-primary">Hands‑On ML (code)</a> · end‑to‑end ML examples</li>
 							<li><a href="https://github.com/rasbt/python-machine-learning-book-3rd-edition" target="_blank" rel="noopener" class="underline hover:text-primary">Python ML book (code)</a> · practical ML in Python</li>
@@ -194,31 +206,32 @@
 		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
 	</button>
 	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
-	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant">
-		<div class="p-4 border-b border-gray-200 flex items-center justify-between">
+	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant">
+		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
 			<div>
-				<h3 class="font-semibold text-gray-800">Learning assistant</h3>
-				<p class="text-xs text-gray-500 mt-0.5">FAQ + Wikipedia by default. Optional full chatbot (~80MB).</p>
+				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">FAQ + Wikipedia by default. Optional full chatbot (~80MB).</p>
 			</div>
-			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Close">&#10005;</button>
+			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">&#10005;</button>
 		</div>
-		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"></div>
-		<div class="p-4 border-t border-gray-200">
+		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-white dark:bg-gray-900"></div>
+		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
 			<div class="flex gap-2">
-				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder-gray-500" placeholder="Ask anything…">
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Ask anything…">
 				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">Send</button>
 			</div>
 			<div class="flex flex-wrap items-center gap-2 mt-3">
-				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs font-semibold hover:bg-gray-50">Enable full chatbot (~80MB)</button>
-				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs font-medium hover:bg-gray-50">Clear chat</button>
-				<span id="assistant-mode-status" class="text-xs text-gray-500"></span>
+				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800">Enable full chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-800">Clear chat</button>
+				<span id="assistant-mode-status" class="text-xs text-gray-500 dark:text-gray-400"></span>
 			</div>
 		</div>
 	</div>
 
-	<footer class="border-t border-gray-200 mt-12 py-6">
-		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 space-y-1">
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
+		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
 			<p>Standalone Playground · deploy anywhere (static)</p>
+			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present · Sumit S. Chaure</p>
 			<p class="text-xs">
 				Code runner: <a href="https://pyodide.org" target="_blank" rel="noopener" class="underline hover:text-primary">Pyodide</a>,
 				<a href="https://sql.js.org" target="_blank" rel="noopener" class="underline hover:text-primary">sql.js</a>,
@@ -237,6 +250,40 @@
 	</footer>
 
 	<script>
+		// Theme toggle (light / dark)
+		(function() {
+			var storageKey = 'standalone_theme';
+			var root = document.documentElement;
+			var btn = document.getElementById('theme-toggle');
+			var current = null;
+
+			function apply(theme) {
+				current = (theme === 'dark') ? 'dark' : 'light';
+				if (current === 'dark') root.classList.add('dark');
+				else root.classList.remove('dark');
+				if (btn) {
+					btn.textContent = current === 'dark' ? '☀️' : '🌙';
+					btn.setAttribute('aria-label', current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+				}
+			}
+
+			var saved = null;
+			try { saved = localStorage.getItem(storageKey); } catch (e) {}
+			if (!saved) {
+				var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+				saved = prefersDark ? 'dark' : 'light';
+			}
+			apply(saved);
+
+			if (btn) {
+				btn.addEventListener('click', function() {
+					var next = current === 'dark' ? 'light' : 'dark';
+					apply(next);
+					try { localStorage.setItem(storageKey, next); } catch (e) {}
+				});
+			}
+		})();
+
 		// Sidebar toggle
 		(function() {
 			var sidebar = document.getElementById('sidebar');
@@ -325,10 +372,12 @@
 			}
 
 			langSel.addEventListener('change', function() {
-				codeEl.placeholder = PLACEHOLDERS[langSel.value] || PLACEHOLDERS.python;
+				codeEl.placeholder = PLACEHOLDERS[langSel.value] || PLACEHOLDERS.javascript;
 				if (sqlActionsEl) sqlActionsEl.classList.toggle('hidden', langSel.value !== 'sql');
 			});
-			codeEl.placeholder = PLACEHOLDERS.python;
+			// Default to JavaScript (fastest, no heavy downloads)
+			langSel.value = 'javascript';
+			codeEl.placeholder = PLACEHOLDERS.javascript;
 			if (sqlActionsEl) sqlActionsEl.classList.add('hidden');
 
 			if (sqlResetBtn) {
@@ -415,9 +464,19 @@
 				s.onload = function() {
 					loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' }).then(function(pyodide) {
 						pyodideReady = pyodide; setStatus('Ready. Running…'); runWithPyodide();
-					}).catch(function(err) { showOut('Pyodide load failed: ' + (err.message || err)); setStatus('Error.'); });
+					}).catch(function(err) {
+						showOut('Pyodide load failed: ' + (err.message || err) + '\n\nPython mode is unavailable right now. Switched to JavaScript.');
+						langSel.value = 'javascript';
+						codeEl.placeholder = PLACEHOLDERS.javascript;
+						setStatus('Python engine unavailable, using JavaScript instead.');
+					});
 				};
-				s.onerror = function() { showOut('Could not load Pyodide.'); setStatus('Error.'); };
+				s.onerror = function() {
+					showOut('Could not load Pyodide.\n\nPython mode is unavailable right now. Switched to JavaScript.');
+					langSel.value = 'javascript';
+					codeEl.placeholder = PLACEHOLDERS.javascript;
+					setStatus('Python engine unavailable, using JavaScript instead.');
+				};
 				document.head.appendChild(s);
 			});
 		})();
@@ -445,18 +504,25 @@
 			});
 		})();
 
-		// Docs search buttons (DevDocs / GitHub) — only open new tabs when clicked
+		// Docs search buttons (DevDocs embedded / GitHub)
 		(function() {
 			var qEl = document.getElementById('docs-query');
 			var devdocsBtn = document.getElementById('docs-devdocs');
 			var ghBtn = document.getElementById('docs-github');
-			if (!qEl || !devdocsBtn || !ghBtn) return;
+			var frameWrap = document.getElementById('docs-frame-wrap');
+			var frame = document.getElementById('docs-frame');
+			if (!qEl || !devdocsBtn || !ghBtn || !frameWrap || !frame) return;
 			function trimmed() { return (qEl.value || '').trim(); }
+			function showFrame() {
+				if (frameWrap.classList.contains('hidden')) {
+					frameWrap.classList.remove('hidden');
+				}
+			}
 			devdocsBtn.addEventListener('click', function() {
 				var q = trimmed();
 				if (!q) return;
-				var url = 'https://devdocs.io/#q=' + encodeURIComponent(q);
-				window.open(url, '_blank', 'noopener');
+				showFrame();
+				frame.src = 'https://devdocs.io/#q=' + encodeURIComponent(q);
 			});
 			ghBtn.addEventListener('click', function() {
 				var q = trimmed();
@@ -640,6 +706,71 @@
 			inputEl.addEventListener('keydown', function(e) {
 				if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); }
 			});
+		})();
+
+		// Basic client-side analytics: device + coarse location (no exact IP stored)
+		(function() {
+			try {
+				var analyticsEndpoint = null; // Set to your API URL (e.g. 'https://your-api.example/track') or keep null to only log to console.
+
+				var payload = {
+					event: 'playground_visit',
+					ts: new Date().toISOString(),
+					path: window.location.pathname + window.location.search,
+					referrer: document.referrer || null,
+					userAgent: navigator.userAgent || null,
+					language: navigator.language || null,
+					platform: navigator.platform || null,
+					device: {
+						width: window.innerWidth || null,
+						height: window.innerHeight || null,
+						screenWidth: window.screen && window.screen.width,
+						screenHeight: window.screen && window.screen.height,
+						pixelRatio: window.devicePixelRatio || 1,
+						touch: 'ontouchstart' in window || navigator.maxTouchPoints > 0
+					},
+					location: null // filled in below (country/city only)
+				};
+
+				// Optional coarse geo lookup. This sends the user's IP to ipapi.co.
+				// Only enable in production if you're OK with their privacy policy.
+				fetch('https://ipapi.co/json/')
+					.then(function(res) { return res.json(); })
+					.then(function(data) {
+						if (data) {
+							payload.location = {
+								ipCountry: data.country_name || null,
+								ipCity: data.city || null,
+								ipRegion: data.region || null,
+								ipCountryCode: data.country || null
+							};
+						}
+
+						if (analyticsEndpoint) {
+							try {
+								var body = JSON.stringify(payload);
+								if (navigator.sendBeacon) {
+									navigator.sendBeacon(analyticsEndpoint, body);
+								} else {
+									fetch(analyticsEndpoint, {
+										method: 'POST',
+										headers: { 'Content-Type': 'application/json' },
+										keepalive: true,
+										body: body
+									}).catch(function() {});
+								}
+							} catch (e) {}
+						} else {
+							console.log('Playground analytics event:', payload);
+						}
+					})
+					.catch(function() {
+						// Geo lookup failed; still log basic device info
+						console.log('Playground analytics event (no geo):', payload);
+					});
+			} catch (e) {
+				// Fail silently – analytics should never break the playground.
+			}
 		})();
 	</script>
 </body>

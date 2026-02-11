@@ -1,0 +1,343 @@
+{
+  "python": {
+    "title": "Python",
+    "summary": "Core language for analytics, scripting, and machine learning. Start here if you are new to programming.",
+    "courses": [
+      {
+        "name": "Kaggle Learn · Python",
+        "url": "https://www.kaggle.com/learn/python"
+      },
+      {
+        "name": "freeCodeCamp · Scientific Computing with Python",
+        "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Automate the Boring Stuff (free book)",
+        "url": "https://automatetheboringstuff.com"
+      },
+      {
+        "name": "Python Tutorial (official docs)",
+        "url": "https://docs.python.org/3/tutorial/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "freeCodeCamp Python articles",
+        "url": "https://www.freecodecamp.org/news/tag/python/"
+      },
+      {
+        "name": "Real Python",
+        "url": "https://realpython.com/"
+      },
+      {
+        "name": "Towards Data Science · Python",
+        "url": "https://towardsdatascience.com/tagged/python"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "rfscVS0vtbw",
+        "title": "Learn Python - Full Course (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Do Kaggle Python → small automation scripts → data analysis with pandas.",
+      "Pair Automate the Boring Stuff with short Real Python tutorials."
+    ]
+  },
+  "sql": {
+    "title": "SQL",
+    "summary": "Query and aggregate data directly in databases. Essential for analytics work.",
+    "courses": [
+      {
+        "name": "Kaggle · Intro to SQL",
+        "url": "https://www.kaggle.com/learn/intro-to-sql"
+      },
+      {
+        "name": "Mode Analytics · SQL Tutorial",
+        "url": "https://mode.com/sql-tutorial/"
+      }
+    ],
+    "books": [
+      {
+        "name": "SQL (Wikipedia)",
+        "url": "https://en.wikipedia.org/wiki/SQL"
+      },
+      {
+        "name": "SQL Tutorial (w3schools)",
+        "url": "https://www.w3schools.com/sql/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "freeCodeCamp SQL articles",
+        "url": "https://www.freecodecamp.org/news/tag/sql/"
+      },
+      {
+        "name": "Mode SQL blog",
+        "url": "https://mode.com/blog/sql/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "p3qvj9hO_Bo",
+        "title": "SQL Tutorial (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Finish Kaggle Intro to SQL and then replicate the same queries on your own sample data.",
+      "Do the Mode tutorial while reading SELECT/JOIN sections from w3schools."
+    ]
+  },
+  "git": {
+    "title": "Git & GitHub",
+    "summary": "Version control and collaboration for code and analytics notebooks.",
+    "courses": [
+      {
+        "name": "freeCodeCamp · Git & GitHub for Beginners",
+        "url": "https://www.freecodecamp.org/news/git-and-github-for-beginners/"
+      },
+      {
+        "name": "Atlassian · Git tutorials",
+        "url": "https://www.atlassian.com/git/tutorials"
+      }
+    ],
+    "books": [
+      {
+        "name": "Pro Git (free book)",
+        "url": "https://git-scm.com/book/en/v2"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "GitHub Docs · Guides",
+        "url": "https://docs.github.com/en/get-started/quickstart"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "RGOj5yH7evk",
+        "title": "Git & GitHub Crash Course (Traversy Media)",
+        "embed": true
+      },
+      {
+        "id": "apGV9Kg7ics",
+        "title": "Git Tutorial for Beginners (freeCodeCamp)"
+      }
+    ]
+  },
+  "pandas": {
+    "title": "Pandas",
+    "summary": "Primary Python library for data wrangling, joins, and feature engineering.",
+    "courses": [
+      {
+        "name": "Kaggle · Pandas",
+        "url": "https://www.kaggle.com/learn/pandas"
+      },
+      {
+        "name": "freeCodeCamp · Data Analysis with Python",
+        "url": "https://www.freecodecamp.org/learn/data-analysis-with-python/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Pandas docs (User Guide)",
+        "url": "https://pandas.pydata.org/docs/user_guide/index.html"
+      },
+      {
+        "name": "Python Data Science Handbook (GitHub)",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Pandas",
+        "url": "https://towardsdatascience.com/tagged/pandas"
+      },
+      {
+        "name": "freeCodeCamp · Pandas articles",
+        "url": "https://www.freecodecamp.org/news/tag/pandas/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "vmEHCJofslg",
+        "title": "Pandas Tutorial (Corey Schafer)",
+        "embed": true
+      }
+    ]
+  },
+  "numpy": {
+    "title": "NumPy",
+    "summary": "Fast arrays and math under the hood of most scientific Python libraries.",
+    "courses": [
+      {
+        "name": "NumPy practice notebooks on Kaggle",
+        "url": "https://www.kaggle.com/code"
+      }
+    ],
+    "books": [
+      {
+        "name": "NumPy docs",
+        "url": "https://numpy.org/doc/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · NumPy",
+        "url": "https://towardsdatascience.com/tagged/numpy"
+      },
+      {
+        "name": "freeCodeCamp · NumPy articles",
+        "url": "https://www.freecodecamp.org/news/tag/numpy/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "QUT1VHIxAN4",
+        "title": "NumPy Tutorial (Corey Schafer)",
+        "embed": true
+      }
+    ]
+  },
+  "matplotlib": {
+    "title": "Visualization",
+    "summary": "Matplotlib/Seaborn fundamentals for static plots in Python.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Visualization",
+        "url": "https://www.kaggle.com/learn/data-visualization"
+      },
+      {
+        "name": "Data Visualization course list (freeCodeCamp guide)",
+        "url": "https://www.freecodecamp.org/news/tag/data-visualization/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Matplotlib docs",
+        "url": "https://matplotlib.org/stable/"
+      },
+      {
+        "name": "Seaborn docs",
+        "url": "https://seaborn.pydata.org/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Storytelling with Data blog",
+        "url": "https://www.storytellingwithdata.com/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "UO98lJQedQc",
+        "title": "Matplotlib Tutorial (Corey Schafer)",
+        "embed": true
+      }
+    ]
+  },
+  "excel": {
+    "title": "Excel",
+    "summary": "Spreadsheet skills for analysts: formulas, pivots, and dashboards.",
+    "courses": [
+      {
+        "name": "Excel Easy (step-by-step)",
+        "url": "https://www.excel-easy.com"
+      },
+      {
+        "name": "freeCodeCamp · Excel for Data Analysis",
+        "url": "https://www.freecodecamp.org/news/tag/excel/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Chandoo.org · Excel blog",
+        "url": "https://chandoo.org"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "ExcelJet blog",
+        "url": "https://exceljet.net/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "Vl0H-qTclOg",
+        "title": "Excel for Beginners (freeCodeCamp)",
+        "embed": true
+      }
+    ]
+  },
+  "power-bi": {
+    "title": "Power BI",
+    "summary": "Microsoft BI stack: self-service dashboards on top of data models.",
+    "courses": [
+      {
+        "name": "Microsoft Learn · Power BI",
+        "url": "https://learn.microsoft.com/en-us/training/powerplatform/power-bi"
+      },
+      {
+        "name": "freeCodeCamp · Power BI full course (video)",
+        "url": "https://www.youtube.com/watch?v=1c01f6T1_2E"
+      }
+    ],
+    "books": [
+      {
+        "name": "Power BI docs",
+        "url": "https://learn.microsoft.com/en-us/power-bi"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "RADACAD Power BI blog",
+        "url": "https://radacad.com/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "1c01f6T1_2E",
+        "title": "Power BI Full Course (freeCodeCamp)",
+        "embed": true
+      }
+    ]
+  },
+  "tableau": {
+    "title": "Tableau",
+    "summary": "Drag-and-drop BI with strong visual defaults and a huge community gallery.",
+    "courses": [
+      {
+        "name": "Tableau official training videos",
+        "url": "https://www.tableau.com/learn/training"
+      },
+      {
+        "name": "Tableau Public (practice)",
+        "url": "https://public.tableau.com"
+      }
+    ],
+    "books": [
+      {
+        "name": "Tableau Help",
+        "url": "https://help.tableau.com"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Tableau blog",
+        "url": "https://www.tableau.com/about/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "6xv6Y0rRES0",
+        "title": "Tableau Full Course (freeCodeCamp)",
+        "embed": true
+      }
+    ]
+  }
+}
