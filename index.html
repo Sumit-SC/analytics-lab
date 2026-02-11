@@ -708,70 +708,10 @@
 			});
 		})();
 
-		// Basic client-side analytics: device + coarse location (no exact IP stored)
-		(function() {
-			try {
-				var analyticsEndpoint = null; // Set to your API URL (e.g. 'https://your-api.example/track') or keep null to only log to console.
-
-				var payload = {
-					event: 'playground_visit',
-					ts: new Date().toISOString(),
-					path: window.location.pathname + window.location.search,
-					referrer: document.referrer || null,
-					userAgent: navigator.userAgent || null,
-					language: navigator.language || null,
-					platform: navigator.platform || null,
-					device: {
-						width: window.innerWidth || null,
-						height: window.innerHeight || null,
-						screenWidth: window.screen && window.screen.width,
-						screenHeight: window.screen && window.screen.height,
-						pixelRatio: window.devicePixelRatio || 1,
-						touch: 'ontouchstart' in window || navigator.maxTouchPoints > 0
-					},
-					location: null // filled in below (country/city only)
-				};
-
-				// Optional coarse geo lookup. This sends the user's IP to ipapi.co.
-				// Only enable in production if you're OK with their privacy policy.
-				fetch('https://ipapi.co/json/')
-					.then(function(res) { return res.json(); })
-					.then(function(data) {
-						if (data) {
-							payload.location = {
-								ipCountry: data.country_name || null,
-								ipCity: data.city || null,
-								ipRegion: data.region || null,
-								ipCountryCode: data.country || null
-							};
-						}
-
-						if (analyticsEndpoint) {
-							try {
-								var body = JSON.stringify(payload);
-								if (navigator.sendBeacon) {
-									navigator.sendBeacon(analyticsEndpoint, body);
-								} else {
-									fetch(analyticsEndpoint, {
-										method: 'POST',
-										headers: { 'Content-Type': 'application/json' },
-										keepalive: true,
-										body: body
-									}).catch(function() {});
-								}
-							} catch (e) {}
-						} else {
-							console.log('Playground analytics event:', payload);
-						}
-					})
-					.catch(function() {
-						// Geo lookup failed; still log basic device info
-						console.log('Playground analytics event (no geo):', payload);
-					});
-			} catch (e) {
-				// Fail silently – analytics should never break the playground.
-			}
-		})();
+	</script>
+	<script src="./assets/js/analytics.js"></script>
+	<script>
+		initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'playground' });
 	</script>
 </body>
 </html>
