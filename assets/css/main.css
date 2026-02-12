@@ -94,6 +94,40 @@ body {
 	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* Notion-style cards for resources */
+.notion-card {
+	border-radius: 0.75rem;
+	border: 1px solid rgba(148, 163, 184, 0.4);
+	background: #f9fafb;
+	padding: 1rem 1.25rem;
+	min-height: 4.25rem;
+	transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.dark .notion-card {
+	background: rgb(17 24 39);
+	border-color: rgba(75, 85, 99, 0.8);
+}
+.notion-card:hover {
+	background: #f3f4f6;
+	transform: translateY(-1px);
+	box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+.dark .notion-card:hover {
+	background: rgb(31 41 55);
+	box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+}
+.notion-card-title {
+	font-weight: 600;
+	margin-bottom: 0.15rem;
+}
+.notion-card-meta {
+	font-size: 0.75rem;
+	color: rgb(107 114 128);
+}
+.dark .notion-card-meta {
+	color: rgb(156 163 175);
+}
+
 /* Material Design Inputs */
 .material-input {
 	border: none;
@@ -209,4 +243,36 @@ body {
 #assistant-overlay.show {
 	opacity: 1;
 	pointer-events: auto;
+}
+
+/* Roadmap Panel Styles */
+#roadmap-panel {
+	transform: translateX(100%);
+	transition: transform 0.3s ease;
+}
+#roadmap-panel:not(.hidden) {
+	transform: translateX(0);
+}
+#roadmap-overlay {
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
+#roadmap-overlay:not(.hidden) {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* Mobile: full screen */
+@media (max-width: 1023px) {
+	#roadmap-panel {
+		width: 100% !important;
+	}
+}
+
+/* Desktop: half screen */
+@media (min-width: 1024px) {
+	#roadmap-panel {
+		width: 50%;
+	}
 }

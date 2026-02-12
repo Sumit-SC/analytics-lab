@@ -105,12 +105,13 @@
         var blob = new Blob([body], { type: "application/json" });
         navigator.sendBeacon(config.endpoint, blob);
       } else {
-        // Standard CORS-aware POST; Worker will send proper CORS headers
+        // Standard CORS-aware POST; Worker will send proper CORS headers.
+        // We intentionally avoid credentials so the endpoint can use "*" CORS.
         fetch(config.endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           keepalive: true,
-          credentials: "include"
+          credentials: "omit"
         }).catch(function () {});
       }
     } catch (e) {

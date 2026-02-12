@@ -368,7 +368,7 @@
 
 	function persist() {
 		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-80)));
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-50)));
 		} catch (e) {}
 	}
 	function push(it) {
@@ -412,10 +412,14 @@
 		panel.classList.add('open');
 		if (overlay) overlay.classList.add('show');
 		if (messagesEl.children.length === 0) {
-			add('assistant', 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB).', 'what is flan t5 small model size');
+			add(
+				'assistant',
+				'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).',
+				'what is flan t5 small model size'
+			);
 			push({
 				role: 'assistant',
-				text: 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB).',
+				text: 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).',
 				searchQuery: 'what is flan t5 small model size',
 			});
 		}
@@ -437,7 +441,7 @@
 		try {
 			var parsed = JSON.parse(raw);
 			if (!Array.isArray(parsed)) return;
-			history = parsed.slice(-80);
+			history = parsed.slice(-50);
 			for (var i = 0; i < history.length; i++) {
 				var it = history[i];
 				add(it.role, it.text || '', it.searchQuery || null);
