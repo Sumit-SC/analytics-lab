@@ -314,9 +314,7 @@
 		btnOnlineocr.addEventListener('click', function () {
 			load('https://onlineocr.io/word-online', btnOnlineocr);
 		});
-	}
-
-	// Load a default editor on first open (Filestash)
+	}	// Load a default editor on first open (Filestash)
 	if (btnFilestash) {
 		load('https://www.filestash.app/word-online.html', btnFilestash);
 	}

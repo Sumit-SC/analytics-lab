@@ -7,6 +7,10 @@
 
 	var QUOTE_CATEGORY_KEY = 'home_quote_category';
 
+	// Local quote DB: faster than APIs, no broken endpoints. Loaded from assets/data/quotes-db.json
+	var quotesDb = null;
+	var lastQuoteFromDb = null; // { quote: { text, author, source, images }, category } for wallpaper refresh
+
 	// Source → image URL (Wikimedia Commons / Wikipedia, free use). Same source = same picture as the quote.
 	var QUOTE_IMAGE_MAP = {
 		'Reply 1988': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg',
@@ -199,6 +203,7 @@
 	}
 
 	function useFallback(category) {
+		lastQuoteFromDb = null;
 		var list = QUOTES_FALLBACK;
 		if (category === 'movie') list = QUOTES_MOVIE;
 		if (category === 'kdrama') list = QUOTES_KDRAMA;
@@ -206,6 +211,27 @@
 		var q = pick(list);
 		setQuoteUI(q.text, q.attr, '');
 		setQuoteImage(null, q.attr);
+	}
+
+	// Pick a random quote from local DB for category; return null if DB not ready or category empty
+	function pickFromLocalDb(category) {
+		if (!quotesDb || typeof quotesDb[category] !== 'object' || !quotesDb[category].length) return null;
+		return pick(quotesDb[category]);
+	}
+
+	// Apply a quote from the local DB (text, author, source, images) and set wallpaper from images[0] or random
+	function applyQuoteFromDb(quote, category) {
+		var meta = (quote.source && quote.source.trim()) ? 'From: ' + quote.source.trim() : '';
+		setQuoteUI(quote.text, quote.author || '', meta);
+		lastQuoteFromDb = { quote: quote, category: category };
+		var urls = quote.images;
+		if (urls && urls.length > 0) {
+			var url = urls[Math.floor(Math.random() * urls.length)];
+			var bg = document.getElementById('home-quote-bg');
+			if (bg) bg.style.backgroundImage = 'url(' + url + ')';
+		} else {
+			setQuoteImage(null, quote.author || quote.source);
+		}
 	}
 
 	function fetchQuotable(tags, done) {
@@ -257,6 +283,14 @@
 		}
 
 		setQuoteLoading(true);
+
+		// Prefer local DB (fast, no broken APIs)
+		var fromDb = pickFromLocalDb(category);
+		if (fromDb) {
+			applyQuoteFromDb(fromDb, category);
+			setQuoteLoading(false);
+			return;
+		}
 
 		if (category === 'anime') {
 			fetchAnimechan(function (q) {
@@ -371,10 +405,22 @@
 		quoteBgRefreshBtn.addEventListener('click', function () {
 			var bg = document.getElementById('home-quote-bg');
 			if (!bg) return;
-			var src = getCurrentQuoteSource() || 'quote';
-			// New random but source-themed wallpaper from Picsum
-			var seed = (src + '-' + Date.now()).replace(/\W/g, '') || Date.now();
-			bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+			// If current quote is from local DB, cycle through its 2 image URLs
+			if (lastQuoteFromDb && lastQuoteFromDb.quote.images && lastQuoteFromDb.quote.images.length > 0) {
+				var imgs = lastQuoteFromDb.quote.images;
+				var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
+				var idx = -1;
+				for (var i = 0; i < imgs.length; i++) {
+					if (currentUrl.indexOf(imgs[i]) !== -1) { idx = i; break; }
+				}
+				if (idx === -1) idx = 0;
+				var nextIdx = (idx + 1) % imgs.length;
+				bg.style.backgroundImage = 'url(' + imgs[nextIdx] + ')';
+			} else {
+				var src = getCurrentQuoteSource() || 'quote';
+				var seed = (src + '-' + Date.now()).replace(/\W/g, '') || Date.now();
+				bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+			}
 		});
 	}
 
@@ -388,8 +434,19 @@
 		});
 	}
 
-	// Initial quote and image
-	loadQuote(getCategory());
+	// Load local quote DB then show initial quote (faster than APIs)
+	fetch('./assets/data/quotes-db.json')
+		.then(function (r) { return r.ok ? r.json() : null; })
+		.then(function (data) {
+			if (data && typeof data === 'object') {
+				quotesDb = data;
+				if (quotesDb.meta) delete quotesDb.meta;
+			}
+			loadQuote(getCategory());
+		})
+		.catch(function () {
+			loadQuote(getCategory());
+		});
 
 	// Refresh spot
 	var refreshEl = document.getElementById('home-refresh-text');

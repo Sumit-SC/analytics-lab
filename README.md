@@ -55,6 +55,18 @@ Then open **http://localhost:8000/** (Home) or **http://localhost:8000/playgroun
 
 ---
 
+## Analytics
+
+All pages (Home, Playground, Tools, Resources, Trends) send **visit** and **unload** events to the configured endpoint (e.g. `https://events.colab.indevs.in/api/events`) so you can see traffic in your dashboard. On the Playground, analytics is initialized **at the start** of the script so it runs even if later code throws.
+
+**If the dashboard shows no logs from the Playground (or any page):**
+
+1. **Debug in the browser:** Open the page with `?analytics_debug=1` (e.g. `playground.html?analytics_debug=1`) or set `localStorage.setItem('analytics_debug','1')`, then open DevTools → Console. You should see `[Analytics] Init: ...` and either `Sent via sendBeacon` / `Sent via fetch` or warnings if requests are blocked or fail.
+2. **Test connectivity:** Use **test-analytics.html** (Health check, endpoint test, send test event) and open the dashboard link for **Playground** to confirm events are stored.
+3. **Ad-blockers:** Some blockers filter requests to analytics/events domains; try disabling them for the site or use a different network.
+
+---
+
 ## Deploy
 
 Deploy the **analytics-lab** folder to any static host (GitHub Pages, Netlify, Vercel, etc.). No build step; no server required.

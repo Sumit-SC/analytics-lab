@@ -2,6 +2,13 @@
  * Playground page: sidebar, Tech/Non-tech mode, code editor, runner, docs search, assistant.
  */
 
+// Analytics: init as soon as script runs so it is not skipped by later errors in this file
+(function () {
+	if (typeof initAnalyticsTracking === 'function') {
+		initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'playground' });
+	}
+})();
+
 (function () {
 	// Tech / Non-tech mode toggle (playground.html only)
 	var MODE_KEY = 'playground_mode';
@@ -1079,8 +1086,3 @@
 		}
 	});
 })();
-
-// Analytics (playground page)
-if (typeof initAnalyticsTracking === 'function') {
-	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'playground' });
-}

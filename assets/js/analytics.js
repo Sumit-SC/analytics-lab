@@ -13,6 +13,17 @@
   var DEFAULT_ENDPOINT = "https://events.colab.indevs.in/api/events";
   var DEFAULT_SECRET = null; // unused, kept for API compatibility
   var SESSION_KEY = "analytics_lab_session_id";
+  var DEBUG_KEY = "analytics_debug";
+
+  function isDebug() {
+    try {
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        if (window.location.search.indexOf("analytics_debug=1") !== -1) return true;
+      }
+      if (typeof localStorage !== "undefined" && localStorage.getItem(DEBUG_KEY) === "1") return true;
+    } catch (e) {}
+    return false;
+  }
 
   function generateSessionId() {
     if (window.crypto && crypto.randomUUID) {
@@ -90,7 +101,12 @@
   }
 
   function sendAnalyticsEvent(config, eventName, extra) {
-    if (!config.endpoint) return;
+    var debug = isDebug();
+    if (!config.endpoint) {
+      if (debug) console.warn("[Analytics] No endpoint configured, event not sent:", eventName);
+      return;
+    }
+    if (debug) console.log("[Analytics] Sending:", eventName, "→", config.endpoint);
 
     var payload = buildBasePayload(config, eventName);
     if (extra && typeof extra === "object") {
@@ -131,9 +147,11 @@
           var blob = new Blob([body], { type: "application/json" });
           if (navigator.sendBeacon(endpointsToTry[b], blob)) {
             beaconSent = true;
+            if (debug) console.log("[Analytics] Sent via sendBeacon:", endpointsToTry[b]);
             break; // Success
           }
         }
+        if (debug && !beaconSent) console.warn("[Analytics] sendBeacon did not accept request, trying fetch");
       } catch (e) {
         // sendBeacon failed, continue to fetch fallback
       }
@@ -143,13 +161,12 @@
     if (!beaconSent) {
       function tryEndpoint(index) {
         if (index >= endpointsToTry.length) {
-          // All endpoints failed - silently fail
+          if (debug) console.warn("[Analytics] All endpoints failed (blocked or unreachable). Check ad-blockers or network.");
           return;
         }
         
         var endpoint = endpointsToTry[index];
         var timeoutId = setTimeout(function() {
-          // Timeout after 2 seconds, try next endpoint
           tryEndpoint(index + 1);
         }, 2000);
 
@@ -163,16 +180,16 @@
           .then(function (response) {
             clearTimeout(timeoutId);
             if (response.ok) {
-              // Success - stop trying other endpoints
+              if (debug) console.log("[Analytics] Sent via fetch:", endpoint);
               return;
             } else {
-              // Try next endpoint on error
+              if (debug) console.warn("[Analytics] fetch failed:", endpoint, response.status);
               tryEndpoint(index + 1);
             }
           })
           .catch(function (err) {
             clearTimeout(timeoutId);
-            // Try next endpoint on failure
+            if (debug) console.warn("[Analytics] fetch error:", endpoint, err && err.message);
             tryEndpoint(index + 1);
           });
       }
@@ -198,6 +215,8 @@
       };
 
       if (!cfg.endpoint) return;
+
+      if (isDebug()) console.log("[Analytics] Init:", cfg.baseEvent, "site:", cfg.site, "endpoint:", cfg.endpoint);
 
       // Initial visit
       sendAnalyticsEvent(cfg, cfg.baseEvent + "_visit");

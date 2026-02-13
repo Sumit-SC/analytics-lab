@@ -73,29 +73,29 @@
 			</div>
 		</section>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 auto-rows-fr">
-			<!-- Top row: Refresh + Clock + Weather -->
-			<section class="second-brain-card p-5 sm:p-6">
-				<p class="home-section-title mb-2">Refresh</p>
-				<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-3">Take a breath. Stretch.</p>
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-start">
+			<!-- Top row: compact Refresh + Clock + Weather (no stretch) -->
+			<section class="second-brain-card p-3 sm:p-4">
+				<p class="home-section-title mb-1 text-xs">Refresh</p>
+				<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-2">Take a breath. Stretch.</p>
 				<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
 			</section>
 
-			<section class="second-brain-card p-5 sm:p-6">
-				<p class="home-section-title mb-2">Clock &amp; calendar</p>
-				<p id="home-clock-time" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
-				<p id="home-clock-date" class="text-sm text-gray-500 dark:text-gray-400 mt-1">—</p>
+			<section class="second-brain-card p-3 sm:p-4">
+				<p class="home-section-title mb-1 text-xs">Clock &amp; calendar</p>
+				<p id="home-clock-time" class="text-xl font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
+				<p id="home-clock-date" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">—</p>
 			</section>
 
-			<section class="second-brain-card p-5 sm:p-6">
-				<p class="home-section-title mb-2">Weather</p>
-				<div class="flex flex-wrap items-center gap-2 mb-2">
-					<input type="text" id="home-weather-search" placeholder="Search city…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
-					<button type="button" id="home-weather-set" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
-					<button type="button" id="home-weather-mylocation" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
+			<section class="second-brain-card p-3 sm:p-4">
+				<p class="home-section-title mb-1 text-xs">Weather</p>
+				<div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+					<input type="text" id="home-weather-search" placeholder="City…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
+					<button type="button" id="home-weather-set" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
+					<button type="button" id="home-weather-mylocation" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
 				</div>
-				<div id="home-weather" class="text-gray-800 dark:text-gray-200">…</div>
-				<p id="home-weather-city" class="text-xs text-gray-500 dark:text-gray-400 mt-1">—</p>
+				<div id="home-weather" class="text-sm text-gray-800 dark:text-gray-200">…</div>
+				<p id="home-weather-city" class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">—</p>
 			</section>
 
 			<!-- Second row: Quote (wider) + Focus timer -->
