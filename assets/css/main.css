@@ -364,6 +364,17 @@ body {
 	color: rgb(148 163 184);
 }
 
+/* Homepage quote background image: use more area, keep aspect */
+#home-quote-bg {
+	background-size: cover;
+	background-position: center top;
+}
+@media (min-width: 768px) {
+	#home-quote-bg {
+		background-size: 120% auto;
+	}
+}
+
 /* Notion-style Go to cards (main stars) */
 .notion-go-section {
 	--notion-go-radius: 0.75rem;
