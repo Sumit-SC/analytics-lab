@@ -100,22 +100,21 @@
     var body = JSON.stringify(payload);
 
     try {
-      // Prefer sendBeacon so the request is sent even on page unload
-      if (navigator.sendBeacon) {
-        var blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon(config.endpoint, blob);
-      } else {
-        // Standard CORS-aware POST; Worker will send proper CORS headers.
-        // We intentionally avoid credentials so the endpoint can use "*" CORS.
-        fetch(config.endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          keepalive: true,
-          credentials: "omit"
-        }).catch(function () {});
-      }
+      // Use fetch with keepalive for better error handling and ad-blocker resistance
+      // keepalive ensures the request completes even on page unload
+      fetch(config.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body,
+        keepalive: true,
+        credentials: "omit"
+      }).catch(function (err) {
+        // Silently fail - don't break the page
+        console.debug("Analytics send failed:", err);
+      });
     } catch (e) {
       // Never break the page
+      console.debug("Analytics error:", e);
     }
   }
 

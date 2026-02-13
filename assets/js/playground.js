@@ -1,6 +1,56 @@
 /**
- * Playground page: sidebar, code editor, runner (Python/JS/SQL), JupyterLite, docs search, assistant.
+ * Playground page: sidebar, Tech/Non-tech mode, code editor, runner, docs search, assistant.
  */
+
+(function () {
+	// Tech / Non-tech mode toggle (playground.html only)
+	var MODE_KEY = 'playground_mode';
+	var contentTech = document.getElementById('playground-content-tech');
+	var contentNontech = document.getElementById('playground-content-nontech');
+	var btnTech = document.getElementById('playground-mode-tech');
+	var btnNontech = document.getElementById('playground-mode-nontech');
+	var hubTech = document.getElementById('hub-buttons-tech');
+	var hubNontech = document.getElementById('hub-buttons-nontech');
+	var docsWrap = document.getElementById('docs-frame-wrap');
+
+	function setMode(mode) {
+		var isTech = mode === 'tech';
+		try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
+		if (contentTech) contentTech.classList.toggle('hidden', !isTech);
+		if (contentNontech) contentNontech.classList.toggle('hidden', isTech);
+		if (hubTech) hubTech.classList.toggle('hidden', !isTech);
+		if (hubNontech) hubNontech.classList.toggle('hidden', isTech);
+		if (docsWrap) docsWrap.classList.toggle('hidden', !isTech);
+		var searchHistWrap = document.getElementById('hub-search-history');
+		if (searchHistWrap) searchHistWrap.classList.toggle('hidden', !isTech);
+		var githubResultsWrap = document.getElementById('github-results-wrap');
+		if (githubResultsWrap && !isTech) githubResultsWrap.classList.add('hidden');
+		var wikipediaResultsWrap = document.getElementById('wikipedia-results-wrap');
+		if (wikipediaResultsWrap && !isTech) wikipediaResultsWrap.classList.add('hidden');
+		var stackoverflowResultsWrap = document.getElementById('stackoverflow-results-wrap');
+		if (stackoverflowResultsWrap && !isTech) stackoverflowResultsWrap.classList.add('hidden');
+		var active = 'border-primary text-primary';
+		var inactive = 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300';
+		if (btnTech) {
+			btnTech.className = 'playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all ' + (isTech ? active : inactive);
+		}
+		if (btnNontech) {
+			btnNontech.className = 'playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all ' + (isTech ? inactive : active);
+		}
+	}
+
+	if (btnTech && btnNontech) {
+		var saved = '';
+		try { saved = localStorage.getItem(MODE_KEY) || 'tech'; } catch (e) { saved = 'tech'; }
+		setMode(saved === 'nontech' ? 'nontech' : 'tech');
+		btnTech.addEventListener('click', function () { setMode('tech'); });
+		btnNontech.addEventListener('click', function () { setMode('nontech'); });
+	} else if (contentTech && contentNontech) {
+		contentNontech.classList.add('hidden');
+	}
+
+	// Ensure hub button groups exist for pages without mode (e.g. old index): no-op if missing
+})();
 
 (function () {
 	// Sidebar toggle (default: closed; persist in localStorage)
@@ -259,14 +309,14 @@
 					runWithPyodide();
 				})
 				.catch(function (err) {
-					showOut('Pyodide load failed: ' + (err.message || err) + '\n\nPython mode is unavailable right now. Switched to JavaScript.');
+					showOut('Pyodide load failed: ' + (err.message || err) + '\n\nPython needs network for first load. Use JS or SQL offline, or retry when online. Switched to JavaScript.');
 					langSel.value = 'javascript';
 					codeEl.placeholder = PLACEHOLDERS.javascript;
 					setStatus('Python engine unavailable, using JavaScript instead.');
 				});
 		};
 		s.onerror = function () {
-			showOut('Could not load Pyodide.\n\nPython mode is unavailable right now. Switched to JavaScript.');
+			showOut('Could not load Pyodide.\n\nPython needs network for first load. Use JS or SQL offline, or retry when online. Switched to JavaScript.');
 			langSel.value = 'javascript';
 			codeEl.placeholder = PLACEHOLDERS.javascript;
 			setStatus('Python engine unavailable, using JavaScript instead.');
@@ -299,39 +349,346 @@
 })();
 
 (function () {
-	// Docs search (DevDocs / GitHub)
-	var qEl = document.getElementById('docs-query');
-	var devdocsBtn = document.getElementById('docs-devdocs');
-	var ghBtn = document.getElementById('docs-github');
+	// Search hub: one query, multiple targets (DevDocs in-page; GitHub API results; others new tab) + search history
+	var SEARCH_HISTORY_KEY = 'standalone_search_history';
+	var qEl = document.getElementById('hub-query') || document.getElementById('docs-query');
 	var frameWrap = document.getElementById('docs-frame-wrap');
 	var frame = document.getElementById('docs-frame');
-	if (!qEl || !devdocsBtn || !ghBtn || !frameWrap || !frame) return;
+	var devdocsBtn = document.getElementById('hub-devdocs') || document.getElementById('docs-devdocs');
+	var ghBtn = document.getElementById('hub-github') || document.getElementById('docs-github');
+	var googleBtn = document.getElementById('hub-google');
+	var ytBtn = document.getElementById('hub-youtube');
+	var wikiBtn = document.getElementById('hub-wikipedia');
+	var soBtn = document.getElementById('hub-stackoverflow');
+	var searchHistoryWrap = document.getElementById('hub-search-history');
+	var searchHistoryList = document.getElementById('hub-search-history-list');
+	var githubResultsWrap = document.getElementById('github-results-wrap');
+	var githubResultsBody = document.getElementById('github-results-body');
+	var githubResultsClose = document.getElementById('github-results-close');
+	var githubResultsMinimize = document.getElementById('github-results-minimize');
+	var wikipediaResultsWrap = document.getElementById('wikipedia-results-wrap');
+	var wikipediaResultsBody = document.getElementById('wikipedia-results-body');
+	var wikipediaResultsClose = document.getElementById('wikipedia-results-close');
+	var wikipediaResultsMinimize = document.getElementById('wikipedia-results-minimize');
+	var stackoverflowResultsWrap = document.getElementById('stackoverflow-results-wrap');
+	var stackoverflowResultsBody = document.getElementById('stackoverflow-results-body');
+	var stackoverflowResultsClose = document.getElementById('stackoverflow-results-close');
+	var stackoverflowResultsMinimize = document.getElementById('stackoverflow-results-minimize');
+	var docsFrameWrap = document.getElementById('docs-frame-wrap');
+	var docsFrameMinimize = document.getElementById('docs-frame-minimize');
+	if (!qEl) return;
+
 	function trimmed() {
 		return (qEl.value || '').trim();
 	}
+	function getSearchHistory() {
+		try {
+			var raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+			return raw ? JSON.parse(raw) : [];
+		} catch (e) { return []; }
+	}
+	function saveSearchHistory(q) {
+		if (!q || !q.trim()) return;
+		var hist = getSearchHistory();
+		var trimmedQ = q.trim();
+		hist = hist.filter(function (h) { return h !== trimmedQ; });
+		hist.unshift(trimmedQ);
+		hist = hist.slice(0, 10);
+		try { localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(hist)); } catch (e) {}
+		renderSearchHistory();
+	}
+	function renderSearchHistory() {
+		if (!searchHistoryWrap || !searchHistoryList) return;
+		var hist = getSearchHistory();
+		if (hist.length === 0) {
+			searchHistoryWrap.classList.add('hidden');
+			return;
+		}
+		searchHistoryWrap.classList.remove('hidden');
+		searchHistoryList.innerHTML = hist.map(function (q) {
+			return '<button type="button" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs" data-query="' + q.replace(/"/g, '&quot;') + '">' + q.replace(/</g, '&lt;') + '</button>';
+		}).join('');
+		searchHistoryList.querySelectorAll('button').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				qEl.value = btn.dataset.query || '';
+				qEl.focus();
+			});
+		});
+	}
 	function showFrame() {
-		if (frameWrap.classList.contains('hidden')) {
+		if (frameWrap && frame && frameWrap.classList.contains('hidden')) {
 			frameWrap.classList.remove('hidden');
 		}
 	}
-	devdocsBtn.addEventListener('click', function () {
-		var q = trimmed();
-		if (!q) return;
-		showFrame();
-		frame.src = 'https://devdocs.io/#q=' + encodeURIComponent(q);
-	});
-	ghBtn.addEventListener('click', function () {
-		var q = trimmed();
-		if (!q) return;
-		var url = 'https://github.com/search?q=' + encodeURIComponent(q) + '&type=repositories';
-		window.open(url, '_blank', 'noopener');
-	});
+	function showGitHubResults() {
+		if (githubResultsWrap) {
+			githubResultsWrap.classList.remove('hidden');
+			githubResultsWrap.classList.remove('collapsed');
+		}
+	}
+	function hideGitHubResults() {
+		if (githubResultsWrap) githubResultsWrap.classList.add('hidden');
+	}
+	function showWikipediaResults() {
+		if (wikipediaResultsWrap) {
+			wikipediaResultsWrap.classList.remove('hidden');
+			wikipediaResultsWrap.classList.remove('collapsed');
+		}
+	}
+	function hideWikipediaResults() {
+		if (wikipediaResultsWrap) wikipediaResultsWrap.classList.add('hidden');
+	}
+	function showStackOverflowResults() {
+		if (stackoverflowResultsWrap) {
+			stackoverflowResultsWrap.classList.remove('hidden');
+			stackoverflowResultsWrap.classList.remove('collapsed');
+		}
+	}
+	function hideStackOverflowResults() {
+		if (stackoverflowResultsWrap) stackoverflowResultsWrap.classList.add('hidden');
+	}
+	function renderGitHubResults(data) {
+		if (!githubResultsBody) return;
+		if (!data || !data.items || data.items.length === 0) {
+			githubResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No repositories found.</p>';
+			return;
+		}
+		var html = '<div class="space-y-3">';
+		data.items.slice(0, 10).forEach(function (repo) {
+			var desc = (repo.description || '').slice(0, 120);
+			var lang = repo.language || '';
+			var stars = repo.stargazers_count || 0;
+			var url = repo.html_url || '';
+			var fullName = repo.full_name || repo.name || '';
+			html += '<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">';
+			html += '<div class="flex items-start justify-between gap-2 mb-1">';
+			html += '<a href="' + url + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-sm">' + fullName.replace(/</g, '&lt;') + '</a>';
+			if (stars > 0) html += '<span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">⭐ ' + stars.toLocaleString() + '</span>';
+			html += '</div>';
+			if (desc) html += '<p class="text-xs text-gray-600 dark:text-gray-400 mb-1.5 line-clamp-2">' + desc.replace(/</g, '&lt;') + '</p>';
+			if (lang) html += '<span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">' + lang.replace(/</g, '&lt;') + '</span>';
+			html += '</div>';
+		});
+		html += '</div>';
+		githubResultsBody.innerHTML = html;
+	}
+	function fetchGitHubSearch(q) {
+		if (!q || !q.trim()) return;
+		if (githubResultsBody) githubResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Searching…</p>';
+		showGitHubResults();
+		var url = 'https://api.github.com/search/repositories?q=' + encodeURIComponent(q) + '&sort=stars&order=desc&per_page=10';
+		fetch(url)
+			.then(function (r) {
+				if (r.status === 403) {
+					renderGitHubResults({ items: [] });
+					if (githubResultsBody) githubResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Rate limit reached. <a href="https://github.com/search?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open GitHub</a></p>';
+					return null;
+				}
+				return r.ok ? r.json() : null;
+			})
+			.then(function (data) {
+				if (data) renderGitHubResults(data);
+			})
+			.catch(function () {
+				if (githubResultsBody) githubResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Search failed. <a href="https://github.com/search?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open GitHub</a></p>';
+			});
+	}
+	function renderWikipediaResults(data) {
+		if (!wikipediaResultsBody) return;
+		if (!data || !data.query || !data.query.search || data.query.search.length === 0) {
+			wikipediaResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No articles found.</p>';
+			return;
+		}
+		var html = '<div class="space-y-3">';
+		data.query.search.slice(0, 10).forEach(function (item) {
+			var title = item.title || '';
+			var snippet = (item.snippet || '').replace(/<[^>]+>/g, '');
+			var url = 'https://en.wikipedia.org/wiki/' + encodeURIComponent(title.replace(/ /g, '_'));
+			html += '<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">';
+			html += '<a href="' + url + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-sm block mb-1">' + title.replace(/</g, '&lt;') + '</a>';
+			if (snippet) html += '<p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-3">' + snippet.replace(/</g, '&lt;') + '</p>';
+			html += '</div>';
+		});
+		html += '</div>';
+		wikipediaResultsBody.innerHTML = html;
+	}
+	function fetchWikipediaSearch(q) {
+		if (!q || !q.trim()) return;
+		if (wikipediaResultsBody) wikipediaResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Searching…</p>';
+		showWikipediaResults();
+		var url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(q);
+		fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (data && data.title) {
+					var html = '<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">';
+					html += '<h3 class="font-semibold text-primary text-base mb-2"><a href="' + (data.content_urls && data.content_urls.desktop && data.content_urls.desktop.page || 'https://en.wikipedia.org/wiki/' + encodeURIComponent(q)) + '" target="_blank" rel="noopener" class="hover:underline">' + (data.title || q).replace(/</g, '&lt;') + '</a></h3>';
+					if (data.extract) html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">' + data.extract.slice(0, 300).replace(/</g, '&lt;') + (data.extract.length > 300 ? '…' : '') + '</p>';
+					if (wikipediaResultsBody) wikipediaResultsBody.innerHTML = html;
+				} else {
+					var searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(q) + '&format=json&origin=*&srlimit=10';
+					fetch(searchUrl)
+						.then(function (r) { return r.ok ? r.json() : null; })
+						.then(function (data) { renderWikipediaResults(data); })
+						.catch(function () {
+							if (wikipediaResultsBody) wikipediaResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Search failed. <a href="https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open Wikipedia</a></p>';
+						});
+				}
+			})
+			.catch(function () {
+				var searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(q) + '&format=json&origin=*&srlimit=10';
+				fetch(searchUrl)
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) { renderWikipediaResults(data); })
+					.catch(function () {
+						if (wikipediaResultsBody) wikipediaResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Search failed. <a href="https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open Wikipedia</a></p>';
+					});
+			});
+	}
+	function renderStackOverflowResults(data) {
+		if (!stackoverflowResultsBody) return;
+		if (!data || !data.items || data.items.length === 0) {
+			stackoverflowResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No questions found.</p>';
+			return;
+		}
+		var html = '<div class="space-y-3">';
+		data.items.slice(0, 10).forEach(function (item) {
+			var title = item.title || '';
+			var score = item.score || 0;
+			var answerCount = item.answer_count || 0;
+			var tags = (item.tags || []).slice(0, 3);
+			var url = item.link || '';
+			var isAnswered = item.is_answered || false;
+			html += '<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">';
+			html += '<div class="flex items-start justify-between gap-2 mb-1">';
+			html += '<a href="' + url + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-sm flex-1">' + title.replace(/</g, '&lt;') + '</a>';
+			html += '<div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">';
+			if (score > 0) html += '<span>↑ ' + score + '</span>';
+			if (answerCount > 0) html += '<span class="' + (isAnswered ? 'text-green-600 dark:text-green-400' : '') + '">' + answerCount + ' answers</span>';
+			html += '</div>';
+			html += '</div>';
+			if (tags.length > 0) {
+				html += '<div class="flex flex-wrap gap-1 mt-1.5">';
+				tags.forEach(function (tag) {
+					html += '<span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">' + tag.replace(/</g, '&lt;') + '</span>';
+				});
+				html += '</div>';
+			}
+			html += '</div>';
+		});
+		html += '</div>';
+		stackoverflowResultsBody.innerHTML = html;
+	}
+	function fetchStackOverflowSearch(q) {
+		if (!q || !q.trim()) return;
+		if (stackoverflowResultsBody) stackoverflowResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Searching…</p>';
+		showStackOverflowResults();
+		var url = 'https://api.stackexchange.com/2.3/search/advanced?order=desc&sort=relevance&q=' + encodeURIComponent(q) + '&site=stackoverflow&pagesize=10';
+		fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (data) renderStackOverflowResults(data);
+			})
+			.catch(function () {
+				if (stackoverflowResultsBody) stackoverflowResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Search failed. <a href="https://stackoverflow.com/search?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open Stack Overflow</a></p>';
+			});
+	}
+
+	if (devdocsBtn && frameWrap && frame) {
+		devdocsBtn.addEventListener('click', function () {
+			var q = trimmed();
+			if (!q) return;
+			saveSearchHistory(q);
+			showFrame();
+			frame.src = 'https://devdocs.io/#q=' + encodeURIComponent(q);
+		});
+	}
+	if (ghBtn) {
+		ghBtn.addEventListener('click', function () {
+			var q = trimmed();
+			if (!q) {
+				hideGitHubResults();
+				window.open('https://github.com', '_blank', 'noopener');
+				return;
+			}
+			saveSearchHistory(q);
+			fetchGitHubSearch(q);
+		});
+	}
+	if (githubResultsClose) {
+		githubResultsClose.addEventListener('click', hideGitHubResults);
+	}
+	if (githubResultsMinimize && githubResultsWrap) {
+		githubResultsMinimize.addEventListener('click', function () {
+			githubResultsWrap.classList.toggle('collapsed');
+		});
+	}
+	if (docsFrameMinimize && docsFrameWrap) {
+		docsFrameMinimize.addEventListener('click', function () {
+			docsFrameWrap.classList.toggle('collapsed');
+		});
+	}
+	if (googleBtn) {
+		googleBtn.addEventListener('click', function () {
+			var q = trimmed();
+			saveSearchHistory(q);
+			window.open(q ? 'https://www.google.com/search?q=' + encodeURIComponent(q) : 'https://www.google.com', '_blank', 'noopener');
+		});
+	}
+	if (ytBtn) {
+		ytBtn.addEventListener('click', function () {
+			var q = trimmed();
+			saveSearchHistory(q);
+			window.open(q ? 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q) : 'https://www.youtube.com', '_blank', 'noopener');
+		});
+	}
+	if (wikiBtn) {
+		wikiBtn.addEventListener('click', function () {
+			var q = trimmed();
+			if (!q) {
+				hideWikipediaResults();
+				window.open('https://en.wikipedia.org', '_blank', 'noopener');
+				return;
+			}
+			saveSearchHistory(q);
+			fetchWikipediaSearch(q);
+		});
+	}
+	if (wikipediaResultsClose) {
+		wikipediaResultsClose.addEventListener('click', hideWikipediaResults);
+	}
+	if (wikipediaResultsMinimize && wikipediaResultsWrap) {
+		wikipediaResultsMinimize.addEventListener('click', function () {
+			wikipediaResultsWrap.classList.toggle('collapsed');
+		});
+	}
+	if (soBtn) {
+		soBtn.addEventListener('click', function () {
+			var q = trimmed();
+			if (!q) {
+				hideStackOverflowResults();
+				window.open('https://stackoverflow.com', '_blank', 'noopener');
+				return;
+			}
+			saveSearchHistory(q);
+			fetchStackOverflowSearch(q);
+		});
+	}
+	if (stackoverflowResultsClose) {
+		stackoverflowResultsClose.addEventListener('click', hideStackOverflowResults);
+	}
+	if (stackoverflowResultsMinimize && stackoverflowResultsWrap) {
+		stackoverflowResultsMinimize.addEventListener('click', function () {
+			stackoverflowResultsWrap.classList.toggle('collapsed');
+		});
+	}
 	qEl.addEventListener('keydown', function (e) {
-		if (e.key === 'Enter') {
+		if (e.key === 'Enter' && devdocsBtn) {
 			e.preventDefault();
 			devdocsBtn.click();
 		}
 	});
+	renderSearchHistory();
 })();
 
 (function () {

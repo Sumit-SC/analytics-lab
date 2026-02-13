@@ -4,6 +4,9 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Resources | Standalone Playground</title>
+	<meta name="description" content="Curated learning paths: Python, SQL, data analytics, ML, NLP, BI. Courses, books, YouTube, GitHub. One hub for analytics and data science." />
+	<meta property="og:title" content="Resources — Standalone Playground" />
+	<meta property="og:description" content="Curated courses, books, videos, and repos for analytics, ML, and programming." />
 	<script src="./assets/js/tailwind-loader.js"></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,8 +19,10 @@
 			<div class="flex items-center justify-between py-3">
 				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
+					<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
 					<a href="./resources.html?topic=python" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Resources</a>
-					<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
+					<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
+					<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
 					<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
@@ -128,13 +133,45 @@
 		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500 dark:text-gray-400 space-y-1">
 			<p>Standalone Playground · Resources</p>
 			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present · Sumit S. Chaure</p>
+			<p class="text-[11px] mt-2 text-amber-700 dark:text-amber-400/90">Sluggish? Clear site cache/storage — saved data will be lost but site may run faster.</p>
 		</div>
 	</footer>
+
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed (Piped)">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Search (Piped)…" aria-label="Search videos">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="Piped trending or search"></iframe>
+	</div>
 
 	<script src="./assets/js/color-theme.js"></script>
 	<script src="./assets/js/theme.js"></script>
 	<script src="./assets/js/analytics.js"></script>
 	<script src="./assets/js/roadmap.js"></script>
+	<script src="./assets/js/global-widgets.js"></script>
+	<script src="./assets/js/dict-widget.js"></script>
 	<script src="./assets/js/assistant.js"></script>
 	<script src="./assets/js/resources.js"></script>
 </body>

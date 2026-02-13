@@ -3,336 +3,225 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Standalone Playground</title>
+	<title>Home — Standalone Playground</title>
+	<meta name="description" content="Notion-like second brain: JS libraries and free APIs only. View, search, edit on the fly; export code, notes, Word-style docs. No backend." />
+	<meta property="og:title" content="Home — Standalone Playground" />
+	<meta property="og:description" content="Focus, weather, quotes. One place for code, resources &amp; tools." />
 	<script src="./assets/js/tailwind-loader.js"></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
-	<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-		<div class="max-w-6xl mx-auto px-4 sm:px-6">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased page-home">
+	<nav class="bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
+		<div class="max-w-5xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
 				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
+					<a href="./index.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Home</a>
+					<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
 					<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-					<a href="./index.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Playground</a>
-					<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
-					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
-					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
+					<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
 				</div>
 			</div>
 		</div>
 	</nav>
 
-	<div class="flex relative">
-		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto hidden lg:block w-[280px] shadow-sm collapsed">
-			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-200 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources">
-				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
-				<span class="sidebar-toggle-vertical">Resources</span>
-			</button>
-			<div class="sidebar-content p-3">
-				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
-				<nav class="space-y-1 text-sm">
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
-							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
-							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
-							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
-							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
-							<li><a href="./resources.html?topic=oops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OOP</a></li>
-							<li><a href="./resources.html?topic=prompting" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Prompting</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
-							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
-							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
-							<li><a href="./resources.html?topic=data-visualization" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Visualization</a></li>
-							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization (Python)</a></li>
-							<li><a href="./resources.html?topic=product-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Product Analytics</a></li>
-							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
-							<li><a href="./resources.html?topic=time-series" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Time Series</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
-							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
-							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
-							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
-							<li><a href="./resources.html?topic=nlp" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NLP</a></li>
-							<li><a href="./resources.html?topic=computer-vision" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Computer Vision</a></li>
-							<li><a href="./resources.html?topic=opencv" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OpenCV</a></li>
-							<li><a href="./resources.html?topic=reinforcement-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Reinforcement Learning</a></li>
-							<li><a href="./resources.html?topic=feature-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Feature Engineering</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
-							<li><a href="./resources.html?topic=spark" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Apache Spark</a></li>
-							<li><a href="./resources.html?topic=streaming" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Streaming Data</a></li>
-							<li><a href="./resources.html?topic=data-warehousing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Warehousing</a></li>
-							<li><a href="./resources.html?topic=databases" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Databases</a></li>
-							<li><a href="./resources.html?topic=cloud-data" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Cloud Platforms</a></li>
-							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
-							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
-							<li><a href="./resources.html?topic=mlops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">MLOps</a></li>
-							<li><a href="./resources.html?topic=devops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">DevOps</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming Languages</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=r" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">R Programming</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=business-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Business Analytics</a></li>
-							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
-							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
-							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
-						</ul>
-					</div>
-				</nav>
+	<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+		<header class="mb-6 sm:mb-8">
+			<p class="home-section-title mb-1">Second brain</p>
+			<h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Notion-like hub, minimal code</h1>
+			<p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">Built on JS libraries and free APIs — view, search, edit on the fly, then export. No backend; pre-made services only.</p>
+		</header>
+
+		<!-- Go to — main stars at top -->
+		<section class="notion-go-section mb-10 sm:mb-12">
+			<p class="home-section-title mb-3">Go to</p>
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+				<a href="./playground.html" class="notion-go-card group">
+					<span class="notion-go-icon">&#128187;</span>
+					<h3 class="notion-go-title">Playground</h3>
+					<p class="notion-go-desc">Code (Python/JS/SQL), docs search, notebooks</p>
+					<span class="notion-go-arrow">→</span>
+				</a>
+				<a href="./resources.html" class="notion-go-card group">
+					<span class="notion-go-icon">&#128218;</span>
+					<h3 class="notion-go-title">Resources</h3>
+					<p class="notion-go-desc">Courses, books, YouTube, learning paths</p>
+					<span class="notion-go-arrow">→</span>
+				</a>
+				<a href="./tools.html" class="notion-go-card group">
+					<span class="notion-go-icon">&#128203;</span>
+					<h3 class="notion-go-title">Tools</h3>
+					<p class="notion-go-desc">Word-style notes, PDF viewer</p>
+					<span class="notion-go-arrow">→</span>
+				</a>
 			</div>
-		</aside>
+		</section>
 
-		<main class="flex-1 min-w-0 max-w-6xl mx-auto px-4 sm:px-6 py-8">
-			<div class="text-center mb-8">
-				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">Playground</h1>
-				<p class="text-gray-600 dark:text-gray-300">Run Python/JS/SQL in your browser. No backend. Heavy parts load only when used.</p>
-			</div>
-
-			<section class="mb-10 material-card rounded-xl border-2 border-gray-200 dark:border-gray-600 p-4 sm:p-6 material-elevation-2">
-				<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Run code in the browser</h2>
-				<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Python uses Pyodide (first run downloads). SQL uses sql.js (SQLite in-browser). JS is instant.</p>
-
-				<div class="flex flex-wrap items-center gap-3 mb-2">
-					<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Language:</label>
-					<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 py-1.5 text-sm font-medium">
-						<option value="python">Python</option>
-						<option value="javascript">JavaScript</option>
-						<option value="sql">SQL (SQLite)</option>
-					</select>
-				</div>
-
-				<div class="code-editor-wrap dark:border-gray-700 dark:bg-gray-900">
-					<div id="line-nums" class="code-line-nums" aria-hidden="true">1</div>
-					<textarea id="code" class="text-gray-800 dark:text-gray-200" spellcheck="false" placeholder="print('Hello')"></textarea>
-				</div>
-
-				<div class="flex items-center gap-2 mt-2">
-					<button type="button" id="run" class="material-button px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium material-elevation-2">Run</button>
-					<span id="status" class="text-xs text-gray-500 dark:text-gray-400"></span>
-				</div>
-
-				<div id="sql-actions" class="hidden mt-3 flex flex-wrap items-center gap-2">
-					<button type="button" id="sql-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Reset DB</button>
-					<button type="button" id="sql-sample" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Load sample data</button>
-					<span class="text-xs text-gray-500 dark:text-gray-400">Runs in-memory SQLite (no server).</span>
-				</div>
-
-				<pre id="out" class="mt-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-sm font-mono overflow-x-auto min-h-[2rem] hidden"></pre>
-			</section>
-
-			<section class="mt-6 material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6 material-elevation-1">
-				<div class="flex items-center justify-between mb-2">
-					<h2 class="text-lg font-semibold text-gray-800">Embedded notebook (JupyterLite)</h2>
-					<button type="button" id="jlite-toggle" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-800 hover:bg-gray-50">Show notebook</button>
-				</div>
-				<p class="text-xs text-gray-500">Loads the official JupyterLite demo inside this page. First load may take some time.</p>
-				<div id="jlite-wrap" class="mt-3 hidden">
-					<iframe id="jlite-frame" class="w-full h-[600px] rounded-lg border border-gray-200 bg-white" title="JupyterLite notebook"></iframe>
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+			<!-- Quote (APIs: Quotable, Animechan; image: Picsum) -->
+			<section class="second-brain-card relative overflow-hidden p-0 lg:col-span-2">
+				<div id="home-quote-bg" class="absolute inset-0 bg-cover bg-center opacity-20 dark:opacity-10" aria-hidden="true"></div>
+				<div class="relative p-5 sm:p-6">
+					<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+						<p class="home-section-title mb-0">Quote</p>
+						<div class="flex items-center gap-2">
+							<label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
+							<select id="home-quote-category" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1.5 text-xs font-medium">
+								<option value="all">All</option>
+								<option value="anime">Anime</option>
+								<option value="books">Books</option>
+								<option value="wisdom">Wisdom</option>
+								<option value="leaders">Leaders</option>
+								<option value="movie">Movie</option>
+								<option value="kdrama">K-drama</option>
+							</select>
+							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Refresh</button>
+						</div>
+					</div>
+					<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
+					<p id="home-quote-attr" class="home-quote-attr">— Plutarch</p>
+					<p id="home-quote-meta" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 hidden"></p>
 				</div>
 			</section>
 
-			<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-				<a href="https://colab.new" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all text-left">
-					<div class="flex items-center gap-3 mb-2"><span class="text-2xl">&#128211;</span><h3 class="text-lg font-semibold">Google Colab</h3></div>
-					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Blank notebook in a new tab.</p>
-					<span class="text-sm font-medium text-primary">Open &#8594;</span>
-				</a>
-				<a href="https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/main?urlpath=lab" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all text-left">
-					<div class="flex items-center gap-3 mb-2"><span class="text-2xl">&#128187;</span><h3 class="text-lg font-semibold">Jupyter (Binder)</h3></div>
-					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Temporary JupyterLab session.</p>
-					<span class="text-sm font-medium text-primary">Open &#8594;</span>
-				</a>
-				<a href="https://jupyterlite.github.io/demo/lab/" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all text-left">
-					<div class="flex items-center gap-3 mb-2"><span class="text-2xl">&#128218;</span><h3 class="text-lg font-semibold">JupyterLite</h3></div>
-					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Notebook UI that runs in-browser.</p>
-					<span class="text-sm font-medium text-primary">Open &#8594;</span>
-				</a>
-			</div>
+			<!-- Refresh -->
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Refresh</p>
+				<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-3">Take a breath. Stretch.</p>
+				<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
+			</section>
 
-			<section class="mt-6 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 sm:p-6">
-				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Docs & repos</h2>
-				<p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Quick links to docs and high‑quality open source learning repos. Nothing heavy runs until you click a button.</p>
-				<div class="flex flex-col sm:flex-row gap-3 mb-4">
-					<input id="docs-query" type="text" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Search docs (e.g. pandas groupby, SQL join)…">
-					<div class="flex gap-2">
-						<button type="button" id="docs-devdocs" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">DevDocs (in-page)</button>
-						<button type="button" id="docs-github" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">GitHub repos</button>
-					</div>
+			<!-- Clock & calendar (real time and date) -->
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Clock &amp; calendar</p>
+				<p id="home-clock-time" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
+				<p id="home-clock-date" class="text-sm text-gray-500 dark:text-gray-400 mt-1">—</p>
+			</section>
+
+			<!-- Weather (set location or use current) -->
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Weather</p>
+				<div class="flex flex-wrap items-center gap-2 mb-2">
+					<input type="text" id="home-weather-search" placeholder="Search city…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
+					<button type="button" id="home-weather-set" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
+					<button type="button" id="home-weather-mylocation" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
 				</div>
+				<div id="home-weather" class="text-gray-800 dark:text-gray-200">…</div>
+				<p id="home-weather-city" class="text-xs text-gray-500 dark:text-gray-400 mt-1">—</p>
+			</section>
 
-				<div id="docs-frame-wrap" class="hidden mb-4 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900">
-						Docs are loaded from <span class="font-semibold">devdocs.io</span>. Tip: in DevDocs, enable Python / SQL / Pandas / PySpark in the filter panel for best results.
-					</div>
-					<iframe id="docs-frame" title="DevDocs embedded" class="w-full h-[480px] bg-white dark:bg-gray-900" loading="lazy" src="about:blank"></iframe>
+			<!-- Timer + Log -->
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Focus timer</p>
+				<!-- Time spans: work & break (saved in browser) -->
+				<div class="flex flex-wrap items-center gap-3 mb-3 text-sm">
+					<label class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+						<span class="text-xs font-medium">Work</span>
+						<input type="number" id="home-timer-work-min" min="1" max="120" value="25" class="w-14 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-center text-gray-800 dark:text-gray-200" aria-label="Work minutes">
+						<span class="text-xs text-gray-500">min</span>
+					</label>
+					<label class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+						<span class="text-xs font-medium">Break</span>
+						<input type="number" id="home-timer-break-min" min="0" max="30" value="5" class="w-14 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-center text-gray-800 dark:text-gray-200" aria-label="Break minutes">
+						<span class="text-xs text-gray-500">min</span>
+					</label>
+					<button type="button" id="home-timer-apply" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Apply</button>
 				</div>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-					<div>
-						<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Awesome & curated lists</h3>
-						<ul class="space-y-1 text-gray-700 dark:text-gray-300">
-							<li><a href="https://github.com/vinta/awesome-python" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-python</a> · curated Python libs</li>
-							<li><a href="https://github.com/josephmisiti/awesome-machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-machine-learning</a> · ML resources</li>
-							<li><a href="https://github.com/awesomedata/awesome-public-datasets" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-public-datasets</a> · datasets to practice</li>
-							<li><a href="https://github.com/academic/awesome-datascience" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-datascience</a> · data science tools & courses</li>
-						</ul>
-					</div>
-					<div>
-						<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Free books & learning repos</h3>
-						<ul class="space-y-1 text-gray-700 dark:text-gray-300">
-							<li><a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener" class="underline hover:text-primary">free-programming-books</a> · huge list of free books</li>
-							<li><a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener" class="underline hover:text-primary">Hands‑On ML (code)</a> · end‑to‑end ML examples</li>
-							<li><a href="https://github.com/rasbt/python-machine-learning-book-3rd-edition" target="_blank" rel="noopener" class="underline hover:text-primary">Python ML book (code)</a> · practical ML in Python</li>
-							<li><a href="https://github.com/fastai/fastbook" target="_blank" rel="noopener" class="underline hover:text-primary">fastbook</a> · Deep Learning for Coders (fast.ai)</li>
-						</ul>
-					</div>
+				<p id="home-timer-display" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100">25:00</p>
+				<p id="home-timer-phase" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Work</p>
+				<div class="flex flex-wrap gap-2 mt-3">
+					<button type="button" id="home-timer-btn" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90">Start</button>
+					<button type="button" id="home-timer-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Reset</button>
+					<button type="button" id="home-timer-log" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Log session</button>
+				</div>
+				<div class="mt-2 flex items-center gap-2">
+					<label class="text-[11px] text-gray-500 dark:text-gray-400">Session label (optional):</label>
+					<input type="text" id="home-timer-session-label" placeholder="e.g. Chapter 3" class="flex-1 max-w-[140px] rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200" maxlength="40">
+				</div>
+				<div id="home-timer-log-list" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+					<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Session log (saved in browser)</p>
+					<ul id="home-timer-log-entries" class="text-xs text-gray-600 dark:text-gray-400 space-y-0.5 max-h-24 overflow-y-auto"></ul>
 				</div>
 			</section>
-		</main>
 
-		<!-- Roadmap Panel -->
-		<div id="roadmap-overlay" class="hidden fixed inset-0 bg-black/30 z-40 lg:z-30" aria-hidden="true"></div>
-		<div id="roadmap-panel" class="hidden fixed top-[57px] right-0 bottom-0 w-full lg:w-1/2 bg-white dark:bg-gray-900 shadow-xl z-50 lg:z-40 flex flex-col border-l border-gray-200 dark:border-gray-700" role="dialog" aria-label="Roadmap">
-			<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
-				<div>
-					<h3 class="font-semibold text-gray-800 dark:text-gray-100">Roadmaps</h3>
-					<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-						Opens on <span class="font-semibold">roadmap.sh</span> in a new tab. Your progress and checkmarks are stored on their site.
-					</p>
+			<!-- Notes / To-do (browser only) -->
+			<section class="second-brain-card p-5 sm:p-6 lg:col-span-2">
+				<p class="home-section-title mb-2">Notes &amp; to-do</p>
+				<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Temp use — stored in browser only. Optional: Tools → Backup to download a copy.</p>
+				<div class="flex gap-2 mb-3">
+					<input id="home-todo-input" type="text" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Add a task…">
+					<button type="button" id="home-todo-add" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90">Add</button>
+					<button type="button" id="home-todo-export-md" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export .md</button>
 				</div>
-				<button type="button" id="roadmap-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close Roadmap">&#10005;</button>
-			</div>
-			<div class="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
-				<div class="p-4 space-y-3 text-sm text-gray-700 dark:text-gray-300">
-					<p class="text-xs text-gray-600 dark:text-gray-400">
-						Pick a roadmap to open it on <span class="font-semibold">roadmap.sh</span>. Keep that tab pinned while you work through the learning paths here.
-					</p>
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-						<a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>Data Analyst roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>AI / Data Scientist roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh/data-engineer" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>Data Engineer roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh/machine-learning-engineer" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>ML Engineer roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh/devops" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>DevOps roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh/python" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>Python roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh/sql" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>SQL roadmap</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-						<a href="https://roadmap.sh" target="_blank" rel="noopener"
-							class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-							<span>Browse all roadmaps</span>
-							<span class="text-xs text-gray-400">&#8599;</span>
-						</a>
-					</div>
+				<ul id="home-todo-list" class="space-y-1.5 text-sm text-gray-700 dark:text-gray-300 max-h-40 overflow-y-auto"></ul>
+			</section>
+		</div>
+
+		<!-- Powered by: JS libs + free APIs, pre-made only -->
+		<section class="mt-14 pt-10 border-t border-gray-200 dark:border-gray-700 notion-powered">
+			<p class="home-section-title mb-3">Powered by</p>
+			<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Notion-like second brain — built from <strong>JS libraries</strong> and <strong>free on-the-fly APIs</strong>. No custom backend; pre-made, compiled services only.</p>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+				<div class="second-brain-card p-4">
+					<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1.5">JS libraries & runtimes</p>
+					<p class="text-gray-600 dark:text-gray-400">Pyodide, sql.js, Tailwind (CDN), vanilla JS. JupyterLite, YouTube IFrame API.</p>
+				</div>
+				<div class="second-brain-card p-4">
+					<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1.5">Free APIs & services</p>
+					<p class="text-gray-600 dark:text-gray-400">Quotable, Animechan, Open-Meteo, Picsum, Dictionary API, DevDocs, YouTube. All no-key or public.</p>
 				</div>
 			</div>
-		</div>
-	</div>
+		</section>
+	</main>
 
-	<!-- Assistant (standalone version) -->
-	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center" aria-label="Open learning assistant">
-		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
-	</button>
-	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
-	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant">
-		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-			<div>
-				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
-				<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">FAQ + Wikipedia by default. Optional full chatbot (~80MB). Saved locally in your browser.</p>
-			</div>
-			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">&#10005;</button>
-		</div>
-		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-white dark:bg-gray-900"></div>
-		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-			<div class="flex gap-2">
-				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Ask anything…">
-				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">Send</button>
-			</div>
-			<div class="flex flex-wrap items-center gap-2 mt-3">
-				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800">Enable full chatbot (~80MB)</button>
-				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-800">Clear chat</button>
-				<span id="assistant-mode-status" class="text-xs text-gray-500 dark:text-gray-400"></span>
-			</div>
-		</div>
-	</div>
-
-	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
-		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
-			<p>Standalone Playground · deploy anywhere (static)</p>
-			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present · Sumit S. Chaure</p>
-			<p class="text-xs">
-				Code runner: <a href="https://pyodide.org" target="_blank" rel="noopener" class="underline hover:text-primary">Pyodide</a>,
-				<a href="https://sql.js.org" target="_blank" rel="noopener" class="underline hover:text-primary">sql.js</a>,
-				<a href="https://jupyterlite.github.io/demo/lab/" target="_blank" rel="noopener" class="underline hover:text-primary">JupyterLite</a>,
-				<a href="https://mybinder.org" target="_blank" rel="noopener" class="underline hover:text-primary">Binder/Jupyter</a>,
-				<a href="https://colab.research.google.com" target="_blank" rel="noopener" class="underline hover:text-primary">Google Colab</a>.
-			</p>
-			<p class="text-xs">
-				Resources & assistant: <a href="https://www.kaggle.com/learn" target="_blank" rel="noopener" class="underline hover:text-primary">Kaggle Learn</a>,
-				<a href="https://medium.com" target="_blank" rel="noopener" class="underline hover:text-primary">Medium</a>,
-				<a href="https://www.youtube.com" target="_blank" rel="noopener" class="underline hover:text-primary">YouTube</a>,
-				<a href="https://wikipedia.org" target="_blank" rel="noopener" class="underline hover:text-primary">Wikipedia</a>,
-				optional chatbot via <a href="https://github.com/xenova/transformers.js" target="_blank" rel="noopener" class="underline hover:text-primary">Transformers.js</a> (Flan‑T5 small).
-			</p>
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-16 py-6">
+		<div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-600 dark:text-gray-400">
+			<p>Standalone Playground · Home</p>
+			<p class="text-xs mt-1">© 2021–Present · Sumit S. Chaure</p>
+			<p class="text-[11px] mt-3 text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 max-w-xl mx-auto">If the site feels sluggish, try clearing this site’s cache/storage (browser settings). You’ll lose saved data (timer log, to-dos, notes, theme) but the site may run faster.</p>
 		</div>
 	</footer>
+
+	<!-- Global music bar (YouTube) + right-side Shorts/search panel -->
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed (Piped)">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Search (Piped)…" aria-label="Search videos">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="Piped trending or search"></iframe>
+	</div>
 
 	<script src="./assets/js/color-theme.js"></script>
 	<script src="./assets/js/theme.js"></script>
 	<script src="./assets/js/analytics.js"></script>
-	<script src="./assets/js/roadmap.js"></script>
-	<script src="./assets/js/playground.js"></script>
+	<script src="./assets/js/global-widgets.js"></script>
+	<script src="./assets/js/dict-widget.js"></script>
+	<script src="./assets/js/homepage.js"></script>
 </body>
 </html>
-

@@ -128,6 +128,38 @@ body {
 	color: rgb(156 163 175);
 }
 
+/* Tools page buttons */
+.tool-btn,
+.tool-sec-btn {
+	border-radius: 9999px;
+	border: 1px solid rgba(148, 163, 184, 0.7);
+	background: #f9fafb;
+	color: rgb(55 65 81);
+	padding: 0.25rem 0.6rem;
+	font-size: 0.7rem;
+	font-weight: 500;
+	line-height: 1;
+	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.dark .tool-btn,
+.dark .tool-sec-btn {
+	background: rgb(17 24 39);
+	color: rgb(209 213 219);
+	border-color: rgba(75, 85, 99, 0.9);
+}
+.tool-btn:hover,
+.tool-sec-btn:hover {
+	background: #eef2ff;
+	border-color: var(--color-primary);
+	color: rgb(30 64 175);
+	box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+}
+.dark .tool-btn:hover,
+.dark .tool-sec-btn:hover {
+	background: rgb(30 64 175 / 0.3);
+	color: rgb(219 234 254);
+}
+
 /* Material Design Inputs */
 .material-input {
 	border: none;
@@ -275,4 +307,492 @@ body {
 	#roadmap-panel {
 		width: 50%;
 	}
+}
+
+/* Second-brain / Notion-style homepage — UI and use like Notion */
+.page-home body {
+	background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+}
+.dark.page-home body {
+	background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+.notion-powered .second-brain-card {
+	min-height: 0;
+}
+.second-brain-card {
+	border-radius: 1rem;
+	border: 1px solid rgba(148, 163, 184, 0.25);
+	background: rgba(255, 255, 255, 0.7);
+	backdrop-filter: blur(8px);
+	box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+	transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.dark .second-brain-card {
+	background: rgba(30, 41, 59, 0.6);
+	border-color: rgba(71, 85, 105, 0.4);
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+.second-brain-card:hover {
+	box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
+	transform: translateY(-2px);
+}
+.dark .second-brain-card:hover {
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.home-quote {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	color: rgb(51 65 85);
+	font-style: italic;
+}
+.dark .home-quote {
+	color: rgb(203 213 225);
+}
+.home-quote-attr {
+	font-size: 0.8rem;
+	opacity: 0.85;
+	margin-top: 0.5rem;
+}
+.home-section-title {
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: rgb(100 116 139);
+}
+.dark .home-section-title {
+	color: rgb(148 163 184);
+}
+
+/* Notion-style Go to cards (main stars) */
+.notion-go-section {
+	--notion-go-radius: 0.75rem;
+	--notion-go-border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.dark .notion-go-section {
+	--notion-go-border: 1px solid rgba(71, 85, 105, 0.4);
+}
+.notion-go-card {
+	display: block;
+	padding: 1.25rem 1.5rem;
+	border-radius: var(--notion-go-radius);
+	border: var(--notion-go-border);
+	background: rgba(255, 255, 255, 0.8);
+	backdrop-filter: blur(6px);
+	transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+	text-decoration: none;
+	color: inherit;
+	position: relative;
+}
+.dark .notion-go-card {
+	background: rgba(30, 41, 59, 0.5);
+}
+.notion-go-card:hover {
+	box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+	transform: translateY(-2px);
+	border-color: rgba(99, 102, 241, 0.4);
+	background: rgba(255, 255, 255, 0.95);
+}
+.dark .notion-go-card:hover {
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+	background: rgba(51, 65, 85, 0.6);
+	border-color: rgba(99, 102, 241, 0.5);
+}
+.notion-go-icon {
+	font-size: 1.75rem;
+	display: block;
+	margin-bottom: 0.5rem;
+	opacity: 0.9;
+}
+.notion-go-title {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: rgb(30 41 55);
+	margin: 0 0 0.25rem 0;
+	transition: color 0.2s ease;
+}
+.dark .notion-go-title {
+	color: rgb(241 245 249);
+}
+.notion-go-card:hover .notion-go-title {
+	color: var(--color-primary);
+}
+.notion-go-desc {
+	font-size: 0.75rem;
+	color: rgb(100 116 139);
+	line-height: 1.4;
+	margin: 0;
+}
+.dark .notion-go-desc {
+	color: rgb(148 163 184);
+}
+.notion-go-arrow {
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	font-size: 1rem;
+	opacity: 0;
+	transform: translateX(-4px);
+	transition: opacity 0.2s ease, transform 0.2s ease;
+	color: var(--color-primary);
+}
+.notion-go-card:hover .notion-go-arrow {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+/* Playground Tech/Non-tech mode button active state */
+.playground-mode-btn.border-primary {
+	background-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+.dark .playground-mode-btn.border-primary {
+	background-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+/* Global music bar (bottom) + YouTube panel (right) */
+body:has(#global-music-bar) {
+	padding-bottom: 3.25rem;
+}
+#global-music-bar {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 50;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	background: rgba(15, 23, 42, 0.95);
+	color: #e2e8f0;
+	border-top: 1px solid rgba(148, 163, 184, 0.3);
+	backdrop-filter: blur(8px);
+}
+.dark #global-music-bar {
+	background: rgba(15, 23, 42, 0.98);
+	border-top-color: rgba(71, 85, 105, 0.5);
+}
+#global-music-bar input {
+	flex: 1;
+	min-width: 0;
+	max-width: 280px;
+	padding: 0.35rem 0.5rem;
+	border-radius: 0.375rem;
+	border: 1px solid rgba(148, 163, 184, 0.4);
+	background: rgba(30, 41, 59, 0.8);
+	color: #e2e8f0;
+	font-size: 0.75rem;
+}
+#global-music-bar input::placeholder {
+	color: #94a3b8;
+}
+#global-music-bar button {
+	padding: 0.35rem 0.5rem;
+	border-radius: 0.375rem;
+	border: none;
+	background: rgba(99, 102, 241, 0.9);
+	color: white;
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+#global-music-bar button:hover {
+	opacity: 0.9;
+}
+#global-music-bar button[aria-label="Play"],
+#global-music-bar button[aria-label="Pause"],
+#global-music-bar button[aria-label="Next"] {
+	min-width: 2rem;
+}
+#global-music-title {
+	font-size: 0.7rem;
+	opacity: 0.9;
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+#global-yt-player-wrap {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+/* Right-side YouTube panel (Shorts / search), mobile-style */
+#global-yt-panel-toggle {
+	position: fixed;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+	z-index: 45;
+	width: 36px;
+	height: 80px;
+	padding: 0;
+	border-radius: 8px 0 0 8px;
+	background: rgba(99, 102, 241, 0.9);
+	color: white;
+	border: 1px solid rgba(99, 102, 241, 1);
+	border-right: none;
+	font-size: 0.65rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+}
+#global-yt-panel-toggle:hover {
+	opacity: 0.95;
+}
+#global-yt-panel {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	max-width: 420px;
+	z-index: 46;
+	background: #0f172a;
+	color: #e2e8f0;
+	box-shadow: -8px 0 24px rgba(0,0,0,0.3);
+	transform: translateX(100%);
+	transition: transform 0.3s ease;
+	display: flex;
+	flex-direction: column;
+}
+#global-yt-panel.global-yt-panel-open {
+	transform: translateX(0);
+}
+#global-yt-panel .global-yt-panel-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid rgba(71, 85, 105, 0.6);
+	flex-shrink: 0;
+}
+#global-yt-panel .global-yt-panel-header input {
+	flex: 1;
+	min-width: 0;
+	padding: 0.4rem 0.5rem;
+	border-radius: 0.375rem;
+	border: 1px solid rgba(71, 85, 105, 0.8);
+	background: rgba(30, 41, 59, 0.8);
+	color: #e2e8f0;
+	font-size: 0.8rem;
+}
+#global-yt-panel .global-yt-panel-header button {
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.375rem;
+	border: none;
+	background: #ef4444;
+	color: white;
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+#global-yt-panel-iframe {
+	flex: 1;
+	width: 100%;
+	min-height: 0;
+	border: none;
+	background: #0f172a;
+}
+@media (max-width: 480px) {
+	#global-yt-panel {
+		max-width: 100%;
+	}
+}
+
+/* Dictionary flyout (global, all pages) */
+#global-dict-toggle {
+	position: fixed;
+	bottom: 3.5rem;
+	left: 0;
+	z-index: 45;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border-radius: 0 8px 8px 0;
+	background: rgba(30, 58, 138, 0.9);
+	color: white;
+	border: 1px solid rgba(30, 58, 138, 1);
+	border-left: none;
+	font-size: 0.75rem;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+	transition: opacity 0.2s ease;
+}
+#global-dict-toggle:hover {
+	opacity: 0.95;
+}
+#global-dict-flyout {
+	position: fixed;
+	bottom: 3.5rem;
+	left: 0;
+	width: 100%;
+	max-width: 380px;
+	max-height: 70vh;
+	z-index: 46;
+	background: rgba(255, 255, 255, 0.98);
+	border: 1px solid rgba(148, 163, 184, 0.3);
+	border-left: none;
+	border-radius: 0 12px 12px 0;
+	box-shadow: 8px 4px 24px rgba(15, 23, 42, 0.12);
+	display: flex;
+	flex-direction: column;
+	transform: translateX(-100%);
+	transition: transform 0.25s ease;
+	overflow: hidden;
+}
+.dark #global-dict-flyout {
+	background: rgba(15, 23, 42, 0.98);
+	border-color: rgba(71, 85, 105, 0.5);
+	box-shadow: 8px 4px 24px rgba(0, 0, 0, 0.35);
+}
+#global-dict-flyout.global-dict-open {
+	transform: translateX(0);
+}
+#global-dict-flyout .global-dict-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.6rem 0.75rem;
+	border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+	flex-shrink: 0;
+}
+.dark #global-dict-flyout .global-dict-header {
+	border-bottom-color: rgba(71, 85, 105, 0.5);
+}
+#global-dict-flyout .global-dict-header input {
+	flex: 1;
+	min-width: 0;
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.5rem;
+	border: 1px solid rgba(148, 163, 184, 0.4);
+	background: rgb(248 250 252);
+	font-size: 0.85rem;
+	color: rgb(30 41 55);
+}
+.dark #global-dict-flyout .global-dict-header input {
+	background: rgb(30 41 59);
+	border-color: rgba(71, 85, 105, 0.6);
+	color: rgb(241 245 249);
+}
+#global-dict-flyout .global-dict-header button {
+	padding: 0.4rem 0.65rem;
+	border-radius: 0.5rem;
+	border: none;
+	background: var(--color-primary);
+	color: white;
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+#global-dict-flyout .global-dict-body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 0.6rem 0.75rem;
+	font-size: 0.8rem;
+	line-height: 1.5;
+	color: rgb(51 65 85);
+}
+.dark #global-dict-flyout .global-dict-body {
+	color: rgb(203 213 225);
+}
+#global-dict-flyout .global-dict-body .dict-word {
+	font-weight: 700;
+	font-size: 1rem;
+	color: rgb(30 41 55);
+	margin-bottom: 0.25rem;
+}
+.dark #global-dict-flyout .global-dict-body .dict-word {
+	color: rgb(241 245 249);
+}
+#global-dict-flyout .global-dict-body .dict-pos {
+	font-size: 0.7rem;
+	color: rgb(100 116 139);
+	font-style: italic;
+	margin-bottom: 0.15rem;
+}
+#global-dict-flyout .global-dict-body .dict-meanings {
+	margin-top: 0.5rem;
+}
+#global-dict-flyout .global-dict-body .dict-def {
+	margin-bottom: 0.35rem;
+	padding-left: 0.5rem;
+	border-left: 2px solid var(--color-primary);
+}
+#global-dict-flyout .global-dict-google {
+	flex-shrink: 0;
+	display: block;
+	margin: 0 0.75rem 0.75rem 0.75rem;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.5rem;
+	background: rgb(248 250 252);
+	border: 1px solid rgba(148, 163, 184, 0.3);
+	font-size: 0.8rem;
+	color: rgb(30 64 175);
+	text-decoration: none;
+	text-align: center;
+	transition: background 0.2s ease;
+}
+.dark #global-dict-flyout .global-dict-google {
+	background: rgb(30 41 59);
+	border-color: rgba(71, 85, 105, 0.5);
+	color: rgb(147 197 253);
+}
+#global-dict-flyout .global-dict-google:hover {
+	background: rgb(239 246 255);
+}
+.dark #global-dict-flyout .global-dict-google:hover {
+	background: rgb(30 58 138 / 0.4);
+}
+#global-dict-flyout .global-dict-close {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	width: 1.5rem;
+	height: 1.5rem;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: rgb(100 116 139);
+	cursor: pointer;
+	font-size: 1rem;
+	line-height: 1;
+}
+#global-dict-flyout .global-dict-header {
+	position: relative;
+}
+
+/* Search hub panels: minimize/maximize */
+#docs-frame-wrap.collapsed #docs-frame-content,
+#github-results-wrap.collapsed #github-results-content,
+#wikipedia-results-wrap.collapsed #wikipedia-results-content,
+#stackoverflow-results-wrap.collapsed #stackoverflow-results-content {
+	display: none;
+}
+#docs-frame-wrap.collapsed #docs-frame-minimize,
+#github-results-wrap.collapsed #github-results-minimize,
+#wikipedia-results-wrap.collapsed #wikipedia-results-minimize,
+#stackoverflow-results-wrap.collapsed #stackoverflow-results-minimize {
+	transform: rotate(180deg);
+}
+#docs-frame-minimize,
+#github-results-minimize,
+#wikipedia-results-minimize,
+#stackoverflow-results-minimize {
+	transition: transform 0.2s ease;
+	cursor: pointer;
 }
