@@ -106,18 +106,24 @@
 				<div class="relative p-5 sm:p-6">
 					<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
 						<p class="home-section-title mb-0">Quote</p>
-						<div class="flex items-center gap-2">
-							<label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
-							<select id="home-quote-category" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1.5 text-xs font-medium">
-								<option value="all">All</option>
-								<option value="random">Random</option>
-								<option value="movies">Movies</option>
-								<option value="bollywood">Bollywood</option>
-								<option value="kdrama">K-drama</option>
-								<option value="anime">Anime</option>
-								<option value="books">Books</option>
-								<option value="leaders">Leaders</option>
-							</select>
+						<div class="flex items-center gap-3">
+							<div class="flex items-center gap-2">
+								<label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
+								<select id="home-quote-category" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1.5 text-xs font-medium">
+									<option value="all">All</option>
+									<option value="random">Random</option>
+									<option value="movies">Movies</option>
+									<option value="bollywood">Bollywood</option>
+									<option value="kdrama">K-drama</option>
+									<option value="anime">Anime</option>
+									<option value="books">Books</option>
+									<option value="leaders">Leaders</option>
+								</select>
+							</div>
+							<label class="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+								<input type="checkbox" id="home-quote-image-live" class="rounded border-gray-300 dark:border-gray-600">
+								<span>Use live posters</span>
+							</label>
 							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
 							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
 							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Open Pinterest search for this source">P</button>

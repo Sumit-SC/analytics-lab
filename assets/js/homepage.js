@@ -6,6 +6,7 @@
 	'use strict';
 
 	var QUOTE_CATEGORY_KEY = 'home_quote_category';
+	var QUOTE_IMAGE_MODE_KEY = 'home_quote_image_mode'; // 'live' or 'local'
 
 	// Local quote DB: faster than APIs, no broken endpoints. Loaded from assets/data/quotes-db.json
 	var quotesDb = null;
@@ -313,6 +314,18 @@
 		try { return localStorage.getItem(OMDB_API_KEY_KEY) || ''; } catch (e) { return ''; }
 	}
 
+	function getImageMode() {
+		try {
+			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'live';
+		} catch (e) {
+			return 'live';
+		}
+	}
+
+	function isLivePostersEnabled() {
+		return getImageMode() !== 'local';
+	}
+
 	// Fetch poster from OMDb (optional; set localStorage omdb_api_key). Free key at https://www.omdbapi.com/
 	// type: 'movie' | 'series' | omit for best match. Used for quote wallpaper/posters.
 	function fetchOMDBPoster(title, cb, type) {
@@ -348,7 +361,9 @@
 			}
 		}
 
-		if (category === 'anime' && quote.source && quote.source.trim()) {
+		var livePosters = isLivePostersEnabled();
+
+		if (livePosters && category === 'anime' && quote.source && quote.source.trim()) {
 			fetchJikanImage(quote.source.trim(), function (url) {
 				if (url) setBgAndImages([url, url]);
 				else setBgAndImages(resolved);
@@ -356,7 +371,7 @@
 			return;
 		}
 		// OMDb for posters/wallpapers: movies (movie), K-drama (series), Bollywood (movie)
-		if (getOMDBKey() && quote.source && quote.source.trim()) {
+		if (livePosters && getOMDBKey() && quote.source && quote.source.trim()) {
 			var omdbType = null;
 			var tryOmdb = false;
 			if (category === 'movies' || category === 'movie') {
@@ -509,8 +524,9 @@
 		setQuoteLoading(false);
 	}
 
-	// Quote: category select, refresh buttons (quote + wallpaper), load initial
+	// Quote: category select, image-mode toggle, refresh buttons (quote + wallpaper), load initial
 	var quoteCategoryEl = document.getElementById('home-quote-category');
+	var quoteImageModeEl = document.getElementById('home-quote-image-live');
 	var quoteRefreshBtn = document.getElementById('home-quote-refresh');
 	var quoteBgRefreshBtn = document.getElementById('home-quote-bg-refresh');
 	var quotePinterestBtn = document.getElementById('home-quote-pinterest');
@@ -532,6 +548,18 @@
 		quoteCategoryEl.addEventListener('change', function () {
 			saveCategory(quoteCategoryEl.value);
 			loadQuote(quoteCategoryEl.value);
+		});
+	}
+
+	if (quoteImageModeEl) {
+		// Initialize from stored mode
+		quoteImageModeEl.checked = isLivePostersEnabled();
+		quoteImageModeEl.addEventListener('change', function () {
+			try {
+				localStorage.setItem(QUOTE_IMAGE_MODE_KEY, quoteImageModeEl.checked ? 'live' : 'local');
+			} catch (e) {}
+			// Reload current category so images update without changing text category
+			loadQuote(getCategory());
 		});
 	}
 
