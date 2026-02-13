@@ -29,7 +29,7 @@
 		'Winston Churchill': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sir_Winston_Churchill_-_19086236948.jpg/800px-Sir_Winston_Churchill_-_19086236948.jpg'
 	};
 
-	// Cache for dynamically discovered images from Wikipedia (keyed by source name)
+	// Cache for dynamically discovered images from Wikipedia / Jikan (keyed by source name)
 	var QUOTE_IMAGE_CACHE_KEY = 'standalone_quote_image_cache';
 	var quoteImageCache = {};
 	try {
@@ -72,6 +72,39 @@
 					quoteImageCache[source] = { url: thumb };
 					saveQuoteImageCache();
 					cb(thumb);
+				} else {
+					cb(null);
+				}
+			})
+			.catch(function () { cb(null); });
+	}
+
+	// Try to fetch an anime poster from Jikan (MyAnimeList API, no key, CORS-friendly)
+	function fetchJikanImage(animeTitle, cb) {
+		if (!animeTitle || !animeTitle.trim()) {
+			cb(null);
+			return;
+		}
+		var key = 'anime:' + animeTitle.trim();
+		if (quoteImageCache[key] && quoteImageCache[key].url) {
+			cb(quoteImageCache[key].url);
+			return;
+		}
+		var url = 'https://api.jikan.moe/v4/anime?q=' + encodeURIComponent(animeTitle.trim()) + '&limit=1';
+		fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.data || !data.data[0] || !data.data[0].images) {
+					cb(null);
+					return;
+				}
+				var imgData = data.data[0].images;
+				var src = (imgData.jpg && (imgData.jpg.large_image_url || imgData.jpg.image_url)) ||
+					(imgData.webp && (imgData.webp.large_image_url || imgData.webp.image_url)) || '';
+				if (src) {
+					quoteImageCache[key] = { url: src };
+					saveQuoteImageCache();
+					cb(src);
 				} else {
 					cb(null);
 				}
@@ -230,8 +263,20 @@
 				setQuoteLoading(false);
 				if (q) {
 					setQuoteUI(q.text, q.attr, q.meta);
-					var animeName = (q.meta || '').replace(/^From:\s*/i, '').trim();
-					setQuoteImage(null, animeName || q.attr);
+					var animeName = (q.meta || '').replace(/^From:\s*/i, '').trim() || q.attr || '';
+					// Prefer proper anime posters from Jikan; fall back to normal quote image logic
+					if (animeName) {
+						fetchJikanImage(animeName, function (url) {
+							if (url) {
+								var bg = document.getElementById('home-quote-bg');
+								if (bg) bg.style.backgroundImage = 'url(' + url + ')';
+							} else {
+								setQuoteImage(null, animeName || q.attr);
+							}
+						});
+					} else {
+						setQuoteImage(null, q.attr);
+					}
 				} else {
 					useFallback('all');
 				}
@@ -279,6 +324,7 @@
 	var quoteCategoryEl = document.getElementById('home-quote-category');
 	var quoteRefreshBtn = document.getElementById('home-quote-refresh');
 	var quoteBgRefreshBtn = document.getElementById('home-quote-bg-refresh');
+	var quotePinterestBtn = document.getElementById('home-quote-pinterest');
 
 	function getCategory() {
 		if (quoteCategoryEl) return quoteCategoryEl.value || 'all';
@@ -329,6 +375,16 @@
 			// New random but source-themed wallpaper from Picsum
 			var seed = (src + '-' + Date.now()).replace(/\W/g, '') || Date.now();
 			bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+		});
+	}
+
+	if (quotePinterestBtn) {
+		quotePinterestBtn.addEventListener('click', function () {
+			var src = getCurrentQuoteSource() || '';
+			var q = src ? (src + ' quote') : 'inspirational quote';
+			try {
+				window.open('https://www.pinterest.com/search/pins/?q=' + encodeURIComponent(q), '_blank', 'noopener');
+			} catch (e) {}
 		});
 	}
 

@@ -73,9 +73,33 @@
 		</section>
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 auto-rows-fr">
-			<!-- Quote (APIs: Quotable, Animechan; image: Picsum) -->
-			<section class="second-brain-card relative overflow-hidden p-0 sm:col-span-2 lg:col-span-3 lg:row-span-2">
-				<div id="home-quote-bg" class="absolute inset-0 bg-cover bg-center opacity-25 dark:opacity-15" aria-hidden="true"></div>
+			<!-- Top row: Refresh + Clock + Weather -->
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Refresh</p>
+				<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-3">Take a breath. Stretch.</p>
+				<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
+			</section>
+
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Clock &amp; calendar</p>
+				<p id="home-clock-time" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
+				<p id="home-clock-date" class="text-sm text-gray-500 dark:text-gray-400 mt-1">—</p>
+			</section>
+
+			<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Weather</p>
+				<div class="flex flex-wrap items-center gap-2 mb-2">
+					<input type="text" id="home-weather-search" placeholder="Search city…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
+					<button type="button" id="home-weather-set" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
+					<button type="button" id="home-weather-mylocation" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
+				</div>
+				<div id="home-weather" class="text-gray-800 dark:text-gray-200">…</div>
+				<p id="home-weather-city" class="text-xs text-gray-500 dark:text-gray-400 mt-1">—</p>
+			</section>
+
+			<!-- Second row: Quote (wider) + Focus timer -->
+			<section class="second-brain-card relative overflow-hidden p-0 sm:col-span-2 lg:col-span-2">
+				<div id="home-quote-bg" class="absolute inset-0 bg-cover bg-center opacity-20 dark:opacity-10" aria-hidden="true"></div>
 				<div class="relative p-5 sm:p-6">
 					<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
 						<p class="home-section-title mb-0">Quote</p>
@@ -92,6 +116,7 @@
 							</select>
 							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
 							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
+							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Open Pinterest search for this source">P</button>
 						</div>
 					</div>
 					<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
@@ -100,33 +125,6 @@
 				</div>
 			</section>
 
-			<!-- Refresh -->
-			<section class="second-brain-card p-5 sm:p-6">
-				<p class="home-section-title mb-2">Refresh</p>
-				<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-3">Take a breath. Stretch.</p>
-				<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
-			</section>
-
-			<!-- Clock & calendar (real time and date) -->
-			<section class="second-brain-card p-5 sm:p-6">
-				<p class="home-section-title mb-2">Clock &amp; calendar</p>
-				<p id="home-clock-time" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
-				<p id="home-clock-date" class="text-sm text-gray-500 dark:text-gray-400 mt-1">—</p>
-			</section>
-
-			<!-- Weather (set location or use current) -->
-			<section class="second-brain-card p-5 sm:p-6">
-				<p class="home-section-title mb-2">Weather</p>
-				<div class="flex flex-wrap items-center gap-2 mb-2">
-					<input type="text" id="home-weather-search" placeholder="Search city…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
-					<button type="button" id="home-weather-set" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
-					<button type="button" id="home-weather-mylocation" class="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
-				</div>
-				<div id="home-weather" class="text-gray-800 dark:text-gray-200">…</div>
-				<p id="home-weather-city" class="text-xs text-gray-500 dark:text-gray-400 mt-1">—</p>
-			</section>
-
-			<!-- Timer + Log -->
 			<section class="second-brain-card p-5 sm:p-6">
 				<p class="home-section-title mb-2">Focus timer</p>
 				<!-- Time spans: work & break (saved in browser) -->
@@ -160,8 +158,8 @@
 				</div>
 			</section>
 
-			<!-- Notes / To-do (browser only) -->
-			<section class="second-brain-card p-5 sm:p-6 lg:col-span-2">
+			<!-- Third row: Notes / To-do -->
+			<section class="second-brain-card p-5 sm:p-6 lg:col-span-3">
 				<p class="home-section-title mb-2">Notes &amp; to-do</p>
 				<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Temp use — stored in browser only. Optional: Tools → Backup to download a copy.</p>
 				<div class="flex gap-2 mb-3">
