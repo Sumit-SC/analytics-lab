@@ -7,10 +7,17 @@
 	<meta name="description" content="Run Python, JS, and SQL in the browser. DevDocs, GitHub search. Toggle Tech (IDE, docs) or Non-tech (notes, web search)." />
 	<meta property="og:title" content="Playground — Code, Docs &amp; Tools" />
 	<meta property="og:description" content="Tech: IDE + DevDocs + GitHub. Non-tech: Word/PDF + Google, Wikipedia, Stack Overflow." />
-	<script src="./assets/js/tailwind-loader.js"></script>
+	<script src="./assets/js/tailwind-loader.js" defer></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+	<link rel="preconnect" href="https://devdocs.io">
+	<link rel="preconnect" href="https://api.github.com">
+	<link rel="preconnect" href="https://api.duckduckgo.com">
+	<link rel="preconnect" href="https://en.wikipedia.org">
+	<link rel="preconnect" href="https://api.stackexchange.com">
+	<link rel="preconnect" href="https://piped.video">
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
@@ -136,14 +143,17 @@
 						<button type="button" id="hub-github" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">GitHub</button>
 					</div>
 					<div id="hub-buttons-nontech" class="hidden flex flex-wrap gap-2 justify-end sm:justify-start">
-						<button type="button" id="hub-google" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Google</button>
+						<button type="button" id="hub-duckduckgo" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">DuckDuckGo</button>
 						<button type="button" id="hub-wikipedia" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Wikipedia</button>
 						<button type="button" id="hub-stackoverflow" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Stack Overflow</button>
 					</div>
 				</div>
 				<!-- Previous searches (tech side only) -->
 				<div id="hub-search-history" class="hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-					<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5">Previous searches</p>
+					<div class="flex items-center justify-between mb-1.5">
+						<p class="text-xs font-semibold text-gray-600 dark:text-gray-400">Previous searches</p>
+						<button type="button" id="hub-search-history-clear" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Clear</button>
+					</div>
 					<div id="hub-search-history-list" class="flex flex-wrap gap-1.5 text-xs"></div>
 				</div>
 			</section>
@@ -202,6 +212,21 @@
 					<div id="stackoverflow-results-content">
 						<div id="stackoverflow-results-body" class="p-4 max-h-[420px] overflow-y-auto">
 							<p class="text-sm text-gray-500 dark:text-gray-400">Search Stack Overflow above.</p>
+						</div>
+					</div>
+				</div>
+				<!-- DuckDuckGo results panel (shows when DuckDuckGo search is used) -->
+				<div id="duckduckgo-results-wrap" class="hidden mb-8 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+						<span>DuckDuckGo search results</span>
+						<div class="flex items-center gap-2">
+							<button type="button" id="duckduckgo-results-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+							<button type="button" id="duckduckgo-results-close" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Close">✕</button>
+						</div>
+					</div>
+					<div id="duckduckgo-results-content">
+						<div id="duckduckgo-results-body" class="p-4 max-h-[420px] overflow-y-auto">
+							<p class="text-sm text-gray-500 dark:text-gray-400">Search DuckDuckGo above.</p>
 						</div>
 					</div>
 				</div>
@@ -379,15 +404,15 @@
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
-		<iframe id="global-yt-panel-iframe" title="Piped trending or search"></iframe>
+		<iframe id="global-yt-panel-iframe" title="Piped trending or search" loading="lazy"></iframe>
 	</div>
 
-	<script src="./assets/js/color-theme.js"></script>
-	<script src="./assets/js/theme.js"></script>
-	<script src="./assets/js/analytics.js"></script>
-	<script src="./assets/js/roadmap.js"></script>
-	<script src="./assets/js/global-widgets.js"></script>
-	<script src="./assets/js/dict-widget.js"></script>
-	<script src="./assets/js/playground.js"></script>
+	<script src="./assets/js/color-theme.js" defer></script>
+	<script src="./assets/js/theme.js" defer></script>
+	<script src="./assets/js/analytics.js" defer></script>
+	<script src="./assets/js/roadmap.js" defer></script>
+	<script src="./assets/js/global-widgets.js" defer></script>
+	<script src="./assets/js/dict-widget.js" defer></script>
+	<script src="./assets/js/playground.js" defer></script>
 </body>
 </html>

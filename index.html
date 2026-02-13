@@ -7,10 +7,20 @@
 	<meta name="description" content="Notion-like second brain: JS libraries and free APIs only. View, search, edit on the fly; export code, notes, Word-style docs. No backend." />
 	<meta property="og:title" content="Home — Standalone Playground" />
 	<meta property="og:description" content="Focus, weather, quotes. One place for code, resources &amp; tools." />
-	<script src="./assets/js/tailwind-loader.js"></script>
+	<script src="./assets/js/tailwind-loader.js" defer></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+	<link rel="preconnect" href="https://api.quotable.io">
+	<link rel="preconnect" href="https://animechan.xyz">
+	<link rel="preconnect" href="https://api.open-meteo.com">
+	<link rel="preconnect" href="https://picsum.photos">
+	<link rel="preconnect" href="https://api.dictionaryapi.dev">
+	<link rel="preconnect" href="https://api.duckduckgo.com">
+	<link rel="preconnect" href="https://api.github.com">
+	<link rel="preconnect" href="https://en.wikipedia.org">
+	<link rel="preconnect" href="https://api.stackexchange.com">
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased page-home">
@@ -214,14 +224,14 @@
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
-		<iframe id="global-yt-panel-iframe" title="Piped trending or search"></iframe>
+		<iframe id="global-yt-panel-iframe" title="Piped trending or search" loading="lazy"></iframe>
 	</div>
 
-	<script src="./assets/js/color-theme.js"></script>
-	<script src="./assets/js/theme.js"></script>
-	<script src="./assets/js/analytics.js"></script>
-	<script src="./assets/js/global-widgets.js"></script>
-	<script src="./assets/js/dict-widget.js"></script>
-	<script src="./assets/js/homepage.js"></script>
+	<script src="./assets/js/color-theme.js" defer></script>
+	<script src="./assets/js/theme.js" defer></script>
+	<script src="./assets/js/analytics.js" defer></script>
+	<script src="./assets/js/global-widgets.js" defer></script>
+	<script src="./assets/js/dict-widget.js" defer></script>
+	<script src="./assets/js/homepage.js" defer></script>
 </body>
 </html>

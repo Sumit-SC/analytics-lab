@@ -7,10 +7,12 @@
 	<meta name="description" content="Curated learning paths: Python, SQL, data analytics, ML, NLP, BI. Courses, books, YouTube, GitHub. One hub for analytics and data science." />
 	<meta property="og:title" content="Resources — Standalone Playground" />
 	<meta property="og:description" content="Curated courses, books, videos, and repos for analytics, ML, and programming." />
-	<script src="./assets/js/tailwind-loader.js"></script>
+	<script src="./assets/js/tailwind-loader.js" defer></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+	<link rel="preconnect" href="https://piped.video">
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
@@ -163,16 +165,16 @@
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
-		<iframe id="global-yt-panel-iframe" title="Piped trending or search"></iframe>
+		<iframe id="global-yt-panel-iframe" title="Piped trending or search" loading="lazy"></iframe>
 	</div>
 
-	<script src="./assets/js/color-theme.js"></script>
-	<script src="./assets/js/theme.js"></script>
-	<script src="./assets/js/analytics.js"></script>
-	<script src="./assets/js/roadmap.js"></script>
-	<script src="./assets/js/global-widgets.js"></script>
-	<script src="./assets/js/dict-widget.js"></script>
-	<script src="./assets/js/assistant.js"></script>
+	<script src="./assets/js/color-theme.js" defer></script>
+	<script src="./assets/js/theme.js" defer></script>
+	<script src="./assets/js/analytics.js" defer></script>
+	<script src="./assets/js/roadmap.js" defer></script>
+	<script src="./assets/js/global-widgets.js" defer></script>
+	<script src="./assets/js/dict-widget.js" defer></script>
+	<script src="./assets/js/assistant.js" defer></script>
 	<script src="./assets/js/resources.js"></script>
 </body>
 </html>

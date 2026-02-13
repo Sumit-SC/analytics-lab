@@ -99,22 +99,85 @@
 
     var body = JSON.stringify(payload);
 
+    // Extract base URL for fallback paths
+    var baseUrl = config.endpoint;
     try {
-      // Use fetch with keepalive for better error handling and ad-blocker resistance
-      // keepalive ensures the request completes even on page unload
-      fetch(config.endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: body,
-        keepalive: true,
-        credentials: "omit"
-      }).catch(function (err) {
-        // Silently fail - don't break the page
-        console.debug("Analytics send failed:", err);
-      });
+      var urlObj = new URL(config.endpoint);
+      baseUrl = urlObj.origin;
     } catch (e) {
-      // Never break the page
-      console.debug("Analytics error:", e);
+      // If URL parsing fails, use as-is
+    }
+
+    // Fallback paths to try (less likely to be blocked)
+    var fallbackPaths = ["/api/events", "/api/track", "/events", "/track", "/ping", "/log"];
+    var endpointsToTry = [config.endpoint];
+    
+    // Add fallbacks if we can extract base URL
+    if (baseUrl !== config.endpoint) {
+      for (var i = 0; i < fallbackPaths.length; i++) {
+        endpointsToTry.push(baseUrl + fallbackPaths[i]);
+      }
+    }
+
+    // Strategy 1: Try sendBeacon first (often less blocked than fetch)
+    var beaconSent = false;
+    if (navigator.sendBeacon) {
+      try {
+        for (var b = 0; b < endpointsToTry.length; b++) {
+          var blob = new Blob([body], { type: "application/json" });
+          if (navigator.sendBeacon(endpointsToTry[b], blob)) {
+            beaconSent = true;
+            break; // Success
+          }
+        }
+      } catch (e) {
+        // sendBeacon failed, continue to fetch fallback
+      }
+    }
+
+    // Strategy 2: If sendBeacon didn't work, try fetch with multiple endpoints
+    if (!beaconSent) {
+      function tryEndpoint(index) {
+        if (index >= endpointsToTry.length) {
+          // All endpoints failed - silently fail
+          return;
+        }
+        
+        var endpoint = endpointsToTry[index];
+        var timeoutId = setTimeout(function() {
+          // Timeout after 2 seconds, try next endpoint
+          tryEndpoint(index + 1);
+        }, 2000);
+
+        fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: body,
+          keepalive: true,
+          credentials: "omit"
+        })
+          .then(function (response) {
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              // Success - stop trying other endpoints
+              return;
+            } else {
+              // Try next endpoint on error
+              tryEndpoint(index + 1);
+            }
+          })
+          .catch(function (err) {
+            clearTimeout(timeoutId);
+            // Try next endpoint on failure
+            tryEndpoint(index + 1);
+          });
+      }
+
+      try {
+        tryEndpoint(0);
+      } catch (e) {
+        // Never break the page
+      }
     }
   }
 

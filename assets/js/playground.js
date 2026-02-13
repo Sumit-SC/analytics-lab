@@ -26,9 +26,11 @@
 		var githubResultsWrap = document.getElementById('github-results-wrap');
 		if (githubResultsWrap && !isTech) githubResultsWrap.classList.add('hidden');
 		var wikipediaResultsWrap = document.getElementById('wikipedia-results-wrap');
-		if (wikipediaResultsWrap && !isTech) wikipediaResultsWrap.classList.add('hidden');
+		if (wikipediaResultsWrap && isTech) wikipediaResultsWrap.classList.add('hidden');
 		var stackoverflowResultsWrap = document.getElementById('stackoverflow-results-wrap');
-		if (stackoverflowResultsWrap && !isTech) stackoverflowResultsWrap.classList.add('hidden');
+		if (stackoverflowResultsWrap && isTech) stackoverflowResultsWrap.classList.add('hidden');
+		var duckduckgoResultsWrap = document.getElementById('duckduckgo-results-wrap');
+		if (duckduckgoResultsWrap && isTech) duckduckgoResultsWrap.classList.add('hidden');
 		var active = 'border-primary text-primary';
 		var inactive = 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300';
 		if (btnTech) {
@@ -356,12 +358,13 @@
 	var frame = document.getElementById('docs-frame');
 	var devdocsBtn = document.getElementById('hub-devdocs') || document.getElementById('docs-devdocs');
 	var ghBtn = document.getElementById('hub-github') || document.getElementById('docs-github');
-	var googleBtn = document.getElementById('hub-google');
+	var duckduckgoBtn = document.getElementById('hub-duckduckgo');
 	var ytBtn = document.getElementById('hub-youtube');
 	var wikiBtn = document.getElementById('hub-wikipedia');
 	var soBtn = document.getElementById('hub-stackoverflow');
 	var searchHistoryWrap = document.getElementById('hub-search-history');
 	var searchHistoryList = document.getElementById('hub-search-history-list');
+	var searchHistoryClear = document.getElementById('hub-search-history-clear');
 	var githubResultsWrap = document.getElementById('github-results-wrap');
 	var githubResultsBody = document.getElementById('github-results-body');
 	var githubResultsClose = document.getElementById('github-results-close');
@@ -374,8 +377,13 @@
 	var stackoverflowResultsBody = document.getElementById('stackoverflow-results-body');
 	var stackoverflowResultsClose = document.getElementById('stackoverflow-results-close');
 	var stackoverflowResultsMinimize = document.getElementById('stackoverflow-results-minimize');
+	var duckduckgoResultsWrap = document.getElementById('duckduckgo-results-wrap');
+	var duckduckgoResultsBody = document.getElementById('duckduckgo-results-body');
+	var duckduckgoResultsClose = document.getElementById('duckduckgo-results-close');
+	var duckduckgoResultsMinimize = document.getElementById('duckduckgo-results-minimize');
 	var docsFrameWrap = document.getElementById('docs-frame-wrap');
 	var docsFrameMinimize = document.getElementById('docs-frame-minimize');
+	var PANEL_STATE_KEY = 'standalone_panel_states';
 	if (!qEl) return;
 
 	function trimmed() {
@@ -414,6 +422,29 @@
 				qEl.focus();
 			});
 		});
+	}
+	function clearSearchHistory() {
+		try { localStorage.removeItem(SEARCH_HISTORY_KEY); } catch (e) {}
+		renderSearchHistory();
+	}
+	function getPanelStates() {
+		try {
+			var raw = localStorage.getItem(PANEL_STATE_KEY);
+			return raw ? JSON.parse(raw) : {};
+		} catch (e) { return {}; }
+	}
+	function savePanelState(panelId, collapsed) {
+		var states = getPanelStates();
+		states[panelId] = collapsed;
+		try { localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(states)); } catch (e) {}
+	}
+	function restorePanelStates() {
+		var states = getPanelStates();
+		if (docsFrameWrap && states['docs-frame-wrap']) docsFrameWrap.classList.toggle('collapsed', states['docs-frame-wrap']);
+		if (githubResultsWrap && states['github-results-wrap']) githubResultsWrap.classList.toggle('collapsed', states['github-results-wrap']);
+		if (wikipediaResultsWrap && states['wikipedia-results-wrap']) wikipediaResultsWrap.classList.toggle('collapsed', states['wikipedia-results-wrap']);
+		if (stackoverflowResultsWrap && states['stackoverflow-results-wrap']) stackoverflowResultsWrap.classList.toggle('collapsed', states['stackoverflow-results-wrap']);
+		if (duckduckgoResultsWrap && states['duckduckgo-results-wrap']) duckduckgoResultsWrap.classList.toggle('collapsed', states['duckduckgo-results-wrap']);
 	}
 	function showFrame() {
 		if (frameWrap && frame && frameWrap.classList.contains('hidden')) {
@@ -593,6 +624,55 @@
 				if (stackoverflowResultsBody) stackoverflowResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Search failed. <a href="https://stackoverflow.com/search?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open Stack Overflow</a></p>';
 			});
 	}
+	function showDuckDuckGoResults() {
+		if (duckduckgoResultsWrap) {
+			duckduckgoResultsWrap.classList.remove('hidden', 'collapsed');
+		}
+	}
+	function hideDuckDuckGoResults() {
+		if (duckduckgoResultsWrap) {
+			duckduckgoResultsWrap.classList.add('hidden');
+		}
+	}
+	function renderDuckDuckGoResults(data, query) {
+		if (!duckduckgoResultsBody) return;
+		if (!data || (!data.RelatedTopics || data.RelatedTopics.length === 0) && (!data.Results || data.Results.length === 0)) {
+			duckduckgoResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No results found. <a href="https://duckduckgo.com/?q=' + encodeURIComponent(query || '') + '" target="_blank" rel="noopener" class="text-primary underline">Open DuckDuckGo</a></p>';
+			return;
+		}
+		var html = '<div class="space-y-3">';
+		var items = (data.Results || []).concat(data.RelatedTopics || []);
+		items.slice(0, 10).forEach(function (item) {
+			var title = item.Text || item.FirstURL || '';
+			var url = item.FirstURL || '#';
+			var desc = item.Text || '';
+			if (title && url !== '#') {
+				html += '<div class="border-b border-gray-200 dark:border-gray-700 pb-3 last:border-0">';
+				html += '<a href="' + url + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-sm block mb-1">' + title.replace(/</g, '&lt;') + '</a>';
+				if (desc && desc !== title) {
+					html += '<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">' + desc.replace(/</g, '&lt;') + '</p>';
+				}
+				html += '</div>';
+			}
+		});
+		html += '</div>';
+		duckduckgoResultsBody.innerHTML = html;
+	}
+	function fetchDuckDuckGoSearch(q) {
+		if (!q || !q.trim()) return;
+		if (duckduckgoResultsBody) duckduckgoResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Searching…</p>';
+		showDuckDuckGoResults();
+		var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(q) + '&format=json&no_html=1&skip_disambig=1';
+		fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (data) renderDuckDuckGoResults(data, q);
+				else if (duckduckgoResultsBody) duckduckgoResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No results. <a href="https://duckduckgo.com/?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open DuckDuckGo</a></p>';
+			})
+			.catch(function () {
+				if (duckduckgoResultsBody) duckduckgoResultsBody.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Search failed. <a href="https://duckduckgo.com/?q=' + encodeURIComponent(q) + '" target="_blank" rel="noopener" class="text-primary underline">Open DuckDuckGo</a></p>';
+			});
+	}
 
 	if (devdocsBtn && frameWrap && frame) {
 		devdocsBtn.addEventListener('click', function () {
@@ -680,7 +760,50 @@
 	if (stackoverflowResultsMinimize && stackoverflowResultsWrap) {
 		stackoverflowResultsMinimize.addEventListener('click', function () {
 			stackoverflowResultsWrap.classList.toggle('collapsed');
+			savePanelState('stackoverflow-results-wrap', stackoverflowResultsWrap.classList.contains('collapsed'));
 		});
+	}
+	if (duckduckgoBtn) {
+		duckduckgoBtn.addEventListener('click', function () {
+			var q = trimmed();
+			if (!q) {
+				hideDuckDuckGoResults();
+				window.open('https://duckduckgo.com', '_blank', 'noopener');
+				return;
+			}
+			saveSearchHistory(q);
+			fetchDuckDuckGoSearch(q);
+		});
+	}
+	if (duckduckgoResultsClose) {
+		duckduckgoResultsClose.addEventListener('click', hideDuckDuckGoResults);
+	}
+	if (duckduckgoResultsMinimize && duckduckgoResultsWrap) {
+		duckduckgoResultsMinimize.addEventListener('click', function () {
+			duckduckgoResultsWrap.classList.toggle('collapsed');
+			savePanelState('duckduckgo-results-wrap', duckduckgoResultsWrap.classList.contains('collapsed'));
+		});
+	}
+	if (docsFrameMinimize && docsFrameWrap) {
+		docsFrameMinimize.addEventListener('click', function () {
+			docsFrameWrap.classList.toggle('collapsed');
+			savePanelState('docs-frame-wrap', docsFrameWrap.classList.contains('collapsed'));
+		});
+	}
+	if (githubResultsMinimize && githubResultsWrap) {
+		githubResultsMinimize.addEventListener('click', function () {
+			githubResultsWrap.classList.toggle('collapsed');
+			savePanelState('github-results-wrap', githubResultsWrap.classList.contains('collapsed'));
+		});
+	}
+	if (wikipediaResultsMinimize && wikipediaResultsWrap) {
+		wikipediaResultsMinimize.addEventListener('click', function () {
+			wikipediaResultsWrap.classList.toggle('collapsed');
+			savePanelState('wikipedia-results-wrap', wikipediaResultsWrap.classList.contains('collapsed'));
+		});
+	}
+	if (searchHistoryClear) {
+		searchHistoryClear.addEventListener('click', clearSearchHistory);
 	}
 	qEl.addEventListener('keydown', function (e) {
 		if (e.key === 'Enter' && devdocsBtn) {
@@ -688,6 +811,7 @@
 			devdocsBtn.click();
 		}
 	});
+	restorePanelStates();
 	renderSearchHistory();
 })();
 
