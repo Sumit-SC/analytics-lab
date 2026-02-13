@@ -198,7 +198,7 @@
 		</div>
 	</footer>
 
-	<!-- Global music bar (YouTube, Spotify-style alternative) + right-side Piped panel -->
+	<!-- Global music bar (YouTube, Spotify-style alternative) + right-side video panel -->
 	<div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
 		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
@@ -219,14 +219,14 @@
 		<div id="global-dict-body" class="global-dict-body"></div>
 		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
 	</div>
-	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed (Piped)">Video</button>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
 	<div id="global-yt-panel">
 		<div class="global-yt-panel-header">
-			<input id="global-yt-panel-input" type="text" placeholder="Search (Piped)…" aria-label="Search videos">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
-		<iframe id="global-yt-panel-iframe" title="Piped trending or search" loading="lazy"></iframe>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
 	</div>
 
 	<script src="./assets/js/color-theme.js" defer></script>

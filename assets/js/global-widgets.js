@@ -166,18 +166,14 @@
 		updateBarTitle();
 	}
 
-	// --- Right-side video panel (Piped when YouTube is blocked; YT feed refuses to embed) ---
+	// --- Right-side video panel (YouTube big player / search helper) ---
 	var panel = document.getElementById('global-yt-panel');
 	var panelToggle = document.getElementById('global-yt-panel-toggle');
 	var panelClose = document.getElementById('global-yt-panel-close');
 	var panelSearch = document.getElementById('global-yt-panel-search');
 	var panelInput = document.getElementById('global-yt-panel-input');
 	var panelFrame = document.getElementById('global-yt-panel-iframe');
-
-	// Piped: privacy-friendly YT frontend, embeddable, works when YouTube is blocked
-	var PIPED_BASE = 'https://piped.video';
-	var PIPED_TRENDING = PIPED_BASE + '/trending';
-	var PIPED_SEARCH = PIPED_BASE + '/results?search=';
+	var DEFAULT_EMBED_ID = DEFAULT_QUEUE[0] ? DEFAULT_QUEUE[0].id : '';
 
 	function setPanelOpen(open) {
 		try { localStorage.setItem(PANEL_OPEN_KEY, open ? '1' : '0'); } catch (e) {}
@@ -186,7 +182,27 @@
 
 	function openSearch(q) {
 		if (!panelFrame) return;
-		panelFrame.src = (q && q.trim()) ? (PIPED_SEARCH + encodeURIComponent(q.trim())) : PIPED_TRENDING;
+		var trimmed = (q || '').trim();
+		if (!trimmed) {
+			// If no query, just ensure a default focus video is loaded for ambience
+			if (!panelFrame.src && DEFAULT_EMBED_ID) {
+				panelFrame.src = 'https://www.youtube.com/embed/' + DEFAULT_EMBED_ID;
+			}
+			return;
+		}
+		// If user pasted a URL or ID, embed that video directly
+		var id = parseVideoId(trimmed);
+		if (id) {
+			panelFrame.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+			return;
+		}
+		// Otherwise, open YouTube search in a new tab and keep panel as a player
+		try {
+			window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(trimmed), '_blank', 'noopener');
+		} catch (e) {}
+		if (!panelFrame.src && DEFAULT_EMBED_ID) {
+			panelFrame.src = 'https://www.youtube.com/embed/' + DEFAULT_EMBED_ID;
+		}
 	}
 
 	if (panel) {
@@ -197,7 +213,9 @@
 			panelToggle.addEventListener('click', function () {
 				var open = panel.classList.toggle('global-yt-panel-open');
 				setPanelOpen(open);
-				if (open && !panelFrame.src) panelFrame.src = PIPED_TRENDING;
+				if (open && !panelFrame.src && DEFAULT_EMBED_ID) {
+					panelFrame.src = 'https://www.youtube.com/embed/' + DEFAULT_EMBED_ID;
+				}
 			});
 		}
 		if (panelClose) {
@@ -214,8 +232,6 @@
 				if (e.key === 'Enter') openSearch(panelInput.value.trim());
 			});
 		}
-		if (panelFrame && !panelFrame.src) {
-			panelFrame.src = PIPED_TRENDING;
-		}
+		// Do not eagerly load anything; wait for user interaction or openSearch
 	}
 })();

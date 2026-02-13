@@ -280,3 +280,45 @@
 	});
 })();
 
+(function () {
+	// Embedded external Word editors (Filestash / OnlineOCR) in an iframe
+	var frame = document.getElementById('word-embed-frame');
+	if (!frame) return;
+
+	var btnFilestash = document.getElementById('word-embed-filestash');
+	var btnOnlineocr = document.getElementById('word-embed-onlineocr');
+
+	function setActive(btn) {
+		[btnFilestash, btnOnlineocr].forEach(function (b) {
+			if (!b) return;
+			if (b === btn) {
+				b.classList.add('border-primary', 'text-primary');
+			} else {
+				b.classList.remove('border-primary', 'text-primary');
+			}
+		});
+	}
+
+	function load(src, btn) {
+		if (!frame || !src) return;
+		frame.src = src;
+		if (btn) setActive(btn);
+	}
+
+	if (btnFilestash) {
+		btnFilestash.addEventListener('click', function () {
+			load('https://www.filestash.app/word-online.html', btnFilestash);
+		});
+	}
+	if (btnOnlineocr) {
+		btnOnlineocr.addEventListener('click', function () {
+			load('https://onlineocr.io/word-online', btnOnlineocr);
+		});
+	}
+
+	// Load a default editor on first open (Filestash)
+	if (btnFilestash) {
+		load('https://www.filestash.app/word-online.html', btnFilestash);
+	}
+})();
+
