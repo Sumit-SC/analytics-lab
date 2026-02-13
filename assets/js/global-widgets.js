@@ -42,8 +42,16 @@
 	var barNext = document.getElementById('global-music-next');
 	var barInput = document.getElementById('global-music-input');
 	var barAdd = document.getElementById('global-music-add');
+	var barFocus = document.getElementById('global-music-focus');
 	var barTitle = document.getElementById('global-music-title');
 	var playerDiv = document.getElementById('global-yt-player-wrap');
+
+	// Simple built-in playlist as a Spotify-style alternative (YouTube IDs only)
+	var DEFAULT_QUEUE = [
+		{ id: '5qap5aO4i9A', title: 'lofi hip hop radio – beats to relax/study to' },
+		{ id: 'jfKfPfyJRdk', title: 'lofi hip hop radio – beats to chill/study to' },
+		{ id: 'DWcJFNfaw9c', title: 'Ambient study music' }
+	];
 
 	function loadYtApi(cb) {
 		if (window.YT && window.YT.Player) {
@@ -132,6 +140,14 @@
 					setQueue(q);
 					barInput.value = '';
 					loadVideo(id);
+				}
+			});
+		}
+		if (barFocus) {
+			barFocus.addEventListener('click', function () {
+				setQueue(DEFAULT_QUEUE.slice());
+				if (DEFAULT_QUEUE[0]) {
+					loadVideo(DEFAULT_QUEUE[0].id);
 				}
 			});
 		}

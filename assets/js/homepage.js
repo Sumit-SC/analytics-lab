@@ -29,6 +29,56 @@
 		'Winston Churchill': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sir_Winston_Churchill_-_19086236948.jpg/800px-Sir_Winston_Churchill_-_19086236948.jpg'
 	};
 
+	// Cache for dynamically discovered images from Wikipedia (keyed by source name)
+	var QUOTE_IMAGE_CACHE_KEY = 'standalone_quote_image_cache';
+	var quoteImageCache = {};
+	try {
+		var rawCache = localStorage.getItem(QUOTE_IMAGE_CACHE_KEY);
+		if (rawCache) quoteImageCache = JSON.parse(rawCache) || {};
+	} catch (e) {
+		quoteImageCache = {};
+	}
+
+	function saveQuoteImageCache() {
+		try { localStorage.setItem(QUOTE_IMAGE_CACHE_KEY, JSON.stringify(quoteImageCache)); } catch (e) {}
+	}
+
+	// Try to fetch a poster/thumbnail for a given source from Wikipedia (no API key)
+	function fetchWikipediaImage(source, cb) {
+		if (!source || !source.trim()) {
+			cb(null);
+			return;
+		}
+		source = source.trim();
+		if (quoteImageCache[source] && quoteImageCache[source].url) {
+			cb(quoteImageCache[source].url);
+			return;
+		}
+		var apiUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' +
+			encodeURIComponent(source) +
+			'&prop=pageimages&format=json&pithumbsize=800&origin=*';
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.query || !data.query.pages) {
+					cb(null);
+					return;
+				}
+				var pages = data.query.pages;
+				var pageId = Object.keys(pages)[0];
+				var page = pages[pageId];
+				var thumb = page && page.thumbnail && page.thumbnail.source;
+				if (thumb) {
+					quoteImageCache[source] = { url: thumb };
+					saveQuoteImageCache();
+					cb(thumb);
+				} else {
+					cb(null);
+				}
+			})
+			.catch(function () { cb(null); });
+	}
+
 	// Fallback / static quotes when API fails or for categories without a free API
 	var QUOTES_FALLBACK = [
 		{ text: 'The only way to do great work is to love what you do.', attr: 'Steve Jobs' },
@@ -95,13 +145,24 @@
 		// Prefer image that matches the quote source (e.g. Reply 1988 quote → Reply 1988 image)
 		var source = (attr && typeof attr === 'string') ? attr.trim() : '';
 		var url = source && QUOTE_IMAGE_MAP[source];
+		if (!url && source && quoteImageCache[source] && quoteImageCache[source].url) {
+			url = quoteImageCache[source].url;
+		}
 		if (url) {
 			bg.style.backgroundImage = 'url(' + url + ')';
 			return;
 		}
-		// Fallback: Picsum with seed from source or seed so same source = same image
-		var s = (source || seedOrSource || Date.now()).toString().replace(/\D/g, '') || Date.now();
+		// Fallback immediately: Picsum with seed from source or seed so same source = same image
+		var s = (source || seedOrSource || Date.now()).toString().replace(/\W/g, '') || Date.now();
 		bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + s + '/800/400)';
+		// Then try to upgrade to a Wikipedia image for this source (async override)
+		if (source) {
+			fetchWikipediaImage(source, function (foundUrl) {
+				if (foundUrl) {
+					bg.style.backgroundImage = 'url(' + foundUrl + ')';
+				}
+			});
+		}
 	}
 
 	function useFallback(category) {
@@ -214,9 +275,10 @@
 		setQuoteLoading(false);
 	}
 
-	// Quote: category select, refresh button, load initial
+	// Quote: category select, refresh buttons (quote + wallpaper), load initial
 	var quoteCategoryEl = document.getElementById('home-quote-category');
 	var quoteRefreshBtn = document.getElementById('home-quote-refresh');
+	var quoteBgRefreshBtn = document.getElementById('home-quote-bg-refresh');
 
 	function getCategory() {
 		if (quoteCategoryEl) return quoteCategoryEl.value || 'all';
@@ -241,6 +303,32 @@
 	if (quoteRefreshBtn) {
 		quoteRefreshBtn.addEventListener('click', function () {
 			loadQuote(getCategory());
+		});
+	}
+
+	function getCurrentQuoteSource() {
+		var metaEl = document.getElementById('home-quote-meta');
+		var attrEl = document.getElementById('home-quote-attr');
+		var metaText = metaEl && metaEl.textContent ? metaEl.textContent.trim() : '';
+		var attrText = attrEl && attrEl.textContent ? attrEl.textContent.trim() : '';
+		var src = '';
+		if (metaText) {
+			src = metaText.replace(/^From:\s*/i, '').trim();
+		}
+		if (!src && attrText) {
+			src = attrText.replace(/^—\s*/, '').trim();
+		}
+		return src;
+	}
+
+	if (quoteBgRefreshBtn) {
+		quoteBgRefreshBtn.addEventListener('click', function () {
+			var bg = document.getElementById('home-quote-bg');
+			if (!bg) return;
+			var src = getCurrentQuoteSource() || 'quote';
+			// New random but source-themed wallpaper from Picsum
+			var seed = (src + '-' + Date.now()).replace(/\W/g, '') || Date.now();
+			bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
 		});
 	}
 

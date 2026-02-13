@@ -35,11 +35,7 @@
 		if (!bodyEl) return;
 		if (!data || !Array.isArray(data) || data.length === 0) {
 			bodyEl.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No definition found. Try another word or use "Search Google" below.</p>';
-			if (googleLink) {
-				googleLink.href = 'https://www.google.com/search?q=define+' + encodeURIComponent(word || '');
-				googleLink.textContent = 'Search Google for “‘ + escapeHtml(word || '') + '"';
-				googleLink.style.display = 'block';
-			}
+			showGoogleLink(word, 'Search Google for more results');
 			return;
 		}
 		var entry = data[0];

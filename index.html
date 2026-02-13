@@ -90,7 +90,8 @@
 								<option value="movie">Movie</option>
 								<option value="kdrama">K-drama</option>
 							</select>
-							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Refresh</button>
+							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
+							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
 						</div>
 					</div>
 					<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
@@ -197,12 +198,13 @@
 		</div>
 	</footer>
 
-	<!-- Global music bar (YouTube) + right-side Shorts/search panel -->
+	<!-- Global music bar (YouTube, Spotify-style alternative) + right-side Piped panel -->
 	<div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
 		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
 		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
 		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" aria-label="Play focus mix">Focus mix</button>
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
