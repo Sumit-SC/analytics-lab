@@ -34,17 +34,16 @@
 \t\t</div>
 \t</nav>
 
-\t<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+\t<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 \t\t<header class="mb-2">
-\t\t\t<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Trends &amp; fun signals</h1>
+\t\t\t<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Trends</h1>
 \t\t\t<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
-\t\t\t\tA light &ldquo;what&apos;s happening&rdquo; page built only from free APIs: tech news, Wikipedia topics, and visual inspiration.
-\t\t\t\tNothing is personalized; it&apos;s just to spark ideas without doom-scrolling.
+\t\t\t\tA calm &ldquo;what&apos;s happening&rdquo; view built only from free APIs: tech headlines, popular Wikipedia pages, and a small inspiration strip.
 \t\t\t</p>
 \t\t</header>
 
-\t\t<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-\t\t\t<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 lg:col-span-2">
+\t\t<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+\t\t\t<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
 \t\t\t\t<div class="flex items-center justify-between mb-2">
 \t\t\t\t\t<div>
 \t\t\t\t\t\t<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Hacker News &middot; tech &amp; dev</h2>
@@ -72,28 +71,28 @@
 \t\t<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
 \t\t\t<div class="flex items-center justify-between mb-3">
 \t\t\t\t<div>
-\t\t\t\t\t<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual inspiration wall</h2>
-\t\t\t\t\t<p class="text-xs text-gray-500 dark:text-gray-400">Light Pinterest-style lane using free photos (Picsum). Click any card to open in a new tab.</p>
+\t\t\t\t\t<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual strip</h2>
+\t\t\t\t\t<p class="text-xs text-gray-500 dark:text-gray-400">A small, quiet strip of free photos for mood. Click any tile to open it.</p>
 \t\t\t\t</div>
-\t\t\t\t<button type="button" id="trends-visual-refresh" class="tool-sec-btn text-xs">Shuffle images</button>
+\t\t\t\t<button type="button" id="trends-visual-refresh" class="tool-sec-btn text-xs">Shuffle</button>
 \t\t\t</div>
-\t\t\t<div id="trends-visual-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-\t\t\t\t<div class="h-36 sm:h-40 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="focus">
+\t\t\t<div id="trends-visual-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="focus">
 \t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
 \t\t\t\t</div>
-\t\t\t\t<div class="h-36 sm:h-40 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="learning">
+\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="learning">
 \t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
 \t\t\t\t</div>
-\t\t\t\t<div class="h-36 sm:h-40 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="creative">
+\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="creative">
 \t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
 \t\t\t\t</div>
-\t\t\t\t<div class="h-36 sm:h-40 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="calm">
+\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="calm">
 \t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
 \t\t\t\t</div>
-\t\t\t\t<div class="h-36 sm:h-40 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="kdrama">
+\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="kdrama">
 \t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
 \t\t\t\t</div>
-\t\t\t\t<div class="h-36 sm:h-40 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="anime">
+\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="anime">
 \t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
 \t\t\t\t</div>
 \t\t\t</div>

@@ -138,3 +138,7 @@
 \tapplyImages();
 })();
 
+// Analytics: track visits and time-on-page for Trends
+if (typeof initAnalyticsTracking === 'function') {
+\tinitAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'trends' });
+}

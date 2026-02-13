@@ -784,3 +784,8 @@
 
 	renderTodos();
 })();
+
+// Analytics: track visits and time-on-page for Home
+if (typeof initAnalyticsTracking === 'function') {
+	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'home' });
+}

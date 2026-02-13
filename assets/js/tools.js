@@ -322,3 +322,8 @@
 	}
 })();
 
+
+// Analytics: track visits and time-on-page for Tools
+if (typeof initAnalyticsTracking === 'function') {
+\tinitAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'tools' });
+}
