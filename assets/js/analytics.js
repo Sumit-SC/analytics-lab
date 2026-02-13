@@ -2,11 +2,15 @@
 // Usage in HTML:
 //   <script src="./assets/js/analytics.js"></script>
 //   <script>
-//     initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'playground' });
+//     initAnalyticsTracking({
+//       site: 'analytics-lab',
+//       baseEvent: 'playground',
+//       endpoint: 'https://events.colab.indevs.in/api/events'
+//     });
 //   </script>
 
 (function () {
-  var DEFAULT_ENDPOINT = "https://stats.colab.indevs.in/collect";
+  var DEFAULT_ENDPOINT = "https://events.colab.indevs.in/api/events";
   var DEFAULT_SECRET = null; // unused, kept for API compatibility
   var SESSION_KEY = "analytics_lab_session_id";
 
