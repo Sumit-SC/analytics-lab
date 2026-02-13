@@ -131,5 +131,17 @@
     {"text": "Sometimes you have to lose everything to find yourself.", "author": "Itaewon Class", "source": "Itaewon Class", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg"]},
     {"text": "Hope is the only thing stronger than fear.", "author": "Squid Game", "source": "Squid Game", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg"]},
     {"text": "Every ending is a new beginning.", "author": "Goblin", "source": "Goblin", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg"]}
+  ],
+  "bollywood": [
+    {"text": "Mogambo khush hua.", "author": "Mr. India", "source": "Mr. India", "images": ["https://picsum.photos/seed/bolly1a/800/400", "https://picsum.photos/seed/bolly1b/800/400"]},
+    {"text": "Kitne aadmi the?", "author": "Sholay", "source": "Sholay", "images": ["https://picsum.photos/seed/bolly2a/800/400", "https://picsum.photos/seed/bolly2b/800/400"]},
+    {"text": "Bade bade deshon mein aisi chhoti chhoti baatein hoti rehti hain.", "author": "Dilwale Dulhania Le Jayenge", "source": "Dilwale Dulhania Le Jayenge", "images": ["https://picsum.photos/seed/bolly3a/800/400", "https://picsum.photos/seed/bolly3b/800/400"]},
+    {"text": "Ek chutki sindoor ki keemat tum kya jaano Ramesh babu.", "author": "Om Shanti Om", "source": "Om Shanti Om", "images": ["https://picsum.photos/seed/bolly4a/800/400", "https://picsum.photos/seed/bolly4b/800/400"]},
+    {"text": "Don ko pakadna mushkil hi nahi, namumkin hai.", "author": "Don", "source": "Don", "images": ["https://picsum.photos/seed/bolly5a/800/400", "https://picsum.photos/seed/bolly5b/800/400"]},
+    {"text": "Zindagi ek safar hai suhana.", "author": "Andaz Apna Apna", "source": "Andaz Apna Apna", "images": ["https://picsum.photos/seed/bolly6a/800/400", "https://picsum.photos/seed/bolly6b/800/400"]},
+    {"text": "Aata hai toh aata hai.", "author": "Golmaal", "source": "Golmaal", "images": ["https://picsum.photos/seed/bolly7a/800/400", "https://picsum.photos/seed/bolly7b/800/400"]},
+    {"text": "Bhai, main hoon na.", "author": "Main Hoon Na", "source": "Main Hoon Na", "images": ["https://picsum.photos/seed/bolly8a/800/400", "https://picsum.photos/seed/bolly8b/800/400"]},
+    {"text": "All is well.", "author": "3 Idiots", "source": "3 Idiots", "images": ["https://picsum.photos/seed/bolly9a/800/400", "https://picsum.photos/seed/bolly9b/800/400"]},
+    {"text": "How's the josh?", "author": "Uri: The Surgical Strike", "source": "Uri: The Surgical Strike", "images": ["https://picsum.photos/seed/bolly10a/800/400", "https://picsum.photos/seed/bolly10b/800/400"]}
   ]
 }

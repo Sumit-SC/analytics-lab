@@ -9,7 +9,7 @@ A **second-brain hub** (Notion-like UI and use): **JS libraries** and **free on-
 | Kind | What |
 |------|------|
 | **JS libraries & runtimes** | Pyodide, sql.js, Tailwind (CDN), vanilla JS, JupyterLite, YouTube IFrame API |
-| **Free APIs & services** | Quotable, Animechan, Open-Meteo, Picsum, Dictionary API (dictionaryapi.dev + Wiktionary fallback), DevDocs, GitHub API, Wikipedia API, Stack Overflow API, DuckDuckGo API, Hacker News API, Wikimedia pageviews API, Wikimedia Commons (images), Jikan (anime posters). Optional: **OMDB** (movie posters — set `localStorage.omdb_api_key` with a free key from [omdbapi.com](https://www.omdbapi.com/)) — all no-key or public where possible |
+| **Free APIs & services** | Quotable, Animechan, Open-Meteo, Picsum, Dictionary API (dictionaryapi.dev + Wiktionary fallback), DevDocs, GitHub API, Wikipedia API, Stack Overflow API, DuckDuckGo API, Hacker News API, Wikimedia pageviews API, Wikimedia Commons (images), Jikan (anime posters). Optional: **OMDb** (posters/wallpapers for movie, K-drama, Bollywood, International — use **GitHub Secret** `OMDB_API_KEY` so the key is never in the repo; see [OMDb API key](#omdb-api-key) below, or set `localStorage.omdb_api_key` for local/dev) — all no-key or public where possible |
 
 ---
 
@@ -17,7 +17,7 @@ A **second-brain hub** (Notion-like UI and use): **JS libraries** and **free on-
 
 | Area | Features |
 |------|----------|
-| **Home** (`index.html`) | **Second-brain dashboard**: **Quote** (local DB + Quotable, Animechan fallback — categories: All, Anime, Books, Wisdom, Leaders, Inspiring, Life, Love, Friendship, Heartbreak, Wishes, Past, Future, Hollywood, International, Bollywood, K-drama) with **source-matched images**: anime → Jikan poster, movie → OMDB poster (if key set) or Wikimedia, K-drama/books/leaders → Wikimedia. Same source reuses the same poster; 1–2 images per quote for wallpaper cycle. **Clock & calendar** (real-time), **Weather** (Open-Meteo with location search + "My location"), **Focus timer** (configurable work/break durations, session labels, auto work→break cycles), **Refresh tips**, **Notes & to-do** (export .md). Quick links to Playground, Resources, Tools. Notion/DeepMind-style cards. |
+| **Home** (`index.html`) | **Second-brain dashboard**: **Quote** (local DB + Quotable, Animechan fallback — categories: All, Anime, Books, Wisdom, Leaders, Inspiring, Life, Love, Friendship, Heartbreak, Wishes, Past, Future, Hollywood, International, Bollywood, K-drama) with **source-matched images**: anime → Jikan poster; movie / K-drama / Bollywood / International → OMDb poster (if key set) or Wikimedia; books/leaders → Wikimedia. Same source reuses the same poster; 1–2 images per quote for wallpaper cycle. **Clock & calendar** (real-time), **Weather** (Open-Meteo with location search + "My location"), **Focus timer** (configurable work/break durations, session labels, auto work→break cycles), **Refresh tips**, **Notes & to-do** (export .md). Quick links to Playground, Resources, Tools. Notion/DeepMind-style cards. |
 | **Playground** (`playground.html`) | **Tech mode:** Code runner (Python/JS/SQL), **Search hub** with **search history** (last 10 queries, clickable to reuse, clear button) → **DevDocs** (embedded iframe, always visible, minimize-able), **GitHub** (embedded API results with repo name, description, stars, language), JupyterLite, quick launch, roadmap panel, learning assistant. **Non-tech mode:** Search hub → **DuckDuckGo** (embedded), **Wikipedia** (embedded API results), **Stack Overflow** (embedded API results); **Word processor** cards (Microsoft Word Online, Google Docs links). All result panels have minimize/close buttons. Mode persisted in `localStorage`. Bottom bar = global YouTube music player (Paste URL / Focus mix), right-side panel = YouTube big player + search helper. |
 | **Trends** (`trends.html`) | **Fun page** with no login or keys: **Hacker News** top stories (via official Firebase API), **Wikipedia top pageviews** (Wikimedia metrics API), and a small **visual inspiration wall** (Picsum images) in a Notion-style layout. Uses the same global music bar, dictionary, and video panel as other pages. |
 | **Resources** (`resources.html`) | Curated topics (Programming, Data Analytics, Data Science & ML, Data Engineering, BI, etc.) with **courses**, **books**, **YouTube** (hero + queue), **GitHub**, and **learning paths**. Notion-style cards; sidebar nav. |
@@ -70,6 +70,25 @@ All pages (Home, Playground, Tools, Resources, Trends) send **visit** and **unlo
 ## Deploy
 
 Deploy the **analytics-lab** folder to any static host (GitHub Pages, Netlify, Vercel, etc.). No build step; no server required.
+
+### OMDb API key (posters / wallpapers)
+
+To avoid committing the OMDb key:
+
+**For local development:**
+
+1. Get a free API key from [omdbapi.com](https://www.omdbapi.com/) (sign up, get your key).
+2. Open your browser's DevTools (F12) → **Console** tab.
+3. Run: `localStorage.setItem('omdb_api_key', 'YOUR_KEY_HERE')`
+4. Refresh the page. Movie/K-drama/Bollywood quotes will now use OMDb posters.
+
+**For production (GitHub Secrets):**
+
+1. **Add a GitHub Secret:** Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret** → name: `OMDB_API_KEY`, value: your key from [omdbapi.com](https://www.omdbapi.com/).
+2. **Use the workflow:** `.github/workflows/inject-omdb-and-deploy.yml` runs on push to `main`/`master` (or manually). It replaces the placeholder in `homepage.js` with the secret before deploy. Add your deploy step (e.g. GitHub Pages, Netlify) to that workflow so the injected key is in the deployed files.
+3. **Local override:** You can still set `localStorage.omdb_api_key` in the browser; it overrides the injected key when present.
+
+**Note:** The key ends up in the deployed JavaScript, so anyone can see it in DevTools. GitHub Secrets keep the key out of the repo and logs; they do not hide it from visitors. For true secrecy you’d need a backend that calls OMDb and never sends the key to the client.
 
 ---
 

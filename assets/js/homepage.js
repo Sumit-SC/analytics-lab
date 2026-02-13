@@ -11,7 +11,8 @@
 	var quotesDb = null;
 	var lastQuoteFromDb = null; // { quote: { text, author, source, images }, category } for wallpaper refresh
 
-	// Optional: set localStorage 'omdb_api_key' for movie poster fetch (free at omdbapi.com)
+	// OMDb key: injected at build from GitHub Secret OMDB_API_KEY, or set localStorage 'omdb_api_key'. Do not commit real key.
+	var OMDB_API_KEY_INJECTED = '__OMDB_API_KEY__';
 	var OMDB_API_KEY_KEY = 'omdb_api_key';
 
 	// Source/author → image URL(s). Same source = same picture. String = one URL (used twice for cycle), or [url1, url2].
@@ -215,6 +216,13 @@
 		{ text: 'The greatest glory in living lies not in never falling, but in rising every time we fall.', attr: 'Nelson Mandela' },
 		{ text: 'First they ignore you, then they laugh at you, then they fight you, then you win.', attr: 'Mahatma Gandhi' }
 	];
+	var QUOTES_BOLLYWOOD = [
+		{ text: 'Mogambo khush hua.', attr: 'Mr. India' },
+		{ text: 'Kitne aadmi the?', attr: 'Sholay' },
+		{ text: 'Bade bade deshon mein aisi chhoti chhoti baatein hoti rehti hain.', attr: 'Dilwale Dulhania Le Jayenge' },
+		{ text: 'Ek chutki sindoor ki keemat tum kya jaano Ramesh babu.', attr: 'Om Shanti Om' },
+		{ text: 'Don ko pakadna mushkil hi nahi, namumkin hai.', attr: 'Don' }
+	];
 
 	var REFRESH_TIPS = [
 		'Take a breath. Stretch.',
@@ -272,6 +280,7 @@
 		if (category === 'movie') list = QUOTES_MOVIE;
 		if (category === 'kdrama') list = QUOTES_KDRAMA;
 		if (category === 'leaders') list = QUOTES_LEADERS;
+		if (category === 'bollywood') list = QUOTES_BOLLYWOOD || QUOTES_FALLBACK;
 		var q = pick(list);
 		setQuoteUI(q.text, q.attr, '');
 		setQuoteImage(null, q.attr);
@@ -299,18 +308,22 @@
 	}
 
 	function getOMDBKey() {
+		var injected = (typeof OMDB_API_KEY_INJECTED === 'string' && OMDB_API_KEY_INJECTED && OMDB_API_KEY_INJECTED !== '__OMDB_API_KEY__') ? OMDB_API_KEY_INJECTED : '';
+		if (injected) return injected;
 		try { return localStorage.getItem(OMDB_API_KEY_KEY) || ''; } catch (e) { return ''; }
 	}
 
-	// Fetch movie poster from OMDB (optional; set localStorage omdb_api_key). Free key at omdbapi.com
-	function fetchOMDBPoster(title, cb) {
+	// Fetch poster from OMDb (optional; set localStorage omdb_api_key). Free key at https://www.omdbapi.com/
+	// type: 'movie' | 'series' | omit for best match. Used for quote wallpaper/posters.
+	function fetchOMDBPoster(title, cb, type) {
 		var key = getOMDBKey();
 		if (!key || !title || !title.trim()) { cb(null); return; }
 		var url = 'https://www.omdbapi.com/?t=' + encodeURIComponent(title.trim()) + '&apikey=' + encodeURIComponent(key);
+		if (type === 'movie' || type === 'series') url += '&type=' + type;
 		fetch(url)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
-				var poster = data && data.Poster && data.Poster.indexOf('http') === 0 ? data.Poster : null;
+				var poster = data && data.Poster && data.Poster !== 'N/A' && data.Poster.indexOf('http') === 0 ? data.Poster : null;
 				cb(poster);
 			})
 			.catch(function () { cb(null); });
@@ -342,12 +355,27 @@
 			});
 			return;
 		}
-		if (category === 'movie' && quote.source && quote.source.trim() && getOMDBKey()) {
-			fetchOMDBPoster(quote.source.trim(), function (url) {
-				if (url) setBgAndImages([url, url]);
-				else setBgAndImages(resolved);
-			});
-			return;
+		// OMDb for posters/wallpapers: movies (movie), K-drama (series), Bollywood (movie)
+		if (getOMDBKey() && quote.source && quote.source.trim()) {
+			var omdbType = null;
+			var tryOmdb = false;
+			if (category === 'movies' || category === 'movie') {
+				omdbType = 'movie';
+				tryOmdb = true;
+			} else if (category === 'kdrama') {
+				omdbType = 'series';
+				tryOmdb = true;
+			} else if (category === 'bollywood') {
+				omdbType = 'movie';
+				tryOmdb = true;
+			}
+			if (tryOmdb) {
+				fetchOMDBPoster(quote.source.trim(), function (url) {
+					if (url) setBgAndImages([url, url]);
+					else setBgAndImages(resolved);
+				}, omdbType);
+				return;
+			}
 		}
 		setBgAndImages(resolved);
 	}
@@ -395,22 +423,30 @@
 
 	function loadQuote(category) {
 		category = category || 'all';
-		if (category === 'all') {
-			var choices = ['wisdom', 'books', 'anime', 'movie', 'kdrama', 'leaders', 'inspiring', 'life', 'love', 'friendship', 'heartbreak', 'wishes', 'past', 'future', 'international', 'bollywood'];
-			category = choices[Math.floor(Math.random() * choices.length)];
+		var actualCategory = category;
+		
+		// Handle simplified categories
+		if (category === 'all' || category === 'random') {
+			// All categories: anime, books, leaders, movie, kdrama, bollywood
+			var choices = ['anime', 'books', 'leaders', 'movie', 'kdrama', 'bollywood'];
+			actualCategory = choices[Math.floor(Math.random() * choices.length)];
+		} else if (category === 'movies') {
+			// Movies combines: movie (Hollywood/International)
+			actualCategory = 'movie';
 		}
+		// bollywood, kdrama, anime, books, leaders use as-is
 
 		setQuoteLoading(true);
 
 		// Prefer local DB (fast, no broken APIs)
-		var fromDb = pickFromLocalDb(category);
+		var fromDb = pickFromLocalDb(actualCategory);
 		if (fromDb) {
-			applyQuoteFromDb(fromDb, category);
+			applyQuoteFromDb(fromDb, category); // Pass original category for OMDb logic
 			setQuoteLoading(false);
 			return;
 		}
 
-		if (category === 'anime') {
+		if (actualCategory === 'anime') {
 			fetchAnimechan(function (q) {
 				setQuoteLoading(false);
 				if (q) {
@@ -462,8 +498,9 @@
 			return;
 		}
 
-		if (category === 'movie' || category === 'kdrama' || category === 'leaders') {
-			useFallback(category);
+		// Fallback for categories that exist in static lists
+		if (actualCategory === 'movie' || actualCategory === 'kdrama' || actualCategory === 'leaders' || actualCategory === 'bollywood') {
+			useFallback(actualCategory);
 			setQuoteLoading(false);
 			return;
 		}

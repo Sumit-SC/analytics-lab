@@ -73,8 +73,8 @@
 			</div>
 		</section>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-start">
-			<!-- Top row: compact Refresh + Clock + Weather (no stretch) -->
+		<!-- Row 1: Refresh, Clock, Weather (three in one line) -->
+		<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-4 sm:mb-5">
 			<section class="second-brain-card p-3 sm:p-4">
 				<p class="home-section-title mb-1 text-xs">Refresh</p>
 				<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-2">Take a breath. Stretch.</p>
@@ -97,9 +97,11 @@
 				<div id="home-weather" class="text-sm text-gray-800 dark:text-gray-200">…</div>
 				<p id="home-weather-city" class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">—</p>
 			</section>
+		</div>
 
-			<!-- Second row: Quote (wider) + Focus timer -->
-			<section class="second-brain-card relative overflow-hidden p-0 sm:col-span-2 lg:col-span-3">
+		<!-- Row 2: Quote + Focus timer (side by side) -->
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 mb-4 sm:mb-5">
+			<section class="second-brain-card relative overflow-hidden p-0 lg:col-span-2">
 				<div id="home-quote-bg" class="absolute inset-0 bg-cover bg-center opacity-20 dark:opacity-10" aria-hidden="true"></div>
 				<div class="relative p-5 sm:p-6">
 					<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -107,23 +109,14 @@
 						<div class="flex items-center gap-2">
 							<label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
 							<select id="home-quote-category" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1.5 text-xs font-medium">
-								<option value="all">All (random)</option>
-								<option value="anime">Anime</option>
-								<option value="books">Books</option>
-								<option value="wisdom">Wisdom</option>
-								<option value="leaders">Leaders</option>
-								<option value="inspiring">Inspiring figures</option>
-								<option value="life">Life</option>
-								<option value="love">Love</option>
-								<option value="friendship">Friendship</option>
-								<option value="heartbreak">Heartbreak</option>
-								<option value="wishes">Wishes</option>
-								<option value="past">Past</option>
-								<option value="future">Future</option>
-								<option value="movie">Hollywood</option>
-								<option value="international">International films &amp; series</option>
+								<option value="all">All</option>
+								<option value="random">Random</option>
+								<option value="movies">Movies</option>
 								<option value="bollywood">Bollywood</option>
 								<option value="kdrama">K-drama</option>
+								<option value="anime">Anime</option>
+								<option value="books">Books</option>
+								<option value="leaders">Leaders</option>
 							</select>
 							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
 							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
@@ -168,9 +161,10 @@
 					<ul id="home-timer-log-entries" class="text-xs text-gray-600 dark:text-gray-400 space-y-0.5 max-h-24 overflow-y-auto"></ul>
 				</div>
 			</section>
+		</div>
 
-			<!-- Third row: Notes / To-do -->
-			<section class="second-brain-card p-5 sm:p-6 lg:col-span-4">
+		<!-- Row 3: Notes / To-do (full width) -->
+		<section class="second-brain-card p-5 sm:p-6">
 				<p class="home-section-title mb-2">Notes &amp; to-do</p>
 				<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Temp use — stored in browser only. Optional: Tools → Backup to download a copy.</p>
 				<div class="flex flex-wrap items-center gap-2 mb-3">
@@ -185,8 +179,7 @@
 					<button type="button" id="home-todo-export-btn" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export</button>
 				</div>
 				<ul id="home-todo-list" class="space-y-1.5 text-sm text-gray-700 dark:text-gray-300 max-h-40 overflow-y-auto"></ul>
-			</section>
-		</div>
+		</section>
 
 		<!-- Powered by: JS libs + free APIs, pre-made only -->
 		<section class="mt-14 pt-10 border-t border-gray-200 dark:border-gray-700 notion-powered">
