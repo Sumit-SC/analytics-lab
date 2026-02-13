@@ -11,26 +11,90 @@
 	var quotesDb = null;
 	var lastQuoteFromDb = null; // { quote: { text, author, source, images }, category } for wallpaper refresh
 
-	// Source → image URL (Wikimedia Commons / Wikipedia, free use). Same source = same picture as the quote.
+	// Optional: set localStorage 'omdb_api_key' for movie poster fetch (free at omdbapi.com)
+	var OMDB_API_KEY_KEY = 'omdb_api_key';
+
+	// Source/author → image URL(s). Same source = same picture. String = one URL (used twice for cycle), or [url1, url2].
+	// Wikimedia/Wikipedia posters for K-drama, movies, anime, books, leaders. OMDB/Jikan used at runtime when available.
 	var QUOTE_IMAGE_MAP = {
 		'Reply 1988': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg',
+		'Reply 1997': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg',
 		'Itaewon Class': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg',
 		'Goblin': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
-		'Crash Landing on You': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Crash_Landing_on_You_poster.jpg/800px-Crash_Landing_on_You_poster.jpg',
 		'Guardian: The Lonely and Great God': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
+		'Crash Landing on You': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Crash_Landing_on_You_poster.jpg/800px-Crash_Landing_on_You_poster.jpg',
+		'Start-Up': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
+		'Vincenzo': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg',
+		'Squid Game': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg',
 		'Casablanca': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/CasablancaPoster.jpg/800px-CasablancaPoster.jpg',
 		'Star Wars': 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/Star_Wars_Logo.svg/800px-Star_Wars_Logo.svg.png',
 		'Jaws': 'https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/JAWS_Movie_poster.jpg/800px-JAWS_Movie_poster.jpg',
 		'The Godfather': 'https://upload.wikimedia.org/wikipedia/en/thumb/a/af/The_Godfather%2C_The_Game.jpg/800px-The_Godfather%2C_The_Game.jpg',
 		'Finding Nemo': 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Finding_Nemo.jpg/800px-Finding_Nemo.jpg',
+		'The Wizard of Oz': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/The_Wizard_of_Oz_Movie_Poster.jpg/800px-The_Wizard_of_Oz_Movie_Poster.jpg',
+		'The Terminator': 'https://upload.wikimedia.org/wikipedia/en/thumb/7/76/Terminator1984movieposter.jpg/800px-Terminator1984movieposter.jpg',
+		'A Few Good Men': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/A_Few_Good_Men_poster.jpg/800px-A_Few_Good_Men_poster.jpg',
+		'Forrest Gump': 'https://upload.wikimedia.org/wikipedia/en/thumb/6/67/Forrest_Gump_poster.jpg/800px-Forrest_Gump_poster.jpg',
+		'Titanic': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/22/Titanic_poster.jpg/800px-Titanic_poster.jpg',
+		'Taxi Driver': 'https://upload.wikimedia.org/wikipedia/en/thumb/3/33/Taxi_Driver_poster.JPG/800px-Taxi_Driver_poster.JPG',
+		'The Dark Knight': 'https://upload.wikimedia.org/wikipedia/en/thumb/8/8a/Dark_Knight.jpg/800px-Dark_Knight.jpg',
+		'Toy Story': 'https://upload.wikimedia.org/wikipedia/en/thumb/1/13/Toy_Story.jpg/800px-Toy_Story.jpg',
+		'The Sixth Sense': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5a/The_Sixth_Sense_poster.jpg/800px-The_Sixth_Sense_poster.jpg',
+		'Apollo 13': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/27/Apollo_13_movie_poster.jpg/800px-Apollo_13_movie_poster.jpg',
+		'The Lord of the Rings': 'https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Ringstrilogyposter.jpg/800px-Ringstrilogyposter.jpg',
+		'There Will Be Blood': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/da/There_Will_Be_Blood_Poster.jpg/800px-There_Will_Be_Blood_Poster.jpg',
+		'The Lord of the Rings': 'https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Ringstrilogyposter.jpg/800px-Ringstrilogyposter.jpg',
+		'Jerry Maguire': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Jerry_Maguire_movie_poster.jpg/800px-Jerry_Maguire_movie_poster.jpg',
+		'Dirty Dancing': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/42/Dirty_Dancing_poster.jpg/800px-Dirty_Dancing_poster.jpg',
+		'Sherlock Holmes': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Arthur_Conan_Doyle_by_Newell_Conan_Doyle.jpg/800px-Arthur_Conan_Doyle_by_Newell_Conan_Doyle.jpg',
+		'One Piece': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/90/One_Piece%2C_Volume_61_Cover_%28Japanese%29.jpg/800px-One_Piece%2C_Volume_61_Cover_%28Japanese%29.jpg',
+		'Code Geass': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Code_Geass_Promo.jpg/800px-Code_Geass_Promo.jpg',
+		'Death Note': 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6f/Death_Note_Vol_1.jpg/800px-Death_Note_Vol_1.jpg',
+		'Gurren Lagann': 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6a/Gurren_Lagann_DVD_1.jpg/800px-Gurren_Lagann_DVD_1.jpg',
+		'Naruto': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/94/NarutoCoverTankobon1.jpg/800px-NarutoCoverTankobon1.jpg',
+		'Berserk': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Berserk_volume_1.jpg/800px-Berserk_volume_1.jpg',
+		'Fullmetal Alchemist': 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Fullmetal_Alchemist_vol1.jpg/800px-Fullmetal_Alchemist_vol1.jpg',
+		'Dragon Ball Z': 'https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/Dragon_Ball_Z_Logo.svg/800px-Dragon_Ball_Z_Logo.svg.png',
+		"Kuroko's Basketball": 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/Kuroko_no_Basuke_volume_1_cover.jpg/800px-Kuroko_no_Basuke_volume_1_cover.jpg',
+		'Mob Psycho 100': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Mob_Psycho_100_volume_1_cover.jpg/800px-Mob_Psycho_100_volume_1_cover.jpg',
+		'Claymore': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/Claymore_vol1.jpg/800px-Claymore_vol1.jpg',
+		'One Punch Man': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2c/One_Punch_Man_volume_1_cover.jpg/800px-One_Punch_Man_volume_1_cover.jpg',
+		'Attack on Titan': 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a0/Shingeki_no_Kyojin_manga_volume_1.jpg/800px-Shingeki_no_Kyojin_manga_volume_1.jpg',
+		'The Little Prince': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/The_Little_Prince_%28book_cover%29.jpg/800px-The_Little_Prince_%28book_cover%29.jpg',
+		'Harry Potter': 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Harry_Potter_Word_Bubble.svg/800px-Harry_Potter_Word_Bubble.svg.png',
+		'The Great Gatsby': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/The_Great_Gatsby_Cover_1925_Retouched.jpg/800px-The_Great_Gatsby_Cover_1925_Retouched.jpg',
+		'Hamlet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Edmund_Kean_as_Hamlet.jpg/800px-Edmund_Kean_as_Hamlet.jpg',
+		'1984': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/1984first.jpg/800px-1984first.jpg',
 		'Steve Jobs': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg/800px-Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg',
+		'Albert Einstein': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Albert_Einstein_Head.jpg/800px-Albert_Einstein_Head.jpg',
 		'Einstein': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Albert_Einstein_Head.jpg/800px-Albert_Einstein_Head.jpg',
 		'Plutarch': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Plutarch_engraving.jpg/800px-Plutarch_engraving.jpg',
 		'Nelson Mandela': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Nelson_Mandela-2008_%28edit%29.jpg/800px-Nelson_Mandela-2008_%28edit%29.jpg',
 		'Mahatma Gandhi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Mahatma-Gandhi%2C_studio%2C_1931.jpg/800px-Mahatma-Gandhi%2C_studio%2C_1931.jpg',
 		'Martin Luther King Jr.': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Martin_Luther_King%2C_Jr..jpg/800px-Martin_Luther_King%2C_Jr..jpg',
 		'Abraham Lincoln': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Abraham_Lincoln_O-77_matte_collodion_print.jpg/800px-Abraham_Lincoln_O-77_matte_collodion_print.jpg',
-		'Winston Churchill': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sir_Winston_Churchill_-_19086236948.jpg/800px-Sir_Winston_Churchill_-_19086236948.jpg'
+		'Winston Churchill': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Sir_Winston_Churchill_-_19086236948.jpg/800px-Sir_Winston_Churchill_-_19086236948.jpg',
+		'Theodore Roosevelt': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/President_Roosevelt_-_Pach_Bros.jpg/800px-President_Roosevelt_-_Pach_Bros.jpg',
+		'Ralph Waldo Emerson': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Ralph_Waldo_Emerson_ca1857_retouched.jpg/800px-Ralph_Waldo_Emerson_ca1857_retouched.jpg',
+		'John Lennon': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/John_Lennon_1969_%28cropped%29.jpg/800px-John_Lennon_1969_%28cropped%29.jpg',
+		'Aristotle': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Aristotle_Altemps_Inv8575.jpg/800px-Aristotle_Altemps_Inv8575.jpg',
+		'Oscar Wilde': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Oscar_Wilde_portrait.jpg/800px-Oscar_Wilde_portrait.jpg',
+		'Maya Angelou': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Angelou_at_Clinton_inauguration_%28cropped_2%29.jpg/800px-Angelou_at_Clinton_inauguration_%28cropped_2%29.jpg',
+		'Franklin D. Roosevelt': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/FDR_1944_Color_Portrait.jpg/800px-FDR_1944_Color_Portrait.jpg',
+		'Henry Ford': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Henry_ford_1919.jpg/800px-Henry_ford_1919.jpg',
+		'George Orwell': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/George_Orwell_press_photo.jpg/800px-George_Orwell_press_photo.jpg',
+		'J.K. Rowling': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/J._K._Rowling_2010.jpg/800px-J._K._Rowling_2010.jpg',
+		'J.R.R. Tolkien': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/J._R._R._Tolkien%2C_1916.jpg/800px-J._R._R._Tolkien%2C_1916.jpg',
+		'Charles Dickens': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Dickens_Gurney_head.jpg/800px-Dickens_Gurney_head.jpg',
+		'William Shakespeare': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/800px-Shakespeare.jpg',
+		'Robert Frost': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Robert_Frost_NYWTS.jpg/800px-Robert_Frost_NYWTS.jpg',
+		'F. Scott Fitzgerald': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/F_Scott_Fitzgerald_1921.jpg/800px-F_Scott_Fitzgerald_1921.jpg',
+		'Antoine de Saint-Exupéry': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Saint-Exup%C3%A9ry_2.jpg/800px-Saint-Exup%C3%A9ry_2.jpg',
+		'Socrates': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Socrates_Louvre.jpg/800px-Socrates_Louvre.jpg',
+		'Lao Tzu': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Laozi_in_taiji_circle.svg/800px-Laozi_in_taiji_circle.svg.png',
+		'Buddha': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Guanyin_in_Ngong_Ping_360.jpg/800px-Guanyin_in_Ngong_Ping_360.jpg',
+		'Tony Robbins': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Tony_Robbins_%282017%29.jpg/800px-Tony_Robbins_%282017%29.jpg',
+		'George Eliot': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/George_Eliot%2C_by_Frederic_W._Burton.jpg/800px-George_Eliot%2C_by_Frederic_W._Burton.jpg'
 	};
 
 	// Cache for dynamically discovered images from Wikipedia / Jikan (keyed by source name)
@@ -219,19 +283,73 @@
 		return pick(quotesDb[category]);
 	}
 
-	// Apply a quote from the local DB (text, author, source, images) and set wallpaper from images[0] or random
+	// Resolve 1–2 source-accurate image URLs: map by source/author, or use quote.images if they're real URLs (not Picsum)
+	function getSourceImages(quote) {
+		var src = (quote.source && quote.source.trim()) || '';
+		var attr = (quote.author && quote.author.trim()) || '';
+		var fromMap = (src && QUOTE_IMAGE_MAP[src]) || (attr && QUOTE_IMAGE_MAP[attr]);
+		if (fromMap) {
+			return Array.isArray(fromMap) ? fromMap : [fromMap, fromMap];
+		}
+		var urls = quote.images;
+		if (urls && urls.length > 0 && urls[0] && urls[0].indexOf('picsum') === -1) {
+			return urls.length >= 2 ? [urls[0], urls[1]] : [urls[0], urls[0]];
+		}
+		return null;
+	}
+
+	function getOMDBKey() {
+		try { return localStorage.getItem(OMDB_API_KEY_KEY) || ''; } catch (e) { return ''; }
+	}
+
+	// Fetch movie poster from OMDB (optional; set localStorage omdb_api_key). Free key at omdbapi.com
+	function fetchOMDBPoster(title, cb) {
+		var key = getOMDBKey();
+		if (!key || !title || !title.trim()) { cb(null); return; }
+		var url = 'https://www.omdbapi.com/?t=' + encodeURIComponent(title.trim()) + '&apikey=' + encodeURIComponent(key);
+		fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var poster = data && data.Poster && data.Poster.indexOf('http') === 0 ? data.Poster : null;
+				cb(poster);
+			})
+			.catch(function () { cb(null); });
+	}
+
+	// Apply a quote from the local DB: resolve source-accurate images (Jikan for anime, OMDB for movie if key set, else map/JSON)
 	function applyQuoteFromDb(quote, category) {
 		var meta = (quote.source && quote.source.trim()) ? 'From: ' + quote.source.trim() : '';
 		setQuoteUI(quote.text, quote.author || '', meta);
-		lastQuoteFromDb = { quote: quote, category: category };
-		var urls = quote.images;
-		if (urls && urls.length > 0) {
-			var url = urls[Math.floor(Math.random() * urls.length)];
-			var bg = document.getElementById('home-quote-bg');
-			if (bg) bg.style.backgroundImage = 'url(' + url + ')';
-		} else {
-			setQuoteImage(null, quote.author || quote.source);
+		var bg = document.getElementById('home-quote-bg');
+		var resolved = getSourceImages(quote);
+		// Keep a copy so we can set .images after async fetch; wallpaper refresh uses lastQuoteFromDb.quote.images
+		lastQuoteFromDb = { quote: { text: quote.text, author: quote.author, source: quote.source, images: quote.images && quote.images.length ? quote.images : (resolved || []) }, category: category };
+
+		function setBgAndImages(urls) {
+			if (urls && urls.length > 0) {
+				lastQuoteFromDb.quote.images = urls.length >= 2 ? urls : [urls[0], urls[0]];
+				if (bg) bg.style.backgroundImage = 'url(' + lastQuoteFromDb.quote.images[0] + ')';
+			} else {
+				lastQuoteFromDb.quote.images = [];
+				setQuoteImage(null, quote.author || quote.source);
+			}
 		}
+
+		if (category === 'anime' && quote.source && quote.source.trim()) {
+			fetchJikanImage(quote.source.trim(), function (url) {
+				if (url) setBgAndImages([url, url]);
+				else setBgAndImages(resolved);
+			});
+			return;
+		}
+		if (category === 'movie' && quote.source && quote.source.trim() && getOMDBKey()) {
+			fetchOMDBPoster(quote.source.trim(), function (url) {
+				if (url) setBgAndImages([url, url]);
+				else setBgAndImages(resolved);
+			});
+			return;
+		}
+		setBgAndImages(resolved);
 	}
 
 	function fetchQuotable(tags, done) {
@@ -278,7 +396,7 @@
 	function loadQuote(category) {
 		category = category || 'all';
 		if (category === 'all') {
-			var choices = ['wisdom', 'books', 'anime', 'movie', 'kdrama', 'leaders'];
+			var choices = ['wisdom', 'books', 'anime', 'movie', 'kdrama', 'leaders', 'inspiring', 'life', 'love', 'friendship', 'heartbreak', 'wishes', 'past', 'future', 'international', 'bollywood'];
 			category = choices[Math.floor(Math.random() * choices.length)];
 		}
 
@@ -813,20 +931,44 @@
 		});
 	}
 
-	// Export to-dos as markdown file
-	var todoExportMd = document.getElementById('home-todo-export-md');
-	if (todoExportMd) {
-		todoExportMd.addEventListener('click', function () {
+	// Export to-dos: format select (.md, .txt, or PDF via print)
+	var todoExportFormat = document.getElementById('home-todo-export-format');
+	var todoExportBtn = document.getElementById('home-todo-export-btn');
+	if (todoExportBtn && getTodos) {
+		todoExportBtn.addEventListener('click', function () {
 			var todos = getTodos();
 			var lines = ['# To-do', ''];
 			todos.forEach(function (t) {
 				lines.push('- [' + (t.done ? 'x' : ' ') + '] ' + (t.text || '').replace(/\n/g, ' '));
 			});
 			var md = lines.join('\n');
+			var txt = lines.slice(2).join('\n'); // plain list without # To-do header
+			var format = (todoExportFormat && todoExportFormat.value) || 'md';
 			var d = new Date();
-			var name = 'todos-' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '.md';
+			var dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+			if (format === 'pdf') {
+				var printHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>To-do</title><style>body{font-family:system-ui,sans-serif;padding:2rem;max-width:40rem;} h1{font-size:1.25rem;} ul{list-style:none;padding:0;} li{margin:0.5rem 0;}</style></head><body><h1>To-do</h1><ul>';
+				todos.forEach(function (t) {
+					printHtml += '<li>' + (t.done ? '[x] ' : '[ ] ') + (t.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>';
+				});
+				printHtml += '</ul></body></html>';
+				var w = window.open('', '_blank');
+				if (w) {
+					w.document.write(printHtml);
+					w.document.close();
+					w.focus();
+					setTimeout(function () { w.print(); w.close(); }, 250);
+				}
+				return;
+			}
+
+			var ext = format === 'txt' ? 'txt' : 'md';
+			var content = format === 'txt' ? txt : md;
+			var name = 'todos-' + dateStr + '.' + ext;
+			var mime = format === 'txt' ? 'text/plain;charset=utf-8' : 'text/markdown;charset=utf-8';
 			try {
-				var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+				var blob = new Blob([content], { type: mime });
 				var url = URL.createObjectURL(blob);
 				var a = document.createElement('a');
 				a.href = url;

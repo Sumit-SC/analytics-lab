@@ -88,10 +88,15 @@
 							<button type="button" class="tool-btn" data-cmd="formatBlock" data-arg="p">Normal</button>
 						</div>
 						<div class="flex-1"></div>
-						<div class="inline-flex flex-wrap gap-1">
-							<button type="button" id="doc-download-txt" class="tool-sec-btn">Download .txt</button>
-							<button type="button" id="doc-download-md" class="tool-sec-btn">Download .md</button>
-							<button type="button" id="doc-download-html" class="tool-sec-btn">Download .html</button>
+						<div class="inline-flex flex-wrap items-center gap-2">
+							<label class="text-[11px] text-gray-500 dark:text-gray-400">Download as:</label>
+							<select id="doc-download-format" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs" aria-label="Download format">
+								<option value="txt">.txt</option>
+								<option value="md">.md</option>
+								<option value="html">.html</option>
+								<option value="pdf">PDF (print)</option>
+							</select>
+							<button type="button" id="doc-download-btn" class="tool-sec-btn">Download</button>
 							<label class="tool-sec-btn cursor-pointer">
 								<span>Open .txt/.md</span>
 								<input type="file" id="doc-open-file" accept=".txt,.md,.text" class="hidden">

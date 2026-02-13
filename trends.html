@@ -1,149 +1,149 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-\t<meta charset="utf-8" />
-\t<meta name="viewport" content="width=device-width, initial-scale=1" />
-\t<title>Trends | Standalone Playground</title>
-\t<meta name="description" content="Fun second-brain page: tech/news trends, Wikipedia topics, and visual inspiration powered by free APIs." />
-\t<meta property="og:title" content="Trends — Fun signals &amp; inspiration" />
-\t<meta property="og:description" content="See what&apos;s moving in tech and the world with Hacker News, Wikipedia, and visual inspiration, all from free APIs." />
-\t<script src="./assets/js/tailwind-loader.js" defer></script>
-\t<link rel="preconnect" href="https://fonts.googleapis.com">
-\t<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-\t<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-\t<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
-\t<link rel="preconnect" href="https://hacker-news.firebaseio.com">
-\t<link rel="preconnect" href="https://wikimedia.org">
-\t<link rel="stylesheet" href="./assets/css/main.css">
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Trends | Standalone Playground</title>
+	<meta name="description" content="Fun second-brain page: tech/news trends, Wikipedia topics, and visual inspiration powered by free APIs." />
+	<meta property="og:title" content="Trends — Fun signals &amp; inspiration" />
+	<meta property="og:description" content="See what&apos;s moving in tech and the world with Hacker News, Wikipedia, and visual inspiration, all from free APIs." />
+	<script src="./assets/js/tailwind-loader.js" defer></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+	<link rel="preconnect" href="https://hacker-news.firebaseio.com">
+	<link rel="preconnect" href="https://wikimedia.org">
+	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
-\t<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-\t\t<div class="max-w-6xl mx-auto px-4 sm:px-6">
-\t\t\t<div class="flex items-center justify-between py-3">
-\t\t\t\t<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
-\t\t\t\t<div class="flex items-center gap-2">
-\t\t\t\t\t<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
-\t\t\t\t\t<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
-\t\t\t\t\t<a href="./trends.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Trends</a>
-\t\t\t\t\t<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-\t\t\t\t\t<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
-\t\t\t\t\t<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
-\t\t\t\t\t<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
-\t\t\t\t</div>
-\t\t\t</div>
-\t\t</div>
-\t</nav>
+	<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
+			<div class="flex items-center justify-between py-3">
+				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<div class="flex items-center gap-2">
+					<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
+					<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
+					<a href="./trends.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Trends</a>
+					<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
+					<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
+				</div>
+			</div>
+		</div>
+	</nav>
 
-\t<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-\t\t<header class="mb-2">
-\t\t\t<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Trends</h1>
-\t\t\t<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
-\t\t\t\tA calm &ldquo;what&apos;s happening&rdquo; view built only from free APIs: tech headlines, popular Wikipedia pages, and a small inspiration strip.
-\t\t\t</p>
-\t\t</header>
+	<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+		<header class="mb-2">
+			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Trends</h1>
+			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
+				A calm &ldquo;what&apos;s happening&rdquo; view built only from free APIs: tech headlines, popular Wikipedia pages, and a small inspiration strip.
+			</p>
+		</header>
 
-\t\t<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-\t\t\t<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
-\t\t\t\t<div class="flex items-center justify-between mb-2">
-\t\t\t\t\t<div>
-\t\t\t\t\t\t<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Hacker News &middot; tech &amp; dev</h2>
-\t\t\t\t\t\t<p class="text-xs text-gray-500 dark:text-gray-400">Top stories from <code>news.ycombinator.com</code> (latest snapshot).</p>
-\t\t\t\t\t</div>
-\t\t\t\t\t<a href="https://news.ycombinator.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open HN ↗</a>
-\t\t\t\t</div>
-\t\t\t\t<p id="trends-hn-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
-\t\t\t\t<ul id="trends-hn-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
-\t\t\t</section>
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+			<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Hacker News &middot; tech &amp; dev</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Top stories from <code>news.ycombinator.com</code> (latest snapshot).</p>
+					</div>
+					<a href="https://news.ycombinator.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open HN ↗</a>
+				</div>
+				<p id="trends-hn-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-hn-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
 
-\t\t\t<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
-\t\t\t\t<div class="flex items-center justify-between mb-2">
-\t\t\t\t\t<div>
-\t\t\t\t\t\t<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Wikipedia today</h2>
-\t\t\t\t\t\t<p class="text-xs text-gray-500 dark:text-gray-400">Most-read English pages today (pageview snapshot).</p>
-\t\t\t\t\t</div>
-\t\t\t\t\t<a href="https://en.wikipedia.org/wiki/Main_Page" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Wikipedia ↗</a>
-\t\t\t\t</div>
-\t\t\t\t<p id="trends-wiki-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
-\t\t\t\t<ul id="trends-wiki-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
-\t\t\t</section>
-\t\t</div>
+			<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Wikipedia today</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Most-read English pages today (pageview snapshot).</p>
+					</div>
+					<a href="https://en.wikipedia.org/wiki/Main_Page" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Wikipedia ↗</a>
+				</div>
+				<p id="trends-wiki-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-wiki-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+		</div>
 
-\t\t<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
-\t\t\t<div class="flex items-center justify-between mb-3">
-\t\t\t\t<div>
-\t\t\t\t\t<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual strip</h2>
-\t\t\t\t\t<p class="text-xs text-gray-500 dark:text-gray-400">A small, quiet strip of free photos for mood. Click any tile to open it.</p>
-\t\t\t\t</div>
-\t\t\t\t<button type="button" id="trends-visual-refresh" class="tool-sec-btn text-xs">Shuffle</button>
-\t\t\t</div>
-\t\t\t<div id="trends-visual-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="focus">
-\t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
-\t\t\t\t</div>
-\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="learning">
-\t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
-\t\t\t\t</div>
-\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="creative">
-\t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
-\t\t\t\t</div>
-\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="calm">
-\t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
-\t\t\t\t</div>
-\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="kdrama">
-\t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
-\t\t\t\t</div>
-\t\t\t\t<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="anime">
-\t\t\t\t\t<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
-\t\t\t\t</div>
-\t\t\t</div>
-\t\t\t<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Images from <a href="https://picsum.photos/" target="_blank" rel="noopener" class="text-primary hover:underline">Picsum</a> (free placeholders).</p>
-\t\t</section>
-\t</main>
+		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
+			<div class="flex items-center justify-between mb-3">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual strip</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">A small, quiet strip of free photos for mood. Click any tile to open it.</p>
+				</div>
+				<button type="button" id="trends-visual-refresh" class="tool-sec-btn text-xs">Shuffle</button>
+			</div>
+			<div id="trends-visual-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="focus">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="learning">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="creative">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="calm">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="kdrama">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="anime">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+			</div>
+			<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Images from <a href="https://picsum.photos/" target="_blank" rel="noopener" class="text-primary hover:underline">Picsum</a> (free placeholders).</p>
+		</section>
+	</main>
 
-\t<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
-\t\t<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
-\t\t\t<p>Standalone Playground · Trends</p>
-\t\t\t<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present · Sumit S. Chaure</p>
-\t\t\t<p class="text-[11px] mt-2 text-amber-700 dark:text-amber-400/90">Sluggish? Clear site cache/storage — saved data will be lost but site may run faster.</p>
-\t\t</div>
-\t</footer>
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
+		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
+			<p>Standalone Playground · Trends</p>
+			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present · Sumit S. Chaure</p>
+			<p class="text-[11px] mt-2 text-amber-700 dark:text-amber-400/90">Sluggish? Clear site cache/storage — saved data will be lost but site may run faster.</p>
+		</div>
+	</footer>
 
-\t<div id="global-music-bar">
-\t\t<div id="global-yt-player-wrap"></div>
-\t\t<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
-\t\t<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
-\t\t<span id="global-music-title">Paste YouTube URL or ID</span>
-\t\t<button type="button" id="global-music-focus" aria-label="Play focus mix">Focus mix</button>
-\t\t<button type="button" id="global-music-play" aria-label="Play">▶</button>
-\t\t<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
-\t\t<button type="button" id="global-music-next" aria-label="Next">⏭</button>
-\t</div>
-\t<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
-\t<div id="global-dict-flyout">
-\t\t<div class="global-dict-header">
-\t\t\t<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
-\t\t\t<button type="button" id="global-dict-search">Search</button>
-\t\t\t<button type="button" id="global-dict-close" aria-label="Close">✕</button>
-\t\t</div>
-\t\t<div id="global-dict-body" class="global-dict-body"></div>
-\t\t<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
-\t</div>
-\t<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
-\t<div id="global-yt-panel">
-\t\t<div class="global-yt-panel-header">
-\t\t\t<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
-\t\t\t<button type="button" id="global-yt-panel-search">Search</button>
-\t\t\t<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
-\t\t</div>
-\t\t<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
-\t</div>
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
+	</div>
 
-\t<script src="./assets/js/color-theme.js" defer></script>
-\t<script src="./assets/js/theme.js" defer></script>
-\t<script src="./assets/js/analytics.js" defer></script>
-\t<script src="./assets/js/global-widgets.js" defer></script>
-\t<script src="./assets/js/dict-widget.js" defer></script>
-\t<script src="./assets/js/trends.js" defer></script>
+	<script src="./assets/js/color-theme.js" defer></script>
+	<script src="./assets/js/theme.js" defer></script>
+	<script src="./assets/js/analytics.js" defer></script>
+	<script src="./assets/js/global-widgets.js" defer></script>
+	<script src="./assets/js/dict-widget.js" defer></script>
+	<script src="./assets/js/trends.js" defer></script>
 </body>
 </html>
 

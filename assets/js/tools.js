@@ -13,9 +13,8 @@
 
 	var editor = document.getElementById('doc-editor');
 	var btns = document.querySelectorAll('.tool-btn');
-	var dlTxt = document.getElementById('doc-download-txt');
-	var dlMd = document.getElementById('doc-download-md');
-	var dlHtml = document.getElementById('doc-download-html');
+	var dlFormat = document.getElementById('doc-download-format');
+	var dlBtn = document.getElementById('doc-download-btn');
 	var openInput = document.getElementById('doc-open-file');
 	var backupNowBtn = document.getElementById('doc-backup-now');
 	var restoreFileInput = document.getElementById('doc-restore-file');
@@ -121,21 +120,25 @@
 		return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + '-' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
 	}
 
-	if (dlTxt && editor) {
-		dlTxt.addEventListener('click', function () {
-			download('notes.txt', getEditorText());
-		});
-	}
-
-	if (dlMd && editor) {
-		dlMd.addEventListener('click', function () {
-			download('notes-' + datePrefix().slice(0, 10) + '.md', getEditorText());
-		});
-	}
-
-	if (dlHtml && editor) {
-		dlHtml.addEventListener('click', function () {
-			download('notes.html', '<!DOCTYPE html><html><body>' + getEditorHtml() + '</body></html>');
+	if (dlBtn && dlFormat && editor) {
+		dlBtn.addEventListener('click', function () {
+			var format = dlFormat.value || 'txt';
+			if (format === 'pdf') {
+				var printHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Notes</title><style>body{font-family:system-ui,sans-serif;padding:2rem;max-width:50rem;line-height:1.6;}</style></head><body>' + getEditorHtml() + '</body></html>';
+				var w = window.open('', '_blank');
+				if (w) {
+					w.document.write(printHtml);
+					w.document.close();
+					w.focus();
+					setTimeout(function () { w.print(); w.close(); }, 250);
+				}
+				return;
+			}
+			var ext = format;
+			var filename = format === 'html' ? 'notes.html' : 'notes-' + datePrefix().slice(0, 10) + '.' + ext;
+			var content = format === 'html' ? '<!DOCTYPE html><html><body>' + getEditorHtml() + '</body></html>' : getEditorText();
+			var mime = format === 'html' ? 'text/html;charset=utf-8' : (format === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8');
+			download(filename, content, mime);
 		});
 	}
 
