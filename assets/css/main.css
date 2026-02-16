@@ -252,13 +252,53 @@ body {
 /* App bar (Material-style header) */
 .app-bar {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	background: rgba(255, 255, 255, 0.78) !important;
+	border-bottom: 1px solid rgba(148, 163, 184, 0.35) !important;
 }
 .dark .app-bar {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+	background: rgba(15, 23, 42, 0.72) !important;
+	border-bottom-color: rgba(71, 85, 105, 0.55) !important;
 }
 .app-bar .max-w-5xl,
 .app-bar .max-w-6xl {
 	min-height: 3.5rem;
+}
+
+/* App bar links: pill hover, less "gross" underline */
+.app-bar .nav-links-inline a {
+	border-radius: 9999px;
+	padding: 0.35rem 0.65rem;
+}
+.app-bar .nav-links-inline a:hover {
+	background: rgba(99, 102, 241, 0.10);
+}
+.dark .app-bar .nav-links-inline a:hover {
+	background: rgba(99, 102, 241, 0.18);
+}
+
+/* Mobile-first density: lighter cards and spacing */
+@media (max-width: 767px) {
+	.material-card {
+		padding: 1rem;
+	}
+	.material-card:hover {
+		transform: none;
+		box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
+	}
+	.dark .material-card:hover {
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+	}
+}
+
+/* Reduce "too many floating things" on very small screens */
+@media (max-width: 767px) {
+	#global-resources-toggle,
+	#global-resources-flyout {
+		display: none !important;
+	}
 }
 
 /* Mobile nav drawer */
