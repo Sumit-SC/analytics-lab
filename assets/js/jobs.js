@@ -110,7 +110,14 @@
 		var promises = [
 			fetchRemoteOK(),
 			fetchStackOverflow(),
-			fetchGitHubJobs()
+			fetchGitHubJobs(),
+			fetchWeWorkRemotely(),
+			fetchIndeed()
+			// Note: Google Jobs, LinkedIn, Naukri require backend proxies with API keys
+			// Uncomment when proxies are set up:
+			// fetchGoogleJobs(),
+			// fetchLinkedIn(),
+			// fetchNaukri()
 		];
 
 		Promise.allSettled(promises).then(function () {
@@ -245,6 +252,208 @@
 			})
 			.catch(function (err) {
 				console.error('GitHub Jobs fetch error:', err);
+			});
+	}
+
+	// Fetch from We Work Remotely (free RSS feed)
+	function fetchWeWorkRemotely() {
+		// We Work Remotely provides free RSS feeds
+		var rssUrl = encodeURIComponent('https://weworkremotely.com/categories/remote-programming-jobs.rss');
+		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=50';
+
+		return fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.items || !Array.isArray(data.items)) return;
+				data.items.forEach(function (item) {
+					if (!item || !item.title) return;
+					var title = item.title.toLowerCase();
+					var description = (item.description || item.content || '').toLowerCase();
+					var fullText = title + ' ' + description;
+
+					if (!isDataScienceJob(fullText)) return;
+
+					// Extract company from title (format: "Job Title: Company Name")
+					var company = 'Unknown';
+					var titleParts = item.title.split(':');
+					var jobTitle = item.title;
+					if (titleParts.length > 1) {
+						company = titleParts[titleParts.length - 1].trim();
+						jobTitle = titleParts.slice(0, -1).join(':').trim();
+					}
+
+					allJobs.push({
+						id: 'wwr_' + (item.guid || item.link || Math.random()).replace(/[^a-zA-Z0-9]/g, '_'),
+						title: jobTitle,
+						company: company,
+						location: 'Remote',
+						url: item.link || '#',
+						description: item.description || item.content || '',
+						tags: [],
+						source: 'weworkremotely',
+						date: item.pubDate || new Date().toISOString()
+					});
+				});
+			})
+			.catch(function (err) {
+				console.error('We Work Remotely fetch error:', err);
+			});
+	}
+
+	// Fetch from Indeed (requires backend proxy with HasData API key)
+	function fetchIndeed() {
+		// Indeed requires a backend proxy with HasData API key
+		// For now, this is a placeholder - implement backend proxy at /api/indeed
+		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? window.JOB_PROXY_URL : '';
+		if (!proxyUrl) {
+			console.log('Indeed: No proxy URL configured. Set window.JOB_PROXY_URL to enable.');
+			return Promise.resolve();
+		}
+
+		return fetch(proxyUrl + '/api/indeed?q=data+science&l=remote')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.results || !Array.isArray(data.results)) return;
+				data.results.forEach(function (item) {
+					if (!item || !item.title) return;
+					var title = item.title.toLowerCase();
+					var description = (item.description || item.snippet || '').toLowerCase();
+					var fullText = title + ' ' + description;
+
+					if (!isDataScienceJob(fullText)) return;
+
+					allJobs.push({
+						id: 'indeed_' + (item.jobkey || item.id || Math.random()).replace(/[^a-zA-Z0-9]/g, '_'),
+						title: item.title || 'Untitled',
+						company: item.company || 'Unknown',
+						location: item.location || item.formattedLocation || 'Remote',
+						url: item.url || item.link || '#',
+						description: item.description || item.snippet || '',
+						tags: [],
+						source: 'indeed',
+						date: item.date || new Date().toISOString()
+					});
+				});
+			})
+			.catch(function (err) {
+				console.error('Indeed fetch error:', err);
+			});
+	}
+
+	// Fetch from Google Jobs (requires backend proxy with ScraperAPI/SerpAPI key)
+	function fetchGoogleJobs() {
+		// Google Jobs requires a backend proxy with ScraperAPI or SerpAPI key
+		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? window.JOB_PROXY_URL : '';
+		if (!proxyUrl) {
+			console.log('Google Jobs: No proxy URL configured. Set window.JOB_PROXY_URL to enable.');
+			return Promise.resolve();
+		}
+
+		return fetch(proxyUrl + '/api/googlejobs?q=data+science&location=remote')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.jobs || !Array.isArray(data.jobs)) return;
+				data.jobs.forEach(function (item) {
+					if (!item || !item.title) return;
+					var title = item.title.toLowerCase();
+					var description = (item.description || item.snippet || '').toLowerCase();
+					var fullText = title + ' ' + description;
+
+					if (!isDataScienceJob(fullText)) return;
+
+					allJobs.push({
+						id: 'googlejobs_' + (item.job_id || item.id || Math.random()).replace(/[^a-zA-Z0-9]/g, '_'),
+						title: item.title || 'Untitled',
+						company: item.company_name || item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.link || item.apply_link || '#',
+						description: item.description || item.snippet || '',
+						tags: [],
+						source: 'googlejobs',
+						date: item.detected_extensions?.posted_at || new Date().toISOString()
+					});
+				});
+			})
+			.catch(function (err) {
+				console.error('Google Jobs fetch error:', err);
+			});
+	}
+
+	// Fetch from LinkedIn (requires backend proxy with Apify API key)
+	function fetchLinkedIn() {
+		// LinkedIn requires a backend proxy with Apify API key
+		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? window.JOB_PROXY_URL : '';
+		if (!proxyUrl) {
+			console.log('LinkedIn: No proxy URL configured. Set window.JOB_PROXY_URL to enable.');
+			return Promise.resolve();
+		}
+
+		return fetch(proxyUrl + '/api/linkedin?keywords=data+science&location=remote')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.results || !Array.isArray(data.results)) return;
+				data.results.forEach(function (item) {
+					if (!item || !item.title) return;
+					var title = item.title.toLowerCase();
+					var description = (item.description || item.jobDescription || '').toLowerCase();
+					var fullText = title + ' ' + description;
+
+					if (!isDataScienceJob(fullText)) return;
+
+					allJobs.push({
+						id: 'linkedin_' + (item.jobId || item.id || Math.random()).replace(/[^a-zA-Z0-9]/g, '_'),
+						title: item.title || 'Untitled',
+						company: item.companyName || item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.url || item.jobUrl || '#',
+						description: item.description || item.jobDescription || '',
+						tags: [],
+						source: 'linkedin',
+						date: item.postedDate || new Date().toISOString()
+					});
+				});
+			})
+			.catch(function (err) {
+				console.error('LinkedIn fetch error:', err);
+			});
+	}
+
+	// Fetch from Naukri (requires backend proxy with Apify API key)
+	function fetchNaukri() {
+		// Naukri requires a backend proxy with Apify API key
+		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? window.JOB_PROXY_URL : '';
+		if (!proxyUrl) {
+			console.log('Naukri: No proxy URL configured. Set window.JOB_PROXY_URL to enable.');
+			return Promise.resolve();
+		}
+
+		return fetch(proxyUrl + '/api/naukri?keyword=data+science&location=remote')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.results || !Array.isArray(data.results)) return;
+				data.results.forEach(function (item) {
+					if (!item || !item.title) return;
+					var title = item.title.toLowerCase();
+					var description = (item.description || item.jobDescription || '').toLowerCase();
+					var fullText = title + ' ' + description;
+
+					if (!isDataScienceJob(fullText)) return;
+
+					allJobs.push({
+						id: 'naukri_' + (item.jobId || item.id || Math.random()).replace(/[^a-zA-Z0-9]/g, '_'),
+						title: item.title || item.jobTitle || 'Untitled',
+						company: item.companyName || item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.url || item.jobUrl || '#',
+						description: item.description || item.jobDescription || '',
+						tags: item.skills || [],
+						source: 'naukri',
+						date: item.postedDate || new Date().toISOString()
+					});
+				});
+			})
+			.catch(function (err) {
+				console.error('Naukri fetch error:', err);
 			});
 	}
 
