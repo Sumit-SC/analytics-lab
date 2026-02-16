@@ -109,6 +109,11 @@
         "playlist": true
       }
     ],
+    "channels": [
+      { "name": "Corey Schafer", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Python & dev tutorials" },
+      { "name": "freeCodeCamp.org", "id": "UCX8OftAXkEIJB7DoMyEiqKw", "description": "Free courses & projects" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, ML, data science" }
+    ],
     "github": [
       {
         "name": "awesome-python",
@@ -1151,6 +1156,11 @@
         "playlist": true
       }
     ],
+    "channels": [
+      { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "Statistics & ML explained simply" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, data science, ML" },
+      { "name": "Ken Jee", "id": "UCiT9RITQ9PW6BXRV0l3dzHg", "description": "Data science career & projects" }
+    ],
     "github": [
       {
         "name": "awesome-datascience",
@@ -1338,6 +1348,11 @@
         "title": "Machine Learning with Python Playlist (sentdex)",
         "playlist": true
       }
+    ],
+    "channels": [
+      { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "ML & statistics explained" },
+      { "name": "3Blue1Brown", "id": "UCYO_jab_esuFRV4b17AJtAw", "description": "Math & neural networks" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "ML with Python" }
     ],
     "github": [
       {

@@ -41,6 +41,37 @@ A **second-brain hub** (Notion-like UI and use): **JS libraries** and **free on-
 
 ---
 
+## Music & Video bar (YouTube + JioSaavn)
+
+A **global bar** at the bottom of the page lets you play **YouTube** or **JioSaavn** without leaving the site. A **Video** panel on the right edge shows the current video or JioSaavn search results.
+
+### Where to find it
+
+- **Music bar**: Fixed at the **bottom** of the viewport (every page that includes it: Home, Playground, Trends, Tools, Jobs, Resources).
+- **Video panel**: **Right edge** — a vertical “Video” tab. Click it to open the slide-out panel.
+
+### Toggle YouTube vs JioSaavn
+
+- In the music bar you’ll see two buttons: **YT** and **JioSaavn**.
+- Click **YT** for YouTube: paste a video URL or ID in the input, then **Add** → **Play** (or use **Focus mix** for a built-in study playlist).
+- Click **JioSaavn** to use it as a Spotify-like option: the input becomes “Search JioSaavn…”. Type a song or artist, press **Add** or **Enter** to search; results appear in the **Video** panel. Click a result to play. Play/Pause/Next work in the bar.
+
+### How to search and play (JioSaavn)
+
+1. Click **JioSaavn** in the bar (so the input says “Search JioSaavn…”).
+2. Type a song name or artist and press **Enter** or click **Add**.
+3. The **Video** panel opens with a list of results; click any track to play it.
+4. Use **Play** / **Pause** / **Next** in the bar to control playback.
+
+Search works from **either** the bottom bar input **or** the input inside the Video panel when the panel is open — both use the same JioSaavn search. Playlist/queue is stored in the browser for the session; there is no share/embed of JioSaavn playlists (the app uses an unofficial API). For **YouTube**, paste a playlist URL in the Video panel to queue; the global bar stays in sync.
+
+### Embed / share
+
+- **YouTube**: You can share or embed the **site URL** (e.g. your Playground) and others get the same music bar and Video panel; they paste their own YouTube URLs. There is no “share this playlist” link stored on the server.
+- **JioSaavn**: Playback is in-browser only; no public embed or share of your queue. To “share” a mood, describe the search (e.g. “search JioSaavn for …”) or use the Focus mix on YT.
+
+---
+
 ## Run locally
 
 Serve the `analytics-lab` folder with any static server:

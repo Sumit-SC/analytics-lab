@@ -385,6 +385,92 @@
 					window.open(url, '_blank', 'noopener');
 				});
 				container.appendChild(searchBtnEl);
+
+				// Recommended channels: tap channel name to show mini embed (channel uploads) + link to open full channel
+				var channels = topic.channels || [];
+				if (channels.length) {
+					var chSection = document.createElement('div');
+					chSection.className = 'mt-6 pt-4 border-t border-gray-200 dark:border-gray-700';
+					var chTitle = document.createElement('h3');
+					chTitle.className = 'text-sm font-bold text-gray-800 dark:text-gray-100 mb-2';
+					chTitle.textContent = 'Recommended channels (tap to explore on this page)';
+					chSection.appendChild(chTitle);
+					var chList = document.createElement('div');
+					chList.className = 'flex flex-wrap gap-2';
+					channels.forEach(function (ch) {
+						if (!ch || !ch.id) return;
+						var uploadsListId = 'UU' + ch.id.slice(2);
+						var channelUrl = 'https://www.youtube.com/channel/' + ch.id;
+						var btn = document.createElement('button');
+						btn.type = 'button';
+						btn.className = 'resource-channel-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left';
+						btn.setAttribute('data-channel-id', ch.id);
+						btn.setAttribute('data-uploads-list', uploadsListId);
+						btn.setAttribute('data-channel-url', channelUrl);
+						btn.innerHTML = (ch.name || 'Channel') + (ch.description ? ' <span class="text-gray-500 dark:text-gray-400 font-normal">· ' + ch.description + '</span>' : '');
+						chList.appendChild(btn);
+					});
+					chSection.appendChild(chList);
+					var chExpand = document.createElement('div');
+					chExpand.className = 'resource-channel-embed-wrap hidden mt-3 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800';
+					chSection.appendChild(chExpand);
+					container.appendChild(chSection);
+
+					chList.addEventListener('click', function (e) {
+						var btn = e.target.closest('.resource-channel-btn');
+						if (!btn) return;
+						var channelId = btn.getAttribute('data-channel-id');
+						var uploadsListId = btn.getAttribute('data-uploads-list');
+						var channelUrl = btn.getAttribute('data-channel-url');
+						var wrap = container.querySelector('.resource-channel-embed-wrap');
+						if (!wrap) return;
+						var isOpen = wrap.classList.contains('hidden') === false;
+						var sameChannel = wrap.getAttribute('data-current-channel') === channelId;
+						if (sameChannel && isOpen) {
+							wrap.classList.add('hidden');
+							wrap.innerHTML = '';
+							wrap.removeAttribute('data-current-channel');
+							return;
+						}
+						wrap.classList.remove('hidden');
+						wrap.setAttribute('data-current-channel', channelId);
+						wrap.innerHTML = '';
+						var embedRow = document.createElement('div');
+						embedRow.className = 'p-3 flex flex-col sm:flex-row gap-3';
+						var iframeWrap = document.createElement('div');
+						iframeWrap.className = 'flex-1 rounded-lg overflow-hidden bg-black';
+						iframeWrap.style.aspectRatio = '16 / 9';
+						iframeWrap.style.minHeight = '200px';
+						var iframe = document.createElement('iframe');
+						iframe.className = 'w-full h-full';
+						iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + uploadsListId + '&rel=0';
+						iframe.title = 'Channel uploads';
+						iframe.allowFullscreen = true;
+						iframeWrap.appendChild(iframe);
+						embedRow.appendChild(iframeWrap);
+						var linkBox = document.createElement('div');
+						linkBox.className = 'flex flex-col justify-center gap-2';
+						var openLink = document.createElement('a');
+						openLink.href = channelUrl;
+						openLink.target = '_blank';
+						openLink.rel = 'noopener';
+						openLink.className = 'text-sm font-semibold text-primary hover:underline';
+						openLink.textContent = 'Open channel on YouTube →';
+						linkBox.appendChild(openLink);
+						var closeBtn = document.createElement('button');
+						closeBtn.type = 'button';
+						closeBtn.className = 'text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200';
+						closeBtn.textContent = 'Close embed';
+						closeBtn.addEventListener('click', function () {
+							wrap.classList.add('hidden');
+							wrap.innerHTML = '';
+							wrap.removeAttribute('data-current-channel');
+						});
+						linkBox.appendChild(closeBtn);
+						embedRow.appendChild(linkBox);
+						wrap.appendChild(embedRow);
+					});
+				}
 			}
 
 			render();
