@@ -614,8 +614,8 @@ body {
 	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 .home-quote {
-	font-size: 1.125rem;
-	line-height: 1.6;
+	font-size: 1.3rem;
+	line-height: 1.7;
 	color: rgb(51 65 85);
 	font-style: italic;
 }
@@ -623,8 +623,8 @@ body {
 	color: rgb(203 213 225);
 }
 .home-quote-attr {
-	font-size: 0.8rem;
-	opacity: 0.85;
+	font-size: 0.9rem;
+	opacity: 0.9;
 	margin-top: 0.5rem;
 }
 .home-section-title {
@@ -638,15 +638,11 @@ body {
 	color: rgb(148 163 184);
 }
 
-/* Homepage quote background image: use more area, keep aspect */
+/* Homepage quote background image: show full poster without stretching */
 #home-quote-bg {
-	background-size: cover;
-	background-position: center top;
-}
-@media (min-width: 768px) {
-	#home-quote-bg {
-		background-size: 120% auto;
-	}
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
 }
 
 /* Notion-style Go to cards (main stars) */
@@ -1006,6 +1002,17 @@ body:has(#global-music-bar) {
 		font-size: 0.8rem;
 		max-width: 100%;
 	}
+}
+
+/* Assistant chat: keep above music bar and video panel */
+#assistant-overlay {
+	z-index: 60 !important;
+}
+#assistant-panel {
+	z-index: 70 !important;
+}
+#assistant-btn {
+	z-index: 65 !important;
 }
 
 /* Dict & Video toggles: minimum touch target on mobile */
