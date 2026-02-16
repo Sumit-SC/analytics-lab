@@ -16,6 +16,11 @@
 	<link rel="preconnect" href="https://api.rss2json.com">
 	<link rel="preconnect" href="https://jobs.github.com">
 	<link rel="stylesheet" href="./assets/css/main.css">
+	<script>
+		// Configure job proxy URL if API is deployed separately (e.g., Vercel)
+		// Set window.JOB_PROXY_URL = 'https://your-api.vercel.app'; before loading jobs.js
+		// If deploying analytics-lab to Vercel/Netlify with api/ folder, leave this unset (uses same origin)
+	</script>
 	<style>
 		.job-card {
 			transition: all 0.2s ease;
@@ -103,10 +108,14 @@
 					<option value="stackoverflow">Stack Overflow</option>
 					<option value="github">GitHub</option>
 					<option value="weworkremotely">We Work Remotely</option>
+					<option value="naukri">Naukri</option>
+					<option value="wellfound">Wellfound</option>
 					<option value="indeed">Indeed</option>
 					<option value="googlejobs">Google Jobs</option>
 					<option value="linkedin">LinkedIn</option>
-					<option value="naukri">Naukri</option>
+					<option value="instahyre">Instahyre</option>
+					<option value="hirist">Hirist</option>
+					<option value="himalaya">Himalaya</option>
 				</select>
 				<select id="job-filter-match" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
 					<option value="all">All Matches</option>
