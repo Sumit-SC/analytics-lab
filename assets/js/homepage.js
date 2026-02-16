@@ -308,9 +308,10 @@
 
 	function getImageMode() {
 		try {
-			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'live';
+			// Default to 'local' so we don't hit OMDb until the user explicitly enables live posters
+			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'local';
 		} catch (e) {
-			return 'live';
+			return 'local';
 		}
 	}
 
@@ -322,12 +323,22 @@
 	// type: 'movie' | 'series' | omit. Set window.OMDB_PROXY_URL if proxy is on another host.
 	function fetchOMDBPoster(title, cb, type) {
 		if (!title || !title.trim()) { cb(null); return; }
+		var key = title.trim();
+		// If we already discovered a poster for this title, reuse it instead of calling OMDb again
+		if (quoteImageCache[key] && quoteImageCache[key].url) {
+			cb(quoteImageCache[key].url);
+			return;
+		}
 		var base = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
 		var apiUrl = (base || '') + '/api/omdb?t=' + encodeURIComponent(title.trim()) + (type === 'movie' || type === 'series' ? '&type=' + type : '');
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				var poster = data && data.poster && data.poster.indexOf && data.poster.indexOf('http') === 0 ? data.poster : null;
+				if (poster) {
+					quoteImageCache[key] = { url: poster, ts: Date.now() };
+					saveQuoteImageCache();
+				}
 				cb(poster);
 			})
 			.catch(function () { cb(null); });

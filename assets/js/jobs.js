@@ -82,6 +82,7 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterAge = document.getElementById('job-filter-age');
 		var refreshBtn = document.getElementById('job-refresh-btn');
 
 		if (searchInput) {
@@ -95,6 +96,9 @@
 		}
 		if (filterStatus) {
 			filterStatus.addEventListener('change', applyFilters);
+		}
+		if (filterAge) {
+			filterAge.addEventListener('change', applyFilters);
 		}
 		if (refreshBtn) {
 			refreshBtn.addEventListener('click', fetchAllJobs);
@@ -867,11 +871,16 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterAge = document.getElementById('job-filter-age');
 
 		var searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 		var sourceFilter = filterSource ? filterSource.value : 'all';
 		var matchFilter = filterMatch ? filterMatch.value : 'all';
 		var statusFilter = filterStatus ? filterStatus.value : 'all';
+		var ageFilter = filterAge ? filterAge.value : 'all';
+
+		var now = new Date();
+		var ageDays = ageFilter === 'all' ? null : parseInt(ageFilter, 10) || null;
 
 		filteredJobs = allJobs.filter(function (job) {
 			// Search filter
@@ -893,6 +902,16 @@
 			if (statusFilter !== 'all') {
 				var status = applications[job.id] || 'new';
 				if (status !== statusFilter) return false;
+			}
+
+			// Age filter (freshness)
+			if (ageDays != null) {
+				var d = job.date || job.created_at || job.postedAt || job.postedDate;
+				if (!d) return false;
+				var created = new Date(d);
+				if (isNaN(created.getTime())) return false;
+				var diffDays = (now - created) / (1000 * 60 * 60 * 24);
+				if (diffDays > ageDays) return false;
 			}
 
 			return true;
