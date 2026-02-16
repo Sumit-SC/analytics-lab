@@ -613,6 +613,14 @@ body {
 .dark .second-brain-card:hover {
 	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
+
+/* Ensure quote + timer panels share a comfortable, consistent height */
+.home-focus-panel {
+	min-height: 260px;
+	display: flex;
+	flex-direction: column;
+}
+
 .home-quote {
 	font-size: 1.3rem;
 	line-height: 1.7;

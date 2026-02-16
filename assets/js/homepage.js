@@ -759,7 +759,7 @@
 		}
 	}
 
-	// Focus timer: configurable work/break + session log (localStorage)
+	// Focus timer: configurable work/break + session log (localStorage) + presets
 	var TIMER_LOG_KEY = 'standalone_timer_log';
 	var TIMER_SETTINGS_KEY = 'standalone_timer_settings';
 	var timerDisplay = document.getElementById('home-timer-display');
@@ -772,12 +772,18 @@
 	var timerBreakInput = document.getElementById('home-timer-break-min');
 	var timerApplyBtn = document.getElementById('home-timer-apply');
 	var timerSessionLabel = document.getElementById('home-timer-session-label');
+	var timerRoundsInput = document.getElementById('home-timer-rounds');
+	var timerAutoCheckbox = document.getElementById('home-timer-auto');
+	var timerStatusText = document.getElementById('home-timer-status');
+	var timerPresetButtons = document.querySelectorAll('.home-timer-preset');
 	var timerInterval = null;
 	var timerSeconds = 25 * 60;
 	var timerRemaining = 25 * 60;
 	var timerWorkMins = 25;
 	var timerBreakMins = 5;
 	var timerIsBreak = false;
+	var timerTotalRounds = 1;
+	var timerRemainingRounds = null;
 
 	function formatTime(s) {
 		var m = Math.floor(s / 60);
@@ -812,6 +818,22 @@
 			updateTimerDisplay();
 			updatePhaseLabel();
 		}
+	}
+
+	// Preset buttons (e.g. 20/5, 40/10, 50/10)
+	if (timerPresetButtons && timerPresetButtons.length) {
+		Array.prototype.forEach.call(timerPresetButtons, function (btn) {
+			btn.addEventListener('click', function () {
+				var w = parseInt(btn.getAttribute('data-work'), 10) || 25;
+				var b = parseInt(btn.getAttribute('data-break'), 10) || 5;
+				if (timerWorkInput) timerWorkInput.value = w;
+				if (timerBreakInput) timerBreakInput.value = b;
+				applyTimerSpan();
+				if (timerStatusText) {
+					timerStatusText.textContent = w + ' / ' + b + ' preset selected';
+				}
+			});
+		});
 	}
 
 	function getTimerLog() {
@@ -861,12 +883,51 @@
 				updatePhaseLabel();
 				if (typeof document.hidden !== 'undefined' && !document.hidden) {
 					try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+					try { alert('Break over. Back to focus.'); } catch (e) {}
 				}
 				return;
 			}
 			var minsLogged = Math.round((timerWorkMins * 60 - 0) / 60) || timerWorkMins;
 			addTimerLogEntry(minsLogged, timerSessionLabel && timerSessionLabel.value ? timerSessionLabel.value.trim() : '');
 			if (timerSessionLabel) timerSessionLabel.value = '';
+
+			var autoOn = !!(timerAutoCheckbox && timerAutoCheckbox.checked);
+			if (autoOn && timerRoundsInput) {
+				var total = timerTotalRounds;
+				if (timerRemainingRounds == null) {
+					total = parseInt(timerRoundsInput.value, 10) || 1;
+					timerTotalRounds = Math.max(1, Math.min(12, total));
+					timerRemainingRounds = timerTotalRounds;
+				}
+				timerRemainingRounds--;
+				if (timerRemainingRounds <= 0) {
+					// Finished all planned rounds: stop completely after this work block
+					clearInterval(timerInterval);
+					timerInterval = null;
+					timerIsBreak = false;
+					timerSeconds = timerWorkMins * 60;
+					timerRemaining = timerSeconds;
+					updateTimerDisplay();
+					updatePhaseLabel();
+					if (timerBtn) {
+						timerBtn.textContent = 'Start';
+						timerBtn.dataset.running = '0';
+					}
+					if (timerStatusText) {
+						timerStatusText.textContent = 'Completed ' + timerTotalRounds + ' rounds';
+					}
+					if (typeof document.hidden !== 'undefined' && !document.hidden) {
+						try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+						try { alert('All scheduled focus sessions are done.'); } catch (e) {}
+					}
+					timerRemainingRounds = null;
+					return;
+				} else if (timerStatusText) {
+					var doneRounds = timerTotalRounds - timerRemainingRounds;
+					timerStatusText.textContent = 'Round ' + (doneRounds + 1) + ' of ' + timerTotalRounds;
+				}
+			}
+
 			if (timerBreakMins > 0) {
 				timerIsBreak = true;
 				timerSeconds = timerBreakMins * 60;
@@ -874,6 +935,7 @@
 				updatePhaseLabel();
 				if (typeof document.hidden !== 'undefined' && !document.hidden) {
 					try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+					try { alert('Focus block done. Break started.'); } catch (e) {}
 				}
 			} else {
 				clearInterval(timerInterval);
@@ -904,6 +966,21 @@
 				timerBtn.textContent = 'Resume';
 				timerBtn.dataset.running = '0';
 			} else {
+				// Initialize rounds state when starting
+				if (timerAutoCheckbox && timerAutoCheckbox.checked && timerRoundsInput) {
+					var rounds = parseInt(timerRoundsInput.value, 10) || 1;
+					timerTotalRounds = Math.max(1, Math.min(12, rounds));
+					if (timerRemainingRounds == null) {
+						timerRemainingRounds = timerTotalRounds;
+					}
+					if (timerStatusText) {
+						var done = timerTotalRounds - timerRemainingRounds;
+						timerStatusText.textContent = 'Round ' + (done + 1) + ' of ' + timerTotalRounds;
+					}
+				} else {
+					timerRemainingRounds = null;
+					if (timerStatusText) timerStatusText.textContent = '';
+				}
 				timerBtn.textContent = 'Pause';
 				timerBtn.dataset.running = '1';
 				timerInterval = setInterval(tick, 1000);

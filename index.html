@@ -125,7 +125,7 @@
 
 		<!-- Row 2: Quote + Focus timer (side by side, equal width on desktop) -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
-			<section class="second-brain-card relative overflow-hidden p-0">
+			<section class="second-brain-card home-focus-panel relative overflow-hidden p-0">
 				<div id="home-quote-bg" class="absolute inset-0 bg-cover bg-center opacity-20 dark:opacity-10" aria-hidden="true"></div>
 				<div class="relative p-5 sm:p-6">
 					<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -150,7 +150,9 @@
 							</label>
 							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
 							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
-							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Open Pinterest search for this source">https://img.icons8.com/?size=100&id=63676&format=png&color=000000</button>
+							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Open Pinterest search for this source">
+								<img src="https://img.icons8.com/?size=100&id=63676&format=png&color=000000" alt="Pinterest" class="w-4 h-4" loading="lazy" />
+							</button>
 						</div>
 					</div>
 					<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
@@ -159,8 +161,26 @@
 				</div>
 			</section>
 
-			<section class="second-brain-card p-5 sm:p-6">
+			<section class="second-brain-card home-focus-panel p-5 sm:p-6">
 				<p class="home-section-title mb-2">Focus timer</p>
+				<!-- Presets and rounds -->
+				<div class="flex flex-wrap items-center gap-2 mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+					<span class="uppercase tracking-wide font-semibold">Presets:</span>
+					<button type="button" class="tool-sec-btn home-timer-preset" data-work="20" data-break="5">20 / 5</button>
+					<button type="button" class="tool-sec-btn home-timer-preset" data-work="40" data-break="10">40 / 10</button>
+					<button type="button" class="tool-sec-btn home-timer-preset" data-work="50" data-break="10">50 / 10</button>
+					<span class="inline-flex items-center gap-1 ml-1">
+						<span>Rounds</span>
+						<input type="number" id="home-timer-rounds" min="1" max="12" value="1" class="w-14 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-1 py-0.5 text-center text-[11px] text-gray-800 dark:text-gray-200" aria-label="Number of pomodoro rounds">
+					</span>
+				</div>
+				<div class="flex flex-wrap items-center gap-3 mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+					<label class="flex items-center gap-1">
+						<input type="checkbox" id="home-timer-auto" class="rounded border-gray-300 dark:border-gray-600">
+						<span>Auto repeat schedule</span>
+					</label>
+					<span id="home-timer-status" class="text-[11px] text-gray-500 dark:text-gray-400"></span>
+				</div>
 				<!-- Time spans: work & break (saved in browser) -->
 				<div class="flex flex-wrap items-center gap-3 mb-3 text-sm">
 					<label class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
