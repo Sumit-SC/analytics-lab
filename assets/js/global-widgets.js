@@ -256,6 +256,10 @@
 	function setSourceUI(src) {
 		var isSaavn = src === 'saavn';
 		if (barInput) barInput.placeholder = isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or video ID';
+		var panelInput = document.getElementById('global-yt-panel-input');
+		if (panelInput) panelInput.placeholder = isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or type search…';
+		var pipedLabel = document.querySelector('.global-yt-panel-piped-label');
+		if (pipedLabel) pipedLabel.style.display = isSaavn ? 'none' : '';
 		var focusBtn = document.getElementById('global-music-focus');
 		if (focusBtn) focusBtn.style.display = isSaavn ? 'none' : '';
 		var panelIframe = document.getElementById('global-yt-panel-iframe');
@@ -373,28 +377,52 @@
 		if (panel) panel.classList.toggle('global-yt-panel-open', !!open);
 	}
 
+	var PIPED_PANEL_KEY = 'standalone_yt_panel_piped';
+	function getPiped() {
+		try { return localStorage.getItem(PIPED_PANEL_KEY) === '1'; } catch (e) { return false; }
+	}
+	function setPiped(on) {
+		try { localStorage.setItem(PIPED_PANEL_KEY, on ? '1' : '0'); } catch (e) {}
+	}
+
+	function embedVideoUrl(id) {
+		if (getPiped()) return 'https://piped.video/embed/' + id + '?autoplay=1';
+		return 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+	}
+
 	function openSearch(q) {
-		if (!panelFrame) return;
 		var trimmed = (q || '').trim();
-		if (!trimmed) {
-			// If no query, just ensure a default focus video is loaded for ambience
-			if (!panelFrame.src && DEFAULT_EMBED_ID) {
-				panelFrame.src = 'https://www.youtube.com/embed/' + DEFAULT_EMBED_ID;
+		// When source is Saavn, panel input is for JioSaavn search
+		if (getMusicSource() === 'saavn') {
+			if (!trimmed) return;
+			searchSaavn(trimmed, function (list) {
+				setSaavnQueue(list);
+				renderSaavnResults(list);
+				if (list.length > 0) playSaavnAt(0);
+			});
+			if (panel) {
+				panel.classList.add('global-yt-panel-open');
+				setPanelOpen(true);
 			}
 			return;
 		}
-		// If user pasted a URL or ID, embed that video directly
-		var id = parseVideoId(trimmed);
-		if (id) {
-			panelFrame.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+		if (!panelFrame) return;
+		if (!trimmed) {
+			if (!panelFrame.src && DEFAULT_EMBED_ID) {
+				panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
+			}
 			return;
 		}
-		// Otherwise, open YouTube search in a new tab and keep panel as a player
+		var id = parseVideoId(trimmed);
+		if (id) {
+			panelFrame.src = embedVideoUrl(id);
+			return;
+		}
 		try {
 			window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(trimmed), '_blank', 'noopener');
 		} catch (e) {}
 		if (!panelFrame.src && DEFAULT_EMBED_ID) {
-			panelFrame.src = 'https://www.youtube.com/embed/' + DEFAULT_EMBED_ID;
+			panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
 		}
 	}
 
@@ -406,8 +434,8 @@
 			panelToggle.addEventListener('click', function () {
 				var open = panel.classList.toggle('global-yt-panel-open');
 				setPanelOpen(open);
-				if (open && !panelFrame.src && DEFAULT_EMBED_ID) {
-					panelFrame.src = 'https://www.youtube.com/embed/' + DEFAULT_EMBED_ID;
+				if (open && getMusicSource() !== 'saavn' && !panelFrame.src && DEFAULT_EMBED_ID) {
+					panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
 				}
 			});
 		}
@@ -425,6 +453,17 @@
 				if (e.key === 'Enter') openSearch(panelInput.value.trim());
 			});
 		}
-		// Do not eagerly load anything; wait for user interaction or openSearch
+		// Piped toggle in panel header (optional)
+		var pipedToggle = document.getElementById('global-yt-panel-piped');
+		if (pipedToggle) {
+			pipedToggle.checked = getPiped();
+			pipedToggle.addEventListener('change', function () {
+				setPiped(pipedToggle.checked);
+				if (panelFrame.src && getMusicSource() !== 'saavn') {
+					var m = panelFrame.src.match(/(?:embed\/|v=)([a-zA-Z0-9_-]{11})/);
+					if (m) panelFrame.src = embedVideoUrl(m[1]);
+				}
+			});
+		}
 	}
 })();

@@ -27,6 +27,7 @@
 						<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
 						<a href="./resources.html?topic=python" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Resources</a>
 						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+						<a href="./jobs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Jobs</a>
 						<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
 					</div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
@@ -47,6 +48,7 @@
 			<a href="./trends.html">Trends</a>
 			<a href="./resources.html" class="text-primary border-primary">Resources</a>
 			<a href="./tools.html">Tools</a>
+			<a href="./jobs.html">Jobs</a>
 			<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent" aria-label="Toggle Roadmap">Roadmap</button>
 		</nav>
 	</div>
@@ -171,6 +173,14 @@
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
 	</div>
+	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
+	<div id="global-resources-flyout">
+		<div class="global-resources-header">
+			<span>Resources</span>
+			<button type="button" id="global-resources-close" class="global-resources-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-resources-body"></div>
+	</div>
 	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
 	<div id="global-dict-flyout">
 		<div class="global-dict-header">
@@ -186,6 +196,7 @@
 		<div class="global-yt-panel-header">
 			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
 			<button type="button" id="global-yt-panel-search">Search</button>
+			<label class="global-yt-panel-piped-label"><input type="checkbox" id="global-yt-panel-piped" aria-label="Use Piped for video"> Piped</label>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
 		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
@@ -202,6 +213,7 @@
 	<script src="./assets/js/roadmap.js" defer></script>
 	<script src="./assets/js/global-widgets.js" defer></script>
 	<script src="./assets/js/dict-widget.js" defer></script>
+	<script src="./assets/js/resources-flyout.js" defer></script>
 	<script src="./assets/js/assistant.js" defer></script>
 	<script src="./assets/js/resources.js"></script>
 	<script>

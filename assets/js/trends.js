@@ -246,6 +246,271 @@
 	applyImages();
 })();
 
+(function () {
+	// Medium/Towards Data Science RSS feed (via RSS2JSON proxy)
+	var listEl = document.getElementById('trends-medium-list');
+	var statusEl = document.getElementById('trends-medium-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	function fetchMediumArticles() {
+		// Use RSS2JSON to convert RSS to JSON (CORS-friendly)
+		var rssUrl = encodeURIComponent('https://towardsdatascience.com/feed');
+		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
+
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.items || !Array.isArray(data.items) || data.items.length === 0) {
+					setStatus('No articles available right now.');
+					return;
+				}
+				var items = data.items.slice(0, 10);
+				setStatus('Showing ' + items.length + ' latest articles.');
+				var html = '';
+				items.forEach(function (item) {
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.link || item.guid || '#';
+					var pubDate = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
+					var author = item.author || '';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+					if (author) html += author + ' &middot; ';
+					if (pubDate) html += pubDate;
+					html += '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				setStatus('Could not reach Medium feed. Try again later.');
+			});
+	}
+
+	fetchMediumArticles();
+})();
+
+(function () {
+	// Dev.to trending articles
+	var listEl = document.getElementById('trends-devto-list');
+	var statusEl = document.getElementById('trends-devto-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	function fetchDevToArticles() {
+		// Top articles from last 7 days
+		fetch('https://dev.to/api/articles?top=7&per_page=10', {
+			headers: {
+				'User-Agent': 'analytics-lab-trends/1.0'
+			}
+		})
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (items) {
+				if (!Array.isArray(items) || items.length === 0) {
+					setStatus('No articles available right now.');
+					return;
+				}
+				setStatus('Showing ' + items.length + ' trending articles.');
+				var html = '';
+				items.forEach(function (item) {
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.url || ('https://dev.to' + (item.path || ''));
+					var reactions = item.positive_reactions_count || 0;
+					var comments = item.comments_count || 0;
+					var tags = Array.isArray(item.tag_list) ? item.tag_list.slice(0, 3).join(', ') : '';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+					html += reactions + ' reactions';
+					if (comments > 0) html += ' &middot; ' + comments + ' comments';
+					if (tags) html += ' &middot; ' + tags;
+					html += '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				setStatus('Could not reach Dev.to API. Try again later.');
+			});
+	}
+
+	fetchDevToArticles();
+})();
+
+(function () {
+	// Reddit r/datascience hot posts
+	var listEl = document.getElementById('trends-reddit-list');
+	var statusEl = document.getElementById('trends-reddit-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	function fetchRedditPosts() {
+		// Reddit JSON API - no auth needed for public subreddits
+		fetch('https://www.reddit.com/r/datascience/hot.json?limit=10', {
+			headers: {
+				'User-Agent': 'analytics-lab-trends/1.0'
+			}
+		})
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.data || !data.data.children || !Array.isArray(data.data.children)) {
+					setStatus('No posts available right now.');
+					return;
+				}
+				var posts = data.data.children.slice(0, 10);
+				setStatus('Showing ' + posts.length + ' hot posts.');
+				var html = '';
+				posts.forEach(function (post) {
+					var item = post.data;
+					if (!item) return;
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.url || ('https://www.reddit.com' + item.permalink);
+					var score = item.score || 0;
+					var comments = item.num_comments || 0;
+					var subreddit = item.subreddit || 'datascience';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+					html += score + ' points';
+					if (comments > 0) html += ' &middot; ' + comments + ' comments';
+					html += ' &middot; r/' + subreddit;
+					html += '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				setStatus('Could not reach Reddit. Try again later.');
+			});
+	}
+
+	fetchRedditPosts();
+})();
+
+(function () {
+	// Reddit r/MachineLearning hot posts
+	var listEl = document.getElementById('trends-reddit-ml-list');
+	var statusEl = document.getElementById('trends-reddit-ml-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	function fetchRedditMLPosts() {
+		// Reddit JSON API - no auth needed for public subreddits
+		fetch('https://www.reddit.com/r/MachineLearning/hot.json?limit=10', {
+			headers: {
+				'User-Agent': 'analytics-lab-trends/1.0'
+			}
+		})
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.data || !data.data.children || !Array.isArray(data.data.children)) {
+					setStatus('No posts available right now.');
+					return;
+				}
+				var posts = data.data.children.slice(0, 10);
+				setStatus('Showing ' + posts.length + ' hot posts.');
+				var html = '';
+				posts.forEach(function (post) {
+					var item = post.data;
+					if (!item) return;
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.url || ('https://www.reddit.com' + item.permalink);
+					var score = item.score || 0;
+					var comments = item.num_comments || 0;
+					var subreddit = item.subreddit || 'MachineLearning';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+					html += score + ' points';
+					if (comments > 0) html += ' &middot; ' + comments + ' comments';
+					html += ' &middot; r/' + subreddit;
+					html += '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				setStatus('Could not reach Reddit. Try again later.');
+			});
+	}
+
+	fetchRedditMLPosts();
+})();
+
+(function () {
+	// GitHub trending repositories
+	var listEl = document.getElementById('trends-github-list');
+	var statusEl = document.getElementById('trends-github-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	function fetchGitHubTrending() {
+		// Using unofficial GitHub trending API
+		fetch('https://githubtrending.lessx.xyz/trending?since=daily&language=&spoken_language_code=en')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !Array.isArray(data) || data.length === 0) {
+					setStatus('No trending repos available right now.');
+					return;
+				}
+				var repos = data.slice(0, 10);
+				setStatus('Showing ' + repos.length + ' trending repositories.');
+				var html = '';
+				repos.forEach(function (repo) {
+					var name = repo.name || '';
+					var author = repo.author || '';
+					var description = repo.description || '';
+					var stars = repo.stars || 0;
+					var forks = repo.forks || 0;
+					var language = repo.language || '';
+					var url = repo.url || ('https://github.com/' + author + '/' + name);
+					var fullName = author ? author + '/' + name : name;
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + fullName.replace(/</g, '&lt;') + '</a>';
+					if (description) html += '<p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-1">' + description.replace(/</g, '&lt;').substring(0, 120) + (description.length > 120 ? '…' : '') + '</p>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+					html += stars.toLocaleString() + ' stars';
+					if (forks > 0) html += ' &middot; ' + forks.toLocaleString() + ' forks';
+					if (language) html += ' &middot; ' + language;
+					html += '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				setStatus('Could not reach GitHub trending API. Try again later.');
+			});
+	}
+
+	fetchGitHubTrending();
+})();
+
 // Analytics: track visits and time-on-page for Trends
 if (typeof initAnalyticsTracking === 'function') {
 	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'trends' });
