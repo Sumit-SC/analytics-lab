@@ -7,10 +7,15 @@ const fs = require('fs');
 const path = require('path');
 
 const key = process.env.OMDB_API_KEY || '';
-const file = path.join(__dirname, '..', 'assets', 'js', 'homepage.js');
+const file = path.resolve(__dirname, '..', 'assets', 'js', 'homepage.js');
+if (!fs.existsSync(file)) {
+  console.error('File not found:', file);
+  process.exit(1);
+}
 let content = fs.readFileSync(file, 'utf8');
 
-// Escape for use inside a double-quoted JS string
-const escaped = key.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+// Escape for use inside single-quoted JS string
+const escaped = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 content = content.replace('__OMDB_API_KEY__', escaped);
 fs.writeFileSync(file, content);
+console.log('OMDb key injected into homepage.js');

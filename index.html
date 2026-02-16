@@ -24,22 +24,39 @@
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased page-home">
-	<nav class="bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
+	<nav class="app-bar bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
 		<div class="max-w-5xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
 				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
-					<a href="./index.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Home</a>
-					<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
-					<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
-					<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-					<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
+					<div class="nav-links-inline flex items-center gap-2">
+						<a href="./index.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Home</a>
+						<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
+						<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
+						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
+						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+					</div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
 				</div>
 			</div>
 		</div>
 	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links">
+			<a href="./index.html" class="text-primary border-primary">Home</a>
+			<a href="./playground.html">Playground</a>
+			<a href="./trends.html">Trends</a>
+			<a href="./resources.html">Resources</a>
+			<a href="./tools.html">Tools</a>
+		</nav>
+	</div>
 
 	<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 		<header class="mb-6 sm:mb-8">
@@ -215,10 +232,14 @@
 	<!-- Global music bar (YouTube, Spotify-style alternative) + right-side video panel -->
 	<div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+		</div>
 		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
 		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
 		<span id="global-music-title">Paste YouTube URL or ID</span>
-		<button type="button" id="global-music-focus" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
@@ -240,9 +261,15 @@
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above, or open this panel and use the search below.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
 		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
 	</div>
 
+	<!-- If OMDb API is on another host (e.g. you deploy API to Vercel and site to GitHub Pages), set: window.OMDB_PROXY_URL = 'https://your-api.vercel.app'; -->
+	<script src="./assets/js/nav-mobile.js" defer></script>
 	<script src="./assets/js/color-theme.js" defer></script>
 	<script src="./assets/js/theme.js" defer></script>
 	<script src="./assets/js/analytics.js" defer></script>

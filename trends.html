@@ -14,36 +14,61 @@
 	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
 	<link rel="preconnect" href="https://hacker-news.firebaseio.com">
 	<link rel="preconnect" href="https://wikimedia.org">
+	<link rel="preconnect" href="https://inshorts.vercel.app">
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
-	<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
 		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
 				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
-					<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
-					<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
-					<a href="./trends.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Trends</a>
-					<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-					<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
+					<div class="nav-links-inline flex items-center gap-2">
+						<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
+						<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
+						<a href="./trends.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Trends</a>
+						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
+						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+					</div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
 				</div>
 			</div>
 		</div>
 	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links">
+			<a href="./index.html">Home</a>
+			<a href="./playground.html">Playground</a>
+			<a href="./trends.html" class="text-primary border-primary">Trends</a>
+			<a href="./resources.html">Resources</a>
+			<a href="./tools.html">Tools</a>
+		</nav>
+	</div>
 
 	<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 		<header class="mb-2">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Trends</h1>
-			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl">
-				A calm &ldquo;what&apos;s happening&rdquo; view built only from free APIs: tech headlines, popular Wikipedia pages, and a small inspiration strip.
+			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mb-4">
+				A calm &ldquo;what&apos;s happening&rdquo; view built only from free APIs. Use the filter below to show only one category.
 			</p>
+			<div class="flex flex-wrap gap-2" id="trends-filter-bar" role="tablist" aria-label="Filter trends by category">
+				<button type="button" class="trends-filter-btn active px-4 py-2 rounded-full text-sm font-semibold border-2 border-primary bg-primary/10 text-primary transition-all min-h-[44px]" data-trend-filter="all" role="tab" aria-selected="true">All</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="tech" role="tab" aria-selected="false">Tech</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="news" role="tab" aria-selected="false">News</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="entertainment" role="tab" aria-selected="false">Entertainment</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="anime" role="tab" aria-selected="false">Anime</button>
+			</div>
 		</header>
 
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-			<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6" id="trends-sections-wrap">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Hacker News &middot; tech &amp; dev</h2>
@@ -55,7 +80,19 @@
 				<ul id="trends-hn-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Inshorts &middot; news</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Short news from <a href="https://inshorts.vercel.app/" target="_blank" rel="noopener" class="text-primary hover:underline">Inshorts API</a> (unofficial).</p>
+					</div>
+					<a href="https://inshorts.vercel.app/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">API ↗</a>
+				</div>
+				<p id="trends-inshorts-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-inshorts-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Wikipedia today</h2>
@@ -68,7 +105,7 @@
 			</section>
 		</div>
 
-		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment">
 			<div class="flex items-center justify-between mb-3">
 				<div>
 					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual strip</h2>
@@ -98,6 +135,13 @@
 			</div>
 			<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Images from <a href="https://picsum.photos/" target="_blank" rel="noopener" class="text-primary hover:underline">Picsum</a> (free placeholders).</p>
 		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 hidden" id="trends-anime-placeholder" data-trend-category="anime">
+			<div class="py-8 text-center">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Anime</h2>
+				<p class="text-sm text-gray-500 dark:text-gray-400">Anime feed (e.g. Jikan, seasonal) can be added here. Pinterest / Tumblr / Shorts-style embeds coming in a later update.</p>
+			</div>
+		</section>
 	</main>
 
 	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
@@ -110,10 +154,14 @@
 
 	<div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+		</div>
 		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
 		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
 		<span id="global-music-title">Paste YouTube URL or ID</span>
-		<button type="button" id="global-music-focus" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
@@ -135,9 +183,14 @@
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
 		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
 	</div>
 
+	<script src="./assets/js/nav-mobile.js" defer></script>
 	<script src="./assets/js/color-theme.js" defer></script>
 	<script src="./assets/js/theme.js" defer></script>
 	<script src="./assets/js/analytics.js" defer></script>

@@ -62,22 +62,43 @@
 })();
 
 (function () {
-	// Sidebar toggle (default: closed; persist in localStorage)
+	// Sidebar toggle (default: open; persist in localStorage). On mobile, sidebar is a drawer; desktop can collapse to 48px.
 	var SIDEBAR_KEY = 'standalone_sidebar_open';
 	var sidebar = document.getElementById('sidebar');
 	var btn = document.getElementById('sidebar-toggle-btn');
+	var overlay = document.getElementById('sidebar-overlay');
+	var mobileToggle = document.getElementById('sidebar-mobile-toggle');
+
+	function closeMobileSidebar() {
+		if (sidebar) sidebar.classList.remove('mobile-open');
+		if (overlay) overlay.classList.add('hidden');
+	}
+
 	if (sidebar && btn) {
 		var saved = null;
 		try {
 			saved = localStorage.getItem(SIDEBAR_KEY);
 		} catch (e) {}
-		if (saved === 'true') sidebar.classList.remove('collapsed');
+		if (saved === 'false') sidebar.classList.add('collapsed');
 		btn.addEventListener('click', function () {
+			if (sidebar.classList.contains('mobile-open')) {
+				closeMobileSidebar();
+				return;
+			}
 			sidebar.classList.toggle('collapsed');
 			try {
 				localStorage.setItem(SIDEBAR_KEY, sidebar.classList.contains('collapsed') ? 'false' : 'true');
 			} catch (e) {}
 		});
+	}
+	if (mobileToggle && sidebar && overlay) {
+		mobileToggle.addEventListener('click', function () {
+			sidebar.classList.toggle('mobile-open');
+			overlay.classList.toggle('hidden', !sidebar.classList.contains('mobile-open'));
+		});
+	}
+	if (overlay) {
+		overlay.addEventListener('click', closeMobileSidebar);
 	}
 })();
 

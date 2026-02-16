@@ -12,9 +12,7 @@
 	var quotesDb = null;
 	var lastQuoteFromDb = null; // { quote: { text, author, source, images }, category } for wallpaper refresh
 
-	// OMDb key: injected at build from GitHub Secret OMDB_API_KEY, or set localStorage 'omdb_api_key'. Do not commit real key.
-	var OMDB_API_KEY_INJECTED = '__OMDB_API_KEY__';
-	var OMDB_API_KEY_KEY = 'omdb_api_key';
+	// OMDb: poster fetched via backend proxy so the API key stays secret. Set window.OMDB_PROXY_URL to your proxy origin if API is on another host (e.g. https://your-omdb-proxy.vercel.app).
 
 	// Source/author → image URL(s). Same source = same picture. String = one URL (used twice for cycle), or [url1, url2].
 	// Wikimedia/Wikipedia posters for K-drama, movies, anime, books, leaders. OMDB/Jikan used at runtime when available.
@@ -308,12 +306,6 @@
 		return null;
 	}
 
-	function getOMDBKey() {
-		var injected = (typeof OMDB_API_KEY_INJECTED === 'string' && OMDB_API_KEY_INJECTED && OMDB_API_KEY_INJECTED !== '__OMDB_API_KEY__') ? OMDB_API_KEY_INJECTED : '';
-		if (injected) return injected;
-		try { return localStorage.getItem(OMDB_API_KEY_KEY) || ''; } catch (e) { return ''; }
-	}
-
 	function getImageMode() {
 		try {
 			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'live';
@@ -326,17 +318,16 @@
 		return getImageMode() !== 'local';
 	}
 
-	// Fetch poster from OMDb (optional; set localStorage omdb_api_key). Free key at https://www.omdbapi.com/
-	// type: 'movie' | 'series' | omit for best match. Used for quote wallpaper/posters.
+	// Fetch poster via backend proxy (key never sent to client). Proxy returns { poster: url } or { poster: null }.
+	// type: 'movie' | 'series' | omit. Set window.OMDB_PROXY_URL if proxy is on another host.
 	function fetchOMDBPoster(title, cb, type) {
-		var key = getOMDBKey();
-		if (!key || !title || !title.trim()) { cb(null); return; }
-		var url = 'https://www.omdbapi.com/?t=' + encodeURIComponent(title.trim()) + '&apikey=' + encodeURIComponent(key);
-		if (type === 'movie' || type === 'series') url += '&type=' + type;
-		fetch(url)
+		if (!title || !title.trim()) { cb(null); return; }
+		var base = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
+		var apiUrl = (base || '') + '/api/omdb?t=' + encodeURIComponent(title.trim()) + (type === 'movie' || type === 'series' ? '&type=' + type : '');
+		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
-				var poster = data && data.Poster && data.Poster !== 'N/A' && data.Poster.indexOf('http') === 0 ? data.Poster : null;
+				var poster = data && data.poster && data.poster.indexOf && data.poster.indexOf('http') === 0 ? data.poster : null;
 				cb(poster);
 			})
 			.catch(function () { cb(null); });
@@ -370,8 +361,8 @@
 			});
 			return;
 		}
-		// OMDb for posters/wallpapers: movies (movie), K-drama (series), Bollywood (movie)
-		if (livePosters && getOMDBKey() && quote.source && quote.source.trim()) {
+		// OMDb for posters/wallpapers via backend proxy (movies, K-drama, Bollywood)
+		if (livePosters && quote.source && quote.source.trim()) {
 			var omdbType = null;
 			var tryOmdb = false;
 			if (category === 'movies' || category === 'movie') {

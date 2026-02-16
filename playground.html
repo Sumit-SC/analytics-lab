@@ -20,27 +20,47 @@
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
-	<nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
 		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
 				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
-					<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
-					<a href="./playground.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Playground</a>
-					<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
-					<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-					<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
-					<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
+					<button type="button" id="sidebar-mobile-toggle" class="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Open Resources menu">&#9776; Resources</button>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer"><span aria-hidden="true">&#9776;</span><span class="ml-1 text-sm font-medium">Menu</span></button>
+					<div class="nav-links-inline flex items-center gap-2">
+						<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
+						<a href="./playground.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Playground</a>
+						<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
+						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
+						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+						<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
+					</div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs material-elevation-1">🌙</button>
 				</div>
 			</div>
 		</div>
 	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links">
+			<a href="./index.html">Home</a>
+			<a href="./playground.html" class="text-primary border-primary">Playground</a>
+			<a href="./trends.html">Trends</a>
+			<a href="./resources.html">Resources</a>
+			<a href="./tools.html">Tools</a>
+			<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle Roadmap">Roadmap</button>
+		</nav>
+	</div>
 
+	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
 	<div class="flex relative">
-		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto hidden lg:block w-[280px] shadow-sm collapsed">
-			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-200 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources">
+		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
+			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources sidebar">
 				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
 				<span class="sidebar-toggle-vertical">Resources</span>
 			</button>
@@ -380,13 +400,27 @@
 
 	<div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+		</div>
 		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
 		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
 		<span id="global-music-title">Paste YouTube URL or ID</span>
-		<button type="button" id="global-music-focus" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-omdb-toggle" class="global-omdb-toggle" aria-label="Open IMDb search">IMDb</button>
+	<div id="global-omdb-flyout" class="global-omdb-flyout">
+		<div class="global-omdb-header">
+			<input id="global-omdb-input" type="text" placeholder="Search movie or series…" aria-label="IMDb search" autocomplete="off">
+			<button type="button" id="global-omdb-close" class="global-omdb-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-omdb-body" class="global-omdb-body">
+			<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Type to search. Results show thumbnail, title, year.</p>
+		</div>
 	</div>
 	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
 	<div id="global-dict-flyout">
@@ -405,9 +439,14 @@
 			<button type="button" id="global-yt-panel-search">Search</button>
 			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
 		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
 		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
 	</div>
 
+	<script src="./assets/js/nav-mobile.js" defer></script>
 	<script src="./assets/js/color-theme.js" defer></script>
 	<script src="./assets/js/theme.js" defer></script>
 	<script src="./assets/js/analytics.js" defer></script>
@@ -415,5 +454,16 @@
 	<script src="./assets/js/global-widgets.js" defer></script>
 	<script src="./assets/js/dict-widget.js" defer></script>
 	<script src="./assets/js/playground.js" defer></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var btn = document.getElementById('nav-drawer-roadmap');
+			if (btn) btn.addEventListener('click', function () {
+				var o = document.getElementById('nav-drawer-overlay');
+				if (o) o.click();
+				var r = document.getElementById('roadmap-toggle');
+				if (r) r.click();
+			});
+		});
+	</script>
 </body>
 </html>

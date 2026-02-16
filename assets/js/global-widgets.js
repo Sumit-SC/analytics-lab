@@ -8,9 +8,26 @@
 	var QUEUE_KEY = 'standalone_music_queue';
 	var CURRENT_KEY = 'standalone_music_current';
 	var PANEL_OPEN_KEY = 'standalone_yt_panel_open';
+	var MUSIC_SOURCE_KEY = 'standalone_music_source'; // 'yt' | 'saavn'
+	var SAAVN_QUEUE_KEY = 'standalone_saavn_queue';
+	var SAAVN_INDEX_KEY = 'standalone_saavn_index';
 	var YT_API_LOADED = false;
+	var ytApiPendingCb = null;
 	var ytPlayer = null;
 	var playerReady = false;
+	var JIOSAAVN_API_BASE = 'https://saavn.sumit.co';
+	var saavnAudio = null;
+	var saavnQueue = [];
+	var saavnCurrentIndex = 0;
+
+	// Must be on window before the YouTube script loads (API calls it when ready)
+	window.onYouTubeIframeAPIReady = function () {
+		YT_API_LOADED = true;
+		if (ytApiPendingCb) {
+			ytApiPendingCb();
+			ytApiPendingCb = null;
+		}
+	};
 
 	function getQueue() {
 		try {
@@ -26,6 +43,27 @@
 	}
 	function setCurrent(id) {
 		try { localStorage.setItem(CURRENT_KEY, id || ''); } catch (e) {}
+	}
+	function getMusicSource() {
+		try { return localStorage.getItem(MUSIC_SOURCE_KEY) || 'yt'; } catch (e) { return 'yt'; }
+	}
+	function setMusicSource(src) {
+		try { localStorage.setItem(MUSIC_SOURCE_KEY, src || 'yt'); } catch (e) {}
+	}
+	function getSaavnQueue() {
+		try {
+			var q = localStorage.getItem(SAAVN_QUEUE_KEY);
+			return q ? JSON.parse(q) : [];
+		} catch (e) { return []; }
+	}
+	function setSaavnQueue(q) {
+		try { localStorage.setItem(SAAVN_QUEUE_KEY, JSON.stringify(q || [])); } catch (e) {}
+	}
+	function getSaavnIndex() {
+		try { return parseInt(localStorage.getItem(SAAVN_INDEX_KEY), 10) || 0; } catch (e) { return 0; }
+	}
+	function setSaavnIndex(i) {
+		try { localStorage.setItem(SAAVN_INDEX_KEY, String(i)); } catch (e) {}
 	}
 
 	function parseVideoId(input) {
@@ -53,37 +91,124 @@
 		{ id: 'DWcJFNfaw9c', title: 'Ambient study music' }
 	];
 
+	// --- JioSaavn (unofficial API: search + stream URL, HTML5 Audio) ---
+	function getStreamUrl(song) {
+		if (!song) return '';
+		if (song.downloadUrl && song.downloadUrl.length > 0) {
+			var best = song.downloadUrl[song.downloadUrl.length - 1];
+			if (best && best.url) return best.url;
+			if (song.downloadUrl[0] && song.downloadUrl[0].url) return song.downloadUrl[0].url;
+		}
+		if (song.url && song.url.indexOf('http') === 0) return song.url;
+		return '';
+	}
+	function searchSaavn(query, cb) {
+		if (!query || !query.trim()) { if (cb) cb([]); return; }
+		var url = JIOSAAVN_API_BASE + '/api/search/songs?query=' + encodeURIComponent(query.trim()) + '&limit=15';
+		fetch(url)
+			.then(function (r) { return r.json(); })
+			.then(function (data) {
+				var list = (data && data.data && data.data.results) ? data.data.results : [];
+				if (cb) cb(list);
+			})
+			.catch(function () { if (cb) cb([]); });
+	}
+	function renderSaavnResults(list) {
+		var el = document.getElementById('global-saavn-list');
+		var wrap = document.getElementById('global-saavn-results');
+		if (!el || !wrap) return;
+		wrap.style.display = 'block';
+		if (!list || list.length === 0) {
+			el.innerHTML = '<li class="global-saavn-item global-saavn-empty">No results. Try another search.</li>';
+			return;
+		}
+		el.innerHTML = list.map(function (s, i) {
+			var name = (s.name || s.title || 'Track').replace(/</g, '&lt;');
+			var artists = (s.primaryArtists || s.singers || (s.artists && s.artists.primary && s.artists.primary.map(function (a) { return a.name; }).join(', ')) || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+			var sub = artists ? ' — ' + artists : '';
+			return '<li class="global-saavn-item" data-i="' + i + '" role="button" tabindex="0"><span class="global-saavn-item-title">' + name + '</span><span class="global-saavn-item-artist">' + sub + '</span></li>';
+		}).join('');
+		el.querySelectorAll('.global-saavn-item[data-i]').forEach(function (item) {
+			item.addEventListener('click', function () {
+				var i = parseInt(item.getAttribute('data-i'), 10);
+				playSaavnAt(i);
+			});
+			item.addEventListener('keydown', function (e) {
+				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.click(); }
+			});
+		});
+	}
+	function playSaavnAt(index) {
+		saavnQueue = getSaavnQueue();
+		if (index < 0 || index >= saavnQueue.length) return;
+		saavnCurrentIndex = index;
+		setSaavnIndex(index);
+		var song = saavnQueue[index];
+		var url = getStreamUrl(song);
+		if (!url) return;
+		if (!saavnAudio) {
+			saavnAudio = new Audio();
+			saavnAudio.addEventListener('ended', function () {
+				if (getMusicSource() === 'saavn') playNextSaavn();
+			});
+		}
+		saavnAudio.src = url;
+		saavnAudio.play().catch(function () {});
+		updateBarTitle();
+	}
+	function playNextSaavn() {
+		saavnQueue = getSaavnQueue();
+		if (saavnQueue.length === 0) return;
+		saavnCurrentIndex = (getSaavnIndex() + 1) % saavnQueue.length;
+		setSaavnIndex(saavnCurrentIndex);
+		playSaavnAt(saavnCurrentIndex);
+	}
+	function playPrevSaavn() {
+		saavnQueue = getSaavnQueue();
+		if (saavnQueue.length === 0) return;
+		saavnCurrentIndex = getSaavnIndex() - 1;
+		if (saavnCurrentIndex < 0) saavnCurrentIndex = saavnQueue.length - 1;
+		setSaavnIndex(saavnCurrentIndex);
+		playSaavnAt(saavnCurrentIndex);
+	}
+
 	function loadYtApi(cb) {
 		if (window.YT && window.YT.Player) {
 			YT_API_LOADED = true;
 			if (cb) cb();
 			return;
 		}
+		ytApiPendingCb = cb;
+		if (document.querySelector('script[src*="youtube.com/iframe_api"]')) return; // already loading; callback will run when ready
 		var tag = document.createElement('script');
 		tag.src = 'https://www.youtube.com/iframe_api';
+		tag.async = true;
 		var first = document.getElementsByTagName('script')[0];
 		first.parentNode.insertBefore(tag, first);
-		window.onYouTubeIframeAPIReady = function () {
-			YT_API_LOADED = true;
-			if (cb) cb();
-		};
 	}
 
 	function initPlayer() {
 		if (!playerDiv || ytPlayer) return;
+		var container = document.getElementById('global-yt-player-iframe');
+		if (!container) return;
 		loadYtApi(function () {
-			ytPlayer = new YT.Player('global-yt-player-iframe', {
-				height: '1',
-				width: '1',
-				videoId: getCurrent() || undefined,
-				playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
-				events: {
-					onReady: function () {
-						playerReady = true;
-						updateBarTitle();
+			try {
+				ytPlayer = new YT.Player('global-yt-player-iframe', {
+					height: '1',
+					width: '1',
+					videoId: getCurrent() || undefined,
+					playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
+					events: {
+						onReady: function () {
+							playerReady = true;
+							updateBarTitle();
+						}
 					}
-				}
-			});
+				});
+			} catch (e) {
+				playerReady = false;
+				ytPlayer = null;
+			}
 		});
 	}
 
@@ -115,14 +240,48 @@
 
 	function updateBarTitle() {
 		if (!barTitle) return;
+		if (getMusicSource() === 'saavn') {
+			var q = getSaavnQueue();
+			var idx = getSaavnIndex();
+			var s = q[idx];
+			barTitle.textContent = (s && (s.name || s.title)) ? (s.name || s.title) : (q.length ? 'JioSaavn' : 'Search JioSaavn');
+			return;
+		}
 		var cur = getCurrent();
 		var q = getQueue();
 		var item = q.find(function (x) { return (x.id || x) === cur; });
 		var t = (item && item.title) ? item.title : (cur ? 'Playing' : 'Paste YouTube URL or ID');
 		barTitle.textContent = t;
 	}
+	function setSourceUI(src) {
+		var isSaavn = src === 'saavn';
+		if (barInput) barInput.placeholder = isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or video ID';
+		var focusBtn = document.getElementById('global-music-focus');
+		if (focusBtn) focusBtn.style.display = isSaavn ? 'none' : '';
+		var panelIframe = document.getElementById('global-yt-panel-iframe');
+		var saavnResults = document.getElementById('global-saavn-results');
+		if (panelIframe && saavnResults) {
+			panelIframe.style.display = isSaavn ? 'none' : 'block';
+			saavnResults.style.display = isSaavn ? 'block' : 'none';
+		}
+		updateBarTitle();
+	}
+	function switchSource(src) {
+		setMusicSource(src);
+		var btnYt = document.getElementById('global-music-source-yt');
+		var btnSaavn = document.getElementById('global-music-source-saavn');
+		if (btnYt) { btnYt.classList.toggle('active', src === 'yt'); btnYt.setAttribute('aria-pressed', src === 'yt'); }
+		if (btnSaavn) { btnSaavn.classList.toggle('active', src === 'saavn'); btnSaavn.setAttribute('aria-pressed', src === 'saavn'); }
+		setSourceUI(src);
+	}
 
 	if (bar) {
+		loadSaavnState();
+		switchSource(getMusicSource());
+
+		document.getElementById('global-music-source-yt') && document.getElementById('global-music-source-yt').addEventListener('click', function () { switchSource('yt'); });
+		document.getElementById('global-music-source-saavn') && document.getElementById('global-music-source-saavn').addEventListener('click', function () { switchSource('saavn'); });
+
 		// Player div must exist before YT.Player() runs (API injects iframe into it)
 		if (playerDiv && !document.getElementById('global-yt-player-iframe')) {
 			var el = document.createElement('div');
@@ -133,6 +292,18 @@
 
 		if (barAdd && barInput) {
 			barAdd.addEventListener('click', function () {
+				if (getMusicSource() === 'saavn') {
+					var q = barInput.value.trim();
+					if (!q) return;
+					barAdd.disabled = true;
+					searchSaavn(q, function (list) {
+						barAdd.disabled = false;
+						setSaavnQueue(list);
+						renderSaavnResults(list);
+						if (list.length > 0) playSaavnAt(0);
+					});
+					return;
+				}
 				var id = parseVideoId(barInput.value);
 				if (id) {
 					var q = getQueue();
@@ -146,9 +317,7 @@
 		if (barFocus) {
 			barFocus.addEventListener('click', function () {
 				setQueue(DEFAULT_QUEUE.slice());
-				if (DEFAULT_QUEUE[0]) {
-					loadVideo(DEFAULT_QUEUE[0].id);
-				}
+				if (DEFAULT_QUEUE[0]) loadVideo(DEFAULT_QUEUE[0].id);
 			});
 		}
 		barInput && barInput.addEventListener('keydown', function (e) {
@@ -156,12 +325,36 @@
 		});
 
 		if (barPlay) barPlay.addEventListener('click', function () {
-			if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+			if (getMusicSource() === 'saavn') {
+				if (saavnAudio && saavnQueue.length > 0) saavnAudio.play().catch(function () {});
+				else if (saavnQueue.length > 0) playSaavnAt(getSaavnIndex());
+				return;
+			}
+			if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+				try { ytPlayer.playVideo(); } catch (e) {}
+			} else {
+				var cur = getCurrent();
+				var q = getQueue();
+				if (!cur && q.length > 0) loadVideo(q[0].id || q[0]);
+				else if (playerDiv && !ytPlayer) initPlayer();
+			}
 		});
 		if (barPause) barPause.addEventListener('click', function () {
-			if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+			if (getMusicSource() === 'saavn') {
+				if (saavnAudio) saavnAudio.pause();
+				return;
+			}
+			if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+				try { ytPlayer.pauseVideo(); } catch (e) {}
+			}
 		});
-		if (barNext) barNext.addEventListener('click', playNext);
+		if (barNext) barNext.addEventListener('click', function () {
+			if (getMusicSource() === 'saavn') {
+				playNextSaavn();
+				return;
+			}
+			playNext();
+		});
 
 		updateBarTitle();
 	}

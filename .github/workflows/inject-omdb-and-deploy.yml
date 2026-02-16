@@ -1,6 +1,6 @@
-# Inject OMDb API key from GitHub Secrets into homepage.js before deploy.
-# Add secret: repo Settings → Secrets and variables → Actions → New repository secret → OMDB_API_KEY.
-name: Inject OMDb key and deploy
+# Deploy analytics-lab (e.g. to GitHub Pages). OMDb key is no longer injected;
+# use the backend proxy (api/omdb.js) with OMDB_API_KEY in server env (Vercel/Netlify). See README.
+name: Deploy
 
 on:
   push:
@@ -8,23 +8,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  inject-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject OMDb API key
-        env:
-          OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
-        run: |
-          if [ -n "$OMDB_API_KEY" ]; then
-            node analytics-lab/scripts/inject-omdb-key.js
-          fi
-
-      # Add your deploy step here, e.g. GitHub Pages, Netlify, or upload artifact.
+      # Add your deploy step here. Example: GitHub Pages (uncomment and set branch).
       # - name: Deploy to GitHub Pages
       #   uses: peaceiris/actions-gh-pages@v3
       #   with:
       #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./
+      #     publish_dir: ./analytics-lab
+      #     publish_branch: gh-pages
+      #
+      # For OMDb posters: deploy the API separately (e.g. Vercel with Root = analytics-lab)
+      # and set OMDB_API_KEY in Vercel Environment Variables. No key in the repo or client.

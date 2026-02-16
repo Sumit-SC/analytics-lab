@@ -1,4 +1,57 @@
 (function () {
+	// Category filter: All | Tech | News | Entertainment | Anime — show only matching sections
+	var FILTER_KEY = 'trends_filter';
+	var filterBar = document.getElementById('trends-filter-bar');
+	var sections = document.querySelectorAll('.trends-section');
+
+	function getFilter() {
+		try { return localStorage.getItem(FILTER_KEY) || 'all'; } catch (e) { return 'all'; }
+	}
+	function setFilter(value) {
+		try { localStorage.setItem(FILTER_KEY, value); } catch (e) {}
+	}
+
+	function applyFilter(filter) {
+		var isAll = filter === 'all';
+		sections.forEach(function (section) {
+			var cat = section.getAttribute('data-trend-category');
+			var show = isAll || cat === filter;
+			section.classList.toggle('hidden', !show);
+		});
+		// Update button states
+		if (filterBar) {
+			filterBar.querySelectorAll('.trends-filter-btn').forEach(function (btn) {
+				var isActive = btn.getAttribute('data-trend-filter') === filter;
+				btn.classList.toggle('active', isActive);
+				btn.classList.toggle('border-primary', isActive);
+				btn.classList.toggle('bg-primary/10', isActive);
+				btn.classList.toggle('text-primary', isActive);
+				if (!isActive) {
+					btn.classList.add('border-gray-300', 'dark:border-gray-600', 'text-gray-700', 'dark:text-gray-300');
+					btn.classList.remove('border-primary', 'bg-primary/10', 'text-primary');
+				}
+				btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+			});
+		}
+	}
+
+	var current = getFilter();
+	applyFilter(current);
+
+	if (filterBar) {
+		filterBar.addEventListener('click', function (e) {
+			var btn = e.target.closest('.trends-filter-btn');
+			if (!btn) return;
+			var filter = btn.getAttribute('data-trend-filter');
+			if (filter) {
+				setFilter(filter);
+				applyFilter(filter);
+			}
+		});
+	}
+})();
+
+(function () {
 	// Hacker News top stories (lightweight snapshot)
 	var listEl = document.getElementById('trends-hn-list');
 	var statusEl = document.getElementById('trends-hn-status');
@@ -53,6 +106,61 @@
 	}
 
 	fetchTopStories();
+})();
+
+(function () {
+	// Inshorts news (https://inshorts.vercel.app — unofficial API by Sumit Kolhe)
+	var listEl = document.getElementById('trends-inshorts-list');
+	var statusEl = document.getElementById('trends-inshorts-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	// Try user's preferred host first, then common alternate (inshortsapi.vercel.app)
+	var endpoints = [
+		'https://inshorts.vercel.app/news?category=all',
+		'https://inshorts.vercel.app/api/news?category=all',
+		'https://inshortsapi.vercel.app/news?category=all'
+	];
+
+	function tryFetch(idx) {
+		if (idx >= endpoints.length) {
+			setStatus('Could not reach Inshorts API. Try again later.');
+			return;
+		}
+		fetch(endpoints[idx])
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var items = Array.isArray(data) ? data : (data && data.data) ? data.data : (data && data.news) ? data.news : null;
+				if (!items || !items.length) {
+					if (idx + 1 < endpoints.length) tryFetch(idx + 1);
+					else setStatus('No news items in this snapshot.');
+					return;
+				}
+				var take = items.slice(0, 10);
+				setStatus('Showing ' + take.length + ' headlines.');
+				var html = '';
+				take.forEach(function (item) {
+					var title = (item.title || item.headline || '').trim() || 'Untitled';
+					var url = item.url || item.readMoreUrl || item.link || '#';
+					var content = (item.content || item.summary || '').trim();
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					if (content) html += '<p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">' + content.replace(/</g, '&lt;').substring(0, 160) + (content.length > 160 ? '…' : '') + '</p>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				tryFetch(idx + 1);
+			});
+	}
+
+	tryFetch(0);
 })();
 
 (function () {
