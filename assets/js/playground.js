@@ -100,6 +100,19 @@
 	if (overlay) {
 		overlay.addEventListener('click', closeMobileSidebar);
 	}
+
+	// Click-to-expand resource groups (for touch; hover still works)
+	if (sidebar) {
+		sidebar.querySelectorAll('.resource-group').forEach(function (group) {
+			var header = group.querySelector('p');
+			if (header) {
+				header.addEventListener('click', function (e) {
+					e.preventDefault();
+					group.classList.toggle('resource-group-open');
+				});
+			}
+		});
+	}
 })();
 
 (function () {

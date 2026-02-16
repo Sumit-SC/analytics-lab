@@ -436,14 +436,18 @@ body {
 	#sidebar-overlay { display: none !important; }
 }
 
-/* Hover-to-expand groups */
+/* Hover-to-expand groups (and click-to-expand on touch) */
+.resource-group {
+	cursor: pointer;
+}
 .resource-group .resource-sublist {
 	max-height: 0;
 	overflow: hidden;
 	opacity: 0;
 	transition: max-height 0.25s ease, opacity 0.2s ease;
 }
-.resource-group:hover .resource-sublist {
+.resource-group:hover .resource-sublist,
+.resource-group.resource-group-open .resource-sublist {
 	max-height: 280px;
 	opacity: 1;
 }
