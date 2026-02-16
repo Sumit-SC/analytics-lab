@@ -23,10 +23,12 @@
 	// Storage keys
 	var STORAGE_JOBS = 'job_tracker_jobs';
 	var STORAGE_APPLICATIONS = 'job_tracker_applications';
+	var STORAGE_PLANNER = 'job_tracker_planner_log';
 
 	var allJobs = [];
 	var applications = {};
 	var filteredJobs = [];
+	var plannerEntries = [];
 
 	// Lightweight caching to avoid rate limits (especially Remotive)
 	var CACHE_PREFIX = 'job_tracker_cache_v1_';
@@ -51,8 +53,11 @@
 	// Initialize
 	function init() {
 		loadApplications();
+		loadPlanner();
 		setupEventListeners();
 		fetchAllJobs();
+		setupPlannerEventListeners();
+		renderPlanner();
 	}
 
 	// Load saved application statuses
@@ -76,6 +81,25 @@
 		}
 	}
 
+	// Load / save planner (Notion-style application log)
+	function loadPlanner() {
+		try {
+			var raw = localStorage.getItem(STORAGE_PLANNER);
+			if (raw) {
+				plannerEntries = JSON.parse(raw) || [];
+			}
+		} catch (e) {
+			plannerEntries = [];
+		}
+		// Update summary after loading
+		updatePlannerSummary();
+	}
+	function savePlanner() {
+		try {
+			localStorage.setItem(STORAGE_PLANNER, JSON.stringify(plannerEntries));
+		} catch (e) {}
+	}
+
 	// Setup event listeners
 	function setupEventListeners() {
 		var searchInput = document.getElementById('job-search-input');
@@ -83,6 +107,7 @@
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
 		var filterAge = document.getElementById('job-filter-age');
+		var filterRole = document.getElementById('job-filter-role');
 		var refreshBtn = document.getElementById('job-refresh-btn');
 
 		if (searchInput) {
@@ -100,8 +125,124 @@
 		if (filterAge) {
 			filterAge.addEventListener('change', applyFilters);
 		}
+		if (filterRole) {
+			filterRole.addEventListener('change', applyFilters);
+		}
 		if (refreshBtn) {
 			refreshBtn.addEventListener('click', fetchAllJobs);
+		}
+	}
+
+	// Planner event listeners (add/update/delete entries)
+	function setupPlannerEventListeners() {
+		var form = document.getElementById('planner-form');
+		var listEl = document.getElementById('planner-list');
+		var searchInput = document.getElementById('planner-search-input');
+		var statusFilter = document.getElementById('planner-filter-status');
+
+		if (form) {
+			form.addEventListener('submit', function (e) {
+				e.preventDefault();
+				var titleEl = document.getElementById('planner-title');
+				var companyEl = document.getElementById('planner-company');
+				var linkEl = document.getElementById('planner-link');
+				var sourceEl = document.getElementById('planner-source');
+				var statusEl = document.getElementById('planner-status');
+				var nextStepEl = document.getElementById('planner-next-step');
+				var appliedAtEl = document.getElementById('planner-applied-at');
+				var priorityEl = document.getElementById('planner-priority');
+				var locationEl = document.getElementById('planner-location');
+				var jobTypeEl = document.getElementById('planner-job-type');
+				var workModeEl = document.getElementById('planner-work-mode');
+				var salaryEl = document.getElementById('planner-salary');
+				var contactNameEl = document.getElementById('planner-contact-name');
+				var contactChannelEl = document.getElementById('planner-contact-channel');
+				var tagsEl = document.getElementById('planner-tags');
+				var outcomeEl = document.getElementById('planner-outcome');
+				var notesEl = document.getElementById('planner-notes');
+
+				var title = (titleEl && titleEl.value || '').trim();
+				var company = (companyEl && companyEl.value || '').trim();
+				if (!title && !company) {
+					return;
+				}
+
+				var entry = {
+					id: 'planner_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2),
+					title: title,
+					company: company,
+					link: (linkEl && linkEl.value || '').trim(),
+					source: (sourceEl && sourceEl.value || '').trim(),
+					status: (statusEl && statusEl.value) || 'idea',
+					nextStep: (nextStepEl && nextStepEl.value) || '',
+					appliedAt: (appliedAtEl && appliedAtEl.value) || '',
+					priority: (priorityEl && priorityEl.value) || 'medium',
+					location: (locationEl && locationEl.value || '').trim(),
+					jobType: (jobTypeEl && jobTypeEl.value) || '',
+					workMode: (workModeEl && workModeEl.value) || '',
+					salary: (salaryEl && salaryEl.value || '').trim(),
+					contactName: (contactNameEl && contactNameEl.value || '').trim(),
+					contactChannel: (contactChannelEl && contactChannelEl.value || '').trim(),
+					tags: (tagsEl && tagsEl.value || '').trim(),
+					outcome: (outcomeEl && outcomeEl.value || '').trim(),
+					notes: (notesEl && notesEl.value || '').trim(),
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
+				};
+
+				plannerEntries.unshift(entry);
+				savePlanner();
+				if (titleEl) titleEl.value = '';
+				if (companyEl) companyEl.value = '';
+				if (linkEl) linkEl.value = '';
+				if (sourceEl) sourceEl.value = '';
+				if (appliedAtEl) appliedAtEl.value = '';
+				if (priorityEl) priorityEl.value = 'medium';
+				if (locationEl) locationEl.value = '';
+				if (jobTypeEl) jobTypeEl.value = '';
+				if (workModeEl) workModeEl.value = '';
+				if (salaryEl) salaryEl.value = '';
+				if (contactNameEl) contactNameEl.value = '';
+				if (contactChannelEl) contactChannelEl.value = '';
+				if (tagsEl) tagsEl.value = '';
+				if (outcomeEl) outcomeEl.value = '';
+				if (notesEl) notesEl.value = '';
+				renderPlanner();
+			});
+		}
+
+		if (searchInput) {
+			searchInput.addEventListener('input', debounce(renderPlanner, 200));
+		}
+		if (statusFilter) {
+			statusFilter.addEventListener('change', renderPlanner);
+		}
+
+		if (listEl) {
+			listEl.addEventListener('change', function (e) {
+				var select = e.target.closest('.planner-status-select');
+				if (select) {
+					var id = select.getAttribute('data-entry-id');
+					var entry = plannerEntries.find(function (p) { return p.id === id; });
+					if (entry) {
+						entry.status = select.value;
+						entry.updatedAt = new Date().toISOString();
+						savePlanner();
+						renderPlanner();
+					}
+					return;
+				}
+			});
+			listEl.addEventListener('click', function (e) {
+				var delBtn = e.target.closest('.planner-delete-btn');
+				if (delBtn) {
+					var id = delBtn.getAttribute('data-entry-id');
+					plannerEntries = plannerEntries.filter(function (p) { return p.id !== id; });
+					savePlanner();
+					renderPlanner();
+					return;
+				}
+			});
 		}
 	}
 
@@ -809,25 +950,57 @@
 			});
 	}
 
+	// Role filter: keywords per focus (your target roles)
+	var ROLE_FILTER_KEYWORDS = {
+		analyst: [
+			'senior data analyst', 'data analyst', 'product analyst', 'business analyst', 'bi analyst',
+			'bi developer', 'business intelligence developer', 'insights analyst', 'reporting analyst',
+			'marketing analyst', 'growth analyst', 'operations analyst', 'business intelligence', 'analytics analyst'
+		],
+		scientist: [
+			'data scientist', 'associate data scientist', 'research scientist', 'statistician', 'data science'
+		],
+		engineer: [
+			'data engineer', 'associate data engineer', 'analytics engineer', 'ml engineer', 'machine learning engineer',
+			'ai engineer', 'data engineering'
+		],
+		associate_junior: [
+			'associate data scientist', 'junior ml engineer', 'junior data engineer', 'associate data engineer',
+			'junior data analyst', 'associate analyst', 'junior analyst', 'entry level data', 'entry-level data',
+			'associate data analyst', 'junior data scientist'
+		]
+	};
+
+	function jobMatchesRole(job, role) {
+		if (!role || role === 'all') return true;
+		var keywords = ROLE_FILTER_KEYWORDS[role];
+		if (!keywords || !keywords.length) return true;
+		var text = (job.title + ' ' + (job.description || '') + ' ' + (job.tags || []).join(' ')).toLowerCase();
+		return keywords.some(function (keyword) {
+			return text.indexOf(keyword.toLowerCase()) !== -1;
+		});
+	}
+
 	// Check if job is data science related
 	function isDataScienceJob(text) {
 		var keywords = [
 			// Core data roles
 			'data scientist', 'data analyst', 'data engineer', 'analytics engineer',
-			// Analyst-focused (what you asked for)
-			'business analyst', 'product analyst', 'bi analyst', 'insights analyst', 'reporting analyst',
-			'marketing analyst', 'growth analyst', 'operations analyst',
+			// Analyst-focused
+			'business analyst', 'product analyst', 'bi analyst', 'bi developer', 'insights analyst', 'reporting analyst',
+			'marketing analyst', 'growth analyst', 'operations analyst', 'senior data analyst',
+			// Scientist / Associate / Junior
+			'associate data scientist', 'junior ml engineer', 'junior data engineer', 'associate data engineer',
 			// Domains / skills
 			'data science', 'data analytics', 'business intelligence', 'analytics',
-			'machine learning', 'ml engineer', 'ai engineer', 'business intelligence',
-			'statistician', 'research scientist', 'data analytics'
+			'machine learning', 'ml engineer', 'ai engineer', 'statistician', 'research scientist'
 		];
 		return keywords.some(function (keyword) {
 			return text.indexOf(keyword) !== -1;
 		});
 	}
 
-	// Calculate match score (0-100)
+	// Calculate match score (0-100) — prioritise your focus roles
 	function calculateMatchScore(job) {
 		var text = (job.title + ' ' + job.description + ' ' + (job.tags || []).join(' ')).toLowerCase();
 		var matches = 0;
@@ -839,12 +1012,14 @@
 			}
 		});
 
-		// Weight: roles are more important
-		var roleMatches = 0;
+		// Weight: your target roles get higher bonus
 		var roleKeywords = [
-			'data scientist', 'data analyst', 'data engineer', 'analytics engineer', 'ml engineer',
-			'business analyst', 'product analyst', 'bi analyst', 'insights analyst', 'reporting analyst'
+			'senior data analyst', 'product analyst', 'business analyst', 'bi developer', 'bi analyst',
+			'associate data scientist', 'junior ml engineer', 'data engineer', 'associate data engineer',
+			'data scientist', 'data analyst', 'analytics engineer', 'ml engineer',
+			'insights analyst', 'reporting analyst', 'business intelligence'
 		];
+		var roleMatches = 0;
 		roleKeywords.forEach(function (keyword) {
 			if (text.indexOf(keyword.toLowerCase()) !== -1) {
 				roleMatches++;
@@ -872,12 +1047,14 @@
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
 		var filterAge = document.getElementById('job-filter-age');
+		var filterRole = document.getElementById('job-filter-role');
 
 		var searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 		var sourceFilter = filterSource ? filterSource.value : 'all';
 		var matchFilter = filterMatch ? filterMatch.value : 'all';
 		var statusFilter = filterStatus ? filterStatus.value : 'all';
 		var ageFilter = filterAge ? filterAge.value : 'all';
+		var roleFilter = filterRole ? filterRole.value : 'all';
 
 		var now = new Date();
 		var ageDays = ageFilter === 'all' ? null : parseInt(ageFilter, 10) || null;
@@ -913,6 +1090,9 @@
 				var diffDays = (now - created) / (1000 * 60 * 60 * 24);
 				if (diffDays > ageDays) return false;
 			}
+
+			// Role focus filter (Analyst / Scientist / Engineer / Associate & Junior)
+			if (!jobMatchesRole(job, roleFilter)) return false;
 
 			return true;
 		});
@@ -995,7 +1175,10 @@
 			}
 			html += '<div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">';
 			html += '<span class="text-xs text-gray-500 dark:text-gray-400">Source: ' + job.source + '</span>';
+			html += '<div class="flex items-center gap-2">';
+			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
+			html += '</div>';
 			html += '</div>';
 			html += '</div>';
 		});
@@ -1012,6 +1195,183 @@
 				applyFilters(); // Re-render to update stats
 			});
 		});
+
+		// Add event listeners for "Add to planner" buttons
+		jobListEl.querySelectorAll('.job-add-to-planner-btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var jobId = this.getAttribute('data-job-id');
+				var job = filteredJobs.find(function (j) { return j.id === jobId; });
+				if (job) {
+					addJobToPlanner(job);
+				}
+			});
+		});
+	}
+
+	// Add job from job list to planner (pre-fill form)
+	function addJobToPlanner(job) {
+		var titleEl = document.getElementById('planner-title');
+		var companyEl = document.getElementById('planner-company');
+		var linkEl = document.getElementById('planner-link');
+		var sourceEl = document.getElementById('planner-source');
+		var locationEl = document.getElementById('planner-location');
+
+		if (titleEl) titleEl.value = job.title || '';
+		if (companyEl) companyEl.value = job.company || '';
+		if (linkEl) linkEl.value = job.url || '';
+		if (sourceEl) sourceEl.value = job.source || '';
+		if (locationEl) locationEl.value = job.location || '';
+
+		// Scroll to planner form
+		var formEl = document.getElementById('planner-form');
+		if (formEl) {
+			formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			// Focus on title field
+			if (titleEl) {
+				setTimeout(function () { titleEl.focus(); }, 300);
+			}
+		}
+	}
+
+	// Update planner summary counts
+	function updatePlannerSummary() {
+		var counts = {
+			idea: 0,
+			todo: 0,
+			applied: 0,
+			interview: 0,
+			offer: 0,
+			rejected: 0,
+			total: plannerEntries.length
+		};
+
+		plannerEntries.forEach(function (e) {
+			if (e.status === 'idea') counts.idea++;
+			else if (e.status === 'todo') counts.todo++;
+			else if (e.status === 'applied') counts.applied++;
+			else if (e.status === 'interview') counts.interview++;
+			else if (e.status === 'offer') counts.offer++;
+			else if (e.status === 'rejected') counts.rejected++;
+		});
+
+		var ideaEl = document.getElementById('planner-count-idea');
+		var todoEl = document.getElementById('planner-count-todo');
+		var appliedEl = document.getElementById('planner-count-applied');
+		var interviewEl = document.getElementById('planner-count-interview');
+		var offerEl = document.getElementById('planner-count-offer');
+		var rejectedEl = document.getElementById('planner-count-rejected');
+		var totalEl = document.getElementById('planner-count-total');
+
+		if (ideaEl) ideaEl.textContent = counts.idea;
+		if (todoEl) todoEl.textContent = counts.todo;
+		if (appliedEl) appliedEl.textContent = counts.applied;
+		if (interviewEl) interviewEl.textContent = counts.interview;
+		if (offerEl) offerEl.textContent = counts.offer;
+		if (rejectedEl) rejectedEl.textContent = counts.rejected;
+		if (totalEl) totalEl.textContent = counts.total;
+	}
+
+	// Render planner entries (Notion-style log)
+	function renderPlanner() {
+		var listEl = document.getElementById('planner-list');
+		var emptyEl = document.getElementById('planner-empty');
+		var searchInput = document.getElementById('planner-search-input');
+		var statusFilter = document.getElementById('planner-filter-status');
+
+		if (!listEl) return;
+
+		var term = (searchInput && searchInput.value || '').toLowerCase();
+		var status = (statusFilter && statusFilter.value) || 'all';
+
+		var entries = plannerEntries.slice();
+		if (term) {
+			entries = entries.filter(function (e) {
+				var text = (e.title + ' ' + e.company + ' ' + e.source + ' ' + e.notes + ' ' + e.location + ' ' + e.jobType + ' ' + e.workMode + ' ' + e.salary + ' ' + e.contactName + ' ' + e.contactChannel + ' ' + e.tags + ' ' + e.outcome).toLowerCase();
+				return text.indexOf(term) !== -1;
+			});
+		}
+		if (status !== 'all') {
+			entries = entries.filter(function (e) { return e.status === status; });
+		}
+
+		// Update summary counts
+		updatePlannerSummary();
+
+		if (!entries.length) {
+			listEl.innerHTML = '';
+			if (emptyEl) emptyEl.classList.remove('hidden');
+			return;
+		}
+		if (emptyEl) emptyEl.classList.add('hidden');
+
+		var html = '';
+		entries.forEach(function (e) {
+			var created = new Date(e.createdAt);
+			var updated = e.updatedAt ? new Date(e.updatedAt) : created;
+			var createdStr = created.toLocaleDateString();
+			var updatedStr = updated.toLocaleDateString() + ' ' + updated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+			html += '<div class="material-card border border-gray-200 dark:border-gray-700 rounded-xl p-3 md:p-4">';
+			html += '<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-1.5">';
+			html += '<div>';
+			html += '<h3 class="font-semibold text-gray-800 dark:text-gray-100">' + escapeHtml(e.title || '(Untitled role)') + '</h3>';
+			if (e.company || e.location) {
+				html += '<p class="text-xs text-gray-600 dark:text-gray-400">';
+				if (e.company) {
+					html += escapeHtml(e.company);
+				}
+				if (e.location) {
+					html += (e.company ? ' · ' : '') + escapeHtml(e.location);
+				}
+				html += '</p>';
+			}
+			if (e.source || e.jobType || e.workMode) {
+				var metaBits = [];
+				if (e.source) metaBits.push('Source: ' + e.source);
+				if (e.jobType) metaBits.push('Type: ' + e.jobType);
+				if (e.workMode) metaBits.push('Mode: ' + e.workMode);
+				html += '<p class="text-[11px] text-gray-500 dark:text-gray-500 mt-0.5">' + escapeHtml(metaBits.join(' · ')) + '</p>';
+			}
+			html += '</div>';
+			html += '<div class="flex flex-col items-end gap-1">';
+			html += '<select class="planner-status-select text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800" data-entry-id="' + e.id + '">';
+			['idea','todo','applied','interview','offer','rejected'].forEach(function (opt) {
+				html += '<option value="' + opt + '"' + (e.status === opt ? ' selected' : '') + '>' + opt.charAt(0).toUpperCase() + opt.slice(1) + '</option>';
+			});
+			html += '</select>';
+			if (e.priority) {
+				html += '<span class="text-[11px] text-gray-500 dark:text-gray-400 capitalize">Priority: ' + escapeHtml(e.priority) + '</span>';
+			}
+			if (e.nextStep) {
+				html += '<span class="text-[11px] text-gray-500 dark:text-gray-400">Next: ' + escapeHtml(e.nextStep) + '</span>';
+			}
+			html += '<button type="button" class="planner-delete-btn text-[11px] text-red-600 dark:text-red-400 hover:underline mt-1" data-entry-id="' + e.id + '">Remove</button>';
+			html += '</div>';
+			html += '</div>';
+
+			if (e.notes) {
+				html += '<p class="text-xs text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-line">' + escapeHtml(e.notes) + '</p>';
+			}
+
+			if (e.tags) {
+				html += '<p class="text-[11px] text-gray-500 dark:text-gray-500 mt-1">Tags: ' + escapeHtml(e.tags) + '</p>';
+			}
+			if (e.outcome) {
+				html += '<p class="text-[11px] text-gray-500 dark:text-gray-500 mt-0.5">Outcome: ' + escapeHtml(e.outcome) + '</p>';
+			}
+
+			html += '<div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-1">';
+			var appliedLabel = e.appliedAt ? ('Applied: ' + escapeHtml(e.appliedAt)) : 'Created: ' + createdStr;
+			html += '<span class="text-[11px] text-gray-500 dark:text-gray-500">' + appliedLabel + '</span>';
+			html += '<span class="text-[11px] text-gray-500 dark:text-gray-500">Updated: ' + updatedStr + '</span>';
+			if (e.link) {
+				html += '<a href="' + e.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="text-[11px] text-primary hover:underline font-semibold">Open job →</a>';
+			}
+			html += '</div>';
+			html += '</div>';
+		});
+
+		listEl.innerHTML = html;
 	}
 
 	// Escape HTML

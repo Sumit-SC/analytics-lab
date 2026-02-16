@@ -150,8 +150,8 @@
 							</label>
 							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
 							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
-							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Open Pinterest search for this source">
-								<img src="https://img.icons8.com/?size=100&id=63676&format=png&color=000000" alt="Pinterest" class="w-4 h-4" loading="lazy" />
+							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center" title="Open Pinterest search for this source">
+								<img src="https://img.icons8.com/ios-filled/50/000000/pinterest.png" alt="Pinterest" class="w-4 h-4 dark:invert" loading="lazy" />
 							</button>
 						</div>
 					</div>
@@ -197,8 +197,10 @@
 				</div>
 				<p id="home-timer-display" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100">25:00</p>
 				<p id="home-timer-phase" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Work</p>
+				<p id="home-timer-penalty-grace" class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Grace: 0m · Penalty: 0m</p>
 				<div class="flex flex-wrap gap-2 mt-3">
 					<button type="button" id="home-timer-btn" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90">Start</button>
+					<button type="button" id="home-timer-next" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800" title="End phase early (adds grace) or continue (after timer hit 0)">Next</button>
 					<button type="button" id="home-timer-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Reset</button>
 					<button type="button" id="home-timer-log" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Log session</button>
 				</div>

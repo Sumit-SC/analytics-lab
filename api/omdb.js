@@ -6,6 +6,7 @@
 
 const OMDB_BASE = 'https://www.omdbapi.com/';
 const MAX_TITLE_LENGTH = 200;
+let OMDB_REQUEST_COUNT = 0;
 
 function getKey() {
 	return process.env.OMDB_API_KEY || '';
@@ -19,6 +20,8 @@ function allowedOrigin(origin) {
 }
 
 module.exports = async function handler(req, res) {
+	OMDB_REQUEST_COUNT += 1;
+
 	// CORS: allow same-origin or list from env
 	var origin = req.headers.origin || '';
 	if (!origin && req.headers.referer) {
@@ -34,13 +37,13 @@ module.exports = async function handler(req, res) {
 
 	if (req.method !== 'GET') {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(405).json({ poster: null, error: 'Method not allowed' });
+		return res.status(405).json({ poster: null, error: 'Method not allowed', usage: { requestCount: OMDB_REQUEST_COUNT } });
 	}
 
 	const key = getKey();
 	if (!key) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(503).json({ poster: null, error: 'OMDb proxy not configured' });
+		return res.status(503).json({ poster: null, error: 'OMDb proxy not configured', usage: { requestCount: OMDB_REQUEST_COUNT } });
 	}
 
 	const setCors = function () {
@@ -66,10 +69,10 @@ module.exports = async function handler(req, res) {
 			});
 			setCors();
 			res.setHeader('Cache-Control', 'public, max-age=300');
-			return res.status(200).json({ results: results });
+			return res.status(200).json({ results: results, usage: { requestCount: OMDB_REQUEST_COUNT } });
 		} catch (e) {
 			res.setHeader('Access-Control-Allow-Origin', origin || '*');
-			return res.status(502).json({ results: [], error: 'Upstream error' });
+			return res.status(502).json({ results: [], error: 'Upstream error', usage: { requestCount: OMDB_REQUEST_COUNT } });
 		}
 	}
 
@@ -82,7 +85,7 @@ module.exports = async function handler(req, res) {
 			const data = await r.json().catch(function () { return null; });
 			if (!data || data.Response === 'False') {
 				setCors();
-				return res.status(200).json({ error: 'Not found' });
+				return res.status(200).json({ error: 'Not found', usage: { requestCount: OMDB_REQUEST_COUNT } });
 			}
 			const out = {
 				Title: data.Title || '',
@@ -106,10 +109,10 @@ module.exports = async function handler(req, res) {
 			};
 			setCors();
 			res.setHeader('Cache-Control', 'public, max-age=86400');
-			return res.status(200).json(out);
+			return res.status(200).json(Object.assign({}, out, { usage: { requestCount: OMDB_REQUEST_COUNT } }));
 		} catch (e) {
 			res.setHeader('Access-Control-Allow-Origin', origin || '*');
-			return res.status(502).json({ error: 'Upstream error' });
+			return res.status(502).json({ error: 'Upstream error', usage: { requestCount: OMDB_REQUEST_COUNT } });
 		}
 	}
 
@@ -117,7 +120,7 @@ module.exports = async function handler(req, res) {
 	const t = typeof req.query.t === 'string' ? req.query.t.trim() : '';
 	if (!t || t.length > MAX_TITLE_LENGTH) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(400).json({ poster: null, error: 'Missing or invalid title' });
+		return res.status(400).json({ poster: null, error: 'Missing or invalid title', usage: { requestCount: OMDB_REQUEST_COUNT } });
 	}
 	const type = (req.query.type === 'movie' || req.query.type === 'series') ? req.query.type : '';
 	let url = OMDB_BASE + '?t=' + encodeURIComponent(t) + '&apikey=' + encodeURIComponent(key);
@@ -128,9 +131,9 @@ module.exports = async function handler(req, res) {
 		const poster = data && data.Poster && data.Poster !== 'N/A' && String(data.Poster).indexOf('http') === 0 ? data.Poster : null;
 		setCors();
 		res.setHeader('Cache-Control', 'public, max-age=86400');
-		return res.status(200).json({ poster: poster });
+		return res.status(200).json({ poster: poster, usage: { requestCount: OMDB_REQUEST_COUNT } });
 	} catch (e) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(502).json({ poster: null, error: 'Upstream error' });
+		return res.status(502).json({ poster: null, error: 'Upstream error', usage: { requestCount: OMDB_REQUEST_COUNT } });
 	}
 };

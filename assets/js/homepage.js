@@ -777,6 +777,7 @@
 	var timerStatusText = document.getElementById('home-timer-status');
 	var timerPresetButtons = document.querySelectorAll('.home-timer-preset');
 	var timerInterval = null;
+	var timerPenaltyInterval = null; // counts seconds after 0 until user clicks (penalty)
 	var timerSeconds = 25 * 60;
 	var timerRemaining = 25 * 60;
 	var timerWorkMins = 25;
@@ -784,6 +785,10 @@
 	var timerIsBreak = false;
 	var timerTotalRounds = 1;
 	var timerRemainingRounds = null;
+	var timerWaitingForUser = false;
+	var timerPenaltySeconds = 0;
+	var timerGraceSeconds = 0;
+	var timerPenaltyGraceEl = document.getElementById('home-timer-penalty-grace');
 
 	function formatTime(s) {
 		var m = Math.floor(s / 60);
@@ -871,80 +876,115 @@
 	function updatePhaseLabel() {
 		if (timerPhaseEl) timerPhaseEl.textContent = timerIsBreak ? 'Break' : 'Work';
 	}
+	function updatePenaltyGraceDisplay() {
+		if (!timerPenaltyGraceEl) return;
+		var g = Math.floor(timerGraceSeconds / 60);
+		var p = Math.floor(timerPenaltySeconds / 60);
+		timerPenaltyGraceEl.textContent = 'Grace: ' + g + 'm · Penalty: ' + p + 'm';
+	}
+
+	// Called when work phase ends (from tick at 0 or from Next with time left). usePenaltyAndGrace: use accumulated penalty/grace for next break length.
+	function transitionWorkEnded(usePenaltyAndGrace) {
+		var minsLogged = Math.round((timerWorkMins * 60 - 0) / 60) || timerWorkMins;
+		addTimerLogEntry(minsLogged, timerSessionLabel && timerSessionLabel.value ? timerSessionLabel.value.trim() : '');
+		if (timerSessionLabel) timerSessionLabel.value = '';
+
+		var autoOn = !!(timerAutoCheckbox && timerAutoCheckbox.checked);
+		if (autoOn && timerRoundsInput) {
+			var total = timerTotalRounds;
+			if (timerRemainingRounds == null) {
+				total = parseInt(timerRoundsInput.value, 10) || 1;
+				timerTotalRounds = Math.max(1, Math.min(12, total));
+				timerRemainingRounds = timerTotalRounds;
+			}
+			timerRemainingRounds--;
+			if (timerRemainingRounds <= 0) {
+				timerIsBreak = false;
+				timerSeconds = timerWorkMins * 60;
+				timerRemaining = timerSeconds;
+				timerWaitingForUser = false;
+				timerPenaltySeconds = 0;
+				timerGraceSeconds = 0;
+				updatePenaltyGraceDisplay();
+				updateTimerDisplay();
+				updatePhaseLabel();
+				if (timerBtn) { timerBtn.textContent = 'Start'; timerBtn.dataset.running = '0'; }
+				if (timerStatusText) timerStatusText.textContent = 'Completed ' + timerTotalRounds + ' rounds';
+				if (typeof document.hidden !== 'undefined' && !document.hidden) {
+					try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+					try { alert('All scheduled focus sessions are done.'); } catch (e) {}
+				}
+				timerRemainingRounds = null;
+				return;
+			}
+			if (timerStatusText) {
+				var doneRounds = timerTotalRounds - timerRemainingRounds;
+				timerStatusText.textContent = 'Round ' + (doneRounds + 1) + ' of ' + timerTotalRounds;
+			}
+		}
+
+		if (timerBreakMins > 0) {
+			var effectiveBreakSec = timerBreakMins * 60;
+			if (usePenaltyAndGrace) {
+				effectiveBreakSec = Math.max(0, timerBreakMins * 60 + timerGraceSeconds - timerPenaltySeconds);
+				timerGraceSeconds = 0;
+				timerPenaltySeconds = 0;
+				updatePenaltyGraceDisplay();
+			}
+			timerIsBreak = true;
+			timerSeconds = effectiveBreakSec;
+			timerRemaining = effectiveBreakSec;
+			updatePhaseLabel();
+			updateTimerDisplay();
+			if (typeof document.hidden !== 'undefined' && !document.hidden) {
+				try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+				try { alert('Focus block done. Break started.'); } catch (e) {}
+			}
+			if (timerBtn) { timerBtn.textContent = 'Pause'; timerBtn.dataset.running = '1'; }
+			timerInterval = setInterval(tick, 1000);
+		} else {
+			if (timerBtn) { timerBtn.textContent = 'Start'; timerBtn.dataset.running = '0'; }
+		}
+	}
 
 	function tick() {
+		if (timerWaitingForUser) return;
 		timerRemaining--;
 		updateTimerDisplay();
 		if (timerRemaining <= 0) {
 			if (timerIsBreak) {
+				clearInterval(timerInterval);
+				timerInterval = null;
 				timerIsBreak = false;
 				timerSeconds = timerWorkMins * 60;
 				timerRemaining = timerSeconds;
 				updatePhaseLabel();
+				updateTimerDisplay();
 				if (typeof document.hidden !== 'undefined' && !document.hidden) {
 					try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
 					try { alert('Break over. Back to focus.'); } catch (e) {}
 				}
+				if (timerBtn) { timerBtn.textContent = 'Pause'; timerBtn.dataset.running = '1'; }
+				timerInterval = setInterval(tick, 1000);
 				return;
 			}
-			var minsLogged = Math.round((timerWorkMins * 60 - 0) / 60) || timerWorkMins;
-			addTimerLogEntry(minsLogged, timerSessionLabel && timerSessionLabel.value ? timerSessionLabel.value.trim() : '');
-			if (timerSessionLabel) timerSessionLabel.value = '';
-
-			var autoOn = !!(timerAutoCheckbox && timerAutoCheckbox.checked);
-			if (autoOn && timerRoundsInput) {
-				var total = timerTotalRounds;
-				if (timerRemainingRounds == null) {
-					total = parseInt(timerRoundsInput.value, 10) || 1;
-					timerTotalRounds = Math.max(1, Math.min(12, total));
-					timerRemainingRounds = timerTotalRounds;
-				}
-				timerRemainingRounds--;
-				if (timerRemainingRounds <= 0) {
-					// Finished all planned rounds: stop completely after this work block
-					clearInterval(timerInterval);
-					timerInterval = null;
-					timerIsBreak = false;
-					timerSeconds = timerWorkMins * 60;
-					timerRemaining = timerSeconds;
-					updateTimerDisplay();
-					updatePhaseLabel();
-					if (timerBtn) {
-						timerBtn.textContent = 'Start';
-						timerBtn.dataset.running = '0';
-					}
-					if (timerStatusText) {
-						timerStatusText.textContent = 'Completed ' + timerTotalRounds + ' rounds';
-					}
-					if (typeof document.hidden !== 'undefined' && !document.hidden) {
-						try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
-						try { alert('All scheduled focus sessions are done.'); } catch (e) {}
-					}
-					timerRemainingRounds = null;
-					return;
-				} else if (timerStatusText) {
-					var doneRounds = timerTotalRounds - timerRemainingRounds;
-					timerStatusText.textContent = 'Round ' + (doneRounds + 1) + ' of ' + timerTotalRounds;
-				}
+			// Work phase ended: wait for user (count penalty until they click)
+			clearInterval(timerInterval);
+			timerInterval = null;
+			timerWaitingForUser = true;
+			timerPenaltySeconds = 0;
+			updatePenaltyGraceDisplay();
+			if (timerBtn) timerBtn.textContent = 'Continue';
+			if (typeof document.hidden !== 'undefined' && !document.hidden) {
+				try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+				try { alert('Focus block done. Click Continue or Next to start break.'); } catch (e) {}
 			}
-
-			if (timerBreakMins > 0) {
-				timerIsBreak = true;
-				timerSeconds = timerBreakMins * 60;
-				timerRemaining = timerSeconds;
-				updatePhaseLabel();
-				if (typeof document.hidden !== 'undefined' && !document.hidden) {
-					try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
-					try { alert('Focus block done. Break started.'); } catch (e) {}
-				}
-			} else {
-				clearInterval(timerInterval);
-				timerInterval = null;
-				if (timerBtn) {
-					timerBtn.textContent = 'Start';
-					timerBtn.dataset.running = '0';
-				}
-			}
+			timerPenaltyInterval = setInterval(function () {
+				timerPenaltySeconds++;
+				updatePenaltyGraceDisplay();
+				if (timerDisplay) timerDisplay.textContent = '0:00 +' + Math.floor(timerPenaltySeconds / 60) + 'm';
+			}, 1000);
+			return;
 		}
 	}
 
@@ -960,6 +1000,15 @@
 
 	if (timerBtn && timerDisplay) {
 		timerBtn.addEventListener('click', function () {
+			if (timerWaitingForUser) {
+				if (timerPenaltyInterval) {
+					clearInterval(timerPenaltyInterval);
+					timerPenaltyInterval = null;
+				}
+				timerWaitingForUser = false;
+				transitionWorkEnded(true);
+				return;
+			}
 			if (timerInterval) {
 				clearInterval(timerInterval);
 				timerInterval = null;
@@ -987,12 +1036,57 @@
 			}
 		});
 	}
+	var timerNextBtn = document.getElementById('home-timer-next');
+	if (timerNextBtn) {
+		timerNextBtn.addEventListener('click', function () {
+			if (timerWaitingForUser) {
+				if (timerPenaltyInterval) {
+					clearInterval(timerPenaltyInterval);
+					timerPenaltyInterval = null;
+				}
+				timerWaitingForUser = false;
+				transitionWorkEnded(true);
+				return;
+			}
+			if (!timerInterval) return;
+			if (timerRemaining > 0) {
+				timerGraceSeconds += timerRemaining;
+				updatePenaltyGraceDisplay();
+			}
+			if (timerIsBreak) {
+				clearInterval(timerInterval);
+				timerInterval = null;
+				timerIsBreak = false;
+				timerSeconds = timerWorkMins * 60;
+				timerRemaining = timerSeconds;
+				updateTimerDisplay();
+				updatePhaseLabel();
+				if (typeof document.hidden !== 'undefined' && !document.hidden) {
+					try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2').play(); } catch (e) {}
+					try { alert('Break ended early. Grace added. Back to focus.'); } catch (e) {}
+				}
+				timerInterval = setInterval(tick, 1000);
+			} else {
+				clearInterval(timerInterval);
+				timerInterval = null;
+				transitionWorkEnded(true);
+			}
+		});
+	}
 	if (timerReset && timerDisplay) {
 		timerReset.addEventListener('click', function () {
 			if (timerInterval) {
 				clearInterval(timerInterval);
 				timerInterval = null;
 			}
+			if (timerPenaltyInterval) {
+				clearInterval(timerPenaltyInterval);
+				timerPenaltyInterval = null;
+			}
+			timerWaitingForUser = false;
+			timerPenaltySeconds = 0;
+			timerGraceSeconds = 0;
+			updatePenaltyGraceDisplay();
 			timerIsBreak = false;
 			timerSeconds = timerWorkMins * 60;
 			timerRemaining = timerSeconds;
@@ -1014,6 +1108,7 @@
 		});
 	}
 	updateTimerDisplay();
+	updatePenaltyGraceDisplay();
 	renderTimerLog();
 
 	// To-do list (localStorage)

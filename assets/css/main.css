@@ -613,14 +613,7 @@ body {
 .dark .second-brain-card:hover {
 	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
-
-/* Ensure quote + timer panels share a comfortable, consistent height */
-.home-focus-panel {
-	min-height: 260px;
-	display: flex;
-	flex-direction: column;
-}
-
+  
 .home-quote {
 	font-size: 1.3rem;
 	line-height: 1.7;
@@ -646,10 +639,10 @@ body {
 	color: rgb(148 163 184);
 }
 
-/* Homepage quote background image: show full poster without stretching */
+/* Homepage quote background image: show full poster without stretching, keep real aspect */
 #home-quote-bg {
-	background-size: contain;
-	background-position: center;
+	background-size: auto 100%;
+	background-position: center center;
 	background-repeat: no-repeat;
 }
 
@@ -1018,9 +1011,17 @@ body:has(#global-music-bar) {
 }
 #assistant-panel {
 	z-index: 70 !important;
+	/* Avoid being hidden behind the global music bar */
+	bottom: 3.25rem;
 }
 #assistant-btn {
 	z-index: 65 !important;
+}
+
+@media (max-width: 767px) {
+	#assistant-panel {
+		bottom: 4rem;
+	}
 }
 
 /* Dict & Video toggles: minimum touch target on mobile */
@@ -1334,6 +1335,12 @@ body:has(#global-music-bar) {
 }
 
 /* Resources flyout (right side, like Dict but with subject/subsections) */
+#sidebar ~ #global-resources-toggle,
+#sidebar ~ #global-resources-flyout {
+	display: none !important;
+}
+
+#global-resources-toggle {
 #global-resources-toggle {
 	position: fixed;
 	top: 50%;

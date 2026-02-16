@@ -386,7 +386,8 @@
 	}
 
 	function embedVideoUrl(id) {
-		if (getPiped()) return 'https://piped.video/embed/' + id + '?autoplay=1';
+		// When "Piped" is enabled, fall back to YouTube's privacy‑enhanced domain instead of third‑party instances
+		if (getPiped()) return 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&modestbranding=1&rel=0';
 		return 'https://www.youtube.com/embed/' + id + '?autoplay=1';
 	}
 

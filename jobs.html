@@ -228,6 +228,13 @@
 					<option value="3">Last 3 days</option>
 					<option value="7">Last 7 days</option>
 				</select>
+				<select id="job-filter-role" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary" title="Focus by role type">
+					<option value="all">All roles</option>
+					<option value="analyst">Analyst (Data, Product, Business, BI)</option>
+					<option value="scientist">Scientist (Data Scientist, Associate DS)</option>
+					<option value="engineer">Engineer (Data, ML, Analytics)</option>
+					<option value="associate_junior">Associate &amp; Junior</option>
+				</select>
 				<button type="button" id="job-refresh-btn" class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Refresh</button>
 			</div>
 			<div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -248,6 +255,172 @@
 		<div id="job-empty" class="text-center py-12 hidden">
 			<p class="text-gray-500 dark:text-gray-400">No jobs found matching your filters.</p>
 		</div>
+
+		<!-- Application planner (Notion-style log, saved in this browser only) -->
+		<section class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
+			<header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+				<div>
+					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Application planner</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400 max-w-xl">
+						Lightweight, Notion-style log for the jobs you care about. Everything is stored locally in this browser (no backend).
+					</p>
+				</div>
+				<div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+					<label class="flex items-center gap-1">
+						<span>Search</span>
+						<input id="planner-search-input" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200" placeholder="Title, company, notes…">
+					</label>
+					<label class="flex items-center gap-1">
+						<span>Status</span>
+						<select id="planner-filter-status" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200">
+							<option value="all">All</option>
+							<option value="idea">Idea</option>
+							<option value="todo">To apply</option>
+							<option value="applied">Applied</option>
+							<option value="interview">Interview</option>
+							<option value="offer">Offer</option>
+							<option value="rejected">Rejected</option>
+						</select>
+					</label>
+				</div>
+			</header>
+
+			<!-- Summary row showing counts by status -->
+			<div id="planner-summary" class="flex flex-wrap items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
+				<span class="font-semibold text-gray-700 dark:text-gray-300">Summary:</span>
+				<span class="text-gray-600 dark:text-gray-400">
+					<span class="font-medium">Idea:</span> <span id="planner-count-idea" class="font-semibold text-primary">0</span>
+				</span>
+				<span class="text-gray-600 dark:text-gray-400">
+					<span class="font-medium">To apply:</span> <span id="planner-count-todo" class="font-semibold text-primary">0</span>
+				</span>
+				<span class="text-gray-600 dark:text-gray-400">
+					<span class="font-medium">Applied:</span> <span id="planner-count-applied" class="font-semibold text-primary">0</span>
+				</span>
+				<span class="text-gray-600 dark:text-gray-400">
+					<span class="font-medium">Interview:</span> <span id="planner-count-interview" class="font-semibold text-primary">0</span>
+				</span>
+				<span class="text-gray-600 dark:text-gray-400">
+					<span class="font-medium">Offer:</span> <span id="planner-count-offer" class="font-semibold text-primary">0</span>
+				</span>
+				<span class="text-gray-600 dark:text-gray-400">
+					<span class="font-medium">Rejected:</span> <span id="planner-count-rejected" class="font-semibold text-primary">0</span>
+				</span>
+				<span class="text-gray-600 dark:text-gray-400 ml-auto">
+					<span class="font-medium">Total:</span> <span id="planner-count-total" class="font-semibold text-primary">0</span>
+				</span>
+			</div>
+
+			<form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+				<div class="flex flex-col gap-1">
+					<label for="planner-title" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Role / title</label>
+					<input id="planner-title" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. Data Analyst – Product">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-company" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Company</label>
+					<input id="planner-company" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Company name">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-link" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Job link (optional)</label>
+					<input id="planner-link" type="url" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="https://…">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-location" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Location / time zone</label>
+					<input id="planner-location" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. Remote – IST, Pune, EU only">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-source" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Source / search context</label>
+					<input id="planner-source" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. LinkedIn – 'data analyst remote'">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-status" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Status</label>
+					<select id="planner-status" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+						<option value="idea">Idea</option>
+						<option value="todo">To apply</option>
+						<option value="applied">Applied</option>
+						<option value="interview">Interview</option>
+						<option value="offer">Offer</option>
+						<option value="rejected">Rejected</option>
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-next-step" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Next step / follow-up date</label>
+					<input id="planner-next-step" type="date" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-applied-at" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Applied on (optional)</label>
+					<input id="planner-applied-at" type="date" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-priority" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Priority</label>
+					<select id="planner-priority" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+						<option value="medium">Medium</option>
+						<option value="high">High</option>
+						<option value="urgent">Urgent</option>
+						<option value="low">Low</option>
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-job-type" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Job type</label>
+					<select id="planner-job-type" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+						<option value="">Not set</option>
+						<option value="full-time">Full-time</option>
+						<option value="internship">Internship</option>
+						<option value="contract">Contract</option>
+						<option value="freelance">Freelance</option>
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-work-mode" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Work mode</label>
+					<select id="planner-work-mode" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+						<option value="">Not set</option>
+						<option value="remote">Remote</option>
+						<option value="hybrid">Hybrid</option>
+						<option value="on-site">On-site</option>
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-salary" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Salary / range (rough)</label>
+					<input id="planner-salary" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. 18–24 LPA, 60–70k EUR, N/A">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-contact-name" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Contact person</label>
+					<input id="planner-contact-name" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Recruiter / hiring manager name">
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-contact-channel" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Contact channel</label>
+					<select id="planner-contact-channel" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+						<option value="">Not set</option>
+						<option value="linkedin">LinkedIn DM</option>
+						<option value="email">Email</option>
+						<option value="portal">Job portal</option>
+						<option value="referral">Referral</option>
+						<option value="other">Other</option>
+					</select>
+				</div>
+				<div class="flex flex-col gap-1">
+					<label for="planner-tags" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Tags</label>
+					<input id="planner-tags" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Comma-separated labels: e.g. product-analytics, SQL-heavy">
+				</div>
+				<div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
+					<label for="planner-outcome" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Outcome / reason (optional)</label>
+					<input id="planner-outcome" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. rejected (location mismatch), offer declined (comp)">
+				</div>
+				<div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
+					<label for="planner-notes" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Notes (interview log, penalties/grace time, etc.)</label>
+					<textarea id="planner-notes" rows="2" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Short notes, who you talked to, next actions…"></textarea>
+				</div>
+				<div class="flex items-end">
+					<button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-semibold">Add to planner</button>
+				</div>
+			</form>
+
+			<div id="planner-empty" class="text-xs text-gray-500 dark:text-gray-400">
+				No planner entries yet. Add roles you actually want to track above.
+			</div>
+			<div id="planner-list" class="space-y-3 text-sm"></div>
+		</section>
+
 	</main>
 	</div>
 
