@@ -1,6 +1,7 @@
 /**
  * IMDb/OMDb flyout on Playground: search-as-you-type, results (thumb, title, year), click for details.
- * Uses backend proxy /api/omdb (s=search, i=imdbID) so the key stays server-side.
+ * Uses backend proxy /api/omdb (s=search, i=imdbID) and /api/cinematerial so the key stays server-side.
+ * Detail shows full fields + CineMaterial & ThePosterDB links and optional poster fetch.
  */
 (function () {
 	var toggle = document.getElementById('global-omdb-toggle');
@@ -11,10 +12,33 @@
 
 	if (!toggle || !flyout || !input || !bodyEl) return;
 
-	function proxyUrl() {
-		var base = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
-		return (base || '') + '/api/omdb';
+	function proxyBase() {
+		return (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
 	}
+	function proxyUrl() {
+		return proxyBase() + '/api/omdb';
+	}
+	function cinematerialUrl() {
+		return proxyBase() + '/api/cinematerial';
+	}
+	function slugify(s) {
+		if (!s) return 'title';
+		return String(s).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'title';
+	}
+	function cinematerialPageUrl(imdbId, title, type) {
+		var id = (imdbId || '').replace(/^tt/i, '');
+		if (!/^\d+$/.test(id)) return 'https://www.cinematerial.com/';
+		var path = type === 'series' ? 'tv' : 'movies';
+		return 'https://www.cinematerial.com/' + path + '/' + slugify(title) + '-i' + id;
+	}
+	function theposterdbSearchUrl(title, type) {
+		var section = type === 'series' ? 'shows' : 'movies';
+		var term = encodeURIComponent((title || '').trim() || '');
+		return term ? 'https://theposterdb.com/search?term=' + term + '&section=' + section : 'https://theposterdb.com/search';
+	}
+	function esc(s) { return (s || '').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+	var currentDetail = { imdbID: '', title: '', type: 'movie' };
 
 	function openFlyout() {
 		flyout.classList.add('global-omdb-open');
@@ -61,6 +85,38 @@
 		});
 	}
 
+	function fetchCineMaterialPosters() {
+		var wrap = bodyEl.querySelector('.global-omdb-poster-sources');
+		var grid = wrap && wrap.querySelector('.global-omdb-cinematerial-grid');
+		if (!grid) return;
+		if (!currentDetail.imdbID || !proxyBase()) {
+			grid.innerHTML = '<span class="text-xs text-gray-500 dark:text-gray-400">Set OMDB_PROXY_URL and open a title.</span>';
+			return;
+		}
+		grid.innerHTML = '<span class="text-xs text-gray-500 dark:text-gray-400">Loading…</span>';
+		var q = 'i=' + encodeURIComponent(currentDetail.imdbID) + '&title=' + encodeURIComponent(currentDetail.title) + '&type=' + encodeURIComponent(currentDetail.type);
+		fetch(cinematerialUrl() + '?' + q)
+			.then(function (r) { return r.json(); })
+			.then(function (data) {
+				var list = (data && data.posters) ? data.posters : [];
+				if (data && data.error && list.length === 0) {
+					grid.innerHTML = '<span class="text-xs text-gray-500 dark:text-gray-400">' + esc(data.error) + ' Use link above.</span>';
+					return;
+				}
+				if (list.length === 0) {
+					grid.innerHTML = '<span class="text-xs text-gray-500 dark:text-gray-400">No images found. Open CineMaterial above.</span>';
+					return;
+				}
+				var h = '';
+				list.forEach(function (p) {
+					var u = (p && p.url) ? p.url : p;
+					h += '<img src="' + esc(u) + '" alt="" loading="lazy" class="global-omdb-cinematerial-img">';
+				});
+				grid.innerHTML = h;
+			})
+			.catch(function () { grid.innerHTML = '<span class="text-xs text-gray-500 dark:text-gray-400">Network error.</span>'; });
+	}
+
 	function fetchDetail(imdbID) {
 		bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Loading…</p>';
 		fetch(proxyUrl() + '?i=' + encodeURIComponent(imdbID))
@@ -70,21 +126,39 @@
 					renderHint('Could not load details.');
 					return;
 				}
+				var type = (data.Type || 'movie').toLowerCase();
+				currentDetail = { imdbID: data.imdbID || imdbID, title: data.Title || '', type: type === 'series' ? 'series' : 'movie' };
+
 				var poster = data.Poster && data.Poster.indexOf('http') === 0 ? '<img class="global-omdb-detail-poster" src="' + data.Poster.replace(/"/g, '&quot;') + '" alt="">' : '';
 				var html = '<div class="global-omdb-detail">';
 				html += poster;
-				html += '<h3>' + (data.Title || '').replace(/</g, '&lt;') + ' (' + (data.Year || '').replace(/</g, '&lt;') + ')</h3>';
-				if (data.Rated && data.Rated !== 'N/A') html += '<p><strong>Rated:</strong> ' + data.Rated.replace(/</g, '&lt;') + '</p>';
-				if (data.Released && data.Released !== 'N/A') html += '<p><strong>Released:</strong> ' + data.Released.replace(/</g, '&lt;') + '</p>';
-				if (data.Runtime && data.Runtime !== 'N/A') html += '<p><strong>Runtime:</strong> ' + data.Runtime.replace(/</g, '&lt;') + '</p>';
-				if (data.Genre && data.Genre !== 'N/A') html += '<p><strong>Genre:</strong> ' + data.Genre.replace(/</g, '&lt;') + '</p>';
-				if (data.Director && data.Director !== 'N/A') html += '<p><strong>Director:</strong> ' + data.Director.replace(/</g, '&lt;') + '</p>';
-				if (data.Actors && data.Actors !== 'N/A') html += '<p><strong>Actors:</strong> ' + data.Actors.replace(/</g, '&lt;') + '</p>';
-				if (data.imdbRating && data.imdbRating !== 'N/A') html += '<p><strong>IMDb:</strong> ' + data.imdbRating.replace(/</g, '&lt;') + '</p>';
-				if (data.Plot && data.Plot !== 'N/A') html += '<p>' + data.Plot.replace(/</g, '&lt;') + '</p>';
-				html += '<p><a href="https://www.imdb.com/title/' + (data.imdbID || '').replace(/"/g, '&quot;') + '/" target="_blank" rel="noopener" class="text-primary hover:underline">View on IMDb ↗</a></p>';
+				html += '<h3>' + esc(data.Title) + ' (' + esc(data.Year) + ')</h3>';
+				if (data.Rated && data.Rated !== 'N/A') html += '<p><strong>Rated:</strong> ' + esc(data.Rated) + '</p>';
+				if (data.Released && data.Released !== 'N/A') html += '<p><strong>Released:</strong> ' + esc(data.Released) + '</p>';
+				if (data.Runtime && data.Runtime !== 'N/A') html += '<p><strong>Runtime:</strong> ' + esc(data.Runtime) + '</p>';
+				if (data.Genre && data.Genre !== 'N/A') html += '<p><strong>Genre:</strong> ' + esc(data.Genre) + '</p>';
+				if (data.Director && data.Director !== 'N/A') html += '<p><strong>Director:</strong> ' + esc(data.Director) + '</p>';
+				if (data.Writer && data.Writer !== 'N/A') html += '<p><strong>Writer:</strong> ' + esc(data.Writer) + '</p>';
+				if (data.Actors && data.Actors !== 'N/A') html += '<p><strong>Actors:</strong> ' + esc(data.Actors) + '</p>';
+				if (data.Language && data.Language !== 'N/A') html += '<p><strong>Language:</strong> ' + esc(data.Language) + '</p>';
+				if (data.Country && data.Country !== 'N/A') html += '<p><strong>Country:</strong> ' + esc(data.Country) + '</p>';
+				if (data.Awards && data.Awards !== 'N/A') html += '<p><strong>Awards:</strong> ' + esc(data.Awards) + '</p>';
+				if (data.BoxOffice && data.BoxOffice !== 'N/A') html += '<p><strong>Box office:</strong> ' + esc(data.BoxOffice) + '</p>';
+				if (data.imdbRating && data.imdbRating !== 'N/A') html += '<p><strong>IMDb:</strong> ' + esc(data.imdbRating) + '</p>';
+				if (data.Plot && data.Plot !== 'N/A') html += '<p>' + esc(data.Plot) + '</p>';
+				html += '<p><a href="https://www.imdb.com/title/' + esc(data.imdbID) + '/" target="_blank" rel="noopener" class="text-primary hover:underline">View on IMDb ↗</a></p>';
+
+				html += '<div class="global-omdb-poster-sources">';
+				html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mt-3 mb-1">Poster sources</p>';
+				html += '<p class="text-xs text-gray-500 dark:text-gray-400 mb-1"><a href="' + esc(cinematerialPageUrl(currentDetail.imdbID, currentDetail.title, currentDetail.type)) + '" target="_blank" rel="noopener" class="text-primary hover:underline">CineMaterial</a>';
+				html += ' <button type="button" id="global-omdb-fetch-cinematerial" class="px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700">Fetch posters</button>';
+				html += ' · <a href="' + esc(theposterdbSearchUrl(currentDetail.title, currentDetail.type)) + '" target="_blank" rel="noopener" class="text-primary hover:underline">ThePosterDB</a></p>';
+				html += '<div class="global-omdb-cinematerial-grid"></div>';
+				html += '</div>';
 				html += '</div>';
 				bodyEl.innerHTML = html;
+
+				bodyEl.querySelector('#global-omdb-fetch-cinematerial').addEventListener('click', fetchCineMaterialPosters);
 			})
 			.catch(function () { renderHint('Network error.'); });
 	}

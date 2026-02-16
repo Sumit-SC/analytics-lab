@@ -85,9 +85,11 @@ Get a free key at [omdbapi.com](https://www.omdbapi.com/).
    `window.OMDB_PROXY_URL = 'https://omdb-proxy-xxx.vercel.app';`  
    (Use your real Vercel URL; no trailing slash.)
 
-Your main repo stays front-end only; the key lives only in Vercel’s env for the proxy repo. See **`omdb-proxy/README.md`** for step-by-step details.
+Your main repo stays front-end only; the key lives only in Vercel’s env for the proxy repo. See **`playground-serveless/README.md`** (or `omdb-proxy`) for step-by-step details.
 
-**If you deploy the main site on Vercel/Netlify** you can instead run the backend from the same deploy (use the `api/` folder in analytics-lab and set `OMDB_API_KEY` in that project’s env). Then you don’t need `OMDB_PROXY_URL` if the site and API are on the same host.
+**Playground IMDb embed:** The **Playground** page has an IMDb flyout (button “IMDb”): search movies/series, click a result for **full detail** (including Writer, Language, Country, Awards, Box office). In the detail view you get links to **CineMaterial** and **ThePosterDB** and a “Fetch posters” button that calls the proxy’s `/api/cinematerial` (if your proxy exposes it, e.g. the `playground-serveless` deploy).
+
+**If you deploy the main site on Vercel/Netlify** you can instead run the backend from the same deploy (use the `api/` folder in analytics-lab — it includes `omdb.js` and `cinematerial.js` — and set `OMDB_API_KEY` in that project’s env). Then you don’t need `OMDB_PROXY_URL` if the site and API are on the same host.
 
 
 ---

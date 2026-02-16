@@ -1095,6 +1095,11 @@ body:has(#global-music-bar) {
 .global-omdb-detail h3 { font-size: 1rem; margin: 0 0 0.5rem 0; }
 .global-omdb-detail-poster { max-width: 120px; border-radius: 8px; margin-bottom: 0.5rem; }
 .global-omdb-detail p { margin: 0.35rem 0; }
+.global-omdb-poster-sources { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(0,0,0,0.08); }
+.dark .global-omdb-poster-sources { border-top-color: rgba(255,255,255,0.08); }
+.global-omdb-cinematerial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 0.35rem; margin-top: 0.35rem; }
+.global-omdb-cinematerial-img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; background: #e2e8f0; }
+.dark .global-omdb-cinematerial-img { background: #475569; }
 
 /* Dictionary flyout (global, all pages) */
 #global-dict-toggle {
