@@ -73,19 +73,21 @@ Deploy the **analytics-lab** folder to any static host (GitHub Pages, Netlify, V
 
 ### OMDb API key (posters / wallpapers)
 
-The key is **never** sent to the browser. A serverless backend in **`api/omdb.js`** calls OMDb and returns only the poster URL.
+The key is **never** sent to the browser. A small backend calls OMDb and returns only poster/search/details.
 
 Get a free key at [omdbapi.com](https://www.omdbapi.com/).
 
-**1. Deploy the backend** so the key lives only in server env:
-- **Vercel:** Deploy the **analytics-lab** folder to Vercel. In **Project → Settings → Environment Variables**, add `OMDB_API_KEY` = your key. Optional: `ALLOWED_ORIGINS` = comma-separated origins to restrict who can call the API.
-- **Netlify:** Use a serverless function (see `api/omdb.js`) and set `OMDB_API_KEY` in **Site settings → Environment variables**.
+**GitHub Pages (recommended): use a separate backend repo**
 
-**2. Frontend:**
+1. Use the **`omdb-proxy`** folder (sibling to `analytics-lab` in this workspace). Copy it into a **new GitHub repo** (e.g. `omdb-proxy`) and push.
+2. Deploy that repo on **Vercel**: Import the repo → add env var **`OMDB_API_KEY`** → deploy. Note the URL (e.g. `https://omdb-proxy-xxx.vercel.app`).
+3. In your **main site** (e.g. in `index.html` and `playground.html`), set before other scripts:  
+   `window.OMDB_PROXY_URL = 'https://omdb-proxy-xxx.vercel.app';`  
+   (Use your real Vercel URL; no trailing slash.)
 
-The site calls `/api/omdb?t=Title&type=movie` (or `series`). If the site and API are on the same host (e.g. both on Vercel), nothing else to set. If the site is on another host (e.g. GitHub Pages), set in `index.html` before other scripts: `window.OMDB_PROXY_URL = 'https://your-api.vercel.app';`
+Your main repo stays front-end only; the key lives only in Vercel’s env for the proxy repo. See **`omdb-proxy/README.md`** for step-by-step details.
 
-**3. Optional:** Use your host rate limiting so bots cannot hammer the proxy. The proxy returns only `{ poster: url }` and never exposes the key.
+**If you deploy the main site on Vercel/Netlify** you can instead run the backend from the same deploy (use the `api/` folder in analytics-lab and set `OMDB_API_KEY` in that project’s env). Then you don’t need `OMDB_PROXY_URL` if the site and API are on the same host.
 
 
 ---
