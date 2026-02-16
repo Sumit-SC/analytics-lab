@@ -7,6 +7,11 @@
 	<meta name="description" content="Run Python, JS, and SQL in the browser. DevDocs, GitHub search. Toggle Tech (IDE, docs) or Non-tech (notes, web search)." />
 	<meta property="og:title" content="Playground — Code, Docs &amp; Tools" />
 	<meta property="og:description" content="Tech: IDE + DevDocs + GitHub. Non-tech: Word/PDF + Google, Wikipedia, Stack Overflow." />
+	<script>
+		// OMDb proxy base (no /api/omdb at the end)
+		// Your Vercel proxy URL: https://playground-serveless.vercel.app
+		window.OMDB_PROXY_URL = 'https://playground-serveless.vercel.app';
+	</script>
 	<script src="./assets/js/tailwind-loader.js" defer></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

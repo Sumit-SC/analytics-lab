@@ -7,6 +7,11 @@
 	<meta name="description" content="Notion-like second brain: JS libraries and free APIs only. View, search, edit on the fly; export code, notes, Word-style docs. No backend." />
 	<meta property="og:title" content="Home — Standalone Playground" />
 	<meta property="og:description" content="Focus, weather, quotes. One place for code, resources &amp; tools." />
+	<script>
+		// OMDb proxy base (no /api/omdb at the end)
+		// Your Vercel proxy URL: https://playground-serveless.vercel.app
+		window.OMDB_PROXY_URL = 'https://playground-serveless.vercel.app';
+	</script>
 	<script src="./assets/js/tailwind-loader.js" defer></script>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

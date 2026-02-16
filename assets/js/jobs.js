@@ -28,6 +28,26 @@
 	var applications = {};
 	var filteredJobs = [];
 
+	// Lightweight caching to avoid rate limits (especially Remotive)
+	var CACHE_PREFIX = 'job_tracker_cache_v1_';
+	function readCache(key, ttlMs) {
+		try {
+			var raw = localStorage.getItem(CACHE_PREFIX + key);
+			if (!raw) return null;
+			var obj = JSON.parse(raw);
+			if (!obj || !obj.ts) return null;
+			if (ttlMs && (Date.now() - obj.ts) > ttlMs) return null;
+			return obj.data || null;
+		} catch (e) {
+			return null;
+		}
+	}
+	function writeCache(key, data) {
+		try {
+			localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ ts: Date.now(), data: data }));
+		} catch (e) {}
+	}
+
 	// Initialize
 	function init() {
 		loadApplications();
@@ -112,6 +132,8 @@
 			fetchStackOverflow(),
 			fetchGitHubJobs(),
 			fetchWeWorkRemotely(),
+			fetchRemotive(),
+			fetchArbeitnow(),
 			fetchNaukri(),
 			fetchWellfound(),
 			// Backend proxy required (set window.JOB_PROXY_URL):
@@ -300,6 +322,100 @@
 			})
 			.catch(function (err) {
 				console.error('We Work Remotely fetch error:', err);
+			});
+	}
+
+	// Fetch from Remotive (public API) — good for analyst roles, but rate-limited.
+	function fetchRemotive() {
+		// Remotive warns about excessive requests; cache aggressively.
+		var TTL = 1000 * 60 * 60 * 6; // 6 hours
+		var cached = readCache('remotive', TTL);
+		if (Array.isArray(cached) && cached.length) {
+			cached.forEach(function (j) { allJobs.push(j); });
+			return Promise.resolve();
+		}
+
+		var url = 'https://remotive.com/api/remote-jobs?search=' + encodeURIComponent('data analyst');
+		return fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var jobs = data && (data.jobs || data['remote-jobs'] || data.results);
+				if (!Array.isArray(jobs) || !jobs.length) return;
+				var out = [];
+				for (var i = 0; i < jobs.length; i++) {
+					var item = jobs[i];
+					if (!item) continue;
+					var title = (item.title || '').toLowerCase();
+					var description = (item.description || item.description_plain || '').toLowerCase();
+					var tags = (item.tags || []).join(' ').toLowerCase();
+					var fullText = title + ' ' + description + ' ' + tags;
+					if (!isDataScienceJob(fullText)) continue;
+					out.push({
+						id: 'remotive_' + (item.id || item.job_id || Math.random()).toString().replace(/[^a-zA-Z0-9]/g, '_'),
+						title: item.title || 'Untitled',
+						company: item.company_name || item.company || 'Unknown',
+						location: item.candidate_required_location || item.location || 'Remote',
+						url: item.url || item.job_url || '#',
+						description: item.description || item.description_plain || '',
+						tags: (item.tags || []).concat(item.category ? [item.category] : []),
+						source: 'remotive',
+						date: item.publication_date || item.created_at || new Date().toISOString()
+					});
+					if (out.length >= 40) break; // keep it lightweight
+				}
+				if (out.length) {
+					writeCache('remotive', out);
+					out.forEach(function (j) { allJobs.push(j); });
+				}
+			})
+			.catch(function (err) {
+				console.error('Remotive fetch error:', err);
+			});
+	}
+
+	// Fetch from Arbeitnow (public API) — broad board, we filter to data/analyst roles.
+	function fetchArbeitnow() {
+		var TTL = 1000 * 60 * 60; // 1 hour
+		var cached = readCache('arbeitnow', TTL);
+		if (Array.isArray(cached) && cached.length) {
+			cached.forEach(function (j) { allJobs.push(j); });
+			return Promise.resolve();
+		}
+
+		return fetch('https://www.arbeitnow.com/api/job-board-api')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var items = data && data.data;
+				if (!Array.isArray(items) || !items.length) return;
+				var out = [];
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					if (!item || !item.title) continue;
+					var title = String(item.title || '').toLowerCase();
+					var description = String(item.description || '').toLowerCase();
+					var tags = Array.isArray(item.tags) ? item.tags.join(' ').toLowerCase() : '';
+					var fullText = title + ' ' + description + ' ' + tags;
+					if (!isDataScienceJob(fullText)) continue;
+					out.push({
+						id: 'arbeitnow_' + String(item.slug || item.url || Math.random()).replace(/[^a-zA-Z0-9]/g, '_'),
+						title: item.title || 'Untitled',
+						company: item.company_name || 'Unknown',
+						location: item.location || (item.remote ? 'Remote' : 'Unknown'),
+						url: item.url || '#',
+						description: item.description || '',
+						tags: item.tags || [],
+						source: 'arbeitnow',
+						date: item.created_at ? new Date(item.created_at * 1000).toISOString() : new Date().toISOString()
+					});
+					if (out.length >= 40) break;
+				}
+				if (out.length) {
+					writeCache('arbeitnow', out);
+					out.forEach(function (j) { allJobs.push(j); });
+				}
+			})
+			.catch(function (err) {
+				console.error('Arbeitnow fetch error:', err);
 			});
 	}
 
@@ -692,7 +808,13 @@
 	// Check if job is data science related
 	function isDataScienceJob(text) {
 		var keywords = [
-			'data scientist', 'data analyst', 'data engineer', 'data science', 'analytics',
+			// Core data roles
+			'data scientist', 'data analyst', 'data engineer', 'analytics engineer',
+			// Analyst-focused (what you asked for)
+			'business analyst', 'product analyst', 'bi analyst', 'insights analyst', 'reporting analyst',
+			'marketing analyst', 'growth analyst', 'operations analyst',
+			// Domains / skills
+			'data science', 'data analytics', 'business intelligence', 'analytics',
 			'machine learning', 'ml engineer', 'ai engineer', 'business intelligence',
 			'statistician', 'research scientist', 'data analytics'
 		];
@@ -715,7 +837,10 @@
 
 		// Weight: roles are more important
 		var roleMatches = 0;
-		var roleKeywords = ['data scientist', 'data analyst', 'data engineer', 'analytics engineer', 'ml engineer'];
+		var roleKeywords = [
+			'data scientist', 'data analyst', 'data engineer', 'analytics engineer', 'ml engineer',
+			'business analyst', 'product analyst', 'bi analyst', 'insights analyst', 'reporting analyst'
+		];
 		roleKeywords.forEach(function (keyword) {
 			if (text.indexOf(keyword.toLowerCase()) !== -1) {
 				roleMatches++;
