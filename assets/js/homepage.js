@@ -319,12 +319,12 @@
 		return getImageMode() !== 'local';
 	}
 
-	// Fetch poster via backend proxy (key never sent to client). Proxy returns { poster: url } or { poster: null }.
+	// Fetch poster via backend proxy (key never sent to client). Proxy returns { poster: url, usage: { dailyCount, dailyLimit } } or { poster: null }.
+	// First hit per title is cached in quoteImageCache; tap on wallpaper button cycles lastQuoteFromDb.quote.images (OMDb returns one poster, so we store [url, url]).
 	// type: 'movie' | 'series' | omit. Set window.OMDB_PROXY_URL if proxy is on another host.
 	function fetchOMDBPoster(title, cb, type) {
 		if (!title || !title.trim()) { cb(null); return; }
 		var key = title.trim();
-		// If we already discovered a poster for this title, reuse it instead of calling OMDb again
 		if (quoteImageCache[key] && quoteImageCache[key].url) {
 			cb(quoteImageCache[key].url);
 			return;

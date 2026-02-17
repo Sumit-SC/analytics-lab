@@ -9,6 +9,7 @@
 	var input = document.getElementById('global-omdb-input');
 	var closeBtn = document.getElementById('global-omdb-close');
 	var bodyEl = document.getElementById('global-omdb-body');
+	var usageEl = document.getElementById('global-omdb-usage');
 
 	if (!toggle || !flyout || !input || !bodyEl) return;
 
@@ -40,9 +41,25 @@
 
 	var currentDetail = { imdbID: '', title: '', type: 'movie' };
 
+	function updateUsageDisplay(usage) {
+		if (!usageEl || !usage) return;
+		var daily = usage.dailyCount != null ? usage.dailyCount : '';
+		var limit = usage.dailyLimit != null ? usage.dailyLimit : 1000;
+		usageEl.textContent = (daily !== '' ? daily : '—') + '/' + limit + ' today';
+	}
+	function fetchUsageOnly() {
+		if (!proxyBase()) return;
+		fetch(proxyUrl() + '?usage=1')
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (data && data.dailyCount != null) updateUsageDisplay(data);
+			})
+			.catch(function () {});
+	}
 	function openFlyout() {
 		flyout.classList.add('global-omdb-open');
 		input.focus();
+		fetchUsageOnly();
 	}
 	function closeFlyout() {
 		flyout.classList.remove('global-omdb-open');
@@ -122,6 +139,7 @@
 		fetch(proxyUrl() + '?i=' + encodeURIComponent(imdbID))
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
+				if (data && data.usage) updateUsageDisplay(data.usage);
 				if (!data || data.error) {
 					renderHint('Could not load details.');
 					return;
@@ -171,10 +189,11 @@
 		}
 		bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Searching…</p>';
 		fetch(proxyUrl() + '?s=' + encodeURIComponent(query))
-			.then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }).catch(function () { return { ok: false, data: null }; }); })
+			.then(function (r) { return r.json().then(function (data) { return { ok: r.ok, status: r.status, data: data }; }).catch(function () { return { ok: false, status: r.status, data: null }; }); })
 			.then(function (out) {
 				var data = out && out.data;
-				if (!out.ok || (data && data.error)) renderHint((data && data.error) || 'OMDb proxy not configured. Deploy api/omdb.js and set OMDB_API_KEY.');
+				if (data && data.usage) updateUsageDisplay(data.usage);
+				if (!out.ok || (data && data.error)) renderHint((data && data.error) || (out.status === 429 ? 'Daily API limit reached. Resets midnight UTC.' : 'OMDb proxy not configured. Deploy api/omdb.js and set OMDB_API_KEY.'));
 				else renderSearchResults((data && data.results) ? data.results : []);
 			})
 			.catch(function () { renderHint('Network error.'); });

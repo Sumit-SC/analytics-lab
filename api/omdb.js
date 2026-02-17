@@ -6,7 +6,26 @@
 
 const OMDB_BASE = 'https://www.omdbapi.com/';
 const MAX_TITLE_LENGTH = 200;
-let OMDB_REQUEST_COUNT = 0;
+const DAILY_LIMIT = 1000;
+
+// Daily counter: reset at midnight UTC. Persists in global across warm invocations (Vercel/Netlify).
+const getGlobalDaily = function () {
+	if (typeof global === 'undefined') return { date: '', count: 0 };
+	global.__omdbDaily = global.__omdbDaily || { date: '', count: 0 };
+	const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
+	if (global.__omdbDaily.date !== today) {
+		global.__omdbDaily = { date: today, count: 0 };
+	}
+	return global.__omdbDaily;
+};
+function incrementDaily() {
+	const d = getGlobalDaily();
+	d.count += 1;
+	return d.count;
+}
+function getDailyCount() {
+	return getGlobalDaily().count;
+}
 
 function getKey() {
 	return process.env.OMDB_API_KEY || '';
@@ -19,10 +38,11 @@ function allowedOrigin(origin) {
 	return list.some(function (o) { return o === origin || origin.endsWith(o); });
 }
 
-module.exports = async function handler(req, res) {
-	OMDB_REQUEST_COUNT += 1;
+function usagePayload() {
+	return { dailyCount: getDailyCount(), dailyLimit: DAILY_LIMIT };
+}
 
-	// CORS: allow same-origin or list from env
+module.exports = async function handler(req, res) {
 	var origin = req.headers.origin || '';
 	if (!origin && req.headers.referer) {
 		try { origin = new URL(req.headers.referer).origin; } catch (e) {}
@@ -37,14 +57,31 @@ module.exports = async function handler(req, res) {
 
 	if (req.method !== 'GET') {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(405).json({ poster: null, error: 'Method not allowed', usage: { requestCount: OMDB_REQUEST_COUNT } });
+		return res.status(405).json({ poster: null, error: 'Method not allowed', usage: usagePayload() });
+	}
+
+	// Usage-only request: return daily count without incrementing and without calling OMDb (no API hit).
+	if (req.query && req.query.usage === '1') {
+		res.setHeader('Access-Control-Allow-Origin', allowedOrigin(origin) ? (origin || '*') : '*');
+		res.setHeader('Cache-Control', 'no-store');
+		return res.status(200).json(usagePayload());
 	}
 
 	const key = getKey();
 	if (!key) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(503).json({ poster: null, error: 'OMDb proxy not configured', usage: { requestCount: OMDB_REQUEST_COUNT } });
+		return res.status(503).json({ poster: null, error: 'OMDb proxy not configured', usage: usagePayload() });
 	}
+
+	// Enforce daily limit (reset at midnight UTC). Do not increment if already at limit.
+	if (getDailyCount() >= DAILY_LIMIT) {
+		res.setHeader('Access-Control-Allow-Origin', origin || '*');
+		return res.status(429).json({
+			error: 'Daily API limit reached (1000). Resets at midnight UTC.',
+			usage: usagePayload()
+		});
+	}
+	incrementDaily();
 
 	const setCors = function () {
 		res.setHeader('Access-Control-Allow-Origin', allowedOrigin(origin) ? (origin || '*') : '*');
@@ -69,10 +106,10 @@ module.exports = async function handler(req, res) {
 			});
 			setCors();
 			res.setHeader('Cache-Control', 'public, max-age=300');
-			return res.status(200).json({ results: results, usage: { requestCount: OMDB_REQUEST_COUNT } });
+			return res.status(200).json({ results: results, usage: usagePayload() });
 		} catch (e) {
 			res.setHeader('Access-Control-Allow-Origin', origin || '*');
-			return res.status(502).json({ results: [], error: 'Upstream error', usage: { requestCount: OMDB_REQUEST_COUNT } });
+			return res.status(502).json({ results: [], error: 'Upstream error', usage: usagePayload() });
 		}
 	}
 
@@ -85,7 +122,7 @@ module.exports = async function handler(req, res) {
 			const data = await r.json().catch(function () { return null; });
 			if (!data || data.Response === 'False') {
 				setCors();
-				return res.status(200).json({ error: 'Not found', usage: { requestCount: OMDB_REQUEST_COUNT } });
+				return res.status(200).json({ error: 'Not found', usage: usagePayload() });
 			}
 			const out = {
 				Title: data.Title || '',
@@ -109,18 +146,18 @@ module.exports = async function handler(req, res) {
 			};
 			setCors();
 			res.setHeader('Cache-Control', 'public, max-age=86400');
-			return res.status(200).json(Object.assign({}, out, { usage: { requestCount: OMDB_REQUEST_COUNT } }));
+			return res.status(200).json(Object.assign({}, out, { usage: usagePayload() }));
 		} catch (e) {
 			res.setHeader('Access-Control-Allow-Origin', origin || '*');
-			return res.status(502).json({ error: 'Upstream error', usage: { requestCount: OMDB_REQUEST_COUNT } });
-		}
+return res.status(502).json({ error: 'Upstream error', usage: usagePayload() });
+	}
 	}
 
 	// Poster by title: t=Title&type=movie|series (existing)
 	const t = typeof req.query.t === 'string' ? req.query.t.trim() : '';
 	if (!t || t.length > MAX_TITLE_LENGTH) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(400).json({ poster: null, error: 'Missing or invalid title', usage: { requestCount: OMDB_REQUEST_COUNT } });
+		return res.status(400).json({ poster: null, error: 'Missing or invalid title', usage: usagePayload() });
 	}
 	const type = (req.query.type === 'movie' || req.query.type === 'series') ? req.query.type : '';
 	let url = OMDB_BASE + '?t=' + encodeURIComponent(t) + '&apikey=' + encodeURIComponent(key);
@@ -131,9 +168,9 @@ module.exports = async function handler(req, res) {
 		const poster = data && data.Poster && data.Poster !== 'N/A' && String(data.Poster).indexOf('http') === 0 ? data.Poster : null;
 		setCors();
 		res.setHeader('Cache-Control', 'public, max-age=86400');
-		return res.status(200).json({ poster: poster, usage: { requestCount: OMDB_REQUEST_COUNT } });
+		return res.status(200).json({ poster: poster, usage: usagePayload() });
 	} catch (e) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(502).json({ poster: null, error: 'Upstream error', usage: { requestCount: OMDB_REQUEST_COUNT } });
+		return res.status(502).json({ poster: null, error: 'Upstream error', usage: usagePayload() });
 	}
 };

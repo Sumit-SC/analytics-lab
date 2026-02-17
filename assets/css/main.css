@@ -1111,6 +1111,10 @@ body:has(#global-music-bar) {
 	border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 	flex-shrink: 0;
 }
+.global-omdb-usage {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
 .global-omdb-flyout .global-omdb-header input {
 	flex: 1;
 	min-width: 0;
