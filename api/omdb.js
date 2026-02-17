@@ -42,6 +42,55 @@ function usagePayload() {
 	return { dailyCount: getDailyCount(), dailyLimit: DAILY_LIMIT };
 }
 
+var STATS_DAYS = 31;
+var CATEGORIES = ['movies', 'kdrama', 'anime', 'bollywood'];
+
+function getStats() {
+	if (typeof global === 'undefined') return { daily: {} };
+	global.__omdbStats = global.__omdbStats || { daily: {} };
+	return global.__omdbStats;
+}
+
+function recordRequest(type, category) {
+	var today = new Date().toISOString().slice(0, 10);
+	var stats = getStats();
+	if (!stats.daily[today]) {
+		stats.daily[today] = { count: 0, byType: { search: 0, detail: 0, poster: 0 }, byCategory: { movies: 0, kdrama: 0, anime: 0, bollywood: 0 } };
+	}
+	var d = stats.daily[today];
+	d.count += 1;
+	d.byType[type] = (d.byType[type] || 0) + 1;
+	if (category && CATEGORIES.indexOf(category) !== -1) {
+		d.byCategory[category] = (d.byCategory[category] || 0) + 1;
+	}
+	var dates = Object.keys(stats.daily).sort();
+	while (dates.length > STATS_DAYS) {
+		delete stats.daily[dates[0]];
+		dates.shift();
+	}
+}
+
+function getStatsPayload() {
+	var stats = getStats();
+	var daily = stats.daily || {};
+	var dates = Object.keys(daily).sort().reverse().slice(0, STATS_DAYS);
+	var out = {};
+	dates.forEach(function (d) { out[d] = daily[d]; });
+	var now = new Date();
+	var weekAgo = new Date(now);
+	weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
+	var monthAgo = new Date(now);
+	monthAgo.setUTCDate(monthAgo.getUTCDate() - 30);
+	var weeklyTotal = 0;
+	var monthlyTotal = 0;
+	dates.forEach(function (d) {
+		var n = daily[d].count || 0;
+		if (d >= weekAgo.toISOString().slice(0, 10)) weeklyTotal += n;
+		if (d >= monthAgo.toISOString().slice(0, 10)) monthlyTotal += n;
+	});
+	return { daily: out, weeklyTotal: weeklyTotal, monthlyTotal: monthlyTotal, dailyLimit: DAILY_LIMIT };
+}
+
 module.exports = async function handler(req, res) {
 	var origin = req.headers.origin || '';
 	if (!origin && req.headers.referer) {
@@ -60,11 +109,15 @@ module.exports = async function handler(req, res) {
 		return res.status(405).json({ poster: null, error: 'Method not allowed', usage: usagePayload() });
 	}
 
-	// Usage-only request: return daily count without incrementing and without calling OMDb (no API hit).
 	if (req.query && req.query.usage === '1') {
 		res.setHeader('Access-Control-Allow-Origin', allowedOrigin(origin) ? (origin || '*') : '*');
 		res.setHeader('Cache-Control', 'no-store');
 		return res.status(200).json(usagePayload());
+	}
+	if (req.query && req.query.stats === '1') {
+		res.setHeader('Access-Control-Allow-Origin', allowedOrigin(origin) ? (origin || '*') : '*');
+		res.setHeader('Cache-Control', 'no-store');
+		return res.status(200).json(getStatsPayload());
 	}
 
 	const key = getKey();
@@ -86,10 +139,15 @@ module.exports = async function handler(req, res) {
 	const setCors = function () {
 		res.setHeader('Access-Control-Allow-Origin', allowedOrigin(origin) ? (origin || '*') : '*');
 	};
+	function getCategory() {
+		var c = (req.query && req.query.category) ? String(req.query.category).toLowerCase().trim() : '';
+		return CATEGORIES.indexOf(c) !== -1 ? c : '';
+	}
 
 	// Search: s=query → returns { results: [ { Title, Year, imdbID, Poster, Type } ] }
 	const searchQuery = typeof req.query.s === 'string' ? req.query.s.trim() : '';
 	if (searchQuery && searchQuery.length <= MAX_TITLE_LENGTH) {
+		recordRequest('search', getCategory());
 		try {
 			const url = OMDB_BASE + '?s=' + encodeURIComponent(searchQuery) + '&apikey=' + encodeURIComponent(key);
 			const r = await fetch(url);
@@ -116,6 +174,7 @@ module.exports = async function handler(req, res) {
 	// By ID: i=imdbID → returns one item details (sanitized)
 	const idQuery = typeof req.query.i === 'string' ? req.query.i.trim() : '';
 	if (idQuery && /^tt\d+$/.test(idQuery)) {
+		recordRequest('detail', getCategory());
 		try {
 			const url = OMDB_BASE + '?i=' + encodeURIComponent(idQuery) + '&apikey=' + encodeURIComponent(key);
 			const r = await fetch(url);
@@ -160,6 +219,7 @@ return res.status(502).json({ error: 'Upstream error', usage: usagePayload() });
 		return res.status(400).json({ poster: null, error: 'Missing or invalid title', usage: usagePayload() });
 	}
 	const type = (req.query.type === 'movie' || req.query.type === 'series') ? req.query.type : '';
+	recordRequest('poster', getCategory());
 	let url = OMDB_BASE + '?t=' + encodeURIComponent(t) + '&apikey=' + encodeURIComponent(key);
 	if (type) url += '&type=' + type;
 	try {
