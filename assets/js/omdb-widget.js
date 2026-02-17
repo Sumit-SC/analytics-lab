@@ -19,6 +19,16 @@
 	function proxyUrl() {
 		return proxyBase() + '/api/omdb';
 	}
+	// Source for stats: vercel_app when on Vercel deploy, else website (form_bot/manual set by caller)
+	function getOmdbSource() {
+		try {
+			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) return 'vercel_app';
+		} catch (e) {}
+		return 'website';
+	}
+	function sourceParam() {
+		return '&source=' + encodeURIComponent(getOmdbSource());
+	}
 	function cinematerialUrl() {
 		return proxyBase() + '/api/cinematerial';
 	}
@@ -136,7 +146,7 @@
 
 	function fetchDetail(imdbID) {
 		bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Loading…</p>';
-		fetch(proxyUrl() + '?i=' + encodeURIComponent(imdbID))
+		fetch(proxyUrl() + '?i=' + encodeURIComponent(imdbID) + sourceParam())
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				if (data && data.usage) updateUsageDisplay(data.usage);
@@ -188,7 +198,7 @@
 			return;
 		}
 		bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Searching…</p>';
-		fetch(proxyUrl() + '?s=' + encodeURIComponent(query))
+		fetch(proxyUrl() + '?s=' + encodeURIComponent(query) + sourceParam())
 			.then(function (r) { return r.json().then(function (data) { return { ok: r.ok, status: r.status, data: data }; }).catch(function () { return { ok: false, status: r.status, data: null }; }); })
 			.then(function (out) {
 				var data = out && out.data;
@@ -215,4 +225,127 @@
 	input.addEventListener('keydown', function (e) {
 		if (e.key === 'Escape') closeFlyout();
 	});
+
+	// Stats dashboard: daily table + weekly/monthly totals + category filter
+	var statsBtn = document.getElementById('global-omdb-stats-btn');
+	if (statsBtn) {
+		statsBtn.addEventListener('click', function () {
+			if (!proxyBase()) {
+				renderHint('Set OMDB_PROXY_URL to view stats.');
+				return;
+			}
+			bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Loading stats…</p>';
+			fetch(proxyUrl() + '?stats=1')
+				.then(function (r) { return r.ok ? r.json() : null; })
+				.then(function (data) {
+					if (!data || !data.daily) {
+						bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">No stats yet. Use search/detail/poster to build data.</p><button type="button" id="global-omdb-stats-back" class="mt-2 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-medium">Back</button>';
+						document.getElementById('global-omdb-stats-back').onclick = function () { renderHint('Type to search. Results show thumbnail, title, year.'); };
+						return;
+					}
+					renderStatsDashboard(data);
+				})
+				.catch(function () {
+					bodyEl.innerHTML = '<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Could not load stats.</p><button type="button" id="global-omdb-stats-back" class="mt-2 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 text-xs font-medium">Back</button>';
+					document.getElementById('global-omdb-stats-back').onclick = function () { renderHint('Type to search. Results show thumbnail, title, year.'); };
+				});
+		});
+	}
+
+	function renderStatsDashboard(data) {
+		var daily = data.daily || {};
+		var dates = Object.keys(daily).sort().reverse();
+		var catFilter = (document.getElementById('global-omdb-stats-filter') && document.getElementById('global-omdb-stats-filter').value) || 'all';
+		var srcFilter = (document.getElementById('global-omdb-stats-source') && document.getElementById('global-omdb-stats-source').value) || 'all';
+		var cats = ['movies', 'kdrama', 'anime', 'bollywood'];
+		var catLabel = { movies: 'Movies', kdrama: 'K-drama', anime: 'Anime', bollywood: 'Bollywood' };
+		var sources = ['website', 'vercel_app', 'manual', 'form_bot', 'other'];
+		var srcLabel = { website: 'Website', vercel_app: 'Vercel app', manual: 'Manual', form_bot: 'Form bot', other: 'Other' };
+
+		var summary = '<div class="global-omdb-stats-summary p-3 border-b border-gray-200 dark:border-gray-700 space-y-1 text-xs">';
+		summary += '<p class="font-semibold text-gray-800 dark:text-gray-200">Summary</p>';
+		var today = new Date().toISOString().slice(0, 10);
+		var todayRow = daily[today];
+		var todayCount = todayRow ? todayRow.count : 0;
+		summary += '<p>Today: <strong>' + todayCount + '</strong> / ' + (data.dailyLimit || 1000) + ' · Weekly: <strong>' + (data.weeklyTotal || 0) + '</strong> · Monthly: <strong>' + (data.monthlyTotal || 0) + '</strong></p>';
+		if (catFilter !== 'all') {
+			var catTotal = 0;
+			dates.forEach(function (d) {
+				var row = daily[d];
+				if (row && row.byCategory && row.byCategory[catFilter] != null) catTotal += row.byCategory[catFilter];
+			});
+			summary += '<p class="text-primary">' + (catLabel[catFilter] || catFilter) + ' (total): <strong>' + catTotal + '</strong></p>';
+		}
+		if (srcFilter !== 'all') {
+			var srcTotal = 0;
+			dates.forEach(function (d) {
+				var row = daily[d];
+				if (row && row.bySource && row.bySource[srcFilter] != null) srcTotal += row.bySource[srcFilter];
+			});
+			summary += '<p class="text-primary">' + (srcLabel[srcFilter] || srcFilter) + ' (total): <strong>' + srcTotal + '</strong></p>';
+		}
+		summary += '</div>';
+
+		var filterHtml = '<div class="p-2 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-wrap">';
+		filterHtml += '<label class="text-xs text-gray-600 dark:text-gray-400">Category:</label>';
+		filterHtml += '<select id="global-omdb-stats-filter" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs px-2 py-1">';
+		filterHtml += '<option value="all"' + (catFilter === 'all' ? ' selected' : '') + '>All</option>';
+		cats.forEach(function (c) {
+			filterHtml += '<option value="' + c + '"' + (catFilter === c ? ' selected' : '') + '>' + (catLabel[c] || c) + '</option>';
+		});
+		filterHtml += '</select>';
+		filterHtml += '<label class="text-xs text-gray-600 dark:text-gray-400 ml-1">Source:</label>';
+		filterHtml += '<select id="global-omdb-stats-source" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-xs px-2 py-1">';
+		filterHtml += '<option value="all"' + (srcFilter === 'all' ? ' selected' : '') + '>All</option>';
+		sources.forEach(function (s) {
+			filterHtml += '<option value="' + s + '"' + (srcFilter === s ? ' selected' : '') + '>' + (srcLabel[s] || s) + '</option>';
+		});
+		filterHtml += '</select>';
+		filterHtml += '<button type="button" id="global-omdb-stats-back" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700">Back</button>';
+		filterHtml += '</div>';
+
+		var table = '<div class="overflow-x-auto p-2"><table class="global-omdb-stats-table w-full text-[11px] text-left border-collapse">';
+		table += '<thead><tr class="border-b border-gray-200 dark:border-gray-700">';
+		table += '<th class="py-1.5 pr-2 font-semibold text-gray-700 dark:text-gray-300">Date</th>';
+		table += '<th class="py-1.5 px-1 font-semibold text-gray-700 dark:text-gray-300">Total</th>';
+		table += '<th class="py-1.5 px-1 font-semibold text-gray-700 dark:text-gray-300">Search</th>';
+		table += '<th class="py-1.5 px-1 font-semibold text-gray-700 dark:text-gray-300">Detail</th>';
+		table += '<th class="py-1.5 px-1 font-semibold text-gray-700 dark:text-gray-300">Poster</th>';
+		sources.forEach(function (s) {
+			table += '<th class="py-1.5 px-1 font-semibold text-gray-700 dark:text-gray-300">' + (srcLabel[s] || s) + '</th>';
+		});
+		cats.forEach(function (c) {
+			table += '<th class="py-1.5 px-1 font-semibold text-gray-700 dark:text-gray-300">' + (catLabel[c] || c) + '</th>';
+		});
+		table += '</tr></thead><tbody>';
+		dates.forEach(function (d) {
+			var row = daily[d];
+			if (!row) return;
+			var byType = row.byType || {};
+			var byCat = row.byCategory || {};
+			var bySrc = row.bySource || {};
+			table += '<tr class="border-b border-gray-100 dark:border-gray-800">';
+			table += '<td class="py-1 pr-2 text-gray-700 dark:text-gray-300">' + esc(d) + '</td>';
+			table += '<td class="py-1 px-1">' + (row.count || 0) + '</td>';
+			table += '<td class="py-1 px-1">' + (byType.search || 0) + '</td>';
+			table += '<td class="py-1 px-1">' + (byType.detail || 0) + '</td>';
+			table += '<td class="py-1 px-1">' + (byType.poster || 0) + '</td>';
+			sources.forEach(function (s) {
+				table += '<td class="py-1 px-1">' + (bySrc[s] || 0) + '</td>';
+			});
+			cats.forEach(function (c) {
+				table += '<td class="py-1 px-1">' + (byCat[c] || 0) + '</td>';
+			});
+			table += '</tr>';
+		});
+		table += '</tbody></table></div>';
+
+		bodyEl.innerHTML = summary + filterHtml + table;
+
+		document.getElementById('global-omdb-stats-back').onclick = function () {
+			renderHint('Type to search. Results show thumbnail, title, year.');
+		};
+		document.getElementById('global-omdb-stats-filter').onchange = function () { renderStatsDashboard(data); };
+		document.getElementById('global-omdb-stats-source').onchange = function () { renderStatsDashboard(data); };
+	}
 })();

@@ -330,7 +330,11 @@
 			return;
 		}
 		var base = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
-		var apiUrl = (base || '') + '/api/omdb?t=' + encodeURIComponent(title.trim()) + (type === 'movie' || type === 'series' ? '&type=' + type : '');
+		var source = 'website';
+		try {
+			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) source = 'vercel_app';
+		} catch (e) {}
+		var apiUrl = (base || '') + '/api/omdb?t=' + encodeURIComponent(title.trim()) + (type === 'movie' || type === 'series' ? '&type=' + type : '') + '&source=' + encodeURIComponent(source);
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {

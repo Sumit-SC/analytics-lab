@@ -44,6 +44,7 @@ function usagePayload() {
 
 var STATS_DAYS = 31;
 var CATEGORIES = ['movies', 'kdrama', 'anime', 'bollywood'];
+var SOURCES = ['website', 'vercel_app', 'manual', 'form_bot', 'other'];
 
 function getStats() {
 	if (typeof global === 'undefined') return { daily: {} };
@@ -51,11 +52,22 @@ function getStats() {
 	return global.__omdbStats;
 }
 
-function recordRequest(type, category) {
+function getSource(req) {
+	var s = (req.query && req.query.source) ? String(req.query.source).toLowerCase().trim() : '';
+	if (!s && req.headers['x-omdb-source']) s = String(req.headers['x-omdb-source']).toLowerCase().trim();
+	return SOURCES.indexOf(s) !== -1 ? s : 'other';
+}
+
+function recordRequest(type, category, source) {
 	var today = new Date().toISOString().slice(0, 10);
 	var stats = getStats();
 	if (!stats.daily[today]) {
-		stats.daily[today] = { count: 0, byType: { search: 0, detail: 0, poster: 0 }, byCategory: { movies: 0, kdrama: 0, anime: 0, bollywood: 0 } };
+		stats.daily[today] = {
+			count: 0,
+			byType: { search: 0, detail: 0, poster: 0 },
+			byCategory: { movies: 0, kdrama: 0, anime: 0, bollywood: 0 },
+			bySource: { website: 0, vercel_app: 0, manual: 0, form_bot: 0, other: 0 }
+		};
 	}
 	var d = stats.daily[today];
 	d.count += 1;
@@ -63,6 +75,8 @@ function recordRequest(type, category) {
 	if (category && CATEGORIES.indexOf(category) !== -1) {
 		d.byCategory[category] = (d.byCategory[category] || 0) + 1;
 	}
+	var src = source && SOURCES.indexOf(source) !== -1 ? source : 'other';
+	d.bySource[src] = (d.bySource[src] || 0) + 1;
 	var dates = Object.keys(stats.daily).sort();
 	while (dates.length > STATS_DAYS) {
 		delete stats.daily[dates[0]];
@@ -99,7 +113,7 @@ module.exports = async function handler(req, res) {
 	if (req.method === 'OPTIONS') {
 		res.setHeader('Access-Control-Allow-Origin', allowedOrigin(origin) ? (origin || '*') : '');
 		res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-		res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+		res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-OMDb-Source');
 		res.setHeader('Access-Control-Max-Age', '86400');
 		return res.status(204).end();
 	}
@@ -143,11 +157,12 @@ module.exports = async function handler(req, res) {
 		var c = (req.query && req.query.category) ? String(req.query.category).toLowerCase().trim() : '';
 		return CATEGORIES.indexOf(c) !== -1 ? c : '';
 	}
+	var source = getSource(req);
 
 	// Search: s=query → returns { results: [ { Title, Year, imdbID, Poster, Type } ] }
 	const searchQuery = typeof req.query.s === 'string' ? req.query.s.trim() : '';
 	if (searchQuery && searchQuery.length <= MAX_TITLE_LENGTH) {
-		recordRequest('search', getCategory());
+		recordRequest('search', getCategory(), source);
 		try {
 			const url = OMDB_BASE + '?s=' + encodeURIComponent(searchQuery) + '&apikey=' + encodeURIComponent(key);
 			const r = await fetch(url);
@@ -174,7 +189,7 @@ module.exports = async function handler(req, res) {
 	// By ID: i=imdbID → returns one item details (sanitized)
 	const idQuery = typeof req.query.i === 'string' ? req.query.i.trim() : '';
 	if (idQuery && /^tt\d+$/.test(idQuery)) {
-		recordRequest('detail', getCategory());
+		recordRequest('detail', getCategory(), source);
 		try {
 			const url = OMDB_BASE + '?i=' + encodeURIComponent(idQuery) + '&apikey=' + encodeURIComponent(key);
 			const r = await fetch(url);
@@ -219,7 +234,7 @@ return res.status(502).json({ error: 'Upstream error', usage: usagePayload() });
 		return res.status(400).json({ poster: null, error: 'Missing or invalid title', usage: usagePayload() });
 	}
 	const type = (req.query.type === 'movie' || req.query.type === 'series') ? req.query.type : '';
-	recordRequest('poster', getCategory());
+	recordRequest('poster', getCategory(), source);
 	let url = OMDB_BASE + '?t=' + encodeURIComponent(t) + '&apikey=' + encodeURIComponent(key);
 	if (type) url += '&type=' + type;
 	try {
