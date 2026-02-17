@@ -694,13 +694,33 @@
 	function fetchWeather(lat, lon, locationName) {
 		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true';
 		fetch(url)
-			.then(function (r) { return r.json(); })
+			.then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); })
 			.then(function (data) {
-				renderWeather(data, locationName);
+				if (data && (data.current_weather || data.error !== true)) {
+					renderWeather(data, locationName);
+				} else {
+					renderWeatherUnavailable();
+				}
 			})
 			.catch(function () {
-				if (weatherEl) weatherEl.innerHTML = '<span class="text-sm opacity-70">Weather unavailable</span>';
+				renderWeatherUnavailable();
 			});
+	}
+	function renderWeatherUnavailable() {
+		if (!weatherEl) return;
+		weatherEl.innerHTML = '<span class="text-sm opacity-70">Weather unavailable</span>' +
+			'<div class="flex gap-2 mt-1">' +
+			'<button type="button" class="weather-retry-btn text-xs font-semibold text-primary hover:underline">Retry</button>' +
+			'<button type="button" class="weather-default-btn text-xs font-semibold text-gray-600 dark:text-gray-400 hover:underline">Use default city</button>' +
+			'</div>';
+		weatherEl.querySelector('.weather-retry-btn').addEventListener('click', function () {
+			var saved = getSavedLocation();
+			if (saved) fetchWeather(saved.lat, saved.lon, saved.name);
+			else fetchWeather(defaultLat, defaultLon, 'London');
+		});
+		weatherEl.querySelector('.weather-default-btn').addEventListener('click', function () {
+			setWeatherByCoords(defaultLat, defaultLon, 'London');
+		});
 	}
 
 	function setWeatherByCoords(lat, lon, name) {

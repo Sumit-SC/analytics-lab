@@ -511,6 +511,55 @@
 	fetchGitHubTrending();
 })();
 
+(function () {
+	// Anime: Jikan API (top / seasonal)
+	var listEl = document.getElementById('trends-anime-list');
+	var statusEl = document.getElementById('trends-anime-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) {
+		statusEl.textContent = text;
+	}
+
+	setStatus('Loading…');
+
+	function fetchAnime() {
+		// Jikan v4: top anime, limit 10
+		fetch('https://api.jikan.moe/v4/top/anime?limit=10')
+			.then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('Jikan error')); })
+			.then(function (data) {
+				var items = data && data.data;
+				if (!Array.isArray(items) || items.length === 0) {
+					setStatus('No anime data available right now.');
+					return;
+				}
+				setStatus('Top ' + items.length + ' anime.');
+				var html = '';
+				items.forEach(function (a) {
+					var title = (a.title || a.title_english || '').trim() || 'Untitled';
+					var url = a.url || ('https://myanimelist.net/anime/' + (a.mal_id || ''));
+					var score = a.score != null ? a.score : '';
+					var type = a.type || '';
+					var episodes = a.episodes != null ? a.episodes + ' eps' : '';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+					if (score) html += 'Score: ' + score;
+					if (type) html += (score ? ' &middot; ' : '') + type;
+					if (episodes) html += (score || type ? ' &middot; ' : '') + episodes;
+					html += '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+			})
+			.catch(function () {
+				setStatus('Could not reach Jikan API. Try again later.');
+			});
+	}
+
+	fetchAnime();
+})();
+
 // Analytics: track visits and time-on-page for Trends
 if (typeof initAnalyticsTracking === 'function') {
 	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'trends' });

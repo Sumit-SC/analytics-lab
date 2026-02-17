@@ -1,63 +1,74 @@
 # Remaining Enhancements & To-Do List
 
-A single backlog of setup tasks, enhancements, and future work for the Standalone Playground (analytics-lab).
+A single backlog for the Standalone Playground (analytics-lab). Each item has **priority** (P0 = must-do, P1 = should-do, P2 = nice-to-have) and **effort** (Quick &lt;1 hr, Medium 1–4 hr, Large 4+ hr).
+
+---
+
+## Quick wins (effort: Quick, good impact)
+
+- [ ] **Document script load order** – Add a short “Script order” section in README and a comment block in each HTML listing required order (e.g. Tailwind → main.css → analytics → page script). Prevents breakage if someone reorders or lazy-loads. *Priority: P1 · Effort: Quick*
+- [ ] **Planner export (CSV/JSON)** – On Jobs page, add “Export planner” button to download application planner entries as CSV or JSON for backup or use in spreadsheets. Data is already in `localStorage`; no backend. *Priority: P2 · Effort: Quick*
 
 ---
 
 ## Setup & configuration
 
-- [ ] **Pipeline (GitHub Actions)** – Add a deploy step (e.g. GitHub Pages) so the site is deployed after the OMDb inject workflow runs. See `.github/workflows/inject-omdb-and-deploy.yml`.
-- [ ] **OMDb API key** – Configure in one of:
-  - **Local / dev:** Browser Console → `localStorage.setItem('omdb_api_key', 'YOUR_KEY')` then refresh. Get a key at [omdbapi.com](https://www.omdbapi.com/).
-  - **Production:** Repo → Settings → Secrets and variables → Actions → New repository secret: `OMDB_API_KEY`. The workflow injects it into `homepage.js` before deploy.
-- [ ] **Quote categories** – Extend or edit the list (All, Random, Movies, Bollywood, K-drama, Anime, Books, Leaders). Data in `assets/data/quotes-db.json`.
-- [ ] **Use live posters** – Home quote card “Use live posters” checkbox: off = DB/map images only (faster, no API calls).
+- [ ] **Pipeline (GitHub Actions)** – Add a deploy step (e.g. GitHub Pages) so the site is deployed after the OMDb inject workflow. See `.github/workflows/inject-omdb-and-deploy.yml`. *Priority: P0 if you deploy via Actions · Effort: Medium*
+- [ ] **OMDb API key** – Configure once:
+  - **Local:** Browser Console → `localStorage.setItem('omdb_api_key', 'YOUR_KEY')` then refresh. Key from [omdbapi.com](https://www.omdbapi.com/).
+  - **Production:** Repo → Settings → Secrets → Actions → New secret `OMDB_API_KEY`. *Priority: P0 for live posters · Effort: Quick*
+- [ ] **Quote categories** – Edit or extend categories and data in `assets/data/quotes-db.json`. Current: All, Random, Movies, Bollywood, K-drama, Anime, Books, Leaders. *Priority: P2 · Effort: Quick*
+- [ ] **Use live posters** – Document in README: Home quote card “Use live posters” = OMDb/Jikan when on; off = DB/map only (faster, no API). *Priority: P2 · Effort: Quick (doc only)*
 
 ---
 
 ## Job tracker
 
-- [ ] **Indeed source** – Implement backend proxy at `/api/indeed`; currently a placeholder in `jobs.js`.
-- [ ] **Job proxy (Instahyre, Hirist, Himalaya, LinkedIn)** – API placeholders exist in `api/`; wire `window.JOB_PROXY_URL` and implement or stub responses for production use.
-- [ ] **Planner export** – Optional: export application planner entries to CSV/JSON for backup or use in other tools.
+- [ ] **Indeed source** – Implement backend proxy (e.g. serverless at `/api/indeed`) and wire it in `jobs.js`; currently a placeholder. *Priority: P1 · Effort: Medium*
+- [ ] **Other job proxies** – Instahyre, Hirist, Himalaya, LinkedIn: stubs exist in `api/`. Set `window.JOB_PROXY_URL` and implement or stub responses. *Priority: P2 · Effort: Medium per source*
 
 ---
 
 ## Trends & content
 
-- [ ] **Anime feed** – Replace Trends “Anime” placeholder with real data (e.g. Jikan, seasonal list). Mentioned: “Jikan / Pinterest / Shorts-style embeds coming in a later update” (`trends.html`).
-- [ ] **Entertainment strip** – Currently Picsum placeholders; optional: themed or curated image source.
-- [ ] **Weather fallback** – On API/CORS failure, show a clear “Weather unavailable” message and optional “Retry” or “Use default city” (see IMPROVEMENTS.md).
+- [ ] **Anime feed** – Replace Trends “Anime” placeholder with real data (e.g. Jikan seasonal, or links to Pinterest/Shorts-style embeds). *Priority: P2 · Effort: Medium*
+- [ ] **Entertainment strip** – Optional: replace or complement Picsum with a themed/curated image source. *Priority: P2 · Effort: Quick–Medium*
 
 ---
 
 ## Codebase & structure (from IMPROVEMENTS.md)
 
-- [ ] **Single nav source** – Nav is duplicated in every HTML file. Add a shared fragment or tiny build step (e.g. JS that injects nav, or Eleventy includes) so nav is defined once.
-- [ ] **Split Playground logic** – `playground.js` is large. Split by feature (e.g. `playground-mode.js`, `playground-runner.js`, `playground-search.js`, `playground-assistant.js`) or use a minimal framework (Alpine/Preact) for smaller components.
-- [ ] **Single Tools UI** – Editor/PDF exist on both `tools.html` and inside Playground (non-tech iframe). Prefer one implementation and iframe it where needed.
-- [ ] **Accessibility** – Add/improve `aria-expanded`, `aria-label`, `role="dialog"`; focus trap in overlays; theme/mode announced to screen readers.
-- [ ] **Automated tests** – Add a few E2E tests (e.g. Playwright/Cypress): Home → Playground → Tech → run snippet; Non-tech → Tools iframe; Resources topic. Even 5–10 tests to catch regressions.
-- [ ] **Script load order** – Document required script order in README and/or use a single entry script that imports and inits in order so analytics and other inits don’t break if scripts are reordered or lazy-loaded.
+- [ ] **Single nav source** – Nav is duplicated in every HTML. Add a shared fragment (e.g. JS that injects nav, or Eleventy includes) so nav is defined once. *Priority: P1 · Effort: Medium*
+- [ ] **Split Playground logic** – Break `playground.js` into smaller modules (e.g. `playground-mode.js`, `playground-runner.js`, `playground-search.js`, `playground-assistant.js`) or use a minimal framework. *Priority: P2 · Effort: Large*
+- [ ] **Single Tools UI** – Use one implementation of editor/PDF (e.g. always iframe `tools.html` from Playground non-tech) instead of two. *Priority: P2 · Effort: Medium*
+- [ ] **Accessibility** – Add `aria-expanded`, `aria-label`, `role="dialog"` where needed; focus trap in overlays; theme/mode announced to screen readers. *Priority: P1 · Effort: Medium*
+- [ ] **Automated tests** – Add 5–10 E2E tests (Playwright/Cypress): Home → Playground → run snippet; Non-tech → Tools; Resources topic. *Priority: P2 · Effort: Medium*
 
 ---
 
 ## Optional / nice-to-have
 
-- [ ] **Focus timer** – Optional: different alarm sounds or “Do not disturb” window when phase ends.
-- [ ] **Analytics dashboard** – Optional: more filters, date range picker, or export of raw logs (already has JSON password protection).
-- [ ] **Backup/restore** – Tools backup already includes notes + to-dos + timer log; optional: include planner entries in the same backup file.
+- [ ] **Focus timer** – Optional: choice of alarm sound or “Do not disturb” style when phase ends. *Priority: P2 · Effort: Quick*
+- [ ] **Analytics dashboard** – Optional: date range picker, extra filters, or export of raw logs (JSON already password-protected). *Priority: P2 · Effort: Medium*
+
+---
+
+## Done (removed from backlog)
+
+- **Weather fallback** – Already implemented: “Weather unavailable” + “Retry” and “Use default city” in `homepage.js` (`renderWeatherUnavailable`).
+- **Backup includes planner** – Tools backup/restore already includes planner entries (`buildBackupPayload` / `applyRestore` in `tools.js`).
 
 ---
 
 ## Summary
 
-| Area              | Count | Focus |
-|-------------------|-------|--------|
-| Setup & config    | 4     | OMDb, pipeline, quotes |
-| Job tracker       | 3     | Indeed, proxy, planner export |
-| Trends & content  | 3     | Anime feed, entertainment, weather |
-| Codebase/structure| 6     | Nav, split playground, Tools, a11y, tests, script order |
-| Optional          | 3     | Timer, analytics, backup |
+| Area              | Open | Priority focus        | Suggested order                    |
+|-------------------|------|------------------------|------------------------------------|
+| Quick wins        | 2    | Doc + planner export  | Do first                           |
+| Setup & config    | 4    | Pipeline, OMDb        | Before/with deploy                 |
+| Job tracker      | 2    | Indeed, then others   | When you need more job sources     |
+| Trends & content  | 2    | Anime, then strip      | When you want richer Trends        |
+| Codebase/structure| 5    | Nav, a11y, then split  | Incremental                        |
+| Optional          | 2    | Timer, dashboard       | As needed                          |
 
-**Total:** 19 items. Tackle setup first, then job sources and Trends content, then structure and optional enhancements.
+**Total open:** 17. **Quick wins:** 2. Tackle quick wins first, then setup, then job sources and structure.

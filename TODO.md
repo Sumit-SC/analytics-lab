@@ -1,6 +1,7 @@
 # Project TODO (quick list)
 
-For the **full backlog** (setup, job tracker, Trends, codebase improvements, optional), see **[ROADMAP.md](./ROADMAP.md)**.
+Full backlog (priorities, effort, quick wins): **[ROADMAP.md](./ROADMAP.md)**.  
+Quick wins there: document script order, add planner export (CSV/JSON).
 
 - [ ] **Pipeline (GitHub Actions)** – Add deploy step (e.g. GitHub Pages) after OMDb inject. See `.github/workflows/inject-omdb-and-deploy.yml`.
 - [ ] **OMDb API key** – Local: `localStorage.setItem('omdb_api_key', 'YOUR_KEY')`; Production: repo secret `OMDB_API_KEY`. [omdbapi.com](https://www.omdbapi.com/).

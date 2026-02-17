@@ -218,6 +218,58 @@
 			statusFilter.addEventListener('change', renderPlanner);
 		}
 
+		function getFilteredPlannerEntries() {
+			var term = (searchInput && searchInput.value || '').toLowerCase();
+			var status = (statusFilter && statusFilter.value) || 'all';
+			var entries = plannerEntries.slice();
+			if (term) {
+				entries = entries.filter(function (e) {
+					var text = (e.title + ' ' + e.company + ' ' + e.source + ' ' + e.notes + ' ' + e.location + ' ' + e.jobType + ' ' + e.workMode + ' ' + e.salary + ' ' + e.contactName + ' ' + e.contactChannel + ' ' + e.tags + ' ' + e.outcome).toLowerCase();
+					return text.indexOf(term) !== -1;
+				});
+			}
+			if (status !== 'all') {
+				entries = entries.filter(function (e) { return e.status === status; });
+			}
+			return entries;
+		}
+
+		var exportJsonBtn = document.getElementById('planner-export-json');
+		var exportCsvBtn = document.getElementById('planner-export-csv');
+		if (exportJsonBtn) {
+			exportJsonBtn.addEventListener('click', function () {
+				var entries = getFilteredPlannerEntries();
+				var blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+				var a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = 'job-planner-' + new Date().toISOString().slice(0, 10) + '.json';
+				a.click();
+				URL.revokeObjectURL(a.href);
+			});
+		}
+		if (exportCsvBtn) {
+			exportCsvBtn.addEventListener('click', function () {
+				var entries = getFilteredPlannerEntries();
+				var headers = ['title', 'company', 'status', 'source', 'location', 'jobType', 'workMode', 'createdAt', 'updatedAt', 'notes'];
+				function csvEscape(s) {
+					if (s == null) return '';
+					var t = String(s);
+					if (/[",\n\r]/.test(t)) return '"' + t.replace(/"/g, '""') + '"';
+					return t;
+				}
+				var rows = [headers.join(',')];
+				entries.forEach(function (e) {
+					rows.push(headers.map(function (h) { return csvEscape(e[h]); }).join(','));
+				});
+				var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+				var a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = 'job-planner-' + new Date().toISOString().slice(0, 10) + '.csv';
+				a.click();
+				URL.revokeObjectURL(a.href);
+			});
+		}
+
 		if (listEl) {
 			listEl.addEventListener('change', function (e) {
 				var select = e.target.closest('.planner-status-select');

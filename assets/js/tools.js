@@ -159,14 +159,20 @@
 		});
 	}
 
-	// Backup now: one JSON with notes + todos + timerLog
+	// Backup now: one JSON with notes + todos + timerLog + job planner
 	function buildBackupPayload() {
+		var planner = [];
+		try {
+			var raw = localStorage.getItem('job_tracker_planner_log');
+			if (raw) planner = JSON.parse(raw);
+		} catch (e) {}
 		return {
-			version: 1,
+			version: 2,
 			createdAt: new Date().toISOString(),
 			notes: getEditorHtml(),
 			todos: getTodos(),
-			timerLog: getTimerLog()
+			timerLog: getTimerLog(),
+			planner: planner
 		};
 	}
 
@@ -188,6 +194,11 @@
 		if (payload.notes != null) setEditorContent(payload.notes);
 		if (payload.todos != null) setTodos(payload.todos);
 		if (payload.timerLog != null) setTimerLog(payload.timerLog);
+		if (payload.planner != null && Array.isArray(payload.planner)) {
+			try {
+				localStorage.setItem('job_tracker_planner_log', JSON.stringify(payload.planner));
+			} catch (e) {}
+		}
 		try {
 			localStorage.setItem(EDITOR_KEY, editor ? editor.innerHTML : '');
 		} catch (e) {}

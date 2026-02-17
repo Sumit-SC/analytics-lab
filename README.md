@@ -63,7 +63,7 @@ A **global bar** at the bottom of the page lets you play **YouTube** or **JioSaa
 3. The **Video** panel opens with a list of results; click any track to play it.
 4. Use **Play** / **Pause** / **Next** in the bar to control playback.
 
-Search works from **either** the bottom bar input **or** the input inside the Video panel when the panel is open — both use the same JioSaavn search. Playlist/queue is stored in the browser for the session; there is no share/embed of JioSaavn playlists (the app uses an unofficial API). For **YouTube**, paste a playlist URL in the Video panel to queue; the global bar stays in sync.
+Search works from **either** the bottom bar input **or** the input inside the Video panel when the panel is open — both use the same JioSaavn search. Playlist/queue is stored in the browser for the session; there is no share/embed of JioSaavn playlists (the app uses an unofficial API). For **YouTube**, paste a playlist URL in the Video panel to queue; the global bar stays in sync. **JioSaavn** uses `JIOSAAVN_API_BASE` in `global-widgets.js` (default `https://saavn.sumit.co`); change it to point to your own backend if you run a different proxy.
 
 ### Embed / share
 
