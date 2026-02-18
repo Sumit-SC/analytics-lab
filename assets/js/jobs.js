@@ -313,7 +313,7 @@
 		};
 	}
 
-	// Fetch jobs from all sources
+	// Fetch jobs from all sources using the new jobs-snapshot API
 	function fetchAllJobs() {
 		var loadingEl = document.getElementById('job-loading');
 		var jobListEl = document.getElementById('job-list');
@@ -324,6 +324,76 @@
 		if (emptyEl) emptyEl.classList.add('hidden');
 
 		allJobs = [];
+		
+		// Use the new jobs-snapshot API endpoint (aggregates RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri, etc.)
+		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
+		var apiUrl = proxyUrl 
+			? (proxyUrl + '/api/jobs-snapshot?q=data%20analyst&days=7&limit=400')
+			: '/api/jobs-snapshot?q=data%20analyst&days=7&limit=400';
+		
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.ok || !Array.isArray(data.jobs)) {
+					console.error('Jobs snapshot API error:', data);
+					// Fallback to old individual fetchers if API fails
+					fetchAllJobsLegacy();
+					return;
+				}
+				
+				// Transform API response to our job format
+				data.jobs.forEach(function (item) {
+					if (!item || !item.title || !item.url) return;
+					
+					allJobs.push({
+						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+						title: item.title,
+						company: item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.url,
+						description: item.description || '',
+						tags: Array.isArray(item.tags) ? item.tags : [],
+						source: item.source || 'unknown',
+						date: item.date || new Date().toISOString(),
+						dateFormatted: item.dateFormatted || '',
+						postedAgo: item.postedAgo || '',
+						// Keep existing match score calculation
+						matchScore: 0 // Will be calculated below
+					});
+				});
+				
+				// Calculate match scores
+				allJobs.forEach(function (job) {
+					job.matchScore = calculateMatchScore(job);
+				});
+
+				// Sort by match score (highest first), then by date (newest first)
+				allJobs.sort(function (a, b) {
+					if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+					// If scores equal, sort by date (newer first)
+					var dateA = new Date(a.date || 0);
+					var dateB = new Date(b.date || 0);
+					return dateB - dateA;
+				});
+
+				applyFilters();
+				if (loadingEl) loadingEl.style.display = 'none';
+				
+				// Log source counts for debugging
+				if (data.sourceCounts) {
+					console.log('Jobs loaded from sources:', data.sourceCounts);
+				}
+			})
+			.catch(function (err) {
+				console.error('Jobs snapshot API error:', err);
+				// Fallback to legacy fetchers
+				fetchAllJobsLegacy();
+			});
+	}
+	
+	// Legacy fallback: individual fetchers (if jobs-snapshot API is unavailable)
+	function fetchAllJobsLegacy() {
+		var loadingEl = document.getElementById('job-loading');
 		var promises = [
 			fetchRemoteOK(),
 			fetchStackOverflow(),
@@ -333,7 +403,6 @@
 			fetchArbeitnow(),
 			fetchNaukri(),
 			fetchWellfound(),
-			// Backend proxy required (set window.JOB_PROXY_URL):
 			fetchIndeed(),
 			fetchGoogleJobs(),
 			fetchLinkedIn(),
@@ -1133,9 +1202,32 @@
 				if (status !== statusFilter) return false;
 			}
 
-			// Age filter (freshness)
+			// Age filter (freshness) — works with date, dateFormatted, or postedAgo
 			if (ageDays != null) {
 				var d = job.date || job.created_at || job.postedAt || job.postedDate;
+				if (!d) {
+					// Try parsing from dateFormatted (e.g. "17 Feb 2025")
+					if (job.dateFormatted) {
+						d = new Date(job.dateFormatted);
+						if (isNaN(d.getTime())) d = null;
+					}
+					// Try parsing from postedAgo (e.g. "2 days ago")
+					if (!d && job.postedAgo) {
+						var agoMatch = job.postedAgo.match(/(\d+)\s*(day|days|hour|hours|minute|minutes|week|weeks|month|months|year|years)\s*ago/);
+						if (agoMatch) {
+							var num = parseInt(agoMatch[1], 10);
+							var unit = agoMatch[2];
+							var ms = 0;
+							if (unit.indexOf('minute') !== -1) ms = num * 60 * 1000;
+							else if (unit.indexOf('hour') !== -1) ms = num * 60 * 60 * 1000;
+							else if (unit.indexOf('day') !== -1) ms = num * 24 * 60 * 60 * 1000;
+							else if (unit.indexOf('week') !== -1) ms = num * 7 * 24 * 60 * 60 * 1000;
+							else if (unit.indexOf('month') !== -1) ms = num * 30 * 24 * 60 * 60 * 1000;
+							else if (unit.indexOf('year') !== -1) ms = num * 365 * 24 * 60 * 60 * 1000;
+							d = new Date(Date.now() - ms).toISOString();
+						}
+					}
+				}
 				if (!d) return false;
 				var created = new Date(d);
 				if (isNaN(created.getTime())) return false;
@@ -1226,7 +1318,14 @@
 				html += '</div>';
 			}
 			html += '<div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">';
-			html += '<span class="text-xs text-gray-500 dark:text-gray-400">Source: ' + job.source + '</span>';
+			var sourceInfo = '<span class="text-xs text-gray-500 dark:text-gray-400">Source: ' + escapeHtml(job.source) + '</span>';
+			if (job.postedAgo || job.dateFormatted) {
+				var dateInfo = [];
+				if (job.postedAgo) dateInfo.push(escapeHtml(job.postedAgo));
+				if (job.dateFormatted) dateInfo.push(escapeHtml(job.dateFormatted));
+				sourceInfo += '<span class="text-xs text-gray-500 dark:text-gray-400 ml-2">· ' + dateInfo.join(' · ') + '</span>';
+			}
+			html += '<div class="flex flex-col sm:flex-row sm:items-center gap-1">' + sourceInfo + '</div>';
 			html += '<div class="flex items-center gap-2">';
 			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
