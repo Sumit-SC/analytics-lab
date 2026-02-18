@@ -131,7 +131,9 @@
 			filterRole.addEventListener('change', applyFilters);
 		}
 		if (refreshBtn) {
-			refreshBtn.addEventListener('click', fetchAllJobs);
+			refreshBtn.addEventListener('click', function () {
+				fetchAllJobs(true); // Force refresh - triggers scraping
+			});
 		}
 	}
 
@@ -315,8 +317,8 @@
 		};
 	}
 
-	// Fetch jobs from all sources using the new jobs-snapshot API
-	function fetchAllJobs() {
+	// Fetch jobs from cached API (fast) or trigger refresh
+	function fetchAllJobs(forceRefresh) {
 		var loadingEl = document.getElementById('job-loading');
 		var jobListEl = document.getElementById('job-list');
 		var emptyEl = document.getElementById('job-empty');
@@ -327,22 +329,129 @@
 		if (loadingEl) {
 			loadingEl.style.display = 'block';
 			var detailEl = document.getElementById('job-loading-detail');
-			if (detailEl) detailEl.textContent = 'Fetching from jobs-snapshot API...';
+			if (detailEl) {
+				detailEl.textContent = forceRefresh 
+					? 'Refreshing jobs from all portals (LinkedIn, Naukri, Indeed, Monster, Foundit, Glassdoor, Hirist, JobsAaj)... This may take 30-60 seconds.'
+					: 'Loading cached jobs from all portals...';
+			}
 		}
 		if (jobListEl) jobListEl.style.display = 'none';
 		if (emptyEl) emptyEl.classList.add('hidden');
 
 		allJobs = [];
 		
-		// Use the new jobs-snapshot API endpoint (aggregates RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri, etc.)
+		// Use cached jobs API (fast) or refresh endpoint
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
 		
 		// Get query from URL params or default to 'data analyst'
 		var urlParams = new URLSearchParams(window.location.search);
 		var query = urlParams.get('q') || 'data analyst';
-		var days = urlParams.get('days') || '7';
+		var days = urlParams.get('days') || '3'; // Default to 3 days for headless scraping
 		var limit = urlParams.get('limit') || '400';
+		var location = urlParams.get('location') || 'remote';
 		
+		// If forcing refresh, call refresh endpoint first, then cached
+		if (forceRefresh) {
+			var refreshUrl = proxyUrl 
+				? (proxyUrl + '/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location))
+				: ('/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location));
+			
+			fetch(refreshUrl)
+				.then(function (r) { return r.ok ? r.json() : null; })
+				.then(function (refreshData) {
+					if (refreshData && refreshData.ok) {
+						// Wait a bit for scraping to complete, then fetch cached
+						setTimeout(function () {
+							fetchCachedJobs(proxyUrl, query, days, limit);
+						}, 2000); // Wait 2 seconds, then try cached
+					} else {
+						// Refresh failed, try cached anyway
+						fetchCachedJobs(proxyUrl, query, days, limit);
+					}
+				})
+				.catch(function (err) {
+					console.error('Refresh failed:', err);
+					// Try cached anyway
+					fetchCachedJobs(proxyUrl, query, days, limit);
+				});
+			return;
+		}
+		
+		// Use cached API (fast)
+		fetchCachedJobs(proxyUrl, query, days, limit);
+	}
+	
+	// Fetch from cached jobs API
+	function fetchCachedJobs(proxyUrl, query, days, limit) {
+		var cachedUrl = proxyUrl 
+			? (proxyUrl + '/api/jobs-cached?q=' + encodeURIComponent(query))
+			: ('/api/jobs-cached?q=' + encodeURIComponent(query));
+		
+		fetch(cachedUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var loadingEl = document.getElementById('job-loading');
+				var errorEl = document.getElementById('job-error');
+				
+				if (!data || !data.ok) {
+					// No cached data - try fallback to jobs-snapshot API
+					console.log('No cached jobs, trying jobs-snapshot API...');
+					fetchJobsSnapshotFallback(proxyUrl, query, days, limit);
+					return;
+				}
+				
+				if (!Array.isArray(data.jobs) || data.jobs.length === 0) {
+					// Empty cache - show message
+					if (loadingEl) loadingEl.style.display = 'none';
+					if (errorEl) {
+						errorEl.classList.remove('hidden');
+						var errorMsgEl = document.getElementById('job-error-message');
+						if (errorMsgEl) {
+							errorMsgEl.textContent = 'No cached jobs found. Click Refresh to scrape fresh jobs from all portals.';
+						}
+						var retryBtn = document.getElementById('job-error-retry');
+						if (retryBtn) {
+							retryBtn.onclick = function () {
+								fetchAllJobs(true); // Force refresh
+							};
+						}
+					}
+					// Try fallback
+					fetchJobsSnapshotFallback(proxyUrl, query, days, limit);
+					return;
+				}
+				
+				// Transform cached API response to our job format
+				data.jobs.forEach(function (item) {
+					if (!item || !item.title || !item.url) return;
+					
+					allJobs.push({
+						id: item.id || (item.source + '_' + Math.random().toString(36).slice(2)),
+						title: item.title,
+						company: item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.url,
+						description: item.description || '',
+						tags: Array.isArray(item.tags) ? item.tags : [],
+						source: item.source || 'unknown',
+						date: item.date || item.postedDate || new Date().toISOString(),
+						dateFormatted: item.dateFormatted || '',
+						postedAgo: item.postedAgo || '',
+						matchScore: 0
+					});
+				});
+				
+				// Process jobs (same as before)
+				processJobsData(data);
+			})
+			.catch(function (err) {
+				console.error('Cached jobs API error:', err);
+				fetchJobsSnapshotFallback(proxyUrl, query, days, limit);
+			});
+	}
+	
+	// Fallback to jobs-snapshot API if cached API fails
+	function fetchJobsSnapshotFallback(proxyUrl, query, days, limit) {
 		var apiUrl = proxyUrl 
 			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
 			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
@@ -368,15 +477,12 @@
 							};
 						}
 					}
-					// Fallback to old individual fetchers if API fails
 					fetchAllJobsLegacy();
 					return;
 				}
 				
-				// Transform API response to our job format
 				data.jobs.forEach(function (item) {
 					if (!item || !item.title || !item.url) return;
-					
 					allJobs.push({
 						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
 						title: item.title,
@@ -389,10 +495,48 @@
 						date: item.date || new Date().toISOString(),
 						dateFormatted: item.dateFormatted || '',
 						postedAgo: item.postedAgo || '',
-						// Keep existing match score calculation
-						matchScore: 0 // Will be calculated below
+						matchScore: 0
 					});
 				});
+				
+				processJobsData(data);
+			})
+			.catch(function (err) {
+				console.error('Fallback API error:', err);
+				fetchAllJobsLegacy();
+			});
+	}
+	
+	// Process jobs data (common logic)
+	function processJobsData(data) {
+		// Calculate match scores
+		allJobs.forEach(function (job) {
+			job.matchScore = calculateMatchScore(job);
+		});
+
+		// Sort by match score (highest first), then by date (newest first)
+		allJobs.sort(function (a, b) {
+			if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+			var dateA = new Date(a.date || 0);
+			var dateB = new Date(b.date || 0);
+			return dateB - dateA;
+		});
+
+		// Store source counts and sources list for UI display
+		if (data.sourceCounts) {
+			sourceCounts = data.sourceCounts;
+		}
+		if (data.sources && Array.isArray(data.sources)) {
+			apiSources = data.sources;
+			updateSourceFilterDropdown();
+		}
+		
+		applyFilters();
+		var loadingEl = document.getElementById('job-loading');
+		if (loadingEl) loadingEl.style.display = 'none';
+		
+		updateSourceStats();
+	}
 				
 				// Calculate match scores
 				allJobs.forEach(function (job) {
