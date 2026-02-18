@@ -317,6 +317,42 @@
 		};
 	}
 
+	// Browser-side temporary jobs DB (localStorage cache)
+	var BROWSER_JOBS_CACHE_KEY = 'analytics_lab_jobs_cache_v1';
+
+	function saveJobsToBrowserCache(payload) {
+		try {
+			if (typeof window === 'undefined' || !window.localStorage) return;
+			var toStore = {
+				timestamp: Date.now(),
+				jobs: Array.isArray(payload.jobs) ? payload.jobs : [],
+				sourceCounts: payload.sourceCounts || {},
+				sources: Array.isArray(payload.sources) ? payload.sources : []
+			};
+			window.localStorage.setItem(BROWSER_JOBS_CACHE_KEY, JSON.stringify(toStore));
+		} catch (e) {
+			console.warn('Unable to save jobs cache to browser storage:', e);
+		}
+	}
+
+	function loadJobsFromBrowserCache(maxAgeMs) {
+		try {
+			if (typeof window === 'undefined' || !window.localStorage) return null;
+			var raw = window.localStorage.getItem(BROWSER_JOBS_CACHE_KEY);
+			if (!raw) return null;
+			var data = JSON.parse(raw);
+			if (!data || !Array.isArray(data.jobs)) return null;
+			var ts = typeof data.timestamp === 'number' ? data.timestamp : 0;
+			if (maxAgeMs && ts && Date.now() - ts > maxAgeMs) {
+				return null;
+			}
+			return data;
+		} catch (e) {
+			console.warn('Unable to read jobs cache from browser storage:', e);
+			return null;
+		}
+	}
+
 	// Fetch jobs from cached API (fast) or trigger refresh
 	function fetchAllJobs(forceRefresh) {
 		var loadingEl = document.getElementById('job-loading');
@@ -441,6 +477,13 @@
 				
 				// Process jobs (same as before)
 				processJobsData(data);
+
+				// Save latest successful jobs snapshot to browser cache (temporary DB)
+				saveJobsToBrowserCache({
+					jobs: allJobs.slice(0),
+					sourceCounts: sourceCounts,
+					sources: apiSources
+				});
 			})
 			.catch(function (err) {
 				console.error('Cached jobs API error:', err);
@@ -475,6 +518,20 @@
 							};
 						}
 					}
+					// As a last resort, try browser-side cache (temporary DB)
+					var cached = loadJobsFromBrowserCache(1000 * 60 * 60 * 6); // up to 6 hours old
+					if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
+						console.log('Loaded jobs from browser cache as fallback.');
+						allJobs = cached.jobs.slice(0);
+						sourceCounts = cached.sourceCounts || {};
+						apiSources = Array.isArray(cached.sources) ? cached.sources : [];
+						processJobsData({
+							sourceCounts: sourceCounts,
+							sources: apiSources
+						});
+						return;
+					}
+
 					// Don't fall back to legacy - they have poor filtering
 					// Instead show error and ask user to refresh
 					return;
@@ -499,6 +556,13 @@
 				});
 				
 				processJobsData(data);
+
+				// Save latest successful jobs snapshot to browser cache (temporary DB)
+				saveJobsToBrowserCache({
+					jobs: allJobs.slice(0),
+					sourceCounts: sourceCounts,
+					sources: apiSources
+				});
 			})
 			.catch(function (err) {
 				console.error('Fallback API error:', err);
@@ -506,6 +570,21 @@
 				var errorEl = document.getElementById('job-error');
 				var errorMsgEl = document.getElementById('job-error-message');
 				if (loadingEl) loadingEl.style.display = 'none';
+
+				// Try browser-side cache before giving up
+				var cached = loadJobsFromBrowserCache(1000 * 60 * 60 * 6); // up to 6 hours old
+				if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
+					console.log('Loaded jobs from browser cache as fallback (API error).');
+					allJobs = cached.jobs.slice(0);
+					sourceCounts = cached.sourceCounts || {};
+					apiSources = Array.isArray(cached.sources) ? cached.sources : [];
+					processJobsData({
+						sourceCounts: sourceCounts,
+						sources: apiSources
+					});
+					return;
+				}
+
 				if (errorEl) {
 					errorEl.classList.remove('hidden');
 					if (errorMsgEl) {
@@ -679,10 +758,23 @@
 						};
 					}
 				}
-				
-				if (detailEl) detailEl.textContent = 'API unavailable, trying fallback sources...';
-				// Fallback to legacy fetchers
-				fetchAllJobsLegacy();
+
+				// As a last resort, try browser-side cache (temporary DB)
+				var cached = loadJobsFromBrowserCache(1000 * 60 * 60 * 6); // up to 6 hours old
+				if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
+					console.log('Loaded jobs from browser cache as fallback (jobs-snapshot error).');
+					allJobs = cached.jobs.slice(0);
+					sourceCounts = cached.sourceCounts || {};
+					apiSources = Array.isArray(cached.sources) ? cached.sources : [];
+					processJobsData({
+						sourceCounts: sourceCounts,
+						sources: apiSources
+					});
+					if (detailEl) detailEl.textContent = 'Showing last saved results (offline cache).';
+					return;
+				}
+
+				if (detailEl) detailEl.textContent = 'API unavailable and no cached results found. Please refresh later.';
 			});
 	}
 	
