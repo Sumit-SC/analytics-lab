@@ -360,10 +360,8 @@
 				.then(function (r) { return r.ok ? r.json() : null; })
 				.then(function (refreshData) {
 					if (refreshData && refreshData.ok) {
-						// Wait a bit for scraping to complete, then fetch cached
-						setTimeout(function () {
-							fetchCachedJobs(proxyUrl, query, days, limit);
-						}, 2000); // Wait 2 seconds, then try cached
+						// jobs-refresh waits for completion; fetch cached immediately
+						fetchCachedJobs(proxyUrl, query, days, limit);
 					} else {
 						// Refresh failed, try cached anyway
 						fetchCachedJobs(proxyUrl, query, days, limit);
@@ -509,6 +507,22 @@
 	
 	// Process jobs data (common logic)
 	function processJobsData(data) {
+		// Compute source counts if missing (cached API usually only returns jobs + sources)
+		if (!data || !data.sourceCounts) {
+			sourceCounts = {};
+			allJobs.forEach(function (j) {
+				var src = j.source || 'unknown';
+				sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+			});
+		} else {
+			sourceCounts = data.sourceCounts;
+		}
+		if (!data || !Array.isArray(data.sources)) {
+			apiSources = Object.keys(sourceCounts || {}).sort();
+		} else {
+			apiSources = data.sources;
+		}
+
 		// Calculate match scores
 		allJobs.forEach(function (job) {
 			job.matchScore = calculateMatchScore(job);
@@ -522,20 +536,68 @@
 			return dateB - dateA;
 		});
 
-		// Store source counts and sources list for UI display
-		if (data.sourceCounts) {
-			sourceCounts = data.sourceCounts;
-		}
-		if (data.sources && Array.isArray(data.sources)) {
-			apiSources = data.sources;
-			updateSourceFilterDropdown();
-		}
+		updateSourceFilterDropdown();
 		
 		applyFilters();
 		var loadingEl = document.getElementById('job-loading');
 		if (loadingEl) loadingEl.style.display = 'none';
 		
 		updateSourceStats();
+	}
+
+	function openJobDetails(job) {
+		var modal = document.getElementById('job-detail-modal');
+		if (!modal || !job) return;
+
+		var titleEl = document.getElementById('job-detail-title');
+		var sourceEl = document.getElementById('job-detail-source');
+		var companyEl = document.getElementById('job-detail-company');
+		var metaEl = document.getElementById('job-detail-meta');
+		var tagsEl = document.getElementById('job-detail-tags');
+		var descEl = document.getElementById('job-detail-description');
+		var applyEl = document.getElementById('job-detail-apply');
+		var plannerBtn = document.getElementById('job-detail-add-planner');
+
+		if (titleEl) titleEl.textContent = job.title || 'Job details';
+		if (sourceEl) sourceEl.textContent = job.source ? ('Source: ' + job.source) : '';
+		if (companyEl) companyEl.textContent = (job.company || 'Unknown') + (job.location ? (' · ' + job.location) : '');
+		var metaParts = [];
+		if (job.postedAgo) metaParts.push(job.postedAgo);
+		if (job.dateFormatted) metaParts.push(job.dateFormatted);
+		if (job.date && !job.dateFormatted) metaParts.push(job.date);
+		if (metaEl) metaEl.textContent = metaParts.join(' · ');
+
+		if (tagsEl) {
+			var tagsHtml = '';
+			var tags = Array.isArray(job.tags) ? job.tags : [];
+			tags.slice(0, 12).forEach(function (t) {
+				tagsHtml += '<span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">' + escapeHtml(t) + '</span>';
+			});
+			tagsEl.innerHTML = tagsHtml;
+		}
+
+		if (descEl) {
+			var txt = String(job.description || '').replace(/<[^>]*>/g, '').trim();
+			descEl.textContent = txt || 'No description available.';
+		}
+
+		if (applyEl) applyEl.href = job.url || '#';
+		if (plannerBtn) {
+			plannerBtn.onclick = function () {
+				addJobToPlanner(job);
+				closeJobDetails();
+			};
+		}
+
+		modal.classList.remove('hidden');
+		modal.setAttribute('aria-hidden', 'false');
+	}
+
+	function closeJobDetails() {
+		var modal = document.getElementById('job-detail-modal');
+		if (!modal) return;
+		modal.classList.add('hidden');
+		modal.setAttribute('aria-hidden', 'true');
 	}
 				
 				// Calculate match scores
@@ -1543,7 +1605,7 @@
 			var matchClass = 'match-' + matchLevel;
 			var statusClass = 'status-' + status;
 
-			html += '<div class="job-card material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1">';
+			html += '<div class="job-card group material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1">';
 			html += '<div class="flex items-start justify-between mb-2">';
 			html += '<div class="flex-1">';
 			html += '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">';
@@ -1568,7 +1630,11 @@
 			html += '</div>';
 			if (job.description) {
 				var desc = job.description.substring(0, 200).replace(/<[^>]*>/g, '');
-				html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">' + escapeHtml(desc) + (job.description.length > 200 ? '…' : '') + '</p>';
+				html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">' + escapeHtml(desc) + (job.description.length > 200 ? '…' : '') + '</p>';
+				// Quick preview on hover (desktop)
+				html += '<div class="hidden group-hover:block mt-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">';
+				html += '<p class="text-xs text-gray-600 dark:text-gray-300" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;">' + escapeHtml(desc) + (job.description.length > 200 ? '…' : '') + '</p>';
+				html += '</div>';
 			}
 			if (job.tags && job.tags.length > 0) {
 				html += '<div class="flex flex-wrap gap-1 mb-2">';
@@ -1591,6 +1657,7 @@
 			sourceInfo += '</div>';
 			html += sourceInfo;
 			html += '<div class="flex items-center gap-2">';
+			html += '<button type="button" class="job-details-btn text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" data-job-id="' + job.id + '" title="Quick view">Details</button>';
 			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
 			html += '</div>';
@@ -1621,6 +1688,19 @@
 				}
 			});
 		});
+
+		// Add event listeners for "Details" buttons + modal close
+		jobListEl.querySelectorAll('.job-details-btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var jobId = this.getAttribute('data-job-id');
+				var job = filteredJobs.find(function (j) { return j.id === jobId; });
+				if (job) openJobDetails(job);
+			});
+		});
+		var closeBtn = document.getElementById('job-detail-close');
+		var backdrop = document.getElementById('job-detail-backdrop');
+		if (closeBtn) closeBtn.onclick = closeJobDetails;
+		if (backdrop) backdrop.onclick = closeJobDetails;
 	}
 
 	// Add job from job list to planner (pre-fill form)

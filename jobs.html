@@ -272,6 +272,32 @@
 			<button type="button" id="job-error-retry" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold">Retry</button>
 		</div>
 
+		<!-- Job quick view modal -->
+		<div id="job-detail-modal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+			<div class="absolute inset-0 bg-black/50" id="job-detail-backdrop"></div>
+			<div class="absolute inset-0 flex items-center justify-center p-4">
+				<div class="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
+					<div class="flex items-start justify-between gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
+						<div class="min-w-0">
+							<p class="text-xs text-gray-500 dark:text-gray-400" id="job-detail-source"></p>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate" id="job-detail-title">Job details</h3>
+							<p class="text-sm text-gray-600 dark:text-gray-400" id="job-detail-company"></p>
+							<p class="text-xs text-gray-500 dark:text-gray-500" id="job-detail-meta"></p>
+						</div>
+						<button type="button" id="job-detail-close" class="shrink-0 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-semibold">Close</button>
+					</div>
+					<div class="p-4">
+						<div class="flex flex-wrap gap-2 mb-3" id="job-detail-tags"></div>
+						<p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line" id="job-detail-description"></p>
+					</div>
+					<div class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800">
+						<button type="button" id="job-detail-add-planner" class="text-sm px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-semibold transition-colors">+ Planner</button>
+						<a id="job-detail-apply" href="#" target="_blank" rel="noopener" class="text-sm px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Apply</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Application planner (Notion-style log, saved in this browser only) -->
 		<section class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
 			<header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
