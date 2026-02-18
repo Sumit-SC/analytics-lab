@@ -331,7 +331,7 @@
 			var detailEl = document.getElementById('job-loading-detail');
 			if (detailEl) {
 				detailEl.textContent = forceRefresh 
-					? 'Refreshing jobs from all portals (LinkedIn, Naukri, Indeed, Monster, Foundit, Glassdoor, Hirist, JobsAaj)... This may take 30-60 seconds.'
+					? 'Refreshing jobs from all portals (LinkedIn, Naukri, Indeed, Monster, Foundit, Glassdoor, Hirist, JobsAaj, TimesJobs, Shine, ZipRecruiter, SimplyHired, CareerBuilder, Dice, Adzuna, Jooble, Freshersworld)... This may take 30-60 seconds.'
 					: 'Loading cached jobs from all portals...';
 			}
 		}
