@@ -29,6 +29,8 @@
 	var applications = {};
 	var filteredJobs = [];
 	var plannerEntries = [];
+	var sourceCounts = {}; // Track jobs per source from API
+	var apiSources = []; // List of sources from API
 
 	// Lightweight caching to avoid rate limits (especially Remotive)
 	var CACHE_PREFIX = 'job_tracker_cache_v1_';
@@ -319,7 +321,14 @@
 		var jobListEl = document.getElementById('job-list');
 		var emptyEl = document.getElementById('job-empty');
 
-		if (loadingEl) loadingEl.style.display = 'block';
+		var errorEl = document.getElementById('job-error');
+		if (errorEl) errorEl.classList.add('hidden');
+		
+		if (loadingEl) {
+			loadingEl.style.display = 'block';
+			var detailEl = document.getElementById('job-loading-detail');
+			if (detailEl) detailEl.textContent = 'Fetching from jobs-snapshot API...';
+		}
 		if (jobListEl) jobListEl.style.display = 'none';
 		if (emptyEl) emptyEl.classList.add('hidden');
 
@@ -327,15 +336,38 @@
 		
 		// Use the new jobs-snapshot API endpoint (aggregates RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri, etc.)
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
+		
+		// Get query from URL params or default to 'data analyst'
+		var urlParams = new URLSearchParams(window.location.search);
+		var query = urlParams.get('q') || 'data analyst';
+		var days = urlParams.get('days') || '7';
+		var limit = urlParams.get('limit') || '400';
+		
 		var apiUrl = proxyUrl 
-			? (proxyUrl + '/api/jobs-snapshot?q=data%20analyst&days=7&limit=400')
-			: '/api/jobs-snapshot?q=data%20analyst&days=7&limit=400';
+			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
+			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
 		
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
 					console.error('Jobs snapshot API error:', data);
+					var loadingEl = document.getElementById('job-loading');
+					var errorEl = document.getElementById('job-error');
+					var errorMsgEl = document.getElementById('job-error-message');
+					if (loadingEl) loadingEl.style.display = 'none';
+					if (errorEl) {
+						errorEl.classList.remove('hidden');
+						if (errorMsgEl) {
+							errorMsgEl.textContent = data.error || 'API returned invalid response. Trying fallback sources...';
+						}
+						var retryBtn = document.getElementById('job-error-retry');
+						if (retryBtn) {
+							retryBtn.onclick = function () {
+								fetchAllJobs();
+							};
+						}
+					}
 					// Fallback to old individual fetchers if API fails
 					fetchAllJobsLegacy();
 					return;
@@ -376,16 +408,45 @@
 					return dateB - dateA;
 				});
 
+				// Store source counts and sources list for UI display
+				if (data.sourceCounts) {
+					sourceCounts = data.sourceCounts;
+				}
+				if (data.sources && Array.isArray(data.sources)) {
+					apiSources = data.sources;
+					// Update source filter dropdown with available sources
+					updateSourceFilterDropdown();
+				}
+				
 				applyFilters();
 				if (loadingEl) loadingEl.style.display = 'none';
 				
-				// Log source counts for debugging
-				if (data.sourceCounts) {
-					console.log('Jobs loaded from sources:', data.sourceCounts);
-				}
+				// Update source stats display
+				updateSourceStats();
 			})
 			.catch(function (err) {
 				console.error('Jobs snapshot API error:', err);
+				var loadingEl = document.getElementById('job-loading');
+				var errorEl = document.getElementById('job-error');
+				var errorMsgEl = document.getElementById('job-error-message');
+				var detailEl = document.getElementById('job-loading-detail');
+				
+				if (loadingEl) loadingEl.style.display = 'none';
+				
+				if (errorEl) {
+					errorEl.classList.remove('hidden');
+					if (errorMsgEl) {
+						errorMsgEl.textContent = err.message || 'Failed to connect to jobs API. Check console for details.';
+					}
+					var retryBtn = document.getElementById('job-error-retry');
+					if (retryBtn) {
+						retryBtn.onclick = function () {
+							fetchAllJobs();
+						};
+					}
+				}
+				
+				if (detailEl) detailEl.textContent = 'API unavailable, trying fallback sources...';
 				// Fallback to legacy fetchers
 				fetchAllJobsLegacy();
 			});
@@ -1263,6 +1324,57 @@
 			appliedEl.textContent = appliedCount + ' tracked';
 		}
 	}
+	
+	// Update source statistics display
+	function updateSourceStats() {
+		var sourceStatsEl = document.getElementById('job-stats-sources');
+		if (!sourceStatsEl) return;
+		
+		if (Object.keys(sourceCounts).length === 0) {
+			sourceStatsEl.innerHTML = '';
+			return;
+		}
+		
+		var sources = Object.keys(sourceCounts).sort(function (a, b) {
+			return sourceCounts[b] - sourceCounts[a];
+		});
+		
+		var html = '<span class="text-xs text-gray-500 dark:text-gray-400">Sources: </span>';
+		var chips = sources.slice(0, 5).map(function (src) {
+			return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" title="' + escapeHtml(src) + '">' + escapeHtml(src) + ': ' + sourceCounts[src] + '</span>';
+		});
+		if (sources.length > 5) {
+			var rest = sources.slice(5).reduce(function (sum, src) { return sum + sourceCounts[src]; }, 0);
+			chips.push('<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">+' + (sources.length - 5) + ' more (' + rest + ')</span>');
+		}
+		html += chips.join(' ');
+		sourceStatsEl.innerHTML = html;
+	}
+	
+	// Update source filter dropdown with sources from API
+	function updateSourceFilterDropdown() {
+		var filterSource = document.getElementById('job-filter-source');
+		if (!filterSource || !apiSources || apiSources.length === 0) return;
+		
+		// Keep "All Sources" option
+		var allOption = filterSource.querySelector('option[value="all"]');
+		var currentValue = filterSource.value;
+		
+		// Remove old source options (keep "All Sources")
+		var options = filterSource.querySelectorAll('option');
+		options.forEach(function (opt) {
+			if (opt.value !== 'all') opt.remove();
+		});
+		
+		// Add new source options from API
+		apiSources.sort().forEach(function (src) {
+			var opt = document.createElement('option');
+			opt.value = src;
+			opt.textContent = src.charAt(0).toUpperCase() + src.slice(1).replace(/_/g, ' ');
+			if (opt.value === currentValue) opt.selected = true;
+			filterSource.appendChild(opt);
+		});
+	}
 
 	// Render jobs
 	function renderJobs() {
@@ -1293,7 +1405,11 @@
 			html += '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-primary hover:underline">' + escapeHtml(job.title) + '</a>';
 			html += '</h3>';
-			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">' + escapeHtml(job.company) + ' &middot; ' + escapeHtml(job.location) + '</p>';
+			var companyLocation = escapeHtml(job.company) + ' &middot; ' + escapeHtml(job.location);
+			if (job.postedAgo && !job.dateFormatted) {
+				companyLocation += ' &middot; <span class="text-xs text-gray-500 dark:text-gray-500">' + escapeHtml(job.postedAgo) + '</span>';
+			}
+			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">' + companyLocation + '</p>';
 			html += '</div>';
 			html += '<div class="flex flex-col gap-2 items-end">';
 			html += '<span class="match-badge ' + matchClass + '">' + job.matchScore + '% match</span>';
@@ -1317,15 +1433,19 @@
 				});
 				html += '</div>';
 			}
-			html += '<div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">';
-			var sourceInfo = '<span class="text-xs text-gray-500 dark:text-gray-400">Source: ' + escapeHtml(job.source) + '</span>';
+			html += '<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">';
+			var sourceInfo = '<div class="flex flex-wrap items-center gap-2">';
+			sourceInfo += '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">' + escapeHtml(job.source) + '</span>';
 			if (job.postedAgo || job.dateFormatted) {
-				var dateInfo = [];
-				if (job.postedAgo) dateInfo.push(escapeHtml(job.postedAgo));
-				if (job.dateFormatted) dateInfo.push(escapeHtml(job.dateFormatted));
-				sourceInfo += '<span class="text-xs text-gray-500 dark:text-gray-400 ml-2">· ' + dateInfo.join(' · ') + '</span>';
+				if (job.postedAgo) {
+					sourceInfo += '<span class="text-xs text-gray-600 dark:text-gray-400 font-medium" title="Posted ' + escapeHtml(job.postedAgo) + '">' + escapeHtml(job.postedAgo) + '</span>';
+				}
+				if (job.dateFormatted) {
+					sourceInfo += '<span class="text-xs text-gray-500 dark:text-gray-500" title="Date: ' + escapeHtml(job.dateFormatted) + '">' + escapeHtml(job.dateFormatted) + '</span>';
+				}
 			}
-			html += '<div class="flex flex-col sm:flex-row sm:items-center gap-1">' + sourceInfo + '</div>';
+			sourceInfo += '</div>';
+			html += sourceInfo;
 			html += '<div class="flex items-center gap-2">';
 			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
