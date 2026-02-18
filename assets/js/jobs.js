@@ -466,16 +466,17 @@
 					if (errorEl) {
 						errorEl.classList.remove('hidden');
 						if (errorMsgEl) {
-							errorMsgEl.textContent = data.error || 'API returned invalid response. Trying fallback sources...';
+							errorMsgEl.textContent = data.error || 'API returned invalid response. Please try refreshing.';
 						}
 						var retryBtn = document.getElementById('job-error-retry');
 						if (retryBtn) {
 							retryBtn.onclick = function () {
-								fetchAllJobs();
+								fetchAllJobs(true); // Force refresh
 							};
 						}
 					}
-					fetchAllJobsLegacy();
+					// Don't fall back to legacy - they have poor filtering
+					// Instead show error and ask user to refresh
 					return;
 				}
 				
@@ -501,7 +502,23 @@
 			})
 			.catch(function (err) {
 				console.error('Fallback API error:', err);
-				fetchAllJobsLegacy();
+				var loadingEl = document.getElementById('job-loading');
+				var errorEl = document.getElementById('job-error');
+				var errorMsgEl = document.getElementById('job-error-message');
+				if (loadingEl) loadingEl.style.display = 'none';
+				if (errorEl) {
+					errorEl.classList.remove('hidden');
+					if (errorMsgEl) {
+						errorMsgEl.textContent = 'Failed to load jobs. Please check your connection and try refreshing.';
+					}
+					var retryBtn = document.getElementById('job-error-retry');
+					if (retryBtn) {
+						retryBtn.onclick = function () {
+							fetchAllJobs(true);
+						};
+					}
+				}
+				// Don't use legacy fetchers - they have poor filtering
 			});
 	}
 	
@@ -523,9 +540,20 @@
 			apiSources = data.sources;
 		}
 
+		// Filter out irrelevant jobs before calculating scores
+		allJobs = allJobs.filter(function (job) {
+			var fullText = (job.title + ' ' + job.description + ' ' + (job.tags || []).join(' ')).toLowerCase();
+			return isDataScienceJob(fullText);
+		});
+
 		// Calculate match scores
 		allJobs.forEach(function (job) {
 			job.matchScore = calculateMatchScore(job);
+		});
+
+		// Filter out jobs with very low match scores (< 5%) - likely irrelevant
+		allJobs = allJobs.filter(function (job) {
+			return job.matchScore >= 5;
 		});
 
 		// Sort by match score (highest first), then by date (newest first)
@@ -1369,23 +1397,63 @@
 		});
 	}
 
-	// Check if job is data science related
+	// Check if job is data science related (strict filtering)
 	function isDataScienceJob(text) {
-		var keywords = [
+		var lowerText = String(text || '').toLowerCase();
+		
+		// Exclude irrelevant categories first
+		var excludePatterns = [
+			/^online[- ]marketing/i,
+			/^marketing$/i,
+			/^social media/i,
+			/^content marketing/i,
+			/^seo/i,
+			/^ppc/i,
+			/^paid advertising/i,
+			/^performance marketing$/i, // Only allow if combined with "analyst" or "data"
+			/^praktikum/i, // German internship
+			/^intern/i,
+			/^trainee$/i
+		];
+		
+		// If title starts with excluded patterns and doesn't mention data/analyst, exclude
+		var titleMatch = lowerText.match(/^(online[- ]marketing|marketing|social media|content marketing|seo|ppc|paid advertising|performance marketing|praktikum|intern|trainee)/);
+		if (titleMatch && !lowerText.match(/(data|analyst|analytics|bi|business intelligence)/)) {
+			return false;
+		}
+		
+		// Required keywords (must have at least one)
+		var requiredKeywords = [
 			// Core data roles
 			'data scientist', 'data analyst', 'data engineer', 'analytics engineer',
-			// Analyst-focused
-			'business analyst', 'product analyst', 'bi analyst', 'bi developer', 'insights analyst', 'reporting analyst',
-			'marketing analyst', 'growth analyst', 'operations analyst', 'senior data analyst',
+			// Analyst-focused (but exclude pure marketing)
+			'business analyst', 'product analyst', 'bi analyst', 'bi developer', 
+			'insights analyst', 'reporting analyst', 'financial analyst',
+			// Only include marketing analyst if it also mentions data/analytics
+			'marketing analyst', // Will be filtered further if no data context
+			'growth analyst', 'operations analyst', 'senior data analyst',
 			// Scientist / Associate / Junior
 			'associate data scientist', 'junior ml engineer', 'junior data engineer', 'associate data engineer',
 			// Domains / skills
 			'data science', 'data analytics', 'business intelligence', 'analytics',
-			'machine learning', 'ml engineer', 'ai engineer', 'statistician', 'research scientist'
+			'machine learning', 'ml engineer', 'ai engineer', 'statistician', 'research scientist',
+			'sql', 'python', 'r ', 'tableau', 'power bi', 'looker', 'snowflake'
 		];
-		return keywords.some(function (keyword) {
-			return text.indexOf(keyword) !== -1;
+		
+		var hasRequired = requiredKeywords.some(function (keyword) {
+			return lowerText.indexOf(keyword) !== -1;
 		});
+		
+		if (!hasRequired) return false;
+		
+		// If it's "marketing analyst" but no data/analytics context, exclude
+		if (lowerText.includes('marketing analyst') || lowerText.includes('marketing analyst')) {
+			if (!lowerText.match(/(data|analytics|bi|business intelligence|sql|python|tableau|power bi|looker)/)) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	// Calculate match score (0-100) — prioritise your focus roles
