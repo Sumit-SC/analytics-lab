@@ -17,11 +17,11 @@
 	<link rel="preconnect" href="https://jobs.github.com">
 	<link rel="stylesheet" href="./assets/css/main.css">
 	<script>
-		// Configure job proxy URL — points to playground-serveless API on Vercel
-		// This uses the new /api/jobs-snapshot endpoint with multiple sources, date formatting, etc.
+		// Jobs API: Vercel only (no Railway). Points to playground-serverless on Vercel.
+		// Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback).
 		window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
-		// If deploying analytics-lab to Vercel/Netlify with api/ folder, you can use same origin:
-		// window.JOB_PROXY_URL = ''; // or omit to use same origin
+		// Same-origin: if analytics-lab is served from same Vercel app with api/, use:
+		// window.JOB_PROXY_URL = '';
 	</script>
 	<style>
 		.job-card {

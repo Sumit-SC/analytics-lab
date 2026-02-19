@@ -1,5 +1,9 @@
 # Standalone Playground — Notion-like second brain
 
+**What this project is:** Frontend app (static HTML/JS) — second-brain hub, job tracker, playground, resources, tools, trends. Deploy as its own Vercel project. For job listings it calls the **playground-serveless** APIs (set `JOB_PROXY_URL` to that deployment).
+
+---
+
 A **second-brain hub** (Notion-like UI and use): **JS libraries** and **free on-the-fly APIs** only — no custom backend, pre-made and compiled services. View, search, edit in the browser, then export code, notes, or Word-style docs. Minimal code; off-the-shelf and public APIs only.
 
 ---

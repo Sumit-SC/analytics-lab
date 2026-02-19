@@ -367,8 +367,8 @@
 			var detailEl = document.getElementById('job-loading-detail');
 			if (detailEl) {
 				detailEl.textContent = forceRefresh 
-					? 'Refreshing jobs from all portals (LinkedIn, Naukri, Indeed, Monster, Foundit, Glassdoor, Hirist, JobsAaj, TimesJobs, Shine, ZipRecruiter, SimplyHired, CareerBuilder, Dice, Adzuna, Jooble, Freshersworld)... This may take 30-60 seconds.'
-					: 'Loading cached jobs from all portals...';
+					? 'Refreshing jobs from all portals... This may take 30-60 seconds.'
+					: 'Loading jobs from all sources (same as Playground)...';
 			}
 		}
 		if (jobListEl) jobListEl.style.display = 'none';
@@ -386,7 +386,7 @@
 		var limit = urlParams.get('limit') || '400';
 		var location = urlParams.get('location') || 'remote';
 		
-		// If forcing refresh, call refresh endpoint first, then cached
+		// If forcing refresh, call refresh endpoint first, then snapshot (same API as playground)
 		if (forceRefresh) {
 			var refreshUrl = proxyUrl 
 				? (proxyUrl + '/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location))
@@ -395,27 +395,44 @@
 			fetch(refreshUrl)
 				.then(function (r) { return r.ok ? r.json() : null; })
 				.then(function (refreshData) {
-					if (refreshData && refreshData.ok) {
-						// jobs-refresh waits for completion; fetch cached immediately
-						fetchCachedJobs(proxyUrl, query, days, limit);
-					} else {
-						// Refresh failed, try cached anyway
-						fetchCachedJobs(proxyUrl, query, days, limit);
-					}
+					// After refresh, always fetch snapshot so UI shows same data as playground
+					fetchJobsSnapshot(proxyUrl, query, days, limit);
 				})
 				.catch(function (err) {
 					console.error('Refresh failed:', err);
-					// Try cached anyway
-					fetchCachedJobs(proxyUrl, query, days, limit);
+					fetchJobsSnapshot(proxyUrl, query, days, limit);
 				});
 			return;
 		}
 		
-		// Use cached API (fast)
-		fetchCachedJobs(proxyUrl, query, days, limit);
+		// Primary: use jobs-snapshot (same API as playground) so results and sources match
+		fetchJobsSnapshot(proxyUrl, query, days, limit);
 	}
 	
-	// Fetch from cached jobs API
+	// Try browser cache then show error (used when both snapshot and cached API fail)
+	function tryBrowserCacheThenError(cacheMaxAgeMs) {
+		var loadingEl = document.getElementById('job-loading');
+		var errorEl = document.getElementById('job-error');
+		var errorMsgEl = document.getElementById('job-error-message');
+		var cached = loadJobsFromBrowserCache(cacheMaxAgeMs || (1000 * 60 * 30)); // default 30 min
+		if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
+			allJobs = cached.jobs.slice(0);
+			sourceCounts = cached.sourceCounts || {};
+			apiSources = Array.isArray(cached.sources) ? cached.sources : [];
+			processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+			if (loadingEl) loadingEl.style.display = 'none';
+			return;
+		}
+		if (loadingEl) loadingEl.style.display = 'none';
+		if (errorEl) {
+			errorEl.classList.remove('hidden');
+			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Click Refresh to try again.';
+			var retryBtn = document.getElementById('job-error-retry');
+			if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
+		}
+	}
+
+	// Fetch from cached jobs API (fallback when snapshot fails)
 	function fetchCachedJobs(proxyUrl, query, days, limit) {
 		var cachedUrl = proxyUrl 
 			? (proxyUrl + '/api/jobs-cached?q=' + encodeURIComponent(query))
@@ -427,38 +444,13 @@
 				var loadingEl = document.getElementById('job-loading');
 				var errorEl = document.getElementById('job-error');
 				
-				if (!data || !data.ok) {
-					// No cached data - try fallback to jobs-snapshot API
-					console.log('No cached jobs, trying jobs-snapshot API...');
-					fetchJobsSnapshotFallback(proxyUrl, query, days, limit);
+				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
+					tryBrowserCacheThenError(1000 * 60 * 30);
 					return;
 				}
 				
-				if (!Array.isArray(data.jobs) || data.jobs.length === 0) {
-					// Empty cache - show message
-					if (loadingEl) loadingEl.style.display = 'none';
-					if (errorEl) {
-						errorEl.classList.remove('hidden');
-						var errorMsgEl = document.getElementById('job-error-message');
-						if (errorMsgEl) {
-							errorMsgEl.textContent = 'No cached jobs found. Click Refresh to scrape fresh jobs from all portals.';
-						}
-						var retryBtn = document.getElementById('job-error-retry');
-						if (retryBtn) {
-							retryBtn.onclick = function () {
-								fetchAllJobs(true); // Force refresh
-							};
-						}
-					}
-					// Try fallback
-					fetchJobsSnapshotFallback(proxyUrl, query, days, limit);
-					return;
-				}
-				
-				// Transform cached API response to our job format
 				data.jobs.forEach(function (item) {
 					if (!item || !item.title || !item.url) return;
-					
 					allJobs.push({
 						id: item.id || (item.source + '_' + Math.random().toString(36).slice(2)),
 						title: item.title,
@@ -474,25 +466,17 @@
 						matchScore: 0
 					});
 				});
-				
-				// Process jobs (same as before)
 				processJobsData(data);
-
-				// Save latest successful jobs snapshot to browser cache (temporary DB)
-				saveJobsToBrowserCache({
-					jobs: allJobs.slice(0),
-					sourceCounts: sourceCounts,
-					sources: apiSources
-				});
+				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
 				console.error('Cached jobs API error:', err);
-				fetchJobsSnapshotFallback(proxyUrl, query, days, limit);
+				tryBrowserCacheThenError(1000 * 60 * 30);
 			});
 	}
 	
-	// Fallback to jobs-snapshot API if cached API fails
-	function fetchJobsSnapshotFallback(proxyUrl, query, days, limit) {
+	// Primary: jobs-snapshot API (same as Playground — same results and sources)
+	function fetchJobsSnapshot(proxyUrl, query, days, limit) {
 		var apiUrl = proxyUrl 
 			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
 			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
@@ -501,39 +485,8 @@
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
-					console.error('Jobs snapshot API error:', data);
-					var loadingEl = document.getElementById('job-loading');
-					var errorEl = document.getElementById('job-error');
-					var errorMsgEl = document.getElementById('job-error-message');
-					if (loadingEl) loadingEl.style.display = 'none';
-					if (errorEl) {
-						errorEl.classList.remove('hidden');
-						if (errorMsgEl) {
-							errorMsgEl.textContent = data.error || 'API returned invalid response. Please try refreshing.';
-						}
-						var retryBtn = document.getElementById('job-error-retry');
-						if (retryBtn) {
-							retryBtn.onclick = function () {
-								fetchAllJobs(true); // Force refresh
-							};
-						}
-					}
-					// As a last resort, try browser-side cache (temporary DB)
-					var cached = loadJobsFromBrowserCache(1000 * 60 * 60 * 6); // up to 6 hours old
-					if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
-						console.log('Loaded jobs from browser cache as fallback.');
-						allJobs = cached.jobs.slice(0);
-						sourceCounts = cached.sourceCounts || {};
-						apiSources = Array.isArray(cached.sources) ? cached.sources : [];
-						processJobsData({
-							sourceCounts: sourceCounts,
-							sources: apiSources
-						});
-						return;
-					}
-
-					// Don't fall back to legacy - they have poor filtering
-					// Instead show error and ask user to refresh
+					console.log('Jobs snapshot failed, trying cached API...');
+					fetchCachedJobs(proxyUrl, query, days, limit);
 					return;
 				}
 				
@@ -565,39 +518,8 @@
 				});
 			})
 			.catch(function (err) {
-				console.error('Fallback API error:', err);
-				var loadingEl = document.getElementById('job-loading');
-				var errorEl = document.getElementById('job-error');
-				var errorMsgEl = document.getElementById('job-error-message');
-				if (loadingEl) loadingEl.style.display = 'none';
-
-				// Try browser-side cache before giving up
-				var cached = loadJobsFromBrowserCache(1000 * 60 * 60 * 6); // up to 6 hours old
-				if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
-					console.log('Loaded jobs from browser cache as fallback (API error).');
-					allJobs = cached.jobs.slice(0);
-					sourceCounts = cached.sourceCounts || {};
-					apiSources = Array.isArray(cached.sources) ? cached.sources : [];
-					processJobsData({
-						sourceCounts: sourceCounts,
-						sources: apiSources
-					});
-					return;
-				}
-
-				if (errorEl) {
-					errorEl.classList.remove('hidden');
-					if (errorMsgEl) {
-						errorMsgEl.textContent = 'Failed to load jobs. Please check your connection and try refreshing.';
-					}
-					var retryBtn = document.getElementById('job-error-retry');
-					if (retryBtn) {
-						retryBtn.onclick = function () {
-							fetchAllJobs(true);
-						};
-					}
-				}
-				// Don't use legacy fetchers - they have poor filtering
+				console.error('Jobs snapshot network error:', err);
+				fetchCachedJobs(proxyUrl, query, days, limit);
 			});
 	}
 	
@@ -706,78 +628,7 @@
 		modal.classList.add('hidden');
 		modal.setAttribute('aria-hidden', 'true');
 	}
-				
-				// Calculate match scores
-				allJobs.forEach(function (job) {
-					job.matchScore = calculateMatchScore(job);
-				});
 
-				// Sort by match score (highest first), then by date (newest first)
-				allJobs.sort(function (a, b) {
-					if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
-					// If scores equal, sort by date (newer first)
-					var dateA = new Date(a.date || 0);
-					var dateB = new Date(b.date || 0);
-					return dateB - dateA;
-				});
-
-				// Store source counts and sources list for UI display
-				if (data.sourceCounts) {
-					sourceCounts = data.sourceCounts;
-				}
-				if (data.sources && Array.isArray(data.sources)) {
-					apiSources = data.sources;
-					// Update source filter dropdown with available sources
-					updateSourceFilterDropdown();
-				}
-				
-				applyFilters();
-				if (loadingEl) loadingEl.style.display = 'none';
-				
-				// Update source stats display
-				updateSourceStats();
-			})
-			.catch(function (err) {
-				console.error('Jobs snapshot API error:', err);
-				var loadingEl = document.getElementById('job-loading');
-				var errorEl = document.getElementById('job-error');
-				var errorMsgEl = document.getElementById('job-error-message');
-				var detailEl = document.getElementById('job-loading-detail');
-				
-				if (loadingEl) loadingEl.style.display = 'none';
-				
-				if (errorEl) {
-					errorEl.classList.remove('hidden');
-					if (errorMsgEl) {
-						errorMsgEl.textContent = err.message || 'Failed to connect to jobs API. Check console for details.';
-					}
-					var retryBtn = document.getElementById('job-error-retry');
-					if (retryBtn) {
-						retryBtn.onclick = function () {
-							fetchAllJobs();
-						};
-					}
-				}
-
-				// As a last resort, try browser-side cache (temporary DB)
-				var cached = loadJobsFromBrowserCache(1000 * 60 * 60 * 6); // up to 6 hours old
-				if (cached && Array.isArray(cached.jobs) && cached.jobs.length) {
-					console.log('Loaded jobs from browser cache as fallback (jobs-snapshot error).');
-					allJobs = cached.jobs.slice(0);
-					sourceCounts = cached.sourceCounts || {};
-					apiSources = Array.isArray(cached.sources) ? cached.sources : [];
-					processJobsData({
-						sourceCounts: sourceCounts,
-						sources: apiSources
-					});
-					if (detailEl) detailEl.textContent = 'Showing last saved results (offline cache).';
-					return;
-				}
-
-				if (detailEl) detailEl.textContent = 'API unavailable and no cached results found. Please refresh later.';
-			});
-	}
-	
 	// Legacy fallback: individual fetchers (if jobs-snapshot API is unavailable)
 	function fetchAllJobsLegacy() {
 		var loadingEl = document.getElementById('job-loading');
