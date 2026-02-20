@@ -631,14 +631,51 @@
 		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
 	}
 	
-	// Fetch jobs directly from rssjobs.app RSS feed
+	// Fetch jobs from rssjobs.app via our jobs-snapshot proxy (no direct browser CORS)
 	function fetchRssJobsFromRssjobsApp(keywords, location) {
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
 		var errorMsgEl = document.getElementById('job-error-message');
+		var jobListEl = document.getElementById('job-list');
+		var emptyEl = document.getElementById('job-empty');
+		var feedUrlInput = document.getElementById('job-rss-feed-url');
 		
-		// Construct rssjobs.app URL - try RSS feed endpoint first
-		var rssUrl = 'https://rssjobs.app/feeds?keywords=' + encodeURIComponent(keywords) + '&location=' + encodeURIComponent(location);
+		// Reset state
+		if (jobListEl) jobListEl.style.display = 'none';
+		if (emptyEl) emptyEl.classList.add('hidden');
+		allJobs = [];
+		
+		// Require a rssjobs.app feed URL from the user (created on rssjobs.app)
+		var rssjobsFeedUrl = feedUrlInput && feedUrlInput.value ? feedUrlInput.value.trim() : '';
+		if (!rssjobsFeedUrl) {
+			if (loadingEl) loadingEl.style.display = 'none';
+			if (errorEl) errorEl.classList.remove('hidden');
+			if (errorMsgEl) {
+				errorMsgEl.textContent = 'To use RSS mode, first create a feed on rssjobs.app for your Role + Location, then paste the feed URL here.';
+			}
+			return;
+		}
+		
+		// Basic safety: only allow rssjobs.app URLs
+		try {
+			var u = new URL(rssjobsFeedUrl);
+			var host = (u.hostname || '').toLowerCase();
+			if (host !== 'rssjobs.app' && host !== 'www.rssjobs.app') {
+				if (loadingEl) loadingEl.style.display = 'none';
+				if (errorEl) errorEl.classList.remove('hidden');
+				if (errorMsgEl) {
+					errorMsgEl.textContent = 'RSS feed URL must be from rssjobs.app. Example: https://rssjobs.app/feeds/your-feed-id';
+				}
+				return;
+			}
+		} catch (e) {
+			if (loadingEl) loadingEl.style.display = 'none';
+			if (errorEl) errorEl.classList.remove('hidden');
+			if (errorMsgEl) {
+				errorMsgEl.textContent = 'Invalid RSS feed URL. Please paste a full URL from rssjobs.app.';
+			}
+			return;
+		}
 		
 		// Update loading message
 		if (loadingEl) {
@@ -648,222 +685,16 @@
 		}
 		if (errorEl) errorEl.classList.add('hidden');
 		
-		// Fetch RSS feed (with CORS proxy fallback if needed)
-		fetch(rssUrl, {
-			mode: 'cors',
-			headers: {
-				'Accept': 'application/rss+xml, application/xml, text/xml, */*'
-			}
-		})
-			.then(function (response) {
-				if (!response.ok) {
-					throw new Error('Failed to fetch RSS feed: ' + response.status);
-				}
-				return response.text();
-			})
-			.then(function (responseText) {
-				// Try parsing as RSS XML first
-				var parser = new DOMParser();
-				var xmlDoc = parser.parseFromString(responseText, 'text/xml');
-				
-				// Check if it's valid XML (RSS feed)
-				var parseError = xmlDoc.querySelector('parsererror');
-				var items = xmlDoc.querySelectorAll('item');
-				
-				if (parseError || items.length === 0) {
-					// Not RSS XML, try parsing as HTML
-					var htmlDoc = parser.parseFromString(responseText, 'text/html');
-					items = htmlDoc.querySelectorAll('article, .job-item, [class*="job"]');
-					
-					if (items.length === 0) {
-						// Try finding job listings in HTML
-						var jobSections = htmlDoc.querySelectorAll('h2, h3, h4');
-						allJobs = [];
-						
-						jobSections.forEach(function (heading, index) {
-							var text = heading.textContent.trim();
-							// Look for "Title at Company" pattern
-							var match = text.match(/^(.+?)\s+at\s+(.+)$/i);
-							if (match) {
-								var title = match[1].trim();
-								var company = match[2].trim();
-								
-								// Find next sibling with details
-								var nextEl = heading.nextElementSibling;
-								var description = '';
-								var locationText = location || 'Remote';
-								var link = '';
-								var postedDate = '';
-								
-								while (nextEl && nextEl.tagName !== 'H2' && nextEl.tagName !== 'H3' && nextEl.tagName !== 'H4') {
-									var text = nextEl.textContent || '';
-									if (text.includes('Location:')) {
-										var locMatch = text.match(/Location:\s*([^\n]+)/i);
-										if (locMatch) locationText = locMatch[1].trim();
-									}
-									if (text.includes('Posted:')) {
-										var dateMatch = text.match(/Posted:\s*([^\n]+)/i);
-										if (dateMatch) postedDate = dateMatch[1].trim();
-									}
-									if (text.includes('Source:')) {
-										var sourceMatch = text.match(/Source:\s*([^\n]+)/i);
-									}
-									description += text + ' ';
-									var linkEl = nextEl.querySelector('a[href]');
-									if (linkEl && !link) link = linkEl.href;
-									nextEl = nextEl.nextElementSibling;
-								}
-								
-								if (title && company) {
-									var jobDate = new Date();
-									if (postedDate) {
-										var parsedDate = new Date(postedDate);
-										if (!isNaN(parsedDate.getTime())) {
-											jobDate = parsedDate;
-										}
-									}
-									
-									allJobs.push({
-										id: 'rssjobs_' + index + '_' + Math.random().toString(36).slice(2),
-										title: title,
-										company: company,
-										location: locationText,
-										url: link || '#',
-										description: description.trim(),
-										tags: [],
-										source: 'rssjobs',
-										date: jobDate.toISOString(),
-										dateFormatted: formatDate(jobDate),
-										postedAgo: getTimeAgo(jobDate),
-										matchScore: 0
-									});
-								}
-							}
-						});
-					} else {
-						// Parse HTML job items
-						allJobs = [];
-						items.forEach(function (item, index) {
-							var titleEl = item.querySelector('h2, h3, h4, .title, [class*="title"]');
-							var linkEl = item.querySelector('a[href]');
-							var companyEl = item.querySelector('.company, [class*="company"]');
-							var locationEl = item.querySelector('.location, [class*="location"]');
-							var descEl = item.querySelector('.description, [class*="description"]');
-							
-							if (!titleEl) return;
-							
-							var titleText = titleEl.textContent.trim();
-							var titleMatch = titleText.match(/^(.+?)\s+at\s+(.+)$/i);
-							var title = titleMatch ? titleMatch[1].trim() : titleText;
-							var company = titleMatch ? titleMatch[2].trim() : (companyEl ? companyEl.textContent.trim() : 'Unknown');
-							var link = linkEl ? linkEl.href : '#';
-							var locationText = locationEl ? locationEl.textContent.trim() : (location || 'Remote');
-							var description = descEl ? descEl.textContent.trim() : '';
-							
-							allJobs.push({
-								id: 'rssjobs_' + index + '_' + Math.random().toString(36).slice(2),
-								title: title,
-								company: company,
-								location: locationText,
-								url: link,
-								description: description,
-								tags: [],
-								source: 'rssjobs',
-								date: new Date().toISOString(),
-								dateFormatted: formatDate(new Date()),
-								postedAgo: 'Just now',
-								matchScore: 0
-							});
-						});
-					}
-				} else {
-					// Parse RSS XML items
-					allJobs = [];
-					items.forEach(function (item, index) {
-						var titleEl = item.querySelector('title');
-						var linkEl = item.querySelector('link');
-						var descriptionEl = item.querySelector('description');
-						var pubDateEl = item.querySelector('pubDate');
-						var sourceEl = item.querySelector('source');
-						
-						if (!titleEl || !linkEl) return;
-						
-						var title = titleEl.textContent.trim();
-						var link = linkEl.textContent.trim();
-						var description = descriptionEl ? descriptionEl.textContent.trim() : '';
-						var pubDate = pubDateEl ? pubDateEl.textContent.trim() : '';
-						var source = sourceEl ? sourceEl.textContent.trim() : 'rssjobs';
-						
-						// Extract company from title (format: "Title at Company")
-						var company = 'Unknown';
-						var titleMatch = title.match(/^(.+?)\s+at\s+(.+)$/i);
-						if (titleMatch) {
-							title = titleMatch[1].trim();
-							company = titleMatch[2].trim();
-						}
-						
-						// Extract location from description if available
-						var locationText = location || 'Remote';
-						var locationMatch = description.match(/Location:\s*([^\n]+)/i);
-						if (locationMatch) {
-							locationText = locationMatch[1].trim();
-						}
-						
-						// Parse date
-						var jobDate = new Date();
-						if (pubDate) {
-							var parsedDate = new Date(pubDate);
-							if (!isNaN(parsedDate.getTime())) {
-								jobDate = parsedDate;
-							}
-						}
-						
-						allJobs.push({
-							id: 'rssjobs_' + index + '_' + Math.random().toString(36).slice(2),
-							title: title,
-							company: company,
-							location: locationText,
-							url: link,
-							description: description,
-							tags: [],
-							source: source.toLowerCase().replace(/\s+/g, '_'),
-							date: jobDate.toISOString(),
-							dateFormatted: formatDate(jobDate),
-							postedAgo: getTimeAgo(jobDate),
-							matchScore: 0
-						});
-					});
-				}
-				
-				// Process and display jobs
-				sourceCounts = {};
-				allJobs.forEach(function (j) {
-					var src = j.source || 'rssjobs';
-					sourceCounts[src] = (sourceCounts[src] || 0) + 1;
-				});
-				apiSources = Object.keys(sourceCounts).sort();
-				
-				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
-				
-				if (loadingEl) loadingEl.style.display = 'none';
-				if (errorEl) errorEl.classList.add('hidden');
-			})
-			.catch(function (err) {
-				console.error('Error fetching RSS jobs:', err);
-				if (loadingEl) loadingEl.style.display = 'none';
-				if (errorEl) {
-					errorEl.classList.remove('hidden');
-					var errorMsg = 'Failed to fetch jobs from rssjobs.app';
-					if (err.message.includes('CORS') || err.message.includes('Failed to fetch')) {
-						errorMsg += '. CORS error - rssjobs.app may not allow direct browser access. Try using our scraping mode instead.';
-					} else {
-						errorMsg += ': ' + err.message;
-					}
-					if (errorMsgEl) errorMsgEl.textContent = errorMsg;
-					var retryBtn = document.getElementById('job-error-retry');
-					if (retryBtn) retryBtn.onclick = function () { fetchRssJobsFromRssjobsApp(keywords, location); };
-				}
-			});
+		// Use the existing jobs-snapshot API (same as main mode), passing rssjobsFeedUrl so the server
+		// fetches the feed (no browser CORS issues).
+		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
+		var urlParams = new URLSearchParams(window.location.search);
+		var query = urlParams.get('q') || keywords || 'data analyst';
+		var days = urlParams.get('days') || '3';
+		var limit = urlParams.get('limit') || '400';
+
+		// Delegate to jobs-snapshot helper; it will handle errors and UI updates via cached API fallback
+		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl);
 	}
 	
 	// Helper function to format date

@@ -639,34 +639,28 @@ body {
 	color: rgb(148 163 184);
 }
 
-/* Homepage quote background: blurred so it stays behind text; overlay for readability */
+/* Homepage quote background: show poster clearly with a soft translucent veil */
 #home-quote-bg,
 .home-quote-bg-image {
 	background-size: cover;
 	background-position: center center;
 	background-repeat: no-repeat;
-	opacity: 0.85;
-	filter: blur(14px) saturate(0.85);
-	transform: scale(1.08);
+	opacity: 1;
+	filter: none;
+	transform: none;
 }
 .dark #home-quote-bg,
 .dark .home-quote-bg-image {
-	opacity: 0.8;
-	filter: blur(16px) saturate(0.8);
+	opacity: 1;
+	filter: none;
 }
-/* Strong overlay: theme tint so quote text is clearly readable; image reads as background */
+/* Soft overlay: translucent layer so quote text is readable but poster is still visible */
 .home-quote-bg-overlay {
-	background: linear-gradient(to bottom,
-		rgba(248, 250, 252, 0.4) 0%,
-		rgba(241, 245, 249, 0.75) 40%,
-		rgba(255, 255, 255, 0.92) 100%);
+	background: rgba(248, 250, 252, 0.35);
 	pointer-events: none;
 }
 .dark .home-quote-bg-overlay {
-	background: linear-gradient(to bottom,
-		rgba(15, 23, 42, 0.35) 0%,
-		rgba(15, 23, 42, 0.75) 40%,
-		rgba(15, 23, 42, 0.95) 100%);
+	background: rgba(15, 23, 42, 0.7);
 }
 
 /* Notion-style Go to cards (main stars) */

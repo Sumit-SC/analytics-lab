@@ -265,7 +265,10 @@
 					<select id="job-rss-location" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary">
 						<!-- Filled by JS from PRIMARY_LOCATIONS -->
 					</select>
-					<span class="text-xs text-gray-500 dark:text-gray-400 italic">Jobs will be fetched automatically from rssjobs.app</span>
+					<label class="text-xs text-gray-500 dark:text-gray-400">Feed URL</label>
+					<input type="url" id="job-rss-feed-url" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary min-w-[220px] flex-1" placeholder="https://rssjobs.app/feeds/your-feed-id">
+					<a href="https://rssjobs.app/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Create feed at rssjobs.app</a>
+					<span class="text-xs text-gray-500 dark:text-gray-400 italic w-full sm:w-auto">Paste a feed URL from rssjobs.app; jobs load into this page via the proxy.</span>
 				</div>
 			</div>
 			<!-- Serverless API Toggle: Vercel vs Railway -->
