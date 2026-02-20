@@ -63,17 +63,17 @@
 				box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
 			}
 		}
-		/* JobSpy Notebook Toggle */
-		#jobspy-notebook-toggle-icon {
+		/* Railway UI Embed Toggle */
+		#railway-ui-embed-toggle-icon {
 			transition: transform 0.3s ease;
 		}
-		#jobspy-notebook-content {
+		#railway-ui-embed-content {
 			transition: all 0.3s ease;
 		}
-		#jobspy-notebook-content.hidden {
+		#railway-ui-embed-content.hidden {
 			display: none;
 		}
-		#jobspy-notebook-iframe {
+		#railway-ui-embed-iframe {
 			min-height: 600px;
 		}
 		/* Enhanced Form Styles */
@@ -262,41 +262,35 @@
 		</aside>
 
 	<main class="flex-1 min-w-0 max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-		<!-- JobSpy Notebook Embed (Collapsible) -->
+		<!-- Railway UI Embed (Collapsible) -->
 		<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-			<button type="button" id="jobspy-notebook-toggle" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false" aria-controls="jobspy-notebook-content">
+			<button type="button" id="railway-ui-embed-toggle" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false" aria-controls="railway-ui-embed-content">
 				<div class="flex items-center gap-3">
-					<span class="text-lg">📓</span>
+					<span class="text-lg">📦</span>
 					<div>
-						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">JobSpy Interactive Scraper</h2>
-						<p class="text-xs text-gray-500 dark:text-gray-400">Run JobSpy directly in your browser to scrape LinkedIn, Indeed, Glassdoor, Google & more</p>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Railway Job Search UI</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Core API, RSSJobs, JobSpy — refresh, fetch, filter in one place</p>
 					</div>
 				</div>
-				<span class="text-gray-500 dark:text-gray-400 text-sm font-medium" id="jobspy-notebook-toggle-text">Click to expand</span>
-				<svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform" id="jobspy-notebook-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<span class="text-gray-500 dark:text-gray-400 text-sm font-medium" id="railway-ui-embed-toggle-text">Click to expand</span>
+				<svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform" id="railway-ui-embed-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
 				</svg>
 			</button>
-			<div id="jobspy-notebook-content" class="hidden border-t border-gray-200 dark:border-gray-700">
+			<div id="railway-ui-embed-content" class="hidden border-t border-gray-200 dark:border-gray-700">
 				<div class="p-4 bg-gray-50 dark:bg-gray-900/50">
 					<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
-						This notebook uses <a href="https://github.com/speedyapply/JobSpy" target="_blank" rel="noopener" class="text-primary hover:underline">JobSpy</a> to scrape jobs from multiple sources. 
-						Modify the search parameters in the notebook and run the cells to fetch jobs.
+						Embedded UI from Railway. <a href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="text-primary hover:underline">Open in new tab</a>
 					</p>
 					<iframe 
-						id="jobspy-notebook-iframe"
-						src=""
+						id="railway-ui-embed-iframe"
+						src="about:blank"
 						width="100%" 
-						height="800" 
+						height="720" 
 						frameborder="0" 
 						class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-						style="display: none;"
-						title="JobSpy Interactive Notebook">
+						title="Railway Job Search API UI">
 					</iframe>
-					<div id="jobspy-notebook-loading" class="text-center py-8">
-						<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Loading notebook...</p>
-						<p class="text-xs text-gray-500 dark:text-gray-500">If Binder is starting up, this may take 1-2 minutes on first load.</p>
-					</div>
 				</div>
 			</div>
 		</section>
@@ -307,7 +301,7 @@
 				Aggregate and track data science jobs from multiple sources. Jobs are automatically matched with your skillset.
 			</p>
 			
-			<!-- API Backend: Railway (default) | Railway UI | Vercel | RSS jobs embed -->
+			<!-- API Backend: Railway (default) | Vercel -->
 			<div class="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
 				<label class="flex items-center gap-2 cursor-pointer">
@@ -315,24 +309,10 @@
 					<span class="text-sm text-gray-800 dark:text-gray-200">Railway</span>
 				</label>
 				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="railway-ui" id="api-backend-railway-ui" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-					<span class="text-sm text-gray-800 dark:text-gray-200">Railway UI</span>
-				</label>
-				<label class="flex items-center gap-2 cursor-pointer">
 					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
 					<span class="text-sm text-gray-800 dark:text-gray-200">Vercel</span>
 				</label>
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="rssjobs" id="api-backend-rssjobs" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-					<span class="text-sm text-gray-800 dark:text-gray-200">RSS jobs embed</span>
-				</label>
 				<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
-				<a id="railway-ui-new-tab-link" href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline ml-1 hidden">Open in new tab</a>
-			</div>
-			<!-- Railway API UI embed (shown when Backend = Railway UI) -->
-			<div id="railway-ui-panel" class="hidden mb-6 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 overflow-hidden">
-				<p class="text-xs text-gray-500 dark:text-gray-400 px-3 py-2 border-b border-gray-200 dark:border-gray-700">Railway Job Search API UI (Core API, RSSJobs, JobSpy). <a href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="text-primary hover:underline">Open in new tab</a></p>
-				<iframe id="railway-ui-iframe" title="Railway Job Search API UI" src="about:blank" class="w-full border-0 bg-white dark:bg-gray-900" style="min-height: 640px; height: 72vh;"></iframe>
 			</div>
 			
 			<div id="job-tracker-main">
@@ -432,23 +412,6 @@
 					<button type="button" id="job-clear-filters-btn" class="px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium">
 						Clear Filters
 					</button>
-				</div>
-			</div>
-			
-			<!-- RSS jobs embed panel: shown only when Backend = RSS jobs embed -->
-			<div id="rssjobs-embed-panel" class="hidden mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-				<h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">RSS jobs (rssjobs.app via Railway)</h3>
-				<div class="flex flex-wrap items-center gap-3">
-					<label class="text-xs text-gray-500 dark:text-gray-400">Role</label>
-					<select id="rssjobs-embed-role" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-						<!-- filled by JS -->
-					</select>
-					<label class="text-xs text-gray-500 dark:text-gray-400">Location</label>
-					<select id="rssjobs-embed-location" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-						<!-- filled by JS -->
-					</select>
-					<button type="button" id="rssjobs-embed-fetch" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-medium">Fetch RSS jobs</button>
-					<span id="rssjobs-embed-status" class="text-xs text-gray-500 dark:text-gray-400"></span>
 				</div>
 			</div>
 			

@@ -91,7 +91,7 @@
 		loadPlanner();
 		setupRssModeAndDropdowns();
 		setupApiBackendToggle();
-		setupRssjobsEmbedPanel();
+		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
 		setupEventListeners();
 		fetchAllJobs();
@@ -196,76 +196,45 @@
 		}
 	}
 	
-		// Setup API Backend: Railway (default) | Railway UI | Vercel | RSS jobs embed
-	var RAILWAY_UI_EMBED_URL = 'https://job-search-api-production-5d5d.up.railway.app/ui/';
+		// Setup API Backend: Railway (default) | Vercel — Railway shows search config, Vercel fetches directly from endpoints
 	var RAILWAY_API_URL = 'https://job-search-api-production-5d5d.up.railway.app';
 	function setupApiBackendToggle() {
 		var railwayRadio = document.getElementById('api-backend-railway');
-		var railwayUiRadio = document.getElementById('api-backend-railway-ui');
 		var vercelRadio = document.getElementById('api-backend-vercel');
-		var rssjobsRadio = document.getElementById('api-backend-rssjobs');
 		var statusEl = document.getElementById('api-status');
-		var newTabLink = document.getElementById('railway-ui-new-tab-link');
-		
 		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'railway';
-		function setChecked(backend) {
-			if (railwayRadio) railwayRadio.checked = (backend === 'railway');
-			if (railwayUiRadio) railwayUiRadio.checked = (backend === 'railway-ui');
-			if (vercelRadio) vercelRadio.checked = (backend === 'vercel');
-			if (rssjobsRadio) rssjobsRadio.checked = (backend === 'rssjobs');
-		}
-		if (savedBackend === 'railway-ui' && railwayUiRadio) setChecked('railway-ui');
-		else if (savedBackend === 'vercel' && vercelRadio) setChecked('vercel');
-		else if (savedBackend === 'rssjobs' && rssjobsRadio) setChecked('rssjobs');
-		else setChecked('railway');
-		
+		if (savedBackend === 'vercel' && vercelRadio) vercelRadio.checked = true;
+		else if (railwayRadio) railwayRadio.checked = true;
+
 		function updateApiBackend(backend) {
-			if (backend === 'railway' || backend === 'railway-ui' || backend === 'rssjobs') {
+			if (backend === 'railway') {
 				window.JOB_PROXY_URL = RAILWAY_API_URL;
+				if (statusEl) statusEl.textContent = '✓ Railway';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+				if (statusEl) statusEl.textContent = '✓ Vercel';
 			}
-			if (statusEl) {
-				if (backend === 'railway') statusEl.textContent = '✓ Railway';
-				else if (backend === 'railway-ui') statusEl.textContent = '✓ Railway UI';
-				else if (backend === 'vercel') statusEl.textContent = '✓ Vercel';
-				else if (backend === 'rssjobs') statusEl.textContent = '✓ RSS jobs embed';
-			}
-			if (newTabLink) newTabLink.classList.toggle('hidden', backend !== 'railway-ui');
 			localStorage.setItem('job_tracker_api_backend', backend);
 			applyBackendVisibility(backend);
 			applyBackendFormState(backend);
-			if (backend === 'railway-ui') {
-				var iframe = document.getElementById('railway-ui-iframe');
-				if (iframe && iframe.getAttribute('src') === 'about:blank') iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
-			}
-			if (backend === 'railway' || backend === 'vercel') fetchAllJobs(backend === 'railway');
+			fetchAllJobs(backend === 'railway');
 		}
-		
+
 		if (railwayRadio) railwayRadio.addEventListener('change', function () { if (railwayRadio.checked) updateApiBackend('railway'); });
-		if (railwayUiRadio) railwayUiRadio.addEventListener('change', function () { if (railwayUiRadio.checked) updateApiBackend('railway-ui'); });
 		if (vercelRadio) vercelRadio.addEventListener('change', function () { if (vercelRadio.checked) updateApiBackend('vercel'); });
-		if (rssjobsRadio) rssjobsRadio.addEventListener('change', function () { if (rssjobsRadio.checked) updateApiBackend('rssjobs'); });
-		
-		updateApiBackend(savedBackend === 'railway-ui' ? 'railway-ui' : savedBackend === 'vercel' ? 'vercel' : savedBackend === 'rssjobs' ? 'rssjobs' : 'railway');
+		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'railway');
 	}
 
-	// Show/hide sections by backend: Railway (search config) | Railway UI (iframe) | Vercel (no search config) | RSS jobs embed (panel)
+	// Railway: show search config. Vercel: hide search config, fetch directly from jobs-snapshot/refresh.
 	function applyBackendVisibility(backend) {
 		var searchConfig = document.getElementById('job-search-config-section');
-		var mainBlock = document.getElementById('job-tracker-main');
-		var railwayPanel = document.getElementById('railway-ui-panel');
-		var rssPanel = document.getElementById('rssjobs-embed-panel');
 		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'railway');
-		if (mainBlock) mainBlock.classList.toggle('hidden', backend === 'railway-ui');
-		if (railwayPanel) railwayPanel.classList.toggle('hidden', backend !== 'railway-ui');
-		if (rssPanel) rssPanel.classList.toggle('hidden', backend !== 'rssjobs');
 	}
 
-	// Gray out / disable form controls that the selected API backend doesn't support (Railway API only uses q, days, limit)
+	// Gray out / disable form controls that Railway API doesn't use (q, days, limit only)
 	function applyBackendFormState(backend) {
 		var isRailway = backend === 'railway';
-		if (backend === 'railway-ui' || backend === 'vercel' || backend === 'rssjobs') return;
+		if (backend === 'vercel') return;
 		var locationInput = document.getElementById('job-location-input');
 		var countrySelect = document.getElementById('job-country-select');
 		var jobSitesContainer = document.getElementById('job-sites-multiselect');
@@ -303,75 +272,24 @@
 		}
 	}
 
-	// RSS jobs embed panel: Role + Location dropdowns, Fetch button → Railway /rssjobs
-	function setupRssjobsEmbedPanel() {
-		var roleSelect = document.getElementById('rssjobs-embed-role');
-		var locationSelect = document.getElementById('rssjobs-embed-location');
-		var fetchBtn = document.getElementById('rssjobs-embed-fetch');
-		var statusEl = document.getElementById('rssjobs-embed-status');
-		if (!roleSelect || !locationSelect || !fetchBtn) return;
-		PRIMARY_ROLES.forEach(function (r) {
-			var opt = document.createElement('option');
-			opt.value = r.query;
-			opt.textContent = r.label;
-			roleSelect.appendChild(opt);
-		});
-		PRIMARY_LOCATIONS.forEach(function (loc) {
-			var opt = document.createElement('option');
-			opt.value = loc.value;
-			opt.textContent = loc.label;
-			locationSelect.appendChild(opt);
-		});
-		fetchBtn.addEventListener('click', function () {
-			var keywords = roleSelect.value || 'data analyst';
-			var loc = locationSelect.value || 'remote';
-			if (statusEl) statusEl.textContent = 'Fetching…';
-			var loadingEl = document.getElementById('job-loading');
-			var jobListEl = document.getElementById('job-list');
-			var emptyEl = document.getElementById('job-empty');
-			var errorEl = document.getElementById('job-error');
-			if (loadingEl) loadingEl.style.display = 'block';
-			if (jobListEl) jobListEl.style.display = 'none';
-			if (emptyEl) emptyEl.classList.add('hidden');
-			if (errorEl) errorEl.classList.add('hidden');
-			allJobs = [];
-			var apiUrl = RAILWAY_API_URL + '/rssjobs?keywords=' + encodeURIComponent(keywords) + '&location=' + encodeURIComponent(loc) + '&limit=400';
-			fetch(apiUrl)
-				.then(function (r) { return r.ok ? r.json() : null; })
-				.then(function (data) {
-					if (loadingEl) loadingEl.style.display = 'none';
-					if (statusEl) statusEl.textContent = '';
-					if (!data || !data.ok || !Array.isArray(data.jobs)) {
-						if (statusEl) statusEl.textContent = data && data.error ? data.error : 'No jobs';
-						return;
-					}
-					data.jobs.forEach(function (item) {
-						if (!item || !item.title || !item.url) return;
-						allJobs.push({
-							id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-							title: item.title,
-							company: item.company || 'Unknown',
-							location: item.location || loc,
-							url: item.url,
-							description: item.description || '',
-							tags: Array.isArray(item.tags) ? item.tags : ['rssjobs'],
-							source: item.source || 'rssjobs.app',
-							date: item.date || new Date().toISOString(),
-							dateFormatted: item.dateFormatted || '',
-							postedAgo: item.postedAgo || '',
-							matchScore: 0
-						});
-					});
-					sourceCounts = { 'rssjobs.app': allJobs.length };
-					apiSources = ['rssjobs.app'];
-					processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
-					saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
-					if (statusEl) statusEl.textContent = allJobs.length + ' jobs loaded';
-				})
-				.catch(function (err) {
-					if (loadingEl) loadingEl.style.display = 'none';
-					if (statusEl) statusEl.textContent = 'Error: ' + (err.message || 'fetch failed');
-				});
+	// Railway UI embed at top: collapsible; on expand load iframe to Railway UI URL
+	var RAILWAY_UI_EMBED_URL = 'https://job-search-api-production-5d5d.up.railway.app/ui/';
+	function setupRailwayUiEmbedToggle() {
+		var toggleBtn = document.getElementById('railway-ui-embed-toggle');
+		var contentDiv = document.getElementById('railway-ui-embed-content');
+		var iframe = document.getElementById('railway-ui-embed-iframe');
+		var toggleText = document.getElementById('railway-ui-embed-toggle-text');
+		var toggleIcon = document.getElementById('railway-ui-embed-toggle-icon');
+		if (!toggleBtn || !contentDiv) return;
+		toggleBtn.addEventListener('click', function () {
+			contentDiv.classList.toggle('hidden');
+			var expanded = !contentDiv.classList.contains('hidden');
+			toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+			if (toggleText) toggleText.textContent = expanded ? 'Click to collapse' : 'Click to expand';
+			if (toggleIcon) toggleIcon.style.transform = expanded ? 'rotate(180deg)' : '';
+			if (expanded && iframe && (iframe.getAttribute('src') === 'about:blank' || !iframe.getAttribute('src'))) {
+				iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
+			}
 		});
 	}
 
@@ -772,10 +690,6 @@
 		
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
 		var railwayRadio = document.getElementById('api-backend-railway');
-		var railwayUiRadio = document.getElementById('api-backend-railway-ui');
-		var rssjobsRadio = document.getElementById('api-backend-rssjobs');
-		if (railwayUiRadio && railwayUiRadio.checked) return; // Railway UI: no job list, iframe only
-		if (rssjobsRadio && rssjobsRadio.checked) return;    // RSS jobs embed: user clicks Fetch
 		var isRailway = (railwayRadio && railwayRadio.checked);
 		
 		// Get query from enhanced form inputs or URL params or default
