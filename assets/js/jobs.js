@@ -90,10 +90,56 @@
 		loadApplications();
 		loadPlanner();
 		setupRssModeAndDropdowns();
+		setupApiBackendToggle();
 		setupEventListeners();
 		fetchAllJobs();
 		setupPlannerEventListeners();
 		renderPlanner();
+	}
+	
+	// Setup API Backend Toggle (Vercel vs Railway)
+	function setupApiBackendToggle() {
+		var vercelRadio = document.getElementById('api-backend-vercel');
+		var railwayRadio = document.getElementById('api-backend-railway');
+		var statusEl = document.getElementById('api-status');
+		
+		// Load saved preference
+		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'vercel';
+		if (savedBackend === 'railway' && railwayRadio) {
+			railwayRadio.checked = true;
+			updateApiBackend('railway');
+		} else if (vercelRadio) {
+			vercelRadio.checked = true;
+			updateApiBackend('vercel');
+		}
+		
+		function updateApiBackend(backend) {
+			if (backend === 'railway') {
+				window.JOB_PROXY_URL = 'https://job-search-api-production-5d5d.up.railway.app';
+				if (statusEl) statusEl.textContent = '✓ Railway';
+			} else {
+				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+				if (statusEl) statusEl.textContent = '✓ Vercel';
+			}
+			localStorage.setItem('job_tracker_api_backend', backend);
+		}
+		
+		if (vercelRadio) {
+			vercelRadio.addEventListener('change', function () {
+				if (vercelRadio.checked) {
+					updateApiBackend('vercel');
+					fetchAllJobs(true); // Refresh jobs
+				}
+			});
+		}
+		if (railwayRadio) {
+			railwayRadio.addEventListener('change', function () {
+				if (railwayRadio.checked) {
+					updateApiBackend('railway');
+					fetchAllJobs(true); // Refresh jobs
+				}
+			});
+		}
 	}
 
 	// Populate RSS Role/Location dropdowns from PRIMARY_* and wire mode toggle + rssjobs feed URL.
@@ -130,34 +176,27 @@
 		function updateMode() {
 			var isRss = rssRadio && rssRadio.checked;
 			setRssPanelVisible(!!isRss);
+			// Auto-fetch when switching to RSS mode
+			if (isRss) {
+				var role = roleSelect ? roleSelect.value : 'analyst';
+				var loc = locationSelect ? locationSelect.value : 'remote';
+				fetchRssJobsFromRssjobsApp(role, loc);
+			}
 		}
 		if (scrapeRadio) scrapeRadio.addEventListener('change', updateMode);
 		if (rssRadio) rssRadio.addEventListener('change', updateMode);
 		updateMode();
 
-		// Optional: when role/location change in RSS mode, try to restore saved feed URL for this combo
-		var rssStorageKey = 'job_tracker_rss_feed_url';
-		function saveRssFeedUrl() {
-			if (!feedUrlInput || !feedUrlInput.value.trim()) return;
-			try {
-				var role = roleSelect ? roleSelect.value : '';
-				var loc = locationSelect ? locationSelect.value : '';
-				var key = rssStorageKey + '_' + role + '_' + loc;
-				localStorage.setItem(key, feedUrlInput.value.trim());
-			} catch (e) {}
+		// Auto-fetch when role/location changes in RSS mode
+		function onRssParamsChange() {
+			if (rssRadio && rssRadio.checked) {
+				var role = roleSelect ? roleSelect.value : 'analyst';
+				var loc = locationSelect ? locationSelect.value : 'remote';
+				fetchRssJobsFromRssjobsApp(role, loc);
+			}
 		}
-		function loadRssFeedUrl() {
-			try {
-				var role = roleSelect ? roleSelect.value : '';
-				var loc = locationSelect ? locationSelect.value : '';
-				var key = rssStorageKey + '_' + role + '_' + loc;
-				var saved = localStorage.getItem(key);
-				if (saved && feedUrlInput) feedUrlInput.value = saved;
-			} catch (e) {}
-		}
-		if (feedUrlInput) feedUrlInput.addEventListener('blur', saveRssFeedUrl);
-		if (roleSelect) roleSelect.addEventListener('change', loadRssFeedUrl);
-		if (locationSelect) locationSelect.addEventListener('change', loadRssFeedUrl);
+		if (roleSelect) roleSelect.addEventListener('change', onRssParamsChange);
+		if (locationSelect) locationSelect.addEventListener('change', onRssParamsChange);
 
 		// If URL has ?rssjobs=..., switch to RSS mode and prefill feed URL
 		var urlParams = new URLSearchParams(window.location.search);
@@ -486,28 +525,36 @@
 		// Use cached jobs API (fast) or refresh endpoint
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
 		
-		// Detect if using Railway API (vs Vercel)
-		var isRailway = proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app'));
+		// Detect if using Railway API (vs Vercel) - check both URL and radio button
+		var railwayRadio = document.getElementById('api-backend-railway');
+		var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
 		
 		// Get query from URL params or default to 'data analyst'
 		var urlParams = new URLSearchParams(window.location.search);
 		var query = urlParams.get('q') || 'data analyst';
 		var days = urlParams.get('days') || '3'; // Default to 3 days for headless scraping
+		// Railway supports up to 400, Vercel supports up to 400, use 400 for both
 		var limit = urlParams.get('limit') || '400';
 		var location = urlParams.get('location') || 'remote';
-		// RSS mode: use feed URL from UI (Role + Location are the "endgame"; jobs fetched via rssjobs.app)
+		// Pagination for Railway
+		var page = parseInt(urlParams.get('page')) || null;
+		var perPage = parseInt(urlParams.get('per_page')) || null;
+		// RSS mode: automatically fetch from rssjobs.app using Role + Location dropdowns
 		var useRssMode = document.getElementById('job-source-rss') && document.getElementById('job-source-rss').checked;
-		var rssjobsUrl = '';
 		if (useRssMode) {
-			var feedInput = document.getElementById('job-rss-feed-url');
-			rssjobsUrl = (feedInput && feedInput.value) ? feedInput.value.trim() : '';
-			// In RSS mode, use selected role/location for API context (snapshot still merges rssjobs feed)
+			// Get role and location from dropdowns
 			var rssRole = document.getElementById('job-rss-role');
 			var rssLoc = document.getElementById('job-rss-location');
-			if (rssRole && rssRole.value) query = rssRole.value;
-			if (rssLoc && rssLoc.value) location = rssLoc.value;
+			var roleValue = (rssRole && rssRole.value) ? rssRole.value : 'analyst';
+			var locValue = (rssLoc && rssLoc.value) ? rssLoc.value : 'remote';
+			
+			// Fetch directly from rssjobs.app
+			fetchRssJobsFromRssjobsApp(roleValue, locValue);
+			return;
 		}
-		if (!rssjobsUrl) rssjobsUrl = urlParams.get('rssjobs') || '';
+		
+		// Check for manual rssjobs URL parameter (fallback)
+		var rssjobsUrl = urlParams.get('rssjobs') || '';
 		
 		// Railway API: Use /refresh (POST) and /jobs (GET) endpoints
 		if (isRailway) {
@@ -545,17 +592,17 @@
 							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 						} else {
 							// Fallback to /jobs endpoint
-							fetchRailwayJobs(proxyUrl, query, days, limit);
+							fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
 						}
 					})
 					.catch(function (err) {
 						console.error('Railway refresh failed:', err);
-						fetchRailwayJobs(proxyUrl, query, days, limit);
+						fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
 					});
 				return;
 			} else {
-				// Railway: GET /jobs (cached)
-				fetchRailwayJobs(proxyUrl, query, days, limit);
+				// Railway: GET /jobs (cached) - use higher limit or pagination
+				fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
 				return;
 			}
 		}
@@ -582,6 +629,268 @@
 		
 		// Primary: use jobs-snapshot (same API as playground) so results and sources match
 		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
+	}
+	
+	// Fetch jobs directly from rssjobs.app RSS feed
+	function fetchRssJobsFromRssjobsApp(keywords, location) {
+		var loadingEl = document.getElementById('job-loading');
+		var errorEl = document.getElementById('job-error');
+		var errorMsgEl = document.getElementById('job-error-message');
+		
+		// Construct rssjobs.app URL - try RSS feed endpoint first
+		var rssUrl = 'https://rssjobs.app/feeds?keywords=' + encodeURIComponent(keywords) + '&location=' + encodeURIComponent(location);
+		
+		// Update loading message
+		if (loadingEl) {
+			loadingEl.style.display = 'block';
+			var detailEl = document.getElementById('job-loading-detail');
+			if (detailEl) detailEl.textContent = 'Fetching jobs from rssjobs.app...';
+		}
+		if (errorEl) errorEl.classList.add('hidden');
+		
+		// Fetch RSS feed (with CORS proxy fallback if needed)
+		fetch(rssUrl, {
+			mode: 'cors',
+			headers: {
+				'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+			}
+		})
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error('Failed to fetch RSS feed: ' + response.status);
+				}
+				return response.text();
+			})
+			.then(function (responseText) {
+				// Try parsing as RSS XML first
+				var parser = new DOMParser();
+				var xmlDoc = parser.parseFromString(responseText, 'text/xml');
+				
+				// Check if it's valid XML (RSS feed)
+				var parseError = xmlDoc.querySelector('parsererror');
+				var items = xmlDoc.querySelectorAll('item');
+				
+				if (parseError || items.length === 0) {
+					// Not RSS XML, try parsing as HTML
+					var htmlDoc = parser.parseFromString(responseText, 'text/html');
+					items = htmlDoc.querySelectorAll('article, .job-item, [class*="job"]');
+					
+					if (items.length === 0) {
+						// Try finding job listings in HTML
+						var jobSections = htmlDoc.querySelectorAll('h2, h3, h4');
+						allJobs = [];
+						
+						jobSections.forEach(function (heading, index) {
+							var text = heading.textContent.trim();
+							// Look for "Title at Company" pattern
+							var match = text.match(/^(.+?)\s+at\s+(.+)$/i);
+							if (match) {
+								var title = match[1].trim();
+								var company = match[2].trim();
+								
+								// Find next sibling with details
+								var nextEl = heading.nextElementSibling;
+								var description = '';
+								var locationText = location || 'Remote';
+								var link = '';
+								var postedDate = '';
+								
+								while (nextEl && nextEl.tagName !== 'H2' && nextEl.tagName !== 'H3' && nextEl.tagName !== 'H4') {
+									var text = nextEl.textContent || '';
+									if (text.includes('Location:')) {
+										var locMatch = text.match(/Location:\s*([^\n]+)/i);
+										if (locMatch) locationText = locMatch[1].trim();
+									}
+									if (text.includes('Posted:')) {
+										var dateMatch = text.match(/Posted:\s*([^\n]+)/i);
+										if (dateMatch) postedDate = dateMatch[1].trim();
+									}
+									if (text.includes('Source:')) {
+										var sourceMatch = text.match(/Source:\s*([^\n]+)/i);
+									}
+									description += text + ' ';
+									var linkEl = nextEl.querySelector('a[href]');
+									if (linkEl && !link) link = linkEl.href;
+									nextEl = nextEl.nextElementSibling;
+								}
+								
+								if (title && company) {
+									var jobDate = new Date();
+									if (postedDate) {
+										var parsedDate = new Date(postedDate);
+										if (!isNaN(parsedDate.getTime())) {
+											jobDate = parsedDate;
+										}
+									}
+									
+									allJobs.push({
+										id: 'rssjobs_' + index + '_' + Math.random().toString(36).slice(2),
+										title: title,
+										company: company,
+										location: locationText,
+										url: link || '#',
+										description: description.trim(),
+										tags: [],
+										source: 'rssjobs',
+										date: jobDate.toISOString(),
+										dateFormatted: formatDate(jobDate),
+										postedAgo: getTimeAgo(jobDate),
+										matchScore: 0
+									});
+								}
+							}
+						});
+					} else {
+						// Parse HTML job items
+						allJobs = [];
+						items.forEach(function (item, index) {
+							var titleEl = item.querySelector('h2, h3, h4, .title, [class*="title"]');
+							var linkEl = item.querySelector('a[href]');
+							var companyEl = item.querySelector('.company, [class*="company"]');
+							var locationEl = item.querySelector('.location, [class*="location"]');
+							var descEl = item.querySelector('.description, [class*="description"]');
+							
+							if (!titleEl) return;
+							
+							var titleText = titleEl.textContent.trim();
+							var titleMatch = titleText.match(/^(.+?)\s+at\s+(.+)$/i);
+							var title = titleMatch ? titleMatch[1].trim() : titleText;
+							var company = titleMatch ? titleMatch[2].trim() : (companyEl ? companyEl.textContent.trim() : 'Unknown');
+							var link = linkEl ? linkEl.href : '#';
+							var locationText = locationEl ? locationEl.textContent.trim() : (location || 'Remote');
+							var description = descEl ? descEl.textContent.trim() : '';
+							
+							allJobs.push({
+								id: 'rssjobs_' + index + '_' + Math.random().toString(36).slice(2),
+								title: title,
+								company: company,
+								location: locationText,
+								url: link,
+								description: description,
+								tags: [],
+								source: 'rssjobs',
+								date: new Date().toISOString(),
+								dateFormatted: formatDate(new Date()),
+								postedAgo: 'Just now',
+								matchScore: 0
+							});
+						});
+					}
+				} else {
+					// Parse RSS XML items
+					allJobs = [];
+					items.forEach(function (item, index) {
+						var titleEl = item.querySelector('title');
+						var linkEl = item.querySelector('link');
+						var descriptionEl = item.querySelector('description');
+						var pubDateEl = item.querySelector('pubDate');
+						var sourceEl = item.querySelector('source');
+						
+						if (!titleEl || !linkEl) return;
+						
+						var title = titleEl.textContent.trim();
+						var link = linkEl.textContent.trim();
+						var description = descriptionEl ? descriptionEl.textContent.trim() : '';
+						var pubDate = pubDateEl ? pubDateEl.textContent.trim() : '';
+						var source = sourceEl ? sourceEl.textContent.trim() : 'rssjobs';
+						
+						// Extract company from title (format: "Title at Company")
+						var company = 'Unknown';
+						var titleMatch = title.match(/^(.+?)\s+at\s+(.+)$/i);
+						if (titleMatch) {
+							title = titleMatch[1].trim();
+							company = titleMatch[2].trim();
+						}
+						
+						// Extract location from description if available
+						var locationText = location || 'Remote';
+						var locationMatch = description.match(/Location:\s*([^\n]+)/i);
+						if (locationMatch) {
+							locationText = locationMatch[1].trim();
+						}
+						
+						// Parse date
+						var jobDate = new Date();
+						if (pubDate) {
+							var parsedDate = new Date(pubDate);
+							if (!isNaN(parsedDate.getTime())) {
+								jobDate = parsedDate;
+							}
+						}
+						
+						allJobs.push({
+							id: 'rssjobs_' + index + '_' + Math.random().toString(36).slice(2),
+							title: title,
+							company: company,
+							location: locationText,
+							url: link,
+							description: description,
+							tags: [],
+							source: source.toLowerCase().replace(/\s+/g, '_'),
+							date: jobDate.toISOString(),
+							dateFormatted: formatDate(jobDate),
+							postedAgo: getTimeAgo(jobDate),
+							matchScore: 0
+						});
+					});
+				}
+				
+				// Process and display jobs
+				sourceCounts = {};
+				allJobs.forEach(function (j) {
+					var src = j.source || 'rssjobs';
+					sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+				});
+				apiSources = Object.keys(sourceCounts).sort();
+				
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				
+				if (loadingEl) loadingEl.style.display = 'none';
+				if (errorEl) errorEl.classList.add('hidden');
+			})
+			.catch(function (err) {
+				console.error('Error fetching RSS jobs:', err);
+				if (loadingEl) loadingEl.style.display = 'none';
+				if (errorEl) {
+					errorEl.classList.remove('hidden');
+					var errorMsg = 'Failed to fetch jobs from rssjobs.app';
+					if (err.message.includes('CORS') || err.message.includes('Failed to fetch')) {
+						errorMsg += '. CORS error - rssjobs.app may not allow direct browser access. Try using our scraping mode instead.';
+					} else {
+						errorMsg += ': ' + err.message;
+					}
+					if (errorMsgEl) errorMsgEl.textContent = errorMsg;
+					var retryBtn = document.getElementById('job-error-retry');
+					if (retryBtn) retryBtn.onclick = function () { fetchRssJobsFromRssjobsApp(keywords, location); };
+				}
+			});
+	}
+	
+	// Helper function to format date
+	function formatDate(date) {
+		if (!date) return '';
+		var d = new Date(date);
+		if (isNaN(d.getTime())) return '';
+		var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+	}
+	
+	// Helper function to get time ago
+	function getTimeAgo(date) {
+		if (!date) return '';
+		var d = new Date(date);
+		if (isNaN(d.getTime())) return '';
+		var now = new Date();
+		var diffMs = now - d;
+		var diffMins = Math.floor(diffMs / 60000);
+		var diffHours = Math.floor(diffMs / 3600000);
+		var diffDays = Math.floor(diffMs / 86400000);
+		
+		if (diffMins < 1) return 'Just now';
+		if (diffMins < 60) return diffMins + 'm ago';
+		if (diffHours < 24) return diffHours + 'h ago';
+		if (diffDays < 7) return diffDays + 'd ago';
+		return formatDate(date);
 	}
 	
 	// Try browser cache then show error (used when both snapshot and cached API fail)
@@ -650,9 +959,18 @@
 			});
 	}
 	
-	// Railway API: Fetch jobs from /jobs endpoint (cached)
-	function fetchRailwayJobs(proxyUrl, query, days, limit) {
-		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit);
+	// Railway API: Fetch jobs from /jobs endpoint (cached) - supports pagination
+	function fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage) {
+		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+		
+		// Use pagination if provided, otherwise use limit (max 400)
+		if (page && perPage) {
+			apiUrl += '&page=' + page + '&per_page=' + perPage;
+		} else {
+			// Increase limit to 400 (max) to get more jobs in one request
+			var requestLimit = Math.min(parseInt(limit) || 400, 400);
+			apiUrl += '&limit=' + requestLimit;
+		}
 		
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
@@ -688,6 +1006,71 @@
 				
 				sourceCounts = data.sourceCounts || {};
 				apiSources = Array.isArray(data.sources) ? data.sources : [];
+				
+				// Handle pagination info if available
+				if (data.total !== undefined && data.page !== undefined && data.per_page !== undefined) {
+					var totalPages = Math.ceil(data.total / data.per_page);
+					console.log('Railway pagination:', 'Page ' + data.page + ' of ' + totalPages + ', Total jobs: ' + data.total);
+					
+					// If using pagination and there are more pages, fetch them
+					// But only if we're not already at the limit
+					var targetLimit = parseInt(limit) || 400;
+					if (data.page < totalPages && allJobs.length < targetLimit && !page) {
+						// Auto-fetch next pages up to the limit
+						var remainingJobs = targetLimit - allJobs.length;
+						var jobsPerPage = data.per_page;
+						var pagesNeeded = Math.ceil(remainingJobs / jobsPerPage);
+						
+						var pagesFetched = 0;
+						var fetchNextPage = function(pageNum) {
+							if (pagesFetched >= pagesNeeded || allJobs.length >= targetLimit) {
+								processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+								saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+								return;
+							}
+							
+							fetch(proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&page=' + pageNum + '&per_page=' + jobsPerPage)
+								.then(function (r) { return r.ok ? r.json() : null; })
+								.then(function (pageData) {
+									if (pageData && pageData.ok && Array.isArray(pageData.jobs)) {
+										pageData.jobs.forEach(function (item) {
+											if (!item || !item.title || !item.url) return;
+											if (allJobs.length >= targetLimit) return;
+											allJobs.push({
+												id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+												title: item.title,
+												company: item.company || 'Unknown',
+												location: item.location || 'Remote',
+												url: item.url,
+												description: item.description || '',
+												tags: Array.isArray(item.tags) ? item.tags : [],
+												source: item.source || 'unknown',
+												date: item.date || new Date().toISOString(),
+												dateFormatted: item.dateFormatted || '',
+												postedAgo: item.postedAgo || '',
+												matchScore: item.match_score || 0
+											});
+										});
+										pagesFetched++;
+										fetchNextPage(pageNum + 1);
+									} else {
+										processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+										saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+									}
+								})
+								.catch(function (err) {
+									console.error('Error fetching page ' + pageNum + ':', err);
+									processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+									saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+								});
+						};
+						
+						// Start fetching next pages
+						fetchNextPage(data.page + 1);
+						return; // Don't process yet, wait for all pages
+					}
+				}
+				
 				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})

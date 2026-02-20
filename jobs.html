@@ -265,9 +265,21 @@
 					<select id="job-rss-location" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary">
 						<!-- Filled by JS from PRIMARY_LOCATIONS -->
 					</select>
-					<input type="url" id="job-rss-feed-url" placeholder="Paste rssjobs.app feed URL (create at rssjobs.app)" class="flex-1 min-w-[200px] px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary">
-					<a href="https://rssjobs.app/" target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">Create feed at rssjobs.app</a>
+					<span class="text-xs text-gray-500 dark:text-gray-400 italic">Jobs will be fetched automatically from rssjobs.app</span>
 				</div>
+			</div>
+			<!-- Serverless API Toggle: Vercel vs Railway -->
+			<div class="flex flex-wrap items-center gap-4 mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
+				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">API Backend:</span>
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
+					<span class="text-sm text-gray-800 dark:text-gray-200">Vercel (Serverless)</span>
+				</label>
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input type="radio" name="api-backend" value="railway" id="api-backend-railway" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+					<span class="text-sm text-gray-800 dark:text-gray-200">Railway (Dedicated)</span>
+				</label>
+				<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
 			</div>
 			<div class="flex flex-col gap-2">
 				<div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
