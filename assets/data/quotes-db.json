@@ -20,7 +20,10 @@
     {"text": "Knowing you're different is only the beginning. If you accept these differences you'll be able to get past them and grow.", "author": "Reigen Arataka", "source": "Mob Psycho 100", "images": ["https://picsum.photos/seed/anime17a/800/400", "https://picsum.photos/seed/anime17b/800/400"]},
     {"text": "Don't be so quick to throw away your life.", "author": "Clare", "source": "Claymore", "images": ["https://picsum.photos/seed/anime18a/800/400", "https://picsum.photos/seed/anime18b/800/400"]},
     {"text": "I'll leave tomorrow's problems to tomorrow's me.", "author": "Saitama", "source": "One Punch Man", "images": ["https://picsum.photos/seed/anime19a/800/400", "https://picsum.photos/seed/anime19b/800/400"]},
-    {"text": "The world is cruel but also beautiful.", "author": "Mikasa Ackerman", "source": "Attack on Titan", "images": ["https://picsum.photos/seed/anime20a/800/400", "https://picsum.photos/seed/anime20b/800/400"]}
+    {"text": "The world is cruel but also beautiful.", "author": "Mikasa Ackerman", "source": "Attack on Titan", "images": ["https://picsum.photos/seed/anime20a/800/400", "https://picsum.photos/seed/anime20b/800/400"]},
+    {"text": "I want to be the very best, like no one ever was.", "author": "Ash Ketchum", "source": "Pokemon", "images": ["https://picsum.photos/seed/anime21a/800/400", "https://picsum.photos/seed/anime21b/800/400"]},
+    {"text": "When you have something you want to protect, that's when you can become truly strong.", "author": "Hinata Shoyo", "source": "Haikyu!!", "images": ["https://picsum.photos/seed/anime22a/800/400", "https://picsum.photos/seed/anime22b/800/400"]},
+    {"text": "I'll never give up. I'll never go back on my word. That is my ninja way.", "author": "Naruto Uzumaki", "source": "Naruto", "images": ["https://picsum.photos/seed/anime23a/800/400", "https://picsum.photos/seed/anime23b/800/400"]}
   ],
   "books": [
     {"text": "It is only with the heart that one can see rightly; what is essential is invisible to the eye.", "author": "Antoine de Saint-Exupéry", "source": "The Little Prince", "images": ["https://picsum.photos/seed/book1a/800/400", "https://picsum.photos/seed/book1b/800/400"]},
@@ -42,7 +45,9 @@
     {"text": "It is never too late to be what you might have been.", "author": "George Eliot", "source": "Attributed", "images": ["https://picsum.photos/seed/book17a/800/400", "https://picsum.photos/seed/book17b/800/400"]},
     {"text": "The journey of a thousand miles begins with a single step.", "author": "Lao Tzu", "source": "Tao Te Ching", "images": ["https://picsum.photos/seed/book18a/800/400", "https://picsum.photos/seed/book18b/800/400"]},
     {"text": "What we think, we become.", "author": "Buddha", "source": "Attributed", "images": ["https://picsum.photos/seed/book19a/800/400", "https://picsum.photos/seed/book19b/800/400"]},
-    {"text": "The only impossible journey is the one you never begin.", "author": "Tony Robbins", "source": "Attributed", "images": ["https://picsum.photos/seed/book20a/800/400", "https://picsum.photos/seed/book20b/800/400"]}
+    {"text": "The only impossible journey is the one you never begin.", "author": "Tony Robbins", "source": "Attributed", "images": ["https://picsum.photos/seed/book20a/800/400", "https://picsum.photos/seed/book20b/800/400"]},
+    {"text": "We accept the love we think we deserve.", "author": "Stephen Chbosky", "source": "The Perks of Being a Wallflower", "images": ["https://picsum.photos/seed/book21a/800/400", "https://picsum.photos/seed/book21b/800/400"]},
+    {"text": "Not all those who wander are lost.", "author": "J.R.R. Tolkien", "source": "The Lord of the Rings", "images": ["https://picsum.photos/seed/book22a/800/400", "https://picsum.photos/seed/book22b/800/400"]}
   ],
   "wisdom": [
     {"text": "The only way to do great work is to love what you do.", "author": "Steve Jobs", "source": "", "images": ["https://picsum.photos/seed/wis1a/800/400", "https://picsum.photos/seed/wis1b/800/400"]},
@@ -108,7 +113,10 @@
     {"text": "I drink your milkshake!", "author": "There Will Be Blood", "source": "There Will Be Blood", "images": ["https://picsum.photos/seed/mov17a/800/400", "https://picsum.photos/seed/mov17b/800/400"]},
     {"text": "Elementary, my dear Watson.", "author": "Sherlock Holmes", "source": "Sherlock Holmes", "images": ["https://picsum.photos/seed/mov18a/800/400", "https://picsum.photos/seed/mov18b/800/400"]},
     {"text": "You had me at hello.", "author": "Jerry Maguire", "source": "Jerry Maguire", "images": ["https://picsum.photos/seed/mov19a/800/400", "https://picsum.photos/seed/mov19b/800/400"]},
-    {"text": "Nobody puts Baby in a corner.", "author": "Dirty Dancing", "source": "Dirty Dancing", "images": ["https://picsum.photos/seed/mov20a/800/400", "https://picsum.photos/seed/mov20b/800/400"]}
+    {"text": "Nobody puts Baby in a corner.", "author": "Dirty Dancing", "source": "Dirty Dancing", "images": ["https://picsum.photos/seed/mov20a/800/400", "https://picsum.photos/seed/mov20b/800/400"]},
+    {"text": "You either die a hero or live long enough to see yourself become the villain.", "author": "The Dark Knight", "source": "The Dark Knight", "images": ["https://picsum.photos/seed/mov21a/800/400", "https://picsum.photos/seed/mov21b/800/400"]},
+    {"text": "Get busy living or get busy dying.", "author": "The Shawshank Redemption", "source": "The Shawshank Redemption", "images": ["https://picsum.photos/seed/mov22a/800/400", "https://picsum.photos/seed/mov22b/800/400"]},
+    {"text": "I am your father.", "author": "Star Wars: The Empire Strikes Back", "source": "Star Wars", "images": ["https://picsum.photos/seed/mov23a/800/400", "https://picsum.photos/seed/mov23b/800/400"]}
   ],
   "kdrama": [
     {"text": "Every moment is a chance to turn things around.", "author": "Itaewon Class", "source": "Itaewon Class", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg"]},
@@ -130,7 +138,10 @@
     {"text": "The best revenge is living well.", "author": "Vincenzo", "source": "Vincenzo", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg"]},
     {"text": "Sometimes you have to lose everything to find yourself.", "author": "Itaewon Class", "source": "Itaewon Class", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg"]},
     {"text": "Hope is the only thing stronger than fear.", "author": "Squid Game", "source": "Squid Game", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg"]},
-    {"text": "Every ending is a new beginning.", "author": "Goblin", "source": "Goblin", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg"]}
+    {"text": "Every ending is a new beginning.", "author": "Goblin", "source": "Goblin", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg"]},
+    {"text": "It's okay to be weak. What's not okay is to stay weak.", "author": "Itaewon Class", "source": "Itaewon Class", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg"]},
+    {"text": "The moment you want to give up is the moment you need to keep going.", "author": "Start-Up", "source": "Start-Up", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg"]},
+    {"text": "Trust the timing of your life.", "author": "Crash Landing on You", "source": "Crash Landing on You", "images": ["https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Crash_Landing_on_You_poster.jpg/800px-Crash_Landing_on_You_poster.jpg", "https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Crash_Landing_on_You_poster.jpg/800px-Crash_Landing_on_You_poster.jpg"]}
   ],
   "bollywood": [
     {"text": "Mogambo khush hua.", "author": "Mr. India", "source": "Mr. India", "images": ["https://picsum.photos/seed/bolly1a/800/400", "https://picsum.photos/seed/bolly1b/800/400"]},
@@ -142,6 +153,109 @@
     {"text": "Aata hai toh aata hai.", "author": "Golmaal", "source": "Golmaal", "images": ["https://picsum.photos/seed/bolly7a/800/400", "https://picsum.photos/seed/bolly7b/800/400"]},
     {"text": "Bhai, main hoon na.", "author": "Main Hoon Na", "source": "Main Hoon Na", "images": ["https://picsum.photos/seed/bolly8a/800/400", "https://picsum.photos/seed/bolly8b/800/400"]},
     {"text": "All is well.", "author": "3 Idiots", "source": "3 Idiots", "images": ["https://picsum.photos/seed/bolly9a/800/400", "https://picsum.photos/seed/bolly9b/800/400"]},
-    {"text": "How's the josh?", "author": "Uri: The Surgical Strike", "source": "Uri: The Surgical Strike", "images": ["https://picsum.photos/seed/bolly10a/800/400", "https://picsum.photos/seed/bolly10b/800/400"]}
+    {"text": "How's the josh?", "author": "Uri: The Surgical Strike", "source": "Uri: The Surgical Strike", "images": ["https://picsum.photos/seed/bolly10a/800/400", "https://picsum.photos/seed/bolly10b/800/400"]},
+    {"text": "All is well. Run fast or you'll be left behind.", "author": "3 Idiots", "source": "3 Idiots", "images": ["https://picsum.photos/seed/bolly11a/800/400", "https://picsum.photos/seed/bolly11b/800/400"]},
+    {"text": "Picture abhi baaki hai mere dost.", "author": "Om Shanti Om", "source": "Om Shanti Om", "images": ["https://picsum.photos/seed/bolly12a/800/400", "https://picsum.photos/seed/bolly12b/800/400"]},
+    {"text": "Kabhi kabhi kuch jeetne ke liye kuch haarna bhi padta hai.", "author": "Lagaan", "source": "Lagaan", "images": ["https://picsum.photos/seed/bolly13a/800/400", "https://picsum.photos/seed/bolly13b/800/400"]}
+  ],
+  "inspiring": [
+    {"text": "Believe you can and you're halfway there.", "author": "Theodore Roosevelt", "source": "", "images": ["https://picsum.photos/seed/insp1a/800/400", "https://picsum.photos/seed/insp1b/800/400"]},
+    {"text": "The only impossible journey is the one you never begin.", "author": "Tony Robbins", "source": "", "images": ["https://picsum.photos/seed/insp2a/800/400", "https://picsum.photos/seed/insp2b/800/400"]},
+    {"text": "It always seems impossible until it's done.", "author": "Nelson Mandela", "source": "", "images": ["https://picsum.photos/seed/insp3a/800/400", "https://picsum.photos/seed/insp3b/800/400"]},
+    {"text": "Do what you can, with what you have, where you are.", "author": "Theodore Roosevelt", "source": "", "images": ["https://picsum.photos/seed/insp4a/800/400", "https://picsum.photos/seed/insp4b/800/400"]},
+    {"text": "Your limitation—it's only your imagination.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/insp5a/800/400", "https://picsum.photos/seed/insp5b/800/400"]},
+    {"text": "Great things never come from comfort zones.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/insp6a/800/400", "https://picsum.photos/seed/insp6b/800/400"]},
+    {"text": "Dream it. Wish it. Do it.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/insp7a/800/400", "https://picsum.photos/seed/insp7b/800/400"]},
+    {"text": "Success doesn't just find you. You have to go out and get it.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/insp8a/800/400", "https://picsum.photos/seed/insp8b/800/400"]}
+  ],
+  "life": [
+    {"text": "Life is what happens when you're busy making other plans.", "author": "John Lennon", "source": "", "images": ["https://picsum.photos/seed/life1a/800/400", "https://picsum.photos/seed/life1b/800/400"]},
+    {"text": "In the end, it's not the years in your life that count. It's the life in your years.", "author": "Abraham Lincoln", "source": "", "images": ["https://picsum.photos/seed/life2a/800/400", "https://picsum.photos/seed/life2b/800/400"]},
+    {"text": "To live is the rarest thing in the world. Most people exist, that is all.", "author": "Oscar Wilde", "source": "", "images": ["https://picsum.photos/seed/life3a/800/400", "https://picsum.photos/seed/life3b/800/400"]},
+    {"text": "The purpose of our lives is to be happy.", "author": "Dalai Lama", "source": "", "images": ["https://picsum.photos/seed/life4a/800/400", "https://picsum.photos/seed/life4b/800/400"]},
+    {"text": "Life is either a daring adventure or nothing at all.", "author": "Helen Keller", "source": "", "images": ["https://picsum.photos/seed/life5a/800/400", "https://picsum.photos/seed/life5b/800/400"]},
+    {"text": "You only live once, but if you do it right, once is enough.", "author": "Mae West", "source": "", "images": ["https://picsum.photos/seed/life6a/800/400", "https://picsum.photos/seed/life6b/800/400"]},
+    {"text": "The unexamined life is not worth living.", "author": "Socrates", "source": "", "images": ["https://picsum.photos/seed/life7a/800/400", "https://picsum.photos/seed/life7b/800/400"]},
+    {"text": "Life isn't about finding yourself. Life is about creating yourself.", "author": "George Bernard Shaw", "source": "", "images": ["https://picsum.photos/seed/life8a/800/400", "https://picsum.photos/seed/life8b/800/400"]}
+  ],
+  "love": [
+    {"text": "We accept the love we think we deserve.", "author": "Stephen Chbosky", "source": "The Perks of Being a Wallflower", "images": ["https://picsum.photos/seed/love1a/800/400", "https://picsum.photos/seed/love1b/800/400"]},
+    {"text": "Love is composed of a single soul inhabiting two bodies.", "author": "Aristotle", "source": "", "images": ["https://picsum.photos/seed/love2a/800/400", "https://picsum.photos/seed/love2b/800/400"]},
+    {"text": "The greatest thing you'll ever learn is just to love and be loved in return.", "author": "Eden Ahbez", "source": "", "images": ["https://picsum.photos/seed/love3a/800/400", "https://picsum.photos/seed/love3b/800/400"]},
+    {"text": "To love and be loved is to feel the sun from both sides.", "author": "David Viscott", "source": "", "images": ["https://picsum.photos/seed/love4a/800/400", "https://picsum.photos/seed/love4b/800/400"]},
+    {"text": "Love is patient, love is kind.", "author": "1 Corinthians 13:4", "source": "", "images": ["https://picsum.photos/seed/love5a/800/400", "https://picsum.photos/seed/love5b/800/400"]},
+    {"text": "Where there is love there is life.", "author": "Mahatma Gandhi", "source": "", "images": ["https://picsum.photos/seed/love6a/800/400", "https://picsum.photos/seed/love6b/800/400"]},
+    {"text": "Love is worth every risk.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/love7a/800/400", "https://picsum.photos/seed/love7b/800/400"]},
+    {"text": "I have decided to stick with love. Hate is too great a burden to bear.", "author": "Martin Luther King Jr.", "source": "", "images": ["https://picsum.photos/seed/love8a/800/400", "https://picsum.photos/seed/love8b/800/400"]}
+  ],
+  "friendship": [
+    {"text": "A real friend is one who walks in when the rest of the world walks out.", "author": "Walter Winchell", "source": "", "images": ["https://picsum.photos/seed/fr1a/800/400", "https://picsum.photos/seed/fr1b/800/400"]},
+    {"text": "Friendship is the only cement that will ever hold the world together.", "author": "Woodrow Wilson", "source": "", "images": ["https://picsum.photos/seed/fr2a/800/400", "https://picsum.photos/seed/fr2b/800/400"]},
+    {"text": "True friendship comes when the silence between two people is comfortable.", "author": "David Tyson", "source": "", "images": ["https://picsum.photos/seed/fr3a/800/400", "https://picsum.photos/seed/fr3b/800/400"]},
+    {"text": "Friends show their love in times of trouble.", "author": "Euripides", "source": "", "images": ["https://picsum.photos/seed/fr4a/800/400", "https://picsum.photos/seed/fr4b/800/400"]},
+    {"text": "A friend is someone who gives you total freedom to be yourself.", "author": "Jim Morrison", "source": "", "images": ["https://picsum.photos/seed/fr5a/800/400", "https://picsum.photos/seed/fr5b/800/400"]},
+    {"text": "Family isn't always blood. It's the people who choose you.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/fr6a/800/400", "https://picsum.photos/seed/fr6b/800/400"]},
+    {"text": "Good friends are like stars. You don't always see them, but you know they're always there.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/fr7a/800/400", "https://picsum.photos/seed/fr7b/800/400"]},
+    {"text": "The language of friendship is not words but meanings.", "author": "Henry David Thoreau", "source": "", "images": ["https://picsum.photos/seed/fr8a/800/400", "https://picsum.photos/seed/fr8b/800/400"]}
+  ],
+  "heartbreak": [
+    {"text": "Tears are words that the heart can't express.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/hb1a/800/400", "https://picsum.photos/seed/hb1b/800/400"]},
+    {"text": "The heart was made to be broken.", "author": "Oscar Wilde", "source": "", "images": ["https://picsum.photos/seed/hb2a/800/400", "https://picsum.photos/seed/hb2b/800/400"]},
+    {"text": "What we have once enjoyed we can never lose.", "author": "Helen Keller", "source": "", "images": ["https://picsum.photos/seed/hb3a/800/400", "https://picsum.photos/seed/hb3b/800/400"]},
+    {"text": "Every exit is an entry somewhere else.", "author": "Tom Stoppard", "source": "", "images": ["https://picsum.photos/seed/hb4a/800/400", "https://picsum.photos/seed/hb4b/800/400"]},
+    {"text": "It is better to have loved and lost than never to have loved at all.", "author": "Alfred Lord Tennyson", "source": "", "images": ["https://picsum.photos/seed/hb5a/800/400", "https://picsum.photos/seed/hb5b/800/400"]},
+    {"text": "The pain you feel today will be the strength you feel tomorrow.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/hb6a/800/400", "https://picsum.photos/seed/hb6b/800/400"]},
+    {"text": "Let go of what was and have faith in what will be.", "author": "Sonia Ricotti", "source": "", "images": ["https://picsum.photos/seed/hb7a/800/400", "https://picsum.photos/seed/hb7b/800/400"]},
+    {"text": "Some of us think holding on makes us strong; but sometimes it is letting go.", "author": "Hermann Hesse", "source": "", "images": ["https://picsum.photos/seed/hb8a/800/400", "https://picsum.photos/seed/hb8b/800/400"]}
+  ],
+  "wishes": [
+    {"text": "May you live every day of your life.", "author": "Jonathan Swift", "source": "", "images": ["https://picsum.photos/seed/wish1a/800/400", "https://picsum.photos/seed/wish1b/800/400"]},
+    {"text": "The best way to predict the future is to create it.", "author": "Peter Drucker", "source": "", "images": ["https://picsum.photos/seed/wish2a/800/400", "https://picsum.photos/seed/wish2b/800/400"]},
+    {"text": "Hope is the thing with feathers that perches in the soul.", "author": "Emily Dickinson", "source": "", "images": ["https://picsum.photos/seed/wish3a/800/400", "https://picsum.photos/seed/wish3b/800/400"]},
+    {"text": "Wish it, dream it, do it.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/wish4a/800/400", "https://picsum.photos/seed/wish4b/800/400"]},
+    {"text": "May your choices reflect your hopes, not your fears.", "author": "Nelson Mandela", "source": "", "images": ["https://picsum.photos/seed/wish5a/800/400", "https://picsum.photos/seed/wish5b/800/400"]},
+    {"text": "Where there is hope there is life.", "author": "Anne Frank", "source": "", "images": ["https://picsum.photos/seed/wish6a/800/400", "https://picsum.photos/seed/wish6b/800/400"]},
+    {"text": "Dream as if you'll live forever. Live as if you'll die today.", "author": "James Dean", "source": "", "images": ["https://picsum.photos/seed/wish7a/800/400", "https://picsum.photos/seed/wish7b/800/400"]},
+    {"text": "The future belongs to those who believe in the beauty of their dreams.", "author": "Eleanor Roosevelt", "source": "", "images": ["https://picsum.photos/seed/wish8a/800/400", "https://picsum.photos/seed/wish8b/800/400"]}
+  ],
+  "past": [
+    {"text": "The past is a place of reference, not a place of residence.", "author": "Roy T. Bennett", "source": "", "images": ["https://picsum.photos/seed/past1a/800/400", "https://picsum.photos/seed/past1b/800/400"]},
+    {"text": "What's done is done. What's gone is gone.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/past2a/800/400", "https://picsum.photos/seed/past2b/800/400"]},
+    {"text": "Your past doesn't define your future.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/past3a/800/400", "https://picsum.photos/seed/past3b/800/400"]},
+    {"text": "We are not our past. We are the possibility of our future.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/past4a/800/400", "https://picsum.photos/seed/past4b/800/400"]},
+    {"text": "Learn from the past, live in the present, hope for the future.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/past5a/800/400", "https://picsum.photos/seed/past5b/800/400"]},
+    {"text": "The past is never dead. It's not even past.", "author": "William Faulkner", "source": "", "images": ["https://picsum.photos/seed/past6a/800/400", "https://picsum.photos/seed/past6b/800/400"]},
+    {"text": "Don't let the past steal your present.", "author": "Cherralea Morgen", "source": "", "images": ["https://picsum.photos/seed/past7a/800/400", "https://picsum.photos/seed/past7b/800/400"]},
+    {"text": "What lies behind us and what lies before us are tiny matters compared to what lies within us.", "author": "Ralph Waldo Emerson", "source": "", "images": ["https://picsum.photos/seed/past8a/800/400", "https://picsum.photos/seed/past8b/800/400"]}
+  ],
+  "future": [
+    {"text": "The best way to predict the future is to invent it.", "author": "Alan Kay", "source": "", "images": ["https://picsum.photos/seed/fut1a/800/400", "https://picsum.photos/seed/fut1b/800/400"]},
+    {"text": "The future belongs to those who prepare for it today.", "author": "Malcolm X", "source": "", "images": ["https://picsum.photos/seed/fut2a/800/400", "https://picsum.photos/seed/fut2b/800/400"]},
+    {"text": "Tomorrow is the first blank page of a 365-page book. Write a good one.", "author": "Brad Paisley", "source": "", "images": ["https://picsum.photos/seed/fut3a/800/400", "https://picsum.photos/seed/fut3b/800/400"]},
+    {"text": "The only limit to our realization of tomorrow will be our doubts of today.", "author": "Franklin D. Roosevelt", "source": "", "images": ["https://picsum.photos/seed/fut4a/800/400", "https://picsum.photos/seed/fut4b/800/400"]},
+    {"text": "You can't go back and change the beginning, but you can start where you are and change the ending.", "author": "C.S. Lewis", "source": "", "images": ["https://picsum.photos/seed/fut5a/800/400", "https://picsum.photos/seed/fut5b/800/400"]},
+    {"text": "The future starts today, not tomorrow.", "author": "Pope John Paul II", "source": "", "images": ["https://picsum.photos/seed/fut6a/800/400", "https://picsum.photos/seed/fut6b/800/400"]},
+    {"text": "Your future is created by what you do today.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/fut7a/800/400", "https://picsum.photos/seed/fut7b/800/400"]},
+    {"text": "The future depends on what we do in the present.", "author": "Mahatma Gandhi", "source": "", "images": ["https://picsum.photos/seed/fut8a/800/400", "https://picsum.photos/seed/fut8b/800/400"]}
+  ],
+  "hollywood": [
+    {"text": "May the Force be with you.", "author": "Star Wars", "source": "Star Wars", "images": ["https://picsum.photos/seed/hol1a/800/400", "https://picsum.photos/seed/hol1b/800/400"]},
+    {"text": "I'll be back.", "author": "The Terminator", "source": "The Terminator", "images": ["https://picsum.photos/seed/hol2a/800/400", "https://picsum.photos/seed/hol2b/800/400"]},
+    {"text": "Here's looking at you, kid.", "author": "Casablanca", "source": "Casablanca", "images": ["https://picsum.photos/seed/hol3a/800/400", "https://picsum.photos/seed/hol3b/800/400"]},
+    {"text": "You can't handle the truth!", "author": "A Few Good Men", "source": "A Few Good Men", "images": ["https://picsum.photos/seed/hol4a/800/400", "https://picsum.photos/seed/hol4b/800/400"]},
+    {"text": "Why so serious?", "author": "The Dark Knight", "source": "The Dark Knight", "images": ["https://picsum.photos/seed/hol5a/800/400", "https://picsum.photos/seed/hol5b/800/400"]},
+    {"text": "You're gonna need a bigger boat.", "author": "Jaws", "source": "Jaws", "images": ["https://picsum.photos/seed/hol6a/800/400", "https://picsum.photos/seed/hol6b/800/400"]},
+    {"text": "I'm the king of the world!", "author": "Titanic", "source": "Titanic", "images": ["https://picsum.photos/seed/hol7a/800/400", "https://picsum.photos/seed/hol7b/800/400"]},
+    {"text": "Life is like a box of chocolates. You never know what you're gonna get.", "author": "Forrest Gump", "source": "Forrest Gump", "images": ["https://picsum.photos/seed/hol8a/800/400", "https://picsum.photos/seed/hol8b/800/400"]}
+  ],
+  "international": [
+    {"text": "Life is beautiful.", "author": "Roberto Benigni", "source": "Life Is Beautiful", "images": ["https://picsum.photos/seed/int1a/800/400", "https://picsum.photos/seed/int1b/800/400"]},
+    {"text": "No one can make you feel inferior without your consent.", "author": "Eleanor Roosevelt", "source": "", "images": ["https://picsum.photos/seed/int2a/800/400", "https://picsum.photos/seed/int2b/800/400"]},
+    {"text": "The only thing we have to fear is fear itself.", "author": "Franklin D. Roosevelt", "source": "", "images": ["https://picsum.photos/seed/int3a/800/400", "https://picsum.photos/seed/int3b/800/400"]},
+    {"text": "Be the change you wish to see in the world.", "author": "Mahatma Gandhi", "source": "", "images": ["https://picsum.photos/seed/int4a/800/400", "https://picsum.photos/seed/int4b/800/400"]},
+    {"text": "In the middle of difficulty lies opportunity.", "author": "Albert Einstein", "source": "", "images": ["https://picsum.photos/seed/int5a/800/400", "https://picsum.photos/seed/int5b/800/400"]},
+    {"text": "It is during our darkest moments that we must focus to see the light.", "author": "Aristotle", "source": "", "images": ["https://picsum.photos/seed/int6a/800/400", "https://picsum.photos/seed/int6b/800/400"]},
+    {"text": "The journey of a thousand miles begins with a single step.", "author": "Lao Tzu", "source": "", "images": ["https://picsum.photos/seed/int7a/800/400", "https://picsum.photos/seed/int7b/800/400"]},
+    {"text": "Not all those who wander are lost.", "author": "J.R.R. Tolkien", "source": "", "images": ["https://picsum.photos/seed/int8a/800/400", "https://picsum.photos/seed/int8b/800/400"]}
   ]
 }

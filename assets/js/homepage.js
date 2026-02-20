@@ -11,6 +11,7 @@
 	// Local quote DB: faster than APIs, no broken endpoints. Loaded from assets/data/quotes-db.json
 	var quotesDb = null;
 	var lastQuoteFromDb = null; // { quote: { text, author, source, images }, category } for wallpaper refresh
+	var currentQuoteCategory = null; // actual category of the currently displayed quote (for image-refresh fetch)
 
 	// OMDb: poster fetched via backend proxy so the API key stays secret. Set window.OMDB_PROXY_URL to your proxy origin if API is on another host (e.g. https://your-omdb-proxy.vercel.app).
 
@@ -275,6 +276,7 @@
 
 	function useFallback(category) {
 		lastQuoteFromDb = null;
+		currentQuoteCategory = category;
 		var list = QUOTES_FALLBACK;
 		if (category === 'movie') list = QUOTES_MOVIE;
 		if (category === 'kdrama') list = QUOTES_KDRAMA;
@@ -319,6 +321,48 @@
 		return getImageMode() !== 'local';
 	}
 
+	function getProxyBase() {
+		var base = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
+		return base;
+	}
+
+	// OMDb search: returns first result's { poster, imdbID, title } for use with CineMaterial. Same origin or OMDB_PROXY_URL.
+	function fetchOMDBSearch(title, type, cb) {
+		if (!title || !title.trim()) { cb(null); return; }
+		var base = getProxyBase();
+		var source = 'website';
+		try {
+			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) source = 'vercel_app';
+		} catch (e) {}
+		var apiUrl = (base || '') + '/api/omdb?s=' + encodeURIComponent(title.trim()) + '&source=' + encodeURIComponent(source);
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var list = data && data.results && Array.isArray(data.results) ? data.results : [];
+				var first = list[0];
+				if (!first) { cb(null); return; }
+				var poster = first.Poster && first.Poster.indexOf('http') === 0 ? first.Poster : null;
+				var imdbID = first.imdbID && /^tt\d+$/.test(first.imdbID) ? first.imdbID : null;
+				cb(imdbID ? { poster: poster, imdbID: imdbID, title: first.Title || title } : null);
+			})
+			.catch(function () { cb(null); });
+	}
+
+	// CineMaterial: returns array of poster URLs for a given imdbID (from OMDb search). Gives multiple posters for wallpaper cycle.
+	function fetchCineMaterialPosters(imdbID, title, type, cb) {
+		if (!imdbID || !/^tt\d+$/.test(imdbID)) { cb([]); return; }
+		var base = getProxyBase();
+		var path = (base || '') + '/api/cinematerial?i=' + encodeURIComponent(imdbID) + '&title=' + encodeURIComponent((title || '').trim()) + '&type=' + (type === 'series' ? 'series' : 'movie');
+		fetch(path)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var raw = (data && data.posters && Array.isArray(data.posters)) ? data.posters : [];
+				var posters = raw.map(function (p) { return (p && (p.url || p)) || ''; }).filter(function (u) { return u && u.indexOf('http') === 0; });
+				cb(posters);
+			})
+			.catch(function () { cb([]); });
+	}
+
 	// Fetch poster via backend proxy (key never sent to client). Proxy returns { poster: url, usage: { dailyCount, dailyLimit } } or { poster: null }.
 	// First hit per title is cached in quoteImageCache; tap on wallpaper button cycles lastQuoteFromDb.quote.images (OMDb returns one poster, so we store [url, url]).
 	// type: 'movie' | 'series' | omit. Set window.OMDB_PROXY_URL if proxy is on another host.
@@ -329,7 +373,7 @@
 			cb(quoteImageCache[key].url);
 			return;
 		}
-		var base = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
+		var base = getProxyBase();
 		var source = 'website';
 		try {
 			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) source = 'vercel_app';
@@ -350,6 +394,7 @@
 
 	// Apply a quote from the local DB: resolve source-accurate images (Jikan for anime, OMDB for movie if key set, else map/JSON)
 	function applyQuoteFromDb(quote, category) {
+		currentQuoteCategory = category === 'movies' ? 'movie' : category;
 		var meta = (quote.source && quote.source.trim()) ? 'From: ' + quote.source.trim() : '';
 		setQuoteUI(quote.text, quote.author || '', meta);
 		var bg = document.getElementById('home-quote-bg');
@@ -448,8 +493,14 @@
 		
 		// Handle simplified categories
 		if (category === 'all' || category === 'random') {
-			// All categories: anime, books, leaders, movie, kdrama, bollywood
-			var choices = ['anime', 'books', 'leaders', 'movie', 'kdrama', 'bollywood'];
+			// All categories: derive from local DB so new categories (wisdom, inspiring, life, etc.) are included
+			var choices = [];
+			if (quotesDb && typeof quotesDb === 'object') {
+				for (var k in quotesDb) {
+					if (k !== 'meta' && Array.isArray(quotesDb[k]) && quotesDb[k].length > 0) choices.push(k);
+				}
+			}
+			if (choices.length === 0) choices = ['anime', 'books', 'wisdom', 'leaders', 'movie', 'kdrama', 'bollywood'];
 			actualCategory = choices[Math.floor(Math.random() * choices.length)];
 		} else if (category === 'movies') {
 			// Movies combines: movie (Hollywood/International)
@@ -468,6 +519,7 @@
 		}
 
 		if (actualCategory === 'anime') {
+			currentQuoteCategory = 'anime';
 			fetchAnimechan(function (q) {
 				setQuoteLoading(false);
 				if (q) {
@@ -494,6 +546,7 @@
 		}
 
 		if (category === 'books') {
+			currentQuoteCategory = 'books';
 			fetchQuotable(['literature'], function (q) {
 				setQuoteLoading(false);
 				if (q) {
@@ -507,6 +560,7 @@
 		}
 
 		if (category === 'wisdom') {
+			currentQuoteCategory = 'wisdom';
 			fetchQuotable(['wisdom', 'life', 'inspirational'], function (q) {
 				setQuoteLoading(false);
 				if (q) {
@@ -594,22 +648,92 @@
 		quoteBgRefreshBtn.addEventListener('click', function () {
 			var bg = document.getElementById('home-quote-bg');
 			if (!bg) return;
-			// If current quote is from local DB, cycle through its 2 image URLs
-			if (lastQuoteFromDb && lastQuoteFromDb.quote.images && lastQuoteFromDb.quote.images.length > 0) {
-				var imgs = lastQuoteFromDb.quote.images;
-				var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
-				var idx = -1;
-				for (var i = 0; i < imgs.length; i++) {
-					if (currentUrl.indexOf(imgs[i]) !== -1) { idx = i; break; }
+			var src = getCurrentQuoteSource();
+			var cat = currentQuoteCategory || (lastQuoteFromDb && lastQuoteFromDb.category) || getCategory();
+			if (cat === 'movies') cat = 'movie';
+
+			// Fetch a new poster from OMDb/Jikan using current quote's show/movie name (and optional year)
+			function setFetchedImages(urls) {
+				if (!urls || urls.length === 0) return;
+				var imgs = urls.length >= 2 ? [urls[0], urls[1]] : [urls[0], urls[0]];
+				if (bg) bg.style.backgroundImage = 'url(' + imgs[0] + ')';
+				if (lastQuoteFromDb) {
+					lastQuoteFromDb.quote.images = imgs;
+				} else {
+					var quoteEl = document.getElementById('home-quote-text');
+					var attrEl = document.getElementById('home-quote-attr');
+					lastQuoteFromDb = {
+						quote: {
+							text: quoteEl ? quoteEl.textContent : '',
+							author: attrEl ? (attrEl.textContent || '').replace(/^—\s*/, '') : '',
+							source: src || '',
+							images: imgs
+						},
+						category: cat
+					};
 				}
-				if (idx === -1) idx = 0;
-				var nextIdx = (idx + 1) % imgs.length;
-				bg.style.backgroundImage = 'url(' + imgs[nextIdx] + ')';
-			} else {
-				var src = getCurrentQuoteSource() || 'quote';
-				var seed = (src + '-' + Date.now()).replace(/\W/g, '') || Date.now();
-				bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
 			}
+
+			function fallbackCycleOrPicsum() {
+				if (lastQuoteFromDb && lastQuoteFromDb.quote.images && lastQuoteFromDb.quote.images.length > 0) {
+					var imgs = lastQuoteFromDb.quote.images;
+					var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
+					var idx = -1;
+					for (var i = 0; i < imgs.length; i++) {
+						if (currentUrl.indexOf(imgs[i]) !== -1) { idx = i; break; }
+					}
+					if (idx === -1) idx = 0;
+					var nextIdx = (idx + 1) % imgs.length;
+					bg.style.backgroundImage = 'url(' + imgs[nextIdx] + ')';
+				} else {
+					var seed = (src || 'quote') + '-' + Date.now();
+					seed = seed.replace(/\W/g, '') || Date.now();
+					bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+				}
+			}
+
+			if (src && (cat === 'anime' || cat === 'movie' || cat === 'kdrama' || cat === 'bollywood')) {
+				if (cat === 'anime') {
+					fetchJikanImage(src, function (url) {
+						if (url) setFetchedImages([url, url]);
+						else fallbackCycleOrPicsum();
+					});
+					return;
+				}
+				// OMDb/CineMaterial require a proxy; if OMDB_PROXY_URL is not set, same-origin /api/omdb 404s
+				if (!getProxyBase()) {
+					fallbackCycleOrPicsum();
+					return;
+				}
+				var omdbType = (cat === 'kdrama') ? 'series' : 'movie';
+				// Fetch OMDb poster first; then try CineMaterial for more posters (movie/series). Requires OMDB_API_KEY on proxy.
+				fetchOMDBPoster(src, function (posterUrl) {
+					if (posterUrl) {
+						setFetchedImages([posterUrl, posterUrl]);
+						// Optionally get more posters from CineMaterial (search by title → imdbID → CineMaterial)
+						fetchOMDBSearch(src, omdbType, function (searchResult) {
+							if (searchResult && searchResult.imdbID) {
+								fetchCineMaterialPosters(searchResult.imdbID, searchResult.title || src, omdbType, function (posters) {
+									if (posters.length > 0) {
+										var combined = [posterUrl];
+										for (var p = 0; p < posters.length && combined.length < 4; p++) {
+											if (posters[p] !== posterUrl) combined.push(posters[p]);
+										}
+										if (lastQuoteFromDb && lastQuoteFromDb.quote) {
+											lastQuoteFromDb.quote.images = combined.length >= 2 ? combined : [combined[0], combined[0]];
+										}
+									}
+								});
+							}
+						});
+					} else {
+						fallbackCycleOrPicsum();
+					}
+				}, omdbType);
+				return;
+			}
+
+			fallbackCycleOrPicsum();
 		});
 	}
 
