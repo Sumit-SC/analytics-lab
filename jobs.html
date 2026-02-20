@@ -17,8 +17,10 @@
 	<link rel="preconnect" href="https://jobs.github.com">
 	<link rel="stylesheet" href="./assets/css/main.css">
 	<script>
-		// Jobs API: Vercel only (no Railway). Points to playground-serverless on Vercel.
-		// Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback).
+		// Jobs API: Supports both Vercel and Railway
+		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
+		// Railway: Uses /jobs (cached) and /refresh (POST, scrapes fresh)
+		// To use Railway, change to: window.JOB_PROXY_URL = 'https://job-search-api-production-5d5d.up.railway.app';
 		window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
 		// Same-origin: if analytics-lab is served from same Vercel app with api/, use:
 		// window.JOB_PROXY_URL = '';

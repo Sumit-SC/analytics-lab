@@ -486,6 +486,9 @@
 		// Use cached jobs API (fast) or refresh endpoint
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
 		
+		// Detect if using Railway API (vs Vercel)
+		var isRailway = proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app'));
+		
 		// Get query from URL params or default to 'data analyst'
 		var urlParams = new URLSearchParams(window.location.search);
 		var query = urlParams.get('q') || 'data analyst';
@@ -506,6 +509,58 @@
 		}
 		if (!rssjobsUrl) rssjobsUrl = urlParams.get('rssjobs') || '';
 		
+		// Railway API: Use /refresh (POST) and /jobs (GET) endpoints
+		if (isRailway) {
+			if (forceRefresh) {
+				// Railway: POST /refresh
+				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
+				
+				fetch(refreshUrl, { method: 'POST' })
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (refreshData) {
+						if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs)) {
+							// Railway /refresh returns jobs directly, use them
+							allJobs = [];
+							refreshData.jobs.forEach(function (item) {
+								if (!item || !item.title || !item.url) return;
+								allJobs.push({
+									id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+									title: item.title,
+									company: item.company || 'Unknown',
+									location: item.location || 'Remote',
+									url: item.url,
+									description: item.description || '',
+									tags: Array.isArray(item.tags) ? item.tags : [],
+									source: item.source || 'unknown',
+									date: item.date || new Date().toISOString(),
+									dateFormatted: item.dateFormatted || '',
+									postedAgo: item.postedAgo || '',
+									matchScore: item.match_score || 0
+								});
+							});
+							sourceCounts = refreshData.sourceCounts || {};
+							apiSources = Array.isArray(refreshData.sources) ? refreshData.sources : [];
+							processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+						} else {
+							// Fallback to /jobs endpoint
+							fetchRailwayJobs(proxyUrl, query, days, limit);
+						}
+					})
+					.catch(function (err) {
+						console.error('Railway refresh failed:', err);
+						fetchRailwayJobs(proxyUrl, query, days, limit);
+					});
+				return;
+			} else {
+				// Railway: GET /jobs (cached)
+				fetchRailwayJobs(proxyUrl, query, days, limit);
+				return;
+			}
+		}
+		
+		// Vercel API: Use /api/jobs-snapshot and /api/jobs-refresh endpoints
 		// If forcing refresh, call refresh endpoint first, then snapshot (same API as playground)
 		if (forceRefresh) {
 			var refreshUrl = proxyUrl 
@@ -591,6 +646,99 @@
 			})
 			.catch(function (err) {
 				console.error('Cached jobs API error:', err);
+				tryBrowserCacheThenError(1000 * 60 * 30);
+			});
+	}
+	
+	// Railway API: Fetch jobs from /jobs endpoint (cached)
+	function fetchRailwayJobs(proxyUrl, query, days, limit) {
+		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit);
+		
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var loadingEl = document.getElementById('job-loading');
+				var errorEl = document.getElementById('job-error');
+				
+				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
+					// Railway /jobs might be empty if storage not persisting, try /refresh as fallback
+					console.log('Railway /jobs empty, trying /refresh...');
+					fetchRailwayRefresh(proxyUrl, query, days, limit);
+					return;
+				}
+				
+				allJobs = [];
+				data.jobs.forEach(function (item) {
+					if (!item || !item.title || !item.url) return;
+					allJobs.push({
+						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+						title: item.title,
+						company: item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.url,
+						description: item.description || '',
+						tags: Array.isArray(item.tags) ? item.tags : [],
+						source: item.source || 'unknown',
+						date: item.date || new Date().toISOString(),
+						dateFormatted: item.dateFormatted || '',
+						postedAgo: item.postedAgo || '',
+						matchScore: item.match_score || 0
+					});
+				});
+				
+				sourceCounts = data.sourceCounts || {};
+				apiSources = Array.isArray(data.sources) ? data.sources : [];
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+			})
+			.catch(function (err) {
+				console.error('Railway /jobs error:', err);
+				// Fallback to /refresh
+				fetchRailwayRefresh(proxyUrl, query, days, limit);
+			});
+	}
+	
+	// Railway API: Fetch jobs from /refresh endpoint (scrapes fresh)
+	function fetchRailwayRefresh(proxyUrl, query, days, limit) {
+		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+		
+		fetch(refreshUrl, { method: 'POST' })
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var loadingEl = document.getElementById('job-loading');
+				var errorEl = document.getElementById('job-error');
+				
+				if (!data || !data.ok || !Array.isArray(data.jobs)) {
+					tryBrowserCacheThenError(1000 * 60 * 30);
+					return;
+				}
+				
+				allJobs = [];
+				data.jobs.forEach(function (item) {
+					if (!item || !item.title || !item.url) return;
+					allJobs.push({
+						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+						title: item.title,
+						company: item.company || 'Unknown',
+						location: item.location || 'Remote',
+						url: item.url,
+						description: item.description || '',
+						tags: Array.isArray(item.tags) ? item.tags : [],
+						source: item.source || 'unknown',
+						date: item.date || new Date().toISOString(),
+						dateFormatted: item.dateFormatted || '',
+						postedAgo: item.postedAgo || '',
+						matchScore: item.match_score || 0
+					});
+				});
+				
+				sourceCounts = data.sourceCounts || {};
+				apiSources = Array.isArray(data.sources) ? data.sources : [];
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+			})
+			.catch(function (err) {
+				console.error('Railway /refresh error:', err);
 				tryBrowserCacheThenError(1000 * 60 * 30);
 			});
 	}
