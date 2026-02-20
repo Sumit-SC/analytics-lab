@@ -63,6 +63,19 @@
 				box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
 			}
 		}
+		/* JobSpy Notebook Toggle */
+		#jobspy-notebook-toggle-icon {
+			transition: transform 0.3s ease;
+		}
+		#jobspy-notebook-content {
+			transition: all 0.3s ease;
+		}
+		#jobspy-notebook-content.hidden {
+			display: none;
+		}
+		#jobspy-notebook-iframe {
+			min-height: 600px;
+		}
 	</style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
@@ -186,6 +199,45 @@
 		</aside>
 
 	<main class="flex-1 min-w-0 max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+		<!-- JobSpy Notebook Embed (Collapsible) -->
+		<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+			<button type="button" id="jobspy-notebook-toggle" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false" aria-controls="jobspy-notebook-content">
+				<div class="flex items-center gap-3">
+					<span class="text-lg">📓</span>
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">JobSpy Interactive Scraper</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Run JobSpy directly in your browser to scrape LinkedIn, Indeed, Glassdoor, Google & more</p>
+					</div>
+				</div>
+				<span class="text-gray-500 dark:text-gray-400 text-sm font-medium" id="jobspy-notebook-toggle-text">Click to expand</span>
+				<svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform" id="jobspy-notebook-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+				</svg>
+			</button>
+			<div id="jobspy-notebook-content" class="hidden border-t border-gray-200 dark:border-gray-700">
+				<div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+					<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+						This notebook uses <a href="https://github.com/speedyapply/JobSpy" target="_blank" rel="noopener" class="text-primary hover:underline">JobSpy</a> to scrape jobs from multiple sources. 
+						Modify the search parameters in the notebook and run the cells to fetch jobs.
+					</p>
+					<iframe 
+						id="jobspy-notebook-iframe"
+						src=""
+						width="100%" 
+						height="800" 
+						frameborder="0" 
+						class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+						style="display: none;"
+						title="JobSpy Interactive Notebook">
+					</iframe>
+					<div id="jobspy-notebook-loading" class="text-center py-8">
+						<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Loading notebook...</p>
+						<p class="text-xs text-gray-500 dark:text-gray-500">If Binder is starting up, this may take 1-2 minutes on first load.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
 		<header class="mb-6">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Tracker</h1>
 			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mb-4">
@@ -571,5 +623,63 @@
 	<script src="./assets/js/sidebar.js" defer></script>
 	<script src="./assets/js/jobs.js" defer></script>
 	<script src="./assets/js/register-sw.js" defer></script>
+	<script>
+		// JobSpy Notebook Toggle & Binder Loading
+		(function() {
+			'use strict';
+			
+			// Configure your Binder URL here
+			// Format: https://mybinder.org/v2/gh/USERNAME/REPO/BRANCH?urlpath=notebooks/jobspy-scraper.ipynb
+			// Example: https://mybinder.org/v2/gh/yourusername/sumit-personal-site/main?urlpath=notebooks/jobspy-scraper.ipynb
+			// If you haven't set up Binder yet, leave this empty and users will see instructions
+			var BINDER_NOTEBOOK_URL = ''; // Set this after deploying to GitHub and configuring Binder
+			
+			var toggleBtn = document.getElementById('jobspy-notebook-toggle');
+			var contentDiv = document.getElementById('jobspy-notebook-content');
+			var iframe = document.getElementById('jobspy-notebook-iframe');
+			var loadingDiv = document.getElementById('jobspy-notebook-loading');
+			var toggleText = document.getElementById('jobspy-notebook-toggle-text');
+			var toggleIcon = document.getElementById('jobspy-notebook-toggle-icon');
+			var isExpanded = false;
+			var notebookLoaded = false;
+			
+			if (!toggleBtn || !contentDiv) return;
+			
+			function updateUI() {
+				if (isExpanded) {
+					contentDiv.classList.remove('hidden');
+					toggleBtn.setAttribute('aria-expanded', 'true');
+					if (toggleText) toggleText.textContent = 'Click to collapse';
+					if (toggleIcon) toggleIcon.style.transform = 'rotate(180deg)';
+					
+					// Load notebook on first expand
+					if (!notebookLoaded && iframe && loadingDiv) {
+						if (BINDER_NOTEBOOK_URL) {
+							iframe.src = BINDER_NOTEBOOK_URL;
+							iframe.style.display = 'block';
+							loadingDiv.style.display = 'none';
+							notebookLoaded = true;
+						} else {
+							// Show instructions if Binder URL not configured
+							loadingDiv.innerHTML = '<div class="text-center py-8"><p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Binder URL not configured</p><p class="text-xs text-gray-600 dark:text-gray-400 mb-4">To enable the interactive notebook:</p><ol class="text-xs text-gray-600 dark:text-gray-400 text-left max-w-md mx-auto space-y-2 list-decimal list-inside"><li>Push this repo to GitHub</li><li>Go to <a href="https://mybinder.org" target="_blank" rel="noopener" class="text-primary hover:underline">mybinder.org</a></li><li>Enter your repo URL: <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">github.com/USERNAME/REPO</code></li><li>Copy the Binder URL and update <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">BINDER_NOTEBOOK_URL</code> in jobs.html</li></ol><p class="text-xs text-gray-500 dark:text-gray-500 mt-4">Or <a href="./notebooks/jobspy-scraper.ipynb" target="_blank" rel="noopener" class="text-primary hover:underline">download the notebook</a> to run locally.</p></div>';
+						}
+					}
+				} else {
+					contentDiv.classList.add('hidden');
+					toggleBtn.setAttribute('aria-expanded', 'false');
+					if (toggleText) toggleText.textContent = 'Click to expand';
+					if (toggleIcon) toggleIcon.style.transform = 'rotate(0deg)';
+				}
+			}
+			
+			toggleBtn.addEventListener('click', function() {
+				isExpanded = !isExpanded;
+				updateUI();
+			});
+			
+			// Initialize UI
+			updateUI();
+		})();
+	</script>
 </body>
 </html>

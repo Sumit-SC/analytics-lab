@@ -613,7 +613,7 @@ body {
 .dark .second-brain-card:hover {
 	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
-  
+
 .home-quote {
 	font-size: 1.3rem;
 	line-height: 1.7;
@@ -640,6 +640,7 @@ body {
 }
 
 /* Homepage quote background: show poster clearly with a soft translucent veil */
+/* 1) The image itself is sharp and fills the card */
 #home-quote-bg,
 .home-quote-bg-image {
 	background-size: cover;
@@ -654,13 +655,59 @@ body {
 	opacity: 1;
 	filter: none;
 }
-/* Soft overlay: translucent layer so quote text is readable but poster is still visible */
+/* 2) Base overlay: very light tint so poster mixes with theme, but stays visible */
 .home-quote-bg-overlay {
-	background: rgba(248, 250, 252, 0.35);
+	background: rgba(248, 250, 252, 0.20);
 	pointer-events: none;
 }
 .dark .home-quote-bg-overlay {
-	background: rgba(15, 23, 42, 0.7);
+	background: rgba(15, 23, 42, 0.6);
+}
+
+/* 3) Quote card: remove heavy white card so the poster is the main background */
+.home-quote-panel {
+	background: transparent;
+	border-color: transparent;
+	box-shadow: none;
+}
+.dark .home-quote-panel {
+	background: transparent;
+	border-color: transparent;
+	box-shadow: none;
+}
+
+/* 4) Add a soft, theme-tinted wash only within the quote card */
+.home-quote-panel .home-quote-bg-overlay {
+	background: linear-gradient(135deg,
+		rgba(99, 102, 241, 0.35) 0%,
+		rgba(248, 250, 252, 0.18) 40%,
+		rgba(15, 23, 42, 0.10) 100%);
+}
+.dark .home-quote-panel .home-quote-bg-overlay {
+	background: linear-gradient(135deg,
+		rgba(15, 23, 42, 0.75) 0%,
+		rgba(79, 70, 229, 0.45) 40%,
+		rgba(15, 23, 42, 0.85) 100%);
+}
+
+/* 5) Gentle translucent layer directly under the text, not over the whole image */
+.home-quote-panel > .relative {
+	position: relative;
+	z-index: 1;
+	background: radial-gradient(circle at top left,
+		rgba(248, 250, 252, 0.80) 0%,
+		rgba(248, 250, 252, 0.45) 35%,
+		rgba(248, 250, 252, 0.10) 75%,
+		rgba(248, 250, 252, 0.00) 100%);
+	backdrop-filter: blur(2px);
+}
+.dark .home-quote-panel > .relative {
+	background: radial-gradient(circle at top left,
+		rgba(15, 23, 42, 0.88) 0%,
+		rgba(15, 23, 42, 0.60) 35%,
+		rgba(15, 23, 42, 0.25) 75%,
+		rgba(15, 23, 42, 0.00) 100%);
+	backdrop-filter: blur(2px);
 }
 
 /* Notion-style Go to cards (main stars) */
