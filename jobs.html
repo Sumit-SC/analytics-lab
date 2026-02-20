@@ -76,6 +76,69 @@
 		#jobspy-notebook-iframe {
 			min-height: 600px;
 		}
+		/* Enhanced Form Styles */
+		input[type="range"] {
+			-webkit-appearance: none;
+			appearance: none;
+			background: transparent;
+			cursor: pointer;
+		}
+		input[type="range"]::-webkit-slider-track {
+			background: #e5e7eb;
+			height: 8px;
+			border-radius: 4px;
+		}
+		input[type="range"]::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			background: var(--color-primary, #667eea);
+			height: 20px;
+			width: 20px;
+			border-radius: 50%;
+			margin-top: -6px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+		input[type="range"]::-webkit-slider-thumb:hover {
+			transform: scale(1.1);
+			box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+		}
+		input[type="range"]::-moz-range-track {
+			background: #e5e7eb;
+			height: 8px;
+			border-radius: 4px;
+		}
+		input[type="range"]::-moz-range-thumb {
+			background: var(--color-primary, #667eea);
+			height: 20px;
+			width: 20px;
+			border-radius: 50%;
+			border: none;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+		input[type="range"]::-moz-range-thumb:hover {
+			transform: scale(1.1);
+		}
+		#job-sites-multiselect label {
+			display: flex;
+			align-items: center;
+			padding: 0.5rem;
+			cursor: pointer;
+			border-radius: 0.375rem;
+			transition: all 0.2s;
+			font-size: 0.875rem;
+		}
+		#job-sites-multiselect label:hover {
+			background: rgba(102, 126, 234, 0.1);
+		}
+		#job-sites-multiselect input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			margin-right: 0.5rem;
+			cursor: pointer;
+			accent-color: var(--color-primary, #667eea);
+		}
 	</style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
@@ -243,11 +306,110 @@
 			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mb-4">
 				Aggregate and track data science jobs from multiple sources. Jobs are automatically matched with your skillset.
 			</p>
-			<div class="flex flex-wrap items-center gap-4 mb-4">
-				<div class="w-full sm:flex-1 sm:min-w-[220px]">
-					<input type="text" id="job-search-input" placeholder="Search jobs by title, company, or keywords..." class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+			
+			<!-- Enhanced Search Form Section -->
+			<div class="mb-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+					<span>⚙️</span> Search Configuration
+				</h2>
+				
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+					<!-- Search Term -->
+					<div class="md:col-span-2 lg:col-span-1">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🔎 Search Term</label>
+						<input type="text" id="job-search-input" value="data analyst" placeholder="e.g., data analyst, software engineer" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+					</div>
+					
+					<!-- Location -->
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">📍 Location</label>
+						<input type="text" id="job-location-input" value="Remote" placeholder="e.g., Remote, San Francisco CA" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+					</div>
+					
+					<!-- Country -->
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🌍 Country (for Indeed/Glassdoor)</label>
+						<select id="job-country-select" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+							<option value="USA">USA</option>
+							<option value="India">India</option>
+							<option value="UK">UK</option>
+							<option value="Canada">Canada</option>
+							<option value="Australia">Australia</option>
+							<option value="Germany">Germany</option>
+							<option value="France">France</option>
+						</select>
+					</div>
+					
+					<!-- Results Per Site Slider -->
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+							📊 Results per site: <span class="text-primary font-semibold" id="results-wanted-display">50</span>
+						</label>
+						<div class="flex items-center gap-3">
+							<input type="range" id="results-wanted-slider" min="10" max="200" step="10" value="50" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
+							<span class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">10-200</span>
+						</div>
+					</div>
+					
+					<!-- Days Old Slider -->
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+							⏰ Days old (max): <span class="text-primary font-semibold" id="days-old-display">3</span>
+						</label>
+						<div class="flex items-center gap-3">
+							<input type="range" id="days-old-slider" min="1" max="30" step="1" value="3" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
+							<span class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">1-30</span>
+						</div>
+					</div>
+					
+					<!-- Job Type -->
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">💼 Job Type</label>
+						<select id="job-type-select" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+							<option value="">All types</option>
+							<option value="fulltime">Full-time</option>
+							<option value="parttime">Part-time</option>
+							<option value="contract">Contract</option>
+							<option value="internship">Internship</option>
+						</select>
+					</div>
 				</div>
-				<select id="job-filter-source" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+				
+				<!-- Job Sites Multi-Select -->
+				<div class="mb-4">
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🌐 Job Sites (Select Multiple)</label>
+					<div id="job-sites-multiselect" class="max-h-48 overflow-y-auto p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+						<!-- Will be populated by JavaScript -->
+					</div>
+				</div>
+				
+				<!-- Checkboxes Row -->
+				<div class="flex flex-wrap items-center gap-4 mb-4">
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input type="checkbox" id="job-remote-only" checked class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+						<span class="text-sm text-gray-700 dark:text-gray-300">🏠 Remote jobs only</span>
+					</label>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input type="checkbox" id="job-linkedin-description" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+						<span class="text-sm text-gray-700 dark:text-gray-300">📄 LinkedIn: Fetch full descriptions (slower)</span>
+					</label>
+				</div>
+				
+				<!-- Action Buttons -->
+				<div class="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+					<button type="button" id="job-refresh-btn" class="px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+						🔍 Search Jobs
+					</button>
+					<button type="button" id="job-clear-filters-btn" class="px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium">
+						Clear Filters
+					</button>
+				</div>
+			</div>
+			
+			<!-- Quick Filters Row -->
+			<div class="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters:</span>
+				<select id="job-filter-source" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
 					<option value="all">All Sources</option>
 					<option value="remoteok">RemoteOK</option>
 					<option value="remotive">Remotive</option>
@@ -258,23 +420,16 @@
 					<option value="workingnomads">Working Nomads</option>
 					<option value="hirist">Hirist</option>
 					<option value="naukri">Naukri</option>
-					<option value="weworkremotely_headless">WeWorkRemotely (Headless)</option>
-					<option value="cached_headless">Cached Headless</option>
 					<option value="stackoverflow">Stack Overflow</option>
-					<option value="github">GitHub</option>
-					<option value="arbeitnow">Arbeitnow</option>
-					<option value="googlejobs">Google Jobs</option>
 					<option value="linkedin">LinkedIn</option>
-					<option value="instahyre">Instahyre</option>
-					<option value="himalaya">Himalaya</option>
 				</select>
-				<select id="job-filter-match" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+				<select id="job-filter-match" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
 					<option value="all">All Matches</option>
 					<option value="high">High Match (80%+)</option>
 					<option value="medium">Medium Match (50-79%)</option>
 					<option value="low">Low Match (&lt;50%)</option>
 				</select>
-				<select id="job-filter-status" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+				<select id="job-filter-status" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
 					<option value="all">All Status</option>
 					<option value="new">New</option>
 					<option value="applied">Applied</option>
@@ -282,20 +437,12 @@
 					<option value="rejected">Rejected</option>
 					<option value="offer">Offer</option>
 				</select>
-				<select id="job-filter-age" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
-					<option value="all">Any time</option>
-					<option value="1">Last 24 hours</option>
-					<option value="3">Last 3 days</option>
-					<option value="7">Last 7 days</option>
-				</select>
-				<select id="job-filter-role" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary" title="Focus by role type">
+				<select id="job-filter-role" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
 					<option value="all">All roles</option>
-					<option value="analyst">Analyst (Data, Product, Business, BI)</option>
-					<option value="scientist">Scientist (Data Scientist, Associate DS)</option>
-					<option value="engineer">Engineer (Data, ML, Analytics)</option>
-					<option value="associate_junior">Associate &amp; Junior</option>
+					<option value="analyst">Analyst</option>
+					<option value="scientist">Scientist</option>
+					<option value="engineer">Engineer</option>
 				</select>
-				<button type="button" id="job-refresh-btn" class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Refresh</button>
 			</div>
 			<!-- Mode: Our scraping vs RSS (rssjobs.app). When RSS: show Role + Location dropdowns and feed URL. -->
 			<div class="flex flex-wrap items-center gap-4 mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">

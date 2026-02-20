@@ -91,13 +91,111 @@
 		loadPlanner();
 		setupRssModeAndDropdowns();
 		setupApiBackendToggle();
+		setupEnhancedForm();
 		setupEventListeners();
 		fetchAllJobs();
 		setupPlannerEventListeners();
 		renderPlanner();
 	}
 	
-	// Setup API Backend Toggle (Vercel vs Railway)
+	// Setup Enhanced Form (JobSpy-style inputs)
+	function setupEnhancedForm() {
+		// Job sites list (from JobSpy)
+		var jobSites = [
+			{ id: 'linkedin', name: 'LinkedIn', default: true },
+			{ id: 'indeed', name: 'Indeed', default: true },
+			{ id: 'glassdoor', name: 'Glassdoor', default: true },
+			{ id: 'zip_recruiter', name: 'ZipRecruiter', default: true },
+			{ id: 'google', name: 'Google Jobs', default: true },
+			{ id: 'monster', name: 'Monster', default: false },
+			{ id: 'dice', name: 'Dice', default: false },
+			{ id: 'simplyhired', name: 'SimplyHired', default: false },
+			{ id: 'careerbuilder', name: 'CareerBuilder', default: false },
+			{ id: 'remoteok', name: 'RemoteOK', default: true },
+			{ id: 'remotive', name: 'Remotive', default: true },
+			{ id: 'weworkremotely', name: 'WeWorkRemotely', default: true },
+			{ id: 'jobscollider', name: 'Jobscollider', default: true },
+			{ id: 'wellfound', name: 'Wellfound', default: true },
+			{ id: 'stackoverflow', name: 'Stack Overflow', default: true },
+			{ id: 'naukri', name: 'Naukri', default: false },
+			{ id: 'hirist', name: 'Hirist', default: false },
+			{ id: 'workingnomads', name: 'Working Nomads', default: false },
+			{ id: 'himalayas', name: 'Himalayas', default: false },
+			{ id: 'authentic_jobs', name: 'Authentic Jobs', default: false }
+		];
+		
+		// Populate job sites multi-select
+		var multiselect = document.getElementById('job-sites-multiselect');
+		if (multiselect) {
+			multiselect.innerHTML = '';
+			jobSites.forEach(function(site) {
+				var label = document.createElement('label');
+				label.className = 'flex items-center';
+				var checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.value = site.id;
+				checkbox.id = 'site-' + site.id;
+				checkbox.checked = site.default;
+				checkbox.className = 'mr-2';
+				label.appendChild(checkbox);
+				var span = document.createElement('span');
+				span.textContent = site.name;
+				label.appendChild(span);
+				multiselect.appendChild(label);
+			});
+		}
+		
+		// Setup sliders
+		var resultsSlider = document.getElementById('results-wanted-slider');
+		var resultsDisplay = document.getElementById('results-wanted-display');
+		if (resultsSlider && resultsDisplay) {
+			resultsSlider.addEventListener('input', function() {
+				resultsDisplay.textContent = resultsSlider.value;
+			});
+		}
+		
+		var daysSlider = document.getElementById('days-old-slider');
+		var daysDisplay = document.getElementById('days-old-display');
+		if (daysSlider && daysDisplay) {
+			daysSlider.addEventListener('input', function() {
+				daysDisplay.textContent = daysSlider.value;
+			});
+		}
+		
+		// Clear filters button
+		var clearBtn = document.getElementById('job-clear-filters-btn');
+		if (clearBtn) {
+			clearBtn.addEventListener('click', function() {
+				document.getElementById('job-search-input').value = 'data analyst';
+				document.getElementById('job-location-input').value = 'Remote';
+				document.getElementById('job-country-select').value = 'USA';
+				document.getElementById('job-type-select').value = '';
+				document.getElementById('job-remote-only').checked = true;
+				document.getElementById('job-linkedin-description').checked = false;
+				if (resultsSlider) resultsSlider.value = 50;
+				if (resultsDisplay) resultsDisplay.textContent = '50';
+				if (daysSlider) daysSlider.value = 3;
+				if (daysDisplay) daysDisplay.textContent = '3';
+				// Reset job sites to defaults
+				jobSites.forEach(function(site) {
+					var checkbox = document.getElementById('site-' + site.id);
+					if (checkbox) checkbox.checked = site.default;
+				});
+			});
+		}
+		
+		// Update API status display location
+		var apiStatus = document.getElementById('api-status');
+		if (apiStatus) {
+			// Move status to enhanced form section
+			var statusEl = document.querySelector('.flex.flex-wrap.items-center.gap-3.pt-3');
+			if (statusEl && apiStatus.parentNode !== statusEl) {
+				statusEl.appendChild(apiStatus);
+			}
+		}
+	}
+	
+		// Setup API Backend Toggle (Vercel vs Railway)
 	function setupApiBackendToggle() {
 		var vercelRadio = document.getElementById('api-backend-vercel');
 		var railwayRadio = document.getElementById('api-backend-railway');
@@ -116,10 +214,10 @@
 		function updateApiBackend(backend) {
 			if (backend === 'railway') {
 				window.JOB_PROXY_URL = 'https://job-search-api-production-5d5d.up.railway.app';
-				if (statusEl) statusEl.textContent = '✓ Railway';
+				if (statusEl) statusEl.textContent = '✓ Railway (Dedicated)';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
-				if (statusEl) statusEl.textContent = '✓ Vercel';
+				if (statusEl) statusEl.textContent = '✓ Vercel (Serverless)';
 			}
 			localStorage.setItem('job_tracker_api_backend', backend);
 		}
@@ -529,13 +627,17 @@
 		var railwayRadio = document.getElementById('api-backend-railway');
 		var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
 		
-		// Get query from URL params or default to 'data analyst'
+		// Get query from enhanced form inputs or URL params or default
 		var urlParams = new URLSearchParams(window.location.search);
-		var query = urlParams.get('q') || 'data analyst';
-		var days = urlParams.get('days') || '3'; // Default to 3 days for headless scraping
-		// Railway supports up to 400, Vercel supports up to 400, use 400 for both
-		var limit = urlParams.get('limit') || '400';
-		var location = urlParams.get('location') || 'remote';
+		var searchInput = document.getElementById('job-search-input');
+		var locationInput = document.getElementById('job-location-input');
+		var daysSlider = document.getElementById('days-old-slider');
+		var resultsSlider = document.getElementById('results-wanted-slider');
+		
+		var query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'data analyst');
+		var days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '3');
+		var limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
+		var location = (locationInput && locationInput.value) ? locationInput.value.trim() : (urlParams.get('location') || 'remote');
 		// Pagination for Railway
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;

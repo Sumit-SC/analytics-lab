@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobSpy Interactive Job Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .multiselect {
+            width: 100%;
+            min-height: 150px;
+            max-height: 300px;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: white;
+            overflow-y: auto;
+        }
+        
+        .multiselect label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .multiselect label:hover {
+            background: #f3f4f6;
+        }
+        
+        .multiselect input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #e5e7eb;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            min-width: 60px;
+            text-align: right;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .status.loading {
+            background: #dbeafe;
+            color: #1e40af;
+            display: block;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+        
+        .results-section {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .analytics {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .analytics h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .analytics-stats {
+            background: rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .analytics-stats ul {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+        
+        .analytics-stats li {
+            padding: 0.25rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-export {
+            padding: 0.75rem 1.5rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .btn-export:hover {
+            background: #059669;
+        }
+        
+        .btn-export.csv {
+            background: #6366f1;
+        }
+        
+        .btn-export.csv:hover {
+            background: #4f46e5;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 JobSpy Interactive Job Scraper</h1>
+            <p>Configure parameters and click "Search Jobs" to fetch results</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-section">
+                <h2>⚙️ Search Configuration</h2>
+                
+                <div class="form-group">
+                    <label>🔎 Search Term</label>
+                    <input type="text" id="searchTerm" value="data analyst" placeholder="e.g., data analyst, software engineer">
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 Location</label>
+                    <input type="text" id="location" value="Remote" placeholder="e.g., Remote, San Francisco CA">
+                </div>
+                
+                <div class="form-group">
+                    <label>🌐 Job Sites (Select Multiple)</label>
+                    <div class="multiselect" id="siteSelection">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>📊 Results per site: <span class="slider-value" id="resultsValue">50</span></label>
+                    <div class="slider-group">
+                        <input type="range" id="resultsWanted" min="10" max="200" step="10" value="50">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>⏰ Hours old (0 = no filter): <span class="slider-value" id="hoursValue">72</span></label>
+                    <div class="slider-group">
+                        <input type="range" id="hoursOld" min="0" max="720" step="24" value="72">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🌍 Country (for Indeed/Glassdoor)</label>
+                    <select id="countryIndeed">
+                        <option value="USA">USA</option>
+                        <option value="India">India</option>
+                        <option value="UK">UK</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔍 Google Search Term (optional)</label>
+                    <input type="text" id="googleSearchTerm" placeholder="e.g., software engineer jobs near San Francisco, CA since yesterday">
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="isRemote" checked>
+                        <label for="isRemote">🏠 Remote jobs only</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>💼 Job Type</label>
+                    <select id="jobType">
+                        <option value="">All types</option>
+                        <option value="fulltime">Full-time</option>
+                        <option value="parttime">Part-time</option>
+                        <option value="contract">Contract</option>
+                        <option value="internship">Internship</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="linkedinFetchDescription">
+                        <label for="linkedinFetchDescription">📄 LinkedIn: Fetch full descriptions (slower)</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔐 Proxies (optional, comma-separated)</label>
+                    <input type="text" id="proxies" placeholder="e.g., user:pass@host:port, localhost">
+                </div>
+                
+                <button class="btn btn-primary" id="searchButton" onclick="searchJobs()">
+                    🔍 Search Jobs
+                </button>
+            </div>
+            
+            <div class="status" id="status"></div>
+            
+            <div class="results-section" id="resultsSection">
+                <div class="analytics" id="analytics"></div>
+                
+                <div class="form-section">
+                    <h2>📋 Job Listings</h2>
+                    <div class="table-container" id="jobTable"></div>
+                    
+                    <div class="export-buttons">
+                        <button class="btn-export csv" onclick="exportCSV()">📥 Download CSV</button>
+                        <button class="btn-export" onclick="exportJSON()">📥 Download JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let jobsData = [];
+        const API_URL = window.location.origin + '/api/search';
+        
+        // Job sites list
+        const jobSites = [
+            "indeed", "linkedin", "zip_recruiter", "glassdoor", "google",
+            "dice", "simplyhired", "monster", "careerbuilder", "stepstone",
+            "wellfound", "bayt", "naukri", "bdjobs", "internshala",
+            "exa", "upwork", "builtin", "snagajob", "dribbble",
+            "remoteok", "remotive", "weworkremotely", "jobicy", "himalayas", "arbeitnow",
+            "greenhouse", "lever", "ashby", "workable", "smartrecruiters",
+            "rippling", "workday", "recruitee", "teamtailor", "bamboohr",
+            "personio", "jazzhr", "icims", "taleo", "successfactors",
+            "jobvite", "adp", "ukg", "breezyhr", "comeet", "pinpoint",
+            "amazon", "apple", "microsoft", "nvidia", "tiktok", "uber",
+            "cursor", "google_careers", "meta", "netflix", "stripe", "openai",
+            "usajobs", "adzuna", "reed", "jooble", "careerjet"
+        ].sort();
+        
+        // Populate site selection
+        const siteSelection = document.getElementById('siteSelection');
+        const defaultSites = ['indeed', 'linkedin', 'zip_recruiter', 'google'];
+        
+        jobSites.forEach(site => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = site;
+            checkbox.checked = defaultSites.includes(site);
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(site));
+            siteSelection.appendChild(label);
+        });
+        
+        // Update slider values
+        document.getElementById('resultsWanted').addEventListener('input', (e) => {
+            document.getElementById('resultsValue').textContent = e.target.value;
+        });
+        
+        document.getElementById('hoursOld').addEventListener('input', (e) => {
+            document.getElementById('hoursValue').textContent = e.target.value;
+        });
+        
+        // Search jobs function
+        async function searchJobs() {
+            const button = document.getElementById('searchButton');
+            const status = document.getElementById('status');
+            const resultsSection = document.getElementById('resultsSection');
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span>Searching...';
+            status.className = 'status loading';
+            status.textContent = '⏳ Fetching job listings... Please wait.';
+            status.style.display = 'block';
+            resultsSection.style.display = 'none';
+            
+            try {
+                // Get form values
+                const searchTerm = document.getElementById('searchTerm').value || 'data analyst';
+                const location = document.getElementById('location').value || 'Remote';
+                const selectedSites = Array.from(document.querySelectorAll('#siteSelection input:checked'))
+                    .map(cb => cb.value);
+                const resultsWanted = parseInt(document.getElementById('resultsWanted').value);
+                const hoursOld = parseInt(document.getElementById('hoursOld').value);
+                const countryIndeed = document.getElementById('countryIndeed').value;
+                const googleSearchTerm = document.getElementById('googleSearchTerm').value;
+                const isRemote = document.getElementById('isRemote').checked;
+                const jobType = document.getElementById('jobType').value;
+                const linkedinFetchDescription = document.getElementById('linkedinFetchDescription').checked;
+                const proxies = document.getElementById('proxies').value;
+                
+                // Prepare request data
+                const requestData = {
+                    site_name: selectedSites.length ? selectedSites : ['indeed'],
+                    search_term: searchTerm,
+                    location: location,
+                    results_wanted: resultsWanted,
+                    country_indeed: countryIndeed,
+                    is_remote: isRemote,
+                    linkedin_fetch_description: linkedinFetchDescription
+                };
+                
+                if (hoursOld > 0) requestData.hours_old = hoursOld;
+                if (jobType) requestData.job_type = jobType;
+                if (googleSearchTerm) requestData.google_search_term = googleSearchTerm;
+                if (proxies) requestData.proxies = proxies.split(',').map(p => p.trim());
+                
+                // Call API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.count > 0) {
+                    jobsData = data.jobs;
+                    displayResults(data.jobs);
+                    status.className = 'status success';
+                    status.textContent = `✅ Successfully scraped ${data.count} jobs!`;
+                } else {
+                    jobsData = [];
+                    status.className = 'status error';
+                    status.textContent = data.error || '⚠️ No jobs found. Try adjusting your search parameters.';
+                }
+            } catch (error) {
+                jobsData = [];
+                status.className = 'status error';
+                status.textContent = `❌ Error: ${error.message}. Make sure the Python server is running!`;
+            } finally {
+                button.disabled = false;
+                button.textContent = '🔍 Search Jobs';
+            }
+        }
+        
+        // Display results
+        function displayResults(jobs) {
+            const resultsSection = document.getElementById('resultsSection');
+            const analytics = document.getElementById('analytics');
+            const jobTable = document.getElementById('jobTable');
+            
+            // Analytics
+            const totalJobs = jobs.length;
+            const sites = {};
+            const jobTypes = {};
+            let remoteCount = 0;
+            
+            jobs.forEach(job => {
+                if (job.site) {
+                    sites[job.site] = (sites[job.site] || 0) + 1;
+                }
+                if (job.job_type) {
+                    jobTypes[job.job_type] = (jobTypes[job.job_type] || 0) + 1;
+                }
+                if (job.is_remote) remoteCount++;
+            });
+            
+            let analyticsHTML = `
+                <h2>📈 Analytics Dashboard</h2>
+                <div style="font-size: 2.5rem; font-weight: bold; margin: 1rem 0;">${totalJobs} Total Jobs</div>
+                <div class="analytics-stats">
+                    <strong>By Source:</strong>
+                    <ul>
+                        ${Object.entries(sites).map(([site, count]) => 
+                            `<li>${site}: <strong>${count}</strong> (${(count/totalJobs*100).toFixed(1)}%)</li>`
+                        ).join('')}
+                    </ul>
+                    ${Object.keys(jobTypes).length > 0 ? `
+                        <strong>By Job Type:</strong>
+                        <ul>
+                            ${Object.entries(jobTypes).map(([type, count]) => 
+                                `<li>${type}: <strong>${count}</strong> (${(count/totalJobs*100).toFixed(1)}%)</li>`
+                            ).join('')}
+                        </ul>
+                    ` : ''}
+                    <strong>Remote vs On-site:</strong>
+                    <ul>
+                        <li>Remote: <strong>${remoteCount}</strong> (${(remoteCount/totalJobs*100).toFixed(1)}%)</li>
+                        <li>On-site: <strong>${totalJobs - remoteCount}</strong> (${((totalJobs-remoteCount)/totalJobs*100).toFixed(1)}%)</li>
+                    </ul>
+                </div>
+            `;
+            analytics.innerHTML = analyticsHTML;
+            
+            // Table
+            if (jobs.length > 0) {
+                const columns = ['title', 'company', 'location', 'site', 'job_type', 'job_url'];
+                let tableHTML = '<table><thead><tr>';
+                columns.forEach(col => {
+                    tableHTML += `<th>${col.replace('_', ' ').toUpperCase()}</th>`;
+                });
+                tableHTML += '</tr></thead><tbody>';
+                
+                jobs.forEach(job => {
+                    tableHTML += '<tr>';
+                    columns.forEach(col => {
+                        let value = job[col] || '';
+                        if (col === 'job_url' && value) {
+                            value = `<a href="${value}" target="_blank" style="color: #3b82f6; text-decoration: none;">View Job</a>`;
+                        }
+                        tableHTML += `<td>${value}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+                
+                tableHTML += '</tbody></table>';
+                jobTable.innerHTML = tableHTML;
+            }
+            
+            resultsSection.style.display = 'block';
+        }
+        
+        // Export functions
+        function exportCSV() {
+            if (jobsData.length === 0) return;
+            
+            const headers = Object.keys(jobsData[0]);
+            const csv = [
+                headers.join(','),
+                ...jobsData.map(row => 
+                    headers.map(header => {
+                        const value = row[header] || '';
+                        return `"${String(value).replace(/"/g, '""')}"`;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `jobs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function exportJSON() {
+            if (jobsData.length === 0) return;
+            
+            const json = JSON.stringify(jobsData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `jobs_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

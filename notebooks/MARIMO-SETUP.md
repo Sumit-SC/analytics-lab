@@ -26,6 +26,40 @@ marimo edit notebooks/jobspy-scraper-marimo.py
 
 This will start a local web server (usually at http://localhost:8080)
 
+## Refreshing/Reloading Marimo Notebook
+
+When you make code changes to the `.py` file, here are ways to refresh:
+
+### Method 1: Browser Refresh (Quickest)
+- **Press `F5`** or **`Ctrl+R`** (Windows/Linux) or **`Cmd+R`** (Mac)
+- Or click the browser's refresh button
+- Marimo will automatically detect file changes and reload
+
+### Method 2: Reload Button in UI
+- Look for a **"Reload"** or **"🔄"** button in the Marimo UI
+- Click it to reload the notebook from disk
+
+### Method 3: Restart Marimo Server
+```bash
+# Stop the current server (Ctrl+C in terminal)
+# Then restart:
+marimo run notebooks/jobspy-scraper-marimo.py
+```
+
+### Method 4: Auto-Reload (Edit Mode)
+```bash
+# Use edit mode - it watches for file changes
+marimo edit notebooks/jobspy-scraper-marimo.py
+```
+Edit mode automatically reloads when you save changes to the file.
+
+### Method 5: Force Reload (Clear Cache)
+1. Stop the Marimo server (`Ctrl+C`)
+2. Clear browser cache (`Ctrl+Shift+Delete`)
+3. Restart: `marimo run notebooks/jobspy-scraper-marimo.py`
+
+**Recommended**: Use **Method 1** (browser refresh) - it's the fastest and Marimo handles file watching automatically.
+
 ### Option 2: Use Marimo Cloud
 
 1. Sign up at [marimo.io](https://marimo.io)
