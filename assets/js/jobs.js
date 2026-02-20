@@ -91,6 +91,7 @@
 		loadPlanner();
 		setupRssModeAndDropdowns();
 		setupApiBackendToggle();
+		setupRailwayEmbedToggle();
 		setupEnhancedForm();
 		setupEventListeners();
 		fetchAllJobs();
@@ -220,6 +221,15 @@
 				if (statusEl) statusEl.textContent = '✓ Vercel (Serverless)';
 			}
 			localStorage.setItem('job_tracker_api_backend', backend);
+			// Update RSS panel visibility when backend changes
+			var rssRadio = document.getElementById('job-source-rss');
+			if (rssRadio && rssRadio.checked) {
+				var roleSelect = document.getElementById('job-rss-role');
+				var locationSelect = document.getElementById('job-rss-location');
+				var role = roleSelect ? roleSelect.value : 'analyst';
+				var loc = locationSelect ? locationSelect.value : 'remote';
+				fetchRssJobsFromRssjobsApp(role, loc);
+			}
 		}
 		
 		if (vercelRadio) {
@@ -238,6 +248,27 @@
 				}
 			});
 		}
+	}
+
+	// Toggle embed panel for Railway Job Search UI (iframe)
+	var RAILWAY_UI_EMBED_URL = 'https://job-search-api-production-5d5d.up.railway.app/ui/';
+	function setupRailwayEmbedToggle() {
+		var toggleBtn = document.getElementById('railway-embed-toggle');
+		var wrap = document.getElementById('railway-embed-frame-wrap');
+		var iframe = document.getElementById('railway-embed-iframe');
+		var chevron = document.getElementById('railway-embed-chevron');
+		var openLink = document.getElementById('railway-embed-open-link');
+		if (!toggleBtn || !wrap) return;
+		toggleBtn.addEventListener('click', function () {
+			var isOpen = !wrap.classList.contains('hidden');
+			wrap.classList.toggle('hidden', isOpen);
+			toggleBtn.setAttribute('aria-expanded', !isOpen);
+			if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+			if (!isOpen && iframe && iframe.getAttribute('src') === 'about:blank') {
+				iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
+			}
+		});
+		if (openLink) openLink.setAttribute('href', RAILWAY_UI_EMBED_URL);
 	}
 
 	// Populate RSS Role/Location dropdowns from PRIMARY_* and wire mode toggle + rssjobs feed URL.
@@ -270,6 +301,19 @@
 
 		function setRssPanelVisible(visible) {
 			if (rssPanel) rssPanel.classList.toggle('hidden', !visible);
+			// Hide feed URL input when Railway backend is selected (not needed)
+			var feedUrlInput = document.getElementById('job-rss-feed-url');
+			var feedUrlLabel = feedUrlInput ? feedUrlInput.previousElementSibling : null;
+			var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
+			var railwayRadio = document.getElementById('api-backend-railway');
+			var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
+			if (visible && isRailway && feedUrlInput) {
+				feedUrlInput.style.display = 'none';
+				if (feedUrlLabel && feedUrlLabel.tagName === 'LABEL') feedUrlLabel.style.display = 'none';
+			} else if (visible && feedUrlInput) {
+				feedUrlInput.style.display = '';
+				if (feedUrlLabel && feedUrlLabel.tagName === 'LABEL') feedUrlLabel.style.display = '';
+			}
 		}
 		function updateMode() {
 			var isRss = rssRadio && rssRadio.checked;
@@ -733,7 +777,7 @@
 		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
 	}
 	
-	// Fetch jobs from rssjobs.app via our jobs-snapshot proxy (no direct browser CORS)
+	// Fetch jobs from rssjobs.app via Railway /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
 	function fetchRssJobsFromRssjobsApp(keywords, location) {
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
@@ -747,38 +791,6 @@
 		if (emptyEl) emptyEl.classList.add('hidden');
 		allJobs = [];
 		
-		// Require a rssjobs.app feed URL from the user (created on rssjobs.app)
-		var rssjobsFeedUrl = feedUrlInput && feedUrlInput.value ? feedUrlInput.value.trim() : '';
-		if (!rssjobsFeedUrl) {
-			if (loadingEl) loadingEl.style.display = 'none';
-			if (errorEl) errorEl.classList.remove('hidden');
-			if (errorMsgEl) {
-				errorMsgEl.textContent = 'To use RSS mode, first create a feed on rssjobs.app for your Role + Location, then paste the feed URL here.';
-			}
-			return;
-		}
-		
-		// Basic safety: only allow rssjobs.app URLs
-		try {
-			var u = new URL(rssjobsFeedUrl);
-			var host = (u.hostname || '').toLowerCase();
-			if (host !== 'rssjobs.app' && host !== 'www.rssjobs.app') {
-				if (loadingEl) loadingEl.style.display = 'none';
-				if (errorEl) errorEl.classList.remove('hidden');
-				if (errorMsgEl) {
-					errorMsgEl.textContent = 'RSS feed URL must be from rssjobs.app. Example: https://rssjobs.app/feeds/your-feed-id';
-				}
-				return;
-			}
-		} catch (e) {
-			if (loadingEl) loadingEl.style.display = 'none';
-			if (errorEl) errorEl.classList.remove('hidden');
-			if (errorMsgEl) {
-				errorMsgEl.textContent = 'Invalid RSS feed URL. Please paste a full URL from rssjobs.app.';
-			}
-			return;
-		}
-		
 		// Update loading message
 		if (loadingEl) {
 			loadingEl.style.display = 'block';
@@ -787,16 +799,70 @@
 		}
 		if (errorEl) errorEl.classList.add('hidden');
 		
-		// Use the existing jobs-snapshot API (same as main mode), passing rssjobsFeedUrl so the server
-		// fetches the feed (no browser CORS issues).
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		var urlParams = new URLSearchParams(window.location.search);
-		var query = urlParams.get('q') || keywords || 'data analyst';
-		var days = urlParams.get('days') || '3';
-		var limit = urlParams.get('limit') || '400';
-
-		// Delegate to jobs-snapshot helper; it will handle errors and UI updates via cached API fallback
-		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl);
+		var railwayRadio = document.getElementById('api-backend-railway');
+		var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
+		
+		// Use keywords and location from dropdowns (no feed URL required)
+		var query = keywords || 'data analyst';
+		var loc = location || 'remote';
+		var limit = 400;
+		
+		if (isRailway) {
+			// Railway: Use /rssjobs endpoint directly (no feed URL needed, no CORS)
+			var apiUrl = proxyUrl + '/rssjobs?keywords=' + encodeURIComponent(query) + '&location=' + encodeURIComponent(loc) + '&limit=' + limit;
+			
+			fetch(apiUrl)
+				.then(function (r) { return r.ok ? r.json() : null; })
+				.then(function (data) {
+					if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
+						if (loadingEl) loadingEl.style.display = 'none';
+						if (errorEl) errorEl.classList.remove('hidden');
+						if (errorMsgEl) {
+							errorMsgEl.textContent = data && data.error ? data.error : 'No jobs found from rssjobs.app';
+						}
+						return;
+					}
+					
+					allJobs = [];
+					data.jobs.forEach(function (item) {
+						if (!item || !item.title || !item.url) return;
+						allJobs.push({
+							id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+							title: item.title,
+							company: item.company || 'Unknown',
+							location: item.location || loc,
+							url: item.url,
+							description: item.description || '',
+							tags: Array.isArray(item.tags) ? item.tags : ['rssjobs'],
+							source: item.source || 'rssjobs.app',
+							date: item.date || new Date().toISOString(),
+							dateFormatted: item.dateFormatted || '',
+							postedAgo: item.postedAgo || '',
+							matchScore: 0
+						});
+					});
+					
+					sourceCounts = { 'rssjobs.app': allJobs.length };
+					apiSources = ['rssjobs.app'];
+					processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+					saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+				})
+				.catch(function (err) {
+					console.error('Railway /rssjobs error:', err);
+					if (loadingEl) loadingEl.style.display = 'none';
+					if (errorEl) errorEl.classList.remove('hidden');
+					if (errorMsgEl) {
+						errorMsgEl.textContent = 'Failed to fetch jobs from rssjobs.app: ' + (err.message || 'Network error');
+					}
+				});
+		} else {
+			// Vercel: Use jobs-snapshot with optional feed URL (for manual feeds)
+			var rssjobsFeedUrl = feedUrlInput && feedUrlInput.value ? feedUrlInput.value.trim() : '';
+			var urlParams = new URLSearchParams(window.location.search);
+			var days = urlParams.get('days') || '3';
+			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl);
+		}
 	}
 	
 	// Helper function to format date
