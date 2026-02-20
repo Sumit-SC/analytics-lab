@@ -243,6 +243,30 @@
 				</select>
 				<button type="button" id="job-refresh-btn" class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Refresh</button>
 			</div>
+			<!-- Mode: Our scraping vs RSS (rssjobs.app). When RSS: show Role + Location dropdowns and feed URL. -->
+			<div class="flex flex-wrap items-center gap-4 mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Job source:</span>
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input type="radio" name="job-source-mode" value="scrape" id="job-source-scrape" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
+					<span class="text-sm text-gray-800 dark:text-gray-200">Our scraping</span>
+				</label>
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input type="radio" name="job-source-mode" value="rss" id="job-source-rss" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+					<span class="text-sm text-gray-800 dark:text-gray-200">RSS (rssjobs.app)</span>
+				</label>
+				<div id="job-rss-panel" class="hidden flex flex-wrap items-center gap-3 pl-2 border-l border-gray-300 dark:border-gray-600">
+					<label class="text-xs text-gray-500 dark:text-gray-400">Role</label>
+					<select id="job-rss-role" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary">
+						<!-- Filled by JS from PRIMARY_ROLES -->
+					</select>
+					<label class="text-xs text-gray-500 dark:text-gray-400">Location</label>
+					<select id="job-rss-location" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary">
+						<!-- Filled by JS from PRIMARY_LOCATIONS -->
+					</select>
+					<input type="url" id="job-rss-feed-url" placeholder="Paste rssjobs.app feed URL (create at rssjobs.app)" class="flex-1 min-w-[200px] px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-primary">
+					<a href="https://rssjobs.app/" target="_blank" rel="noopener noreferrer" class="text-sm text-primary hover:underline">Create feed at rssjobs.app</a>
+				</div>
+			</div>
 			<div class="flex flex-col gap-2">
 				<div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
 					<span id="job-stats-total">Loading jobs...</span>

@@ -1,6 +1,39 @@
 (function () {
 	'use strict';
 
+	// Primary roles and locations (single source of truth for UI + rssjobs.app). Used by Role/Location dropdowns and API query.
+	var PRIMARY_ROLES = [
+		{ label: 'Data Analyst', query: 'data analyst' },
+		{ label: 'Senior Data Analyst', query: 'senior data analyst' },
+		{ label: 'Business Analyst', query: 'business analyst' },
+		{ label: 'Product Analyst', query: 'product analyst' },
+		{ label: 'BI / Business Intelligence', query: 'business intelligence analyst' },
+		{ label: 'Analytics Engineer', query: 'analytics engineer' },
+		{ label: 'Data Scientist', query: 'data scientist' },
+		{ label: 'Senior Data Scientist', query: 'senior data scientist' },
+		{ label: 'ML Engineer', query: 'machine learning engineer' },
+		{ label: 'Junior / Associate Data Scientist', query: 'junior data scientist' },
+		{ label: 'Decision Scientist', query: 'decision scientist' },
+		{ label: 'Financial Analyst', query: 'financial analyst' },
+		{ label: 'Marketing Analyst', query: 'marketing analyst' },
+		{ label: 'Operations Analyst', query: 'operations analyst' }
+	];
+	var PRIMARY_LOCATIONS = [
+		{ label: 'Remote (any)', value: 'remote' },
+		{ label: 'Remote – India', value: 'remote india' },
+		{ label: 'India', value: 'india' },
+		{ label: 'Pune', value: 'pune' },
+		{ label: 'Mumbai', value: 'mumbai' },
+		{ label: 'Bangalore', value: 'bangalore' },
+		{ label: 'Hyderabad', value: 'hyderabad' },
+		{ label: 'Chennai', value: 'chennai' },
+		{ label: 'Delhi / NCR', value: 'delhi' },
+		{ label: 'Gurgaon', value: 'gurgaon' },
+		{ label: 'Noida', value: 'noida' },
+		{ label: 'Remote – US', value: 'remote us' },
+		{ label: 'Remote – EU', value: 'remote eu' }
+	];
+
 	// Skillset keywords for matching (data science domain)
 	var SKILLS_KEYWORDS = [
 		// Roles
@@ -56,10 +89,84 @@
 	function init() {
 		loadApplications();
 		loadPlanner();
+		setupRssModeAndDropdowns();
 		setupEventListeners();
 		fetchAllJobs();
 		setupPlannerEventListeners();
 		renderPlanner();
+	}
+
+	// Populate RSS Role/Location dropdowns from PRIMARY_* and wire mode toggle + rssjobs feed URL.
+	function setupRssModeAndDropdowns() {
+		var roleSelect = document.getElementById('job-rss-role');
+		var locationSelect = document.getElementById('job-rss-location');
+		var feedUrlInput = document.getElementById('job-rss-feed-url');
+		var rssPanel = document.getElementById('job-rss-panel');
+		var scrapeRadio = document.getElementById('job-source-scrape');
+		var rssRadio = document.getElementById('job-source-rss');
+
+		if (roleSelect) {
+			roleSelect.innerHTML = '';
+			PRIMARY_ROLES.forEach(function (r) {
+				var opt = document.createElement('option');
+				opt.value = r.query;
+				opt.textContent = r.label;
+				roleSelect.appendChild(opt);
+			});
+		}
+		if (locationSelect) {
+			locationSelect.innerHTML = '';
+			PRIMARY_LOCATIONS.forEach(function (loc) {
+				var opt = document.createElement('option');
+				opt.value = loc.value;
+				opt.textContent = loc.label;
+				locationSelect.appendChild(opt);
+			});
+		}
+
+		function setRssPanelVisible(visible) {
+			if (rssPanel) rssPanel.classList.toggle('hidden', !visible);
+		}
+		function updateMode() {
+			var isRss = rssRadio && rssRadio.checked;
+			setRssPanelVisible(!!isRss);
+		}
+		if (scrapeRadio) scrapeRadio.addEventListener('change', updateMode);
+		if (rssRadio) rssRadio.addEventListener('change', updateMode);
+		updateMode();
+
+		// Optional: when role/location change in RSS mode, try to restore saved feed URL for this combo
+		var rssStorageKey = 'job_tracker_rss_feed_url';
+		function saveRssFeedUrl() {
+			if (!feedUrlInput || !feedUrlInput.value.trim()) return;
+			try {
+				var role = roleSelect ? roleSelect.value : '';
+				var loc = locationSelect ? locationSelect.value : '';
+				var key = rssStorageKey + '_' + role + '_' + loc;
+				localStorage.setItem(key, feedUrlInput.value.trim());
+			} catch (e) {}
+		}
+		function loadRssFeedUrl() {
+			try {
+				var role = roleSelect ? roleSelect.value : '';
+				var loc = locationSelect ? locationSelect.value : '';
+				var key = rssStorageKey + '_' + role + '_' + loc;
+				var saved = localStorage.getItem(key);
+				if (saved && feedUrlInput) feedUrlInput.value = saved;
+			} catch (e) {}
+		}
+		if (feedUrlInput) feedUrlInput.addEventListener('blur', saveRssFeedUrl);
+		if (roleSelect) roleSelect.addEventListener('change', loadRssFeedUrl);
+		if (locationSelect) locationSelect.addEventListener('change', loadRssFeedUrl);
+
+		// If URL has ?rssjobs=..., switch to RSS mode and prefill feed URL
+		var urlParams = new URLSearchParams(window.location.search);
+		var rssParam = urlParams.get('rssjobs');
+		if (rssParam && rssParam.trim()) {
+			if (rssRadio) rssRadio.checked = true;
+			if (feedUrlInput) feedUrlInput.value = rssParam.trim();
+			setRssPanelVisible(true);
+		}
 	}
 
 	// Load saved application statuses
@@ -385,6 +492,19 @@
 		var days = urlParams.get('days') || '3'; // Default to 3 days for headless scraping
 		var limit = urlParams.get('limit') || '400';
 		var location = urlParams.get('location') || 'remote';
+		// RSS mode: use feed URL from UI (Role + Location are the "endgame"; jobs fetched via rssjobs.app)
+		var useRssMode = document.getElementById('job-source-rss') && document.getElementById('job-source-rss').checked;
+		var rssjobsUrl = '';
+		if (useRssMode) {
+			var feedInput = document.getElementById('job-rss-feed-url');
+			rssjobsUrl = (feedInput && feedInput.value) ? feedInput.value.trim() : '';
+			// In RSS mode, use selected role/location for API context (snapshot still merges rssjobs feed)
+			var rssRole = document.getElementById('job-rss-role');
+			var rssLoc = document.getElementById('job-rss-location');
+			if (rssRole && rssRole.value) query = rssRole.value;
+			if (rssLoc && rssLoc.value) location = rssLoc.value;
+		}
+		if (!rssjobsUrl) rssjobsUrl = urlParams.get('rssjobs') || '';
 		
 		// If forcing refresh, call refresh endpoint first, then snapshot (same API as playground)
 		if (forceRefresh) {
@@ -396,17 +516,17 @@
 				.then(function (r) { return r.ok ? r.json() : null; })
 				.then(function (refreshData) {
 					// After refresh, always fetch snapshot so UI shows same data as playground
-					fetchJobsSnapshot(proxyUrl, query, days, limit);
+					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
 				})
 				.catch(function (err) {
 					console.error('Refresh failed:', err);
-					fetchJobsSnapshot(proxyUrl, query, days, limit);
+					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
 				});
 			return;
 		}
 		
 		// Primary: use jobs-snapshot (same API as playground) so results and sources match
-		fetchJobsSnapshot(proxyUrl, query, days, limit);
+		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
 	}
 	
 	// Try browser cache then show error (used when both snapshot and cached API fail)
@@ -475,11 +595,14 @@
 			});
 	}
 	
-	// Primary: jobs-snapshot API (same as Playground — same results and sources)
-	function fetchJobsSnapshot(proxyUrl, query, days, limit) {
+	// Primary: jobs-snapshot API (same as Playground — same results and sources). Optional rssjobs = rssjobs.app feed URL.
+	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl) {
 		var apiUrl = proxyUrl 
 			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
 			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
+		if (rssjobsFeedUrl && rssjobsFeedUrl.trim().length > 0) {
+			apiUrl += '&rssjobs=' + encodeURIComponent(rssjobsFeedUrl.trim());
+		}
 		
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
