@@ -91,6 +91,7 @@
 		loadPlanner();
 		setupRssModeAndDropdowns();
 		setupApiBackendToggle();
+		setupVercelSearchSection();
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
 		setupEventListeners();
@@ -225,10 +226,12 @@
 		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'railway');
 	}
 
-	// Railway: show search config. Vercel: hide search config, fetch directly from jobs-snapshot/refresh.
+	// Railway: show search config. Vercel: show vercel-search-section, hide search config.
 	function applyBackendVisibility(backend) {
 		var searchConfig = document.getElementById('job-search-config-section');
+		var vercelSearch = document.getElementById('vercel-search-section');
 		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'railway');
+		if (vercelSearch) vercelSearch.classList.toggle('hidden', backend !== 'vercel');
 	}
 
 	// Gray out / disable form controls that Railway API doesn't use (q, days, limit only)
@@ -270,6 +273,29 @@
 			var siteInputs = jobSitesContainer.querySelectorAll('input[type="checkbox"]');
 			for (var i = 0; i < siteInputs.length; i++) siteInputs[i].disabled = isRailway;
 		}
+	}
+
+	// Vercel-only search: role, location, days + Search button; Search hits refresh then snapshot
+	function setupVercelSearchSection() {
+		var roleSelect = document.getElementById('vercel-search-role');
+		var locationSelect = document.getElementById('vercel-search-location');
+		var searchBtn = document.getElementById('vercel-search-btn');
+		if (!roleSelect || !locationSelect) return;
+		PRIMARY_ROLES.forEach(function (r) {
+			var opt = document.createElement('option');
+			opt.value = r.query;
+			opt.textContent = r.label;
+			if (r.query === 'data analyst') opt.selected = true;
+			roleSelect.appendChild(opt);
+		});
+		PRIMARY_LOCATIONS.forEach(function (loc) {
+			var opt = document.createElement('option');
+			opt.value = loc.value;
+			opt.textContent = loc.label;
+			if (loc.value === 'remote') opt.selected = true;
+			locationSelect.appendChild(opt);
+		});
+		if (searchBtn) searchBtn.addEventListener('click', function () { fetchAllJobs(true); });
 	}
 
 	// Railway UI embed at top: collapsible; on expand load iframe to Railway UI URL
@@ -692,17 +718,28 @@
 		var railwayRadio = document.getElementById('api-backend-railway');
 		var isRailway = (railwayRadio && railwayRadio.checked);
 		
-		// Get query from enhanced form inputs or URL params or default
 		var urlParams = new URLSearchParams(window.location.search);
 		var searchInput = document.getElementById('job-search-input');
 		var locationInput = document.getElementById('job-location-input');
 		var daysSlider = document.getElementById('days-old-slider');
 		var resultsSlider = document.getElementById('results-wanted-slider');
+		var vercelRole = document.getElementById('vercel-search-role');
+		var vercelLocation = document.getElementById('vercel-search-location');
+		var vercelDays = document.getElementById('vercel-search-days');
 		
-		var query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'data analyst');
-		var days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '3');
-		var limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
-		var location = (locationInput && locationInput.value) ? locationInput.value.trim() : (urlParams.get('location') || 'remote');
+		// For Railway: use search config inputs. For Vercel: use Vercel search section (role, location, days)
+		var query, days, limit, location;
+		if (isRailway) {
+			query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'data analyst');
+			days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '3');
+			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
+			location = (locationInput && locationInput.value) ? locationInput.value.trim() : (urlParams.get('location') || 'remote');
+		} else {
+			query = (vercelRole && vercelRole.value) ? vercelRole.value.trim() : (urlParams.get('q') || 'data analyst');
+			location = (vercelLocation && vercelLocation.value) ? vercelLocation.value.trim() : (urlParams.get('location') || 'remote');
+			days = (vercelDays && vercelDays.value) ? vercelDays.value : (urlParams.get('days') || '3');
+			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
+		}
 		// Pagination for Railway
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;

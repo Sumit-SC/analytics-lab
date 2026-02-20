@@ -315,6 +315,40 @@
 				<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
 			</div>
 			
+			<!-- Vercel search: role, location, days + Search button (visible only when Backend = Vercel) -->
+			<div id="vercel-search-section" class="hidden mb-6 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+				<h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+					<span>🔍</span> Search (Vercel)
+				</h2>
+				<div class="flex flex-wrap items-end gap-3">
+					<div>
+						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Role</label>
+						<select id="vercel-search-role" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[180px]">
+							<!-- Filled by JS from PRIMARY_ROLES -->
+						</select>
+					</div>
+					<div>
+						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Location</label>
+						<select id="vercel-search-location" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[140px]">
+							<!-- Filled by JS from PRIMARY_LOCATIONS -->
+						</select>
+					</div>
+					<div>
+						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Days old (max)</label>
+						<select id="vercel-search-days" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+							<option value="1">1</option>
+							<option value="3" selected>3</option>
+							<option value="7">7</option>
+							<option value="14">14</option>
+							<option value="30">30</option>
+						</select>
+					</div>
+					<button type="button" id="vercel-search-btn" class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm shadow-sm">
+						Search Jobs
+					</button>
+				</div>
+			</div>
+			
 			<div id="job-tracker-main">
 			<!-- Search Configuration: shown only when Backend = Railway -->
 			<div id="job-search-config-section" class="mb-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
