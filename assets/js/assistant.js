@@ -259,5 +259,17 @@
 			sendBtn.click();
 		}
 	});
+
+	// Global: open assistant with a pre-filled message (e.g. from Jobs "Prep for interview")
+	window.openAssistantWithMessage = function (msg) {
+		if (!msg) return;
+		openPanel();
+		setTimeout(function () {
+			if (inputEl) {
+				inputEl.value = msg;
+				inputEl.focus();
+			}
+		}, 150);
+	};
 })();
 

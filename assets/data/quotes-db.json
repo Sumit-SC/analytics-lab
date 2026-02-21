@@ -176,7 +176,15 @@
     {"text": "Life is either a daring adventure or nothing at all.", "author": "Helen Keller", "source": "", "images": ["https://picsum.photos/seed/life5a/800/400", "https://picsum.photos/seed/life5b/800/400"]},
     {"text": "You only live once, but if you do it right, once is enough.", "author": "Mae West", "source": "", "images": ["https://picsum.photos/seed/life6a/800/400", "https://picsum.photos/seed/life6b/800/400"]},
     {"text": "The unexamined life is not worth living.", "author": "Socrates", "source": "", "images": ["https://picsum.photos/seed/life7a/800/400", "https://picsum.photos/seed/life7b/800/400"]},
-    {"text": "Life isn't about finding yourself. Life is about creating yourself.", "author": "George Bernard Shaw", "source": "", "images": ["https://picsum.photos/seed/life8a/800/400", "https://picsum.photos/seed/life8b/800/400"]}
+    {"text": "Life isn't about finding yourself. Life is about creating yourself.", "author": "George Bernard Shaw", "source": "", "images": ["https://picsum.photos/seed/life8a/800/400", "https://picsum.photos/seed/life8b/800/400"]},
+    {"text": "We accept the love we think we deserve.", "author": "Stephen Chbosky", "source": "The Perks of Being a Wallflower", "images": ["https://picsum.photos/seed/love1a/800/400", "https://picsum.photos/seed/love1b/800/400"]},
+    {"text": "A real friend is one who walks in when the rest of the world walks out.", "author": "Walter Winchell", "source": "", "images": ["https://picsum.photos/seed/fr1a/800/400", "https://picsum.photos/seed/fr1b/800/400"]},
+    {"text": "The heart was made to be broken.", "author": "Oscar Wilde", "source": "", "images": ["https://picsum.photos/seed/hb2a/800/400", "https://picsum.photos/seed/hb2b/800/400"]},
+    {"text": "It is during our darkest moments that we must focus to see the light.", "author": "Aristotle", "source": "", "images": ["https://picsum.photos/seed/life9a/800/400", "https://picsum.photos/seed/life9b/800/400"]},
+    {"text": "The pain you feel today will be the strength you feel tomorrow.", "author": "Unknown", "source": "", "images": ["https://picsum.photos/seed/hb6a/800/400", "https://picsum.photos/seed/hb6b/800/400"]},
+    {"text": "Some of us think holding on makes us strong; but sometimes it is letting go.", "author": "Hermann Hesse", "source": "", "images": ["https://picsum.photos/seed/hb8a/800/400", "https://picsum.photos/seed/hb8b/800/400"]},
+    {"text": "The best way to predict the future is to create it.", "author": "Peter Drucker", "source": "", "images": ["https://picsum.photos/seed/wish2a/800/400", "https://picsum.photos/seed/wish2b/800/400"]},
+    {"text": "Hope is the thing with feathers that perches in the soul.", "author": "Emily Dickinson", "source": "", "images": ["https://picsum.photos/seed/wish3a/800/400", "https://picsum.photos/seed/wish3b/800/400"]}
   ],
   "love": [
     {"text": "We accept the love we think we deserve.", "author": "Stephen Chbosky", "source": "The Perks of Being a Wallflower", "images": ["https://picsum.photos/seed/love1a/800/400", "https://picsum.photos/seed/love1b/800/400"]},
@@ -257,5 +265,25 @@
     {"text": "It is during our darkest moments that we must focus to see the light.", "author": "Aristotle", "source": "", "images": ["https://picsum.photos/seed/int6a/800/400", "https://picsum.photos/seed/int6b/800/400"]},
     {"text": "The journey of a thousand miles begins with a single step.", "author": "Lao Tzu", "source": "", "images": ["https://picsum.photos/seed/int7a/800/400", "https://picsum.photos/seed/int7b/800/400"]},
     {"text": "Not all those who wander are lost.", "author": "J.R.R. Tolkien", "source": "", "images": ["https://picsum.photos/seed/int8a/800/400", "https://picsum.photos/seed/int8b/800/400"]}
+  ],
+  "tv_show": [
+    {"text": "Winter is coming.", "author": "Game of Thrones", "source": "Game of Thrones", "images": ["https://picsum.photos/seed/tv1a/800/400", "https://picsum.photos/seed/tv1b/800/400"]},
+    {"text": "I am the one who knocks.", "author": "Walter White", "source": "Breaking Bad", "images": ["https://picsum.photos/seed/tv2a/800/400", "https://picsum.photos/seed/tv2b/800/400"]},
+    {"text": "That's what she said.", "author": "The Office", "source": "The Office", "images": ["https://picsum.photos/seed/tv3a/800/400", "https://picsum.photos/seed/tv3b/800/400"]},
+    {"text": "You know nothing, Jon Snow.", "author": "Ygritte", "source": "Game of Thrones", "images": ["https://picsum.photos/seed/tv4a/800/400", "https://picsum.photos/seed/tv4b/800/400"]},
+    {"text": "We have to go back!", "author": "Lost", "source": "Lost", "images": ["https://picsum.photos/seed/tv5a/800/400", "https://picsum.photos/seed/tv5b/800/400"]},
+    {"text": "Dunder Mifflin, this is Pam.", "author": "The Office", "source": "The Office", "images": ["https://picsum.photos/seed/tv6a/800/400", "https://picsum.photos/seed/tv6b/800/400"]},
+    {"text": "Say my name.", "author": "Breaking Bad", "source": "Breaking Bad", "images": ["https://picsum.photos/seed/tv7a/800/400", "https://picsum.photos/seed/tv7b/800/400"]},
+    {"text": "The truth is out there.", "author": "The X-Files", "source": "The X-Files", "images": ["https://picsum.photos/seed/tv8a/800/400", "https://picsum.photos/seed/tv8b/800/400"]}
+  ],
+  "meme": [
+    {"text": "This is fine.", "author": "Dog in burning room", "source": "Meme", "images": ["https://picsum.photos/seed/meme1a/800/400", "https://picsum.photos/seed/meme1b/800/400"]},
+    {"text": "One does not simply walk into Mordor.", "author": "Boromir", "source": "Meme", "images": ["https://picsum.photos/seed/meme2a/800/400", "https://picsum.photos/seed/meme2b/800/400"]},
+    {"text": "I have the high ground!", "author": "Obi-Wan", "source": "Meme", "images": ["https://picsum.photos/seed/meme3a/800/400", "https://picsum.photos/seed/meme3b/800/400"]},
+    {"text": "Hello there.", "author": "Obi-Wan Kenobi", "source": "Meme", "images": ["https://picsum.photos/seed/meme4a/800/400", "https://picsum.photos/seed/meme4b/800/400"]},
+    {"text": "It's over 9000!", "author": "Vegeta", "source": "Meme", "images": ["https://picsum.photos/seed/meme5a/800/400", "https://picsum.photos/seed/meme5b/800/400"]},
+    {"text": "I'm not even supposed to be here today.", "author": "Clerks", "source": "Meme", "images": ["https://picsum.photos/seed/meme6a/800/400", "https://picsum.photos/seed/meme6b/800/400"]},
+    {"text": "Ah, the negotiator.", "author": "General Grievous", "source": "Meme", "images": ["https://picsum.photos/seed/meme7a/800/400", "https://picsum.photos/seed/meme7b/800/400"]},
+    {"text": "Task failed successfully.", "author": "Windows", "source": "Meme", "images": ["https://picsum.photos/seed/meme8a/800/400", "https://picsum.photos/seed/meme8b/800/400"]}
   ]
 }

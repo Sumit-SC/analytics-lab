@@ -306,16 +306,29 @@
 		var toggleText = document.getElementById('railway-ui-embed-toggle-text');
 		var toggleIcon = document.getElementById('railway-ui-embed-toggle-icon');
 		if (!toggleBtn || !contentDiv) return;
-		toggleBtn.addEventListener('click', function () {
+		var toggleLock = false;
+		function handleToggle() {
+			if (toggleLock) return;
+			toggleLock = true;
+			setTimeout(function () { toggleLock = false; }, 400);
+			var wasHidden = contentDiv.classList.contains('hidden');
 			contentDiv.classList.toggle('hidden');
 			var expanded = !contentDiv.classList.contains('hidden');
 			toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 			if (toggleText) toggleText.textContent = expanded ? 'Click to collapse' : 'Click to expand';
 			if (toggleIcon) toggleIcon.style.transform = expanded ? 'rotate(180deg)' : '';
-			if (expanded && iframe && (iframe.getAttribute('src') === 'about:blank' || !iframe.getAttribute('src'))) {
-				iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
+			if (expanded && iframe) {
+				var src = iframe.getAttribute('src') || '';
+				if (!src || src === 'about:blank' || src === '') {
+					iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
+				}
 			}
-		});
+		}
+		toggleBtn.addEventListener('click', handleToggle);
+		toggleBtn.addEventListener('touchend', function (e) {
+			e.preventDefault();
+			handleToggle();
+		}, { passive: false });
 	}
 
 	// Populate RSS Role/Location dropdowns (no-op when Job source block removed)
@@ -797,17 +810,43 @@
 		}
 		
 		// Vercel API: Use /api/jobs-snapshot and /api/jobs-refresh endpoints
-		// If forcing refresh, call refresh endpoint first, then snapshot (same API as playground)
+		// If forcing refresh, call refresh endpoint; use its response when it has jobs, else fall back to snapshot
 		if (forceRefresh) {
-			var refreshUrl = proxyUrl 
+			var refreshUrl = proxyUrl
 				? (proxyUrl + '/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location))
 				: ('/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location));
-			
+
 			fetch(refreshUrl)
 				.then(function (r) { return r.ok ? r.json() : null; })
 				.then(function (refreshData) {
-					// After refresh, fetch snapshot so UI shows same data as playground
-					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+					if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs) && refreshData.jobs.length > 0) {
+						allJobs = [];
+						refreshData.jobs.forEach(function (item) {
+							if (!item || !item.title || !item.url) return;
+							allJobs.push({
+								id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+								title: item.title,
+								company: item.company || 'Unknown',
+								location: item.location || 'Remote',
+								url: item.url,
+								description: item.description || '',
+								tags: Array.isArray(item.tags) ? item.tags : [],
+								source: item.source || 'unknown',
+								date: item.date || new Date().toISOString(),
+								dateFormatted: item.dateFormatted || '',
+								postedAgo: item.postedAgo || '',
+								matchScore: 0
+							});
+						});
+						processJobsData(refreshData);
+						saveJobsToBrowserCache({
+							jobs: allJobs.slice(0),
+							sourceCounts: refreshData.sourceCounts || {},
+							sources: refreshData.sources || []
+						});
+					} else {
+						fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+					}
 				})
 				.catch(function (err) {
 					console.error('Refresh failed:', err);
@@ -1270,9 +1309,12 @@
 		updateSourceStats();
 	}
 
+	var currentDetailJob = null;
+
 	function openJobDetails(job) {
 		var modal = document.getElementById('job-detail-modal');
 		if (!modal || !job) return;
+		currentDetailJob = job;
 
 		var titleEl = document.getElementById('job-detail-title');
 		var sourceEl = document.getElementById('job-detail-source');
@@ -1282,6 +1324,7 @@
 		var descEl = document.getElementById('job-detail-description');
 		var applyEl = document.getElementById('job-detail-apply');
 		var plannerBtn = document.getElementById('job-detail-add-planner');
+		var prepBtn = document.getElementById('job-detail-prep-interview');
 
 		if (titleEl) titleEl.textContent = job.title || 'Job details';
 		if (sourceEl) sourceEl.textContent = job.source ? ('Source: ' + job.source) : '';
@@ -1311,6 +1354,18 @@
 			plannerBtn.onclick = function () {
 				addJobToPlanner(job);
 				closeJobDetails();
+			};
+		}
+		if (prepBtn) {
+			prepBtn.onclick = function () {
+				var desc = String(job.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+				if (desc.length > 1200) desc = desc.slice(0, 1200) + '...';
+				var prepMessage = 'Help me prepare for an interview for this role:\n\nRole: ' + (job.title || '') + '\nCompany: ' + (job.company || '') + '\nLocation: ' + (job.location || '') + '\n\nJob description:\n' + desc + '\n\nPlease suggest: 1) 5–8 likely interview questions for this role, 2) how to answer them, 3) key points to emphasize.';
+				if (typeof window.openAssistantWithMessage === 'function') {
+					window.openAssistantWithMessage(prepMessage);
+				} else {
+					window.alert('Assistant is loading. Try again in a moment.');
+				}
 			};
 		}
 

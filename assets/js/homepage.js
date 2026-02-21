@@ -282,6 +282,13 @@
 		if (category === 'kdrama') list = QUOTES_KDRAMA;
 		if (category === 'leaders') list = QUOTES_LEADERS;
 		if (category === 'bollywood') list = QUOTES_BOLLYWOOD || QUOTES_FALLBACK;
+		if (category === 'life' || category === 'tv_show' || category === 'meme') {
+			var fromDb = pickFromLocalDb(category);
+			if (fromDb) {
+				applyQuoteFromDb(fromDb, category);
+				return;
+			}
+		}
 		var q = pick(list);
 		setQuoteUI(q.text, q.attr, '');
 		setQuoteImage(null, q.attr);
@@ -491,22 +498,23 @@
 		category = category || 'all';
 		var actualCategory = category;
 		
-		// Handle simplified categories
+		// Handle simplified categories: all + random = pick one category at random; movies -> movie
 		if (category === 'all' || category === 'random') {
-			// All categories: derive from local DB so new categories (wisdom, inspiring, life, etc.) are included
+			var allowed = ['kdrama', 'anime', 'movie', 'books', 'tv_show', 'leaders', 'meme', 'bollywood', 'life'];
 			var choices = [];
 			if (quotesDb && typeof quotesDb === 'object') {
-				for (var k in quotesDb) {
-					if (k !== 'meta' && Array.isArray(quotesDb[k]) && quotesDb[k].length > 0) choices.push(k);
+				for (var i = 0; i < allowed.length; i++) {
+					var k = allowed[i];
+					if (Array.isArray(quotesDb[k]) && quotesDb[k].length > 0) choices.push(k);
 				}
 			}
-			if (choices.length === 0) choices = ['anime', 'books', 'wisdom', 'leaders', 'movie', 'kdrama', 'bollywood'];
+			if (choices.length === 0) choices = ['anime', 'books', 'leaders', 'movie', 'kdrama', 'bollywood', 'life'];
 			actualCategory = choices[Math.floor(Math.random() * choices.length)];
 		} else if (category === 'movies') {
-			// Movies combines: movie (Hollywood/International)
 			actualCategory = 'movie';
+		} else {
+			actualCategory = category;
 		}
-		// bollywood, kdrama, anime, books, leaders use as-is
 
 		setQuoteLoading(true);
 
@@ -559,22 +567,8 @@
 			return;
 		}
 
-		if (category === 'wisdom') {
-			currentQuoteCategory = 'wisdom';
-			fetchQuotable(['wisdom', 'life', 'inspirational'], function (q) {
-				setQuoteLoading(false);
-				if (q) {
-					setQuoteUI(q.text, q.attr, q.meta);
-					setQuoteImage(null, q.attr);
-				} else {
-					useFallback('all');
-				}
-			});
-			return;
-		}
-
-		// Fallback for categories that exist in static lists
-		if (actualCategory === 'movie' || actualCategory === 'kdrama' || actualCategory === 'leaders' || actualCategory === 'bollywood') {
+		// All other categories from local DB or static fallback: movie, kdrama, leaders, bollywood, life, tv_show, meme
+		if (actualCategory === 'movie' || actualCategory === 'kdrama' || actualCategory === 'leaders' || actualCategory === 'bollywood' || actualCategory === 'life' || actualCategory === 'tv_show' || actualCategory === 'meme') {
 			useFallback(actualCategory);
 			setQuoteLoading(false);
 			return;

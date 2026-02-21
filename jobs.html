@@ -76,6 +76,76 @@
 		#railway-ui-embed-iframe {
 			min-height: 600px;
 		}
+		@media (max-width: 768px) {
+			#railway-ui-embed-toggle {
+				min-height: 48px;
+				padding: 12px 16px;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			#railway-ui-embed-toggle h2 {
+				font-size: 1rem;
+			}
+			#railway-ui-embed-toggle p {
+				font-size: 0.75rem;
+			}
+			#railway-ui-embed-content .p-4 {
+				padding: 12px;
+			}
+			#railway-ui-embed-iframe {
+				min-height: 420px;
+				height: 60vh;
+			}
+		}
+		@media (max-width: 480px) {
+			#railway-ui-embed-iframe {
+				min-height: 360px;
+				height: 55vh;
+			}
+		}
+		/* Job tracker: mobile/tablet */
+		@media (max-width: 768px) {
+			main .space-y-6 > * { margin-bottom: 1rem; }
+			#job-tracker-main .grid { gap: 0.75rem; }
+			#job-tracker-main input[type="text"],
+			#job-tracker-main input[type="number"],
+			#job-tracker-main select {
+				min-height: 44px;
+				font-size: 16px;
+			}
+			#job-list {
+				gap: 0.75rem;
+			}
+			#job-list .job-card {
+				padding: 0.75rem 1rem;
+				min-width: 0;
+			}
+			#job-list .job-card h3,
+			#job-list .job-card .font-semibold {
+				font-size: 0.9375rem;
+				line-height: 1.35;
+			}
+			#job-detail-modal .rounded-xl {
+				max-height: 90vh;
+				overflow-y: auto;
+			}
+			#planner-form.grid {
+				grid-template-columns: 1fr;
+			}
+		}
+		@media (max-width: 480px) {
+			main {
+				padding-left: 0.75rem;
+				padding-right: 0.75rem;
+				padding-top: 1rem;
+				padding-bottom: 1rem;
+			}
+			#job-tracker-main .flex-wrap.gap-4 { gap: 0.5rem; }
+			#job-sites-multiselect {
+				grid-template-columns: 1fr;
+				max-height: 200px;
+			}
+		}
 		/* Enhanced Form Styles */
 		input[type="range"] {
 			-webkit-appearance: none;
@@ -535,7 +605,8 @@
 						<div class="flex flex-wrap gap-2 mb-3" id="job-detail-tags"></div>
 						<p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line" id="job-detail-description"></p>
 					</div>
-					<div class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800">
+					<div class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800 flex-wrap">
+						<button type="button" id="job-detail-prep-interview" class="text-sm px-3 py-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 rounded-lg font-semibold transition-colors border border-amber-400/40">🎤 Prep for interview</button>
 						<button type="button" id="job-detail-add-planner" class="text-sm px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-semibold transition-colors">+ Planner</button>
 						<a id="job-detail-apply" href="#" target="_blank" rel="noopener" class="text-sm px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Apply</a>
 					</div>
@@ -737,6 +808,28 @@
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
 	</div>
+	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl flex items-center justify-center" aria-label="Assistant">
+		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+	</button>
+	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
+	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Assistant">
+		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+			<h3 class="font-semibold text-gray-800 dark:text-gray-100">Interview prep &amp; assistant</h3>
+			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">&#10005;</button>
+		</div>
+		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"></div>
+		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+			<div class="flex gap-2">
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm" placeholder="Ask anything or paste job details for interview prep…">
+				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium">Send</button>
+			</div>
+			<div class="flex flex-wrap gap-2 mt-3">
+				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold">Enable full chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs">Clear</button>
+				<span id="assistant-mode-status" class="text-xs text-gray-500"></span>
+			</div>
+		</div>
+	</div>
 	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
 	<div id="global-resources-flyout">
 		<div class="global-resources-header">
@@ -776,6 +869,7 @@
 	<script src="./assets/js/analytics.js" defer></script>
 	<script src="./assets/js/lazy-panels.js" defer></script>
 	<script src="./assets/js/sidebar.js" defer></script>
+	<script src="./assets/js/assistant.js" defer></script>
 	<script src="./assets/js/jobs.js" defer></script>
 	<script src="./assets/js/register-sw.js" defer></script>
 	<script>
