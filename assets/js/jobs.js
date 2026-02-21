@@ -297,30 +297,74 @@
 		if (searchBtn) searchBtn.addEventListener('click', function () { fetchAllJobs(true); });
 	}
 
-	// Railway UI embed at top: collapsible; on expand load iframe to Railway UI URL
+	// Railway UI embed at top: collapsible; on expand load iframe; detect block (extensions) and show fallback + banner
 	var RAILWAY_UI_EMBED_URL = 'https://job-search-api-production-5d5d.up.railway.app/ui/';
+	var EMBED_LOAD_TIMEOUT_MS = 8000;
+	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
 	function setupRailwayUiEmbedToggle() {
 		var toggleBtn = document.getElementById('railway-ui-embed-toggle');
 		var contentDiv = document.getElementById('railway-ui-embed-content');
 		var iframe = document.getElementById('railway-ui-embed-iframe');
 		var toggleText = document.getElementById('railway-ui-embed-toggle-text');
 		var toggleIcon = document.getElementById('railway-ui-embed-toggle-icon');
+		var fallbackEl = document.getElementById('railway-ui-embed-fallback');
+		var bannerEl = document.getElementById('embed-blocked-banner');
+		var bannerDismissBtn = document.getElementById('embed-blocked-banner-dismiss');
 		if (!toggleBtn || !contentDiv) return;
+		var loadTimeoutId = null;
+		function clearLoadTimeout() {
+			if (loadTimeoutId) {
+				clearTimeout(loadTimeoutId);
+				loadTimeoutId = null;
+			}
+		}
+		function showFallback() {
+			clearLoadTimeout();
+			if (fallbackEl) fallbackEl.classList.remove('hidden');
+			try {
+				if (bannerEl && !sessionStorage.getItem(EMBED_BANNER_DISMISS_KEY)) bannerEl.classList.remove('hidden');
+			} catch (e) { if (bannerEl) bannerEl.classList.remove('hidden'); }
+		}
+		function hideFallback() {
+			if (fallbackEl) fallbackEl.classList.add('hidden');
+		}
+		if (bannerDismissBtn && bannerEl) {
+			bannerDismissBtn.addEventListener('click', function () {
+				bannerEl.classList.add('hidden');
+				try { sessionStorage.setItem(EMBED_BANNER_DISMISS_KEY, '1'); } catch (e) { /* ignore */ }
+			});
+		}
+		if (iframe) {
+			iframe.addEventListener('load', function () {
+				clearLoadTimeout();
+				hideFallback();
+			});
+		}
 		var toggleLock = false;
 		function handleToggle() {
 			if (toggleLock) return;
 			toggleLock = true;
 			setTimeout(function () { toggleLock = false; }, 400);
-			var wasHidden = contentDiv.classList.contains('hidden');
 			contentDiv.classList.toggle('hidden');
 			var expanded = !contentDiv.classList.contains('hidden');
 			toggleBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 			if (toggleText) toggleText.textContent = expanded ? 'Click to collapse' : 'Click to expand';
 			if (toggleIcon) toggleIcon.style.transform = expanded ? 'rotate(180deg)' : '';
-			if (expanded && iframe) {
+			if (!expanded) {
+				clearLoadTimeout();
+				hideFallback();
+				return;
+			}
+			if (iframe) {
 				var src = iframe.getAttribute('src') || '';
 				if (!src || src === 'about:blank' || src === '') {
+					hideFallback();
+					if (bannerEl) bannerEl.classList.add('hidden');
 					iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
+					loadTimeoutId = setTimeout(function () {
+						loadTimeoutId = null;
+						showFallback();
+					}, EMBED_LOAD_TIMEOUT_MS);
 				}
 			}
 		}
