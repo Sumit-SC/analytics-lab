@@ -194,6 +194,21 @@ body {
 	color: rgb(156 163 175);
 }
 
+/* Resources page: Notion-like cards with thumbnail */
+.resource-card-with-thumb {
+	text-decoration: none;
+	color: inherit;
+}
+.resource-card-with-thumb .resource-card-thumb {
+	border-right: 1px solid rgba(148, 163, 184, 0.3);
+}
+.dark .resource-card-with-thumb .resource-card-thumb {
+	border-right-color: rgba(75, 85, 99, 0.5);
+}
+.resource-channel-embed-wrap.hidden {
+	display: none !important;
+}
+
 /* Tools page buttons */
 .tool-btn,
 .tool-sec-btn {
@@ -551,8 +566,14 @@ body {
 	pointer-events: auto;
 }
 
-/* Roadmap Panel Styles */
+/* Roadmap Panel Styles (Resources & Playground) */
+#roadmap-panel.hidden,
+#roadmap-overlay.hidden {
+	display: none !important;
+}
 #roadmap-panel {
+	display: flex;
+	flex-direction: column;
 	transform: translateX(100%);
 	transition: transform 0.3s ease;
 }

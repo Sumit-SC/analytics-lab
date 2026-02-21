@@ -2,6 +2,12 @@
   "python": {
     "title": "Python",
     "summary": "Core language for analytics, scripting, and machine learning. Start here if you are new to programming.",
+    "roadmapUrl": "https://roadmap.sh/python",
+    "reddit": [
+      { "name": "r/Python", "subreddit": "Python" },
+      { "name": "r/learnpython", "subreddit": "learnpython" },
+      { "name": "r/learnprogramming", "subreddit": "learnprogramming" }
+    ],
     "courses": [
       {
         "name": "Kaggle Learn · Python",
@@ -364,6 +370,11 @@
   "sql": {
     "title": "SQL",
     "summary": "Query and aggregate data directly in databases. Essential for analytics work.",
+    "roadmapUrl": "https://roadmap.sh/sql",
+    "reddit": [
+      { "name": "r/SQL", "subreddit": "SQL" },
+      { "name": "r/datascience", "subreddit": "datascience" }
+    ],
     "courses": [
       {
         "name": "Kaggle · Intro to SQL",
@@ -1081,6 +1092,12 @@
   },
   "data-science": {
     "title": "Data Science",
+    "roadmapUrl": "https://roadmap.sh/ai-data-scientist",
+    "reddit": [
+      { "name": "r/datascience", "subreddit": "datascience" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" },
+      { "name": "r/learnmachinelearning", "subreddit": "learnmachinelearning" }
+    ],
     "summary": "End‑to‑end analytics and ML: cleaning data, modeling, evaluation, and communication.",
     "courses": [
       {
@@ -1254,10 +1271,16 @@
         "title": "Data Engineering Full Course (freeCodeCamp)"
       },
       {
-        "id": "PLy4gF-kTfQnP8YzYjP8j4bP5Y5Y5Y5Y5Y5",
-        "title": "Data Engineering Playlist",
+        "id": "PLrAXtmErZgOeiKm4sgNOknGvNjby9efdfg",
+        "title": "Data Engineering Playlist (DataTalksClub / Zoomcamp)",
         "playlist": true
       }
+    ],
+    "roadmapUrl": "https://roadmap.sh/data-engineer",
+    "reddit": [
+      { "name": "r/dataengineering", "subreddit": "dataengineering" },
+      { "name": "r/ETL", "subreddit": "ETL" },
+      { "name": "r/bigdata", "subreddit": "bigdata" }
     ],
     "github": [
       {
@@ -1267,6 +1290,10 @@
       {
         "name": "data-engineering-zoomcamp",
         "url": "https://github.com/DataTalksClub/data-engineering-zoomcamp"
+      },
+      {
+        "name": "Data Engineering Cookbook (Andrej Kretinsky)",
+        "url": "https://github.com/andkret/Cookbook"
       }
     ],
     "paths": [
@@ -1279,6 +1306,12 @@
   "machine-learning": {
     "title": "Machine Learning",
     "summary": "Classical ML: regression, trees, ensembles, model evaluation, and feature engineering.",
+    "roadmapUrl": "https://roadmap.sh/machine-learning-engineer",
+    "reddit": [
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" },
+      { "name": "r/learnmachinelearning", "subreddit": "learnmachinelearning" },
+      { "name": "r/MLquestions", "subreddit": "MLquestions" }
+    ],
     "courses": [
       {
         "name": "Kaggle · Intro to Machine Learning",
@@ -1382,6 +1415,12 @@
   "deep-learning": {
     "title": "Deep Learning",
     "summary": "Neural networks, CNNs, RNNs, transformers, and training tricks.",
+    "roadmapUrl": "https://roadmap.sh/machine-learning-engineer",
+    "reddit": [
+      { "name": "r/deeplearning", "subreddit": "deeplearning" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" },
+      { "name": "r/LanguageTechnology", "subreddit": "LanguageTechnology" }
+    ],
     "courses": [
       {
         "name": "fast.ai · Practical Deep Learning for Coders",
@@ -1890,6 +1929,11 @@
   },
   "mlops": {
     "title": "MLOps",
+    "roadmapUrl": "https://roadmap.sh/ai-engineer",
+    "reddit": [
+      { "name": "r/mlops", "subreddit": "mlops" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" }
+    ],
     "summary": "Deploying, monitoring, and maintaining ML models in production: CI/CD, model versioning, and monitoring.",
     "courses": [
       {

@@ -55,6 +55,14 @@
 		if (t.summary) {
 			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">' + t.summary + '</p>';
 		}
+		var roadmapUrl = (t.roadmapUrl || '').trim();
+		if (roadmapUrl) {
+			html += '<div class="mb-6 p-4 rounded-xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10">';
+			html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">What should I learn next?</p>';
+			html += '<p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Follow a step-by-step roadmap and tick off skills as you go.</p>';
+			html += '<a href="' + roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary text-white px-4 py-2 text-sm font-semibold hover:opacity-90">Open roadmap on roadmap.sh →</a>';
+			html += '</div>';
+		}
 
 		html += '<div class="mb-6 inline-flex flex-wrap gap-2 rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-xs sm:text-sm">';
 		html += '<button type="button" data-tab="youtube" class="tab-btn px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 text-primary font-semibold shadow-sm">YouTube</button>';
@@ -74,54 +82,58 @@
 		html += '<div id="yt-panel" class="p-5"></div>';
 		html += '</section>';
 
-		// Panel: Read / Blogs / Books
+		// Panel: Read / Blogs / Books — Notion-like cards with thumbnail
 		html += '<section data-tab-panel="read" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
 		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">📖 Read / blogs / books</h2></div><div class="p-4 space-y-4 text-sm">';
+		function cardWithThumb(url, name, meta, icon) {
+			var thumb = icon || '📄';
+			return '<a class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all" target="_blank" rel="noopener" href="' + url + '">' +
+				'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">' + thumb + '</div>' +
+				'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + name + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + meta + '</div></div></a>';
+		}
 		if (t.books && t.books.length) {
 			html += '<div><h3 class="font-semibold mb-2">Books & official docs</h3><div class="grid gap-3 sm:grid-cols-2">';
 			t.books.forEach(function (r) {
-				html += '<a class="notion-card block hover:no-underline" target="_blank" rel="noopener" href="' + r.url + '">';
-				html += '<div class="notion-card-title">' + r.name + '</div>';
-				html += '<div class="notion-card-meta">Book / docs</div>';
-				html += '</a>';
+				html += cardWithThumb(r.url, r.name, 'Book / docs', '📖');
 			});
 			html += '</div></div>';
 		}
 		if (t.blogs && t.blogs.length) {
 			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="grid gap-3 sm:grid-cols-2">';
 			t.blogs.forEach(function (b) {
-				html += '<a class="notion-card block hover:no-underline" target="_blank" rel="noopener" href="' + b.url + '">';
-				html += '<div class="notion-card-title">' + b.name + '</div>';
-				html += '<div class="notion-card-meta">Blog / article</div>';
-				html += '</a>';
+				html += cardWithThumb(b.url, b.name, 'Blog / article', '📄');
 			});
 			html += '</div></div>';
 		}
 		if (t.github && t.github.length) {
 			html += '<div class="mt-2"><h3 class="font-semibold mb-2">GitHub repositories</h3><div class="grid gap-3 sm:grid-cols-2">';
 			t.github.forEach(function (g) {
-				html += '<a class="notion-card block hover:no-underline" target="_blank" rel="noopener" href="' + g.url + '">';
-				html += '<div class="notion-card-title">⭐ ' + g.name + '</div>';
-				html += '<div class="notion-card-meta">GitHub repo</div>';
-				html += '</a>';
+				html += cardWithThumb(g.url, g.name, 'GitHub repo', '⭐');
 			});
 			html += '</div></div>';
 		}
-		if ((!t.books || !t.books.length) && (!t.blogs || !t.blogs.length) && (!t.github || !t.github.length)) {
+		if (t.reddit && t.reddit.length) {
+			html += '<div class="mt-2"><h3 class="font-semibold mb-2">Reddit communities</h3><div class="grid gap-3 sm:grid-cols-2">';
+			t.reddit.forEach(function (r) {
+				var url = r.url || ('https://www.reddit.com/r/' + (r.subreddit || r.name || '').replace(/^r\//, '') + '/');
+				html += cardWithThumb(url, r.name || ('r/' + (r.subreddit || '')), 'Reddit', '🔴');
+			});
+			html += '</div></div>';
+		}
+		if ((!t.books || !t.books.length) && (!t.blogs || !t.blogs.length) && (!t.github || !t.github.length) && (!t.reddit || !t.reddit.length)) {
 			html += '<p class="text-sm text-gray-500">(no reading list yet)</p>';
 		}
 		html += '</div></section>';
 
-		// Panel: Courses & paths
+		// Panel: Courses & paths — Notion-like cards with thumbnail
 		html += '<section data-tab-panel="course" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
 		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">🎓 Courses & learning paths</h2></div><div class="p-4 space-y-4 text-sm">';
 		if (t.courses && t.courses.length) {
 			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="grid gap-3 sm:grid-cols-2">';
 			t.courses.forEach(function (c) {
-				html += '<a class="notion-card block hover:no-underline" target="_blank" rel="noopener" href="' + c.url + '">';
-				html += '<div class="notion-card-title">' + c.name + '</div>';
-				html += '<div class="notion-card-meta">Course</div>';
-				html += '</a>';
+				html += '<a class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all" target="_blank" rel="noopener" href="' + c.url + '">' +
+					'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">🎓</div>' +
+					'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + c.name + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Course</div></div></a>';
 			});
 			html += '</div></div>';
 		} else {
@@ -136,15 +148,25 @@
 		}
 		html += '</div></section>';
 
-		// Panel: Best playlists & lists
+		// Panel: Best playlists & lists — GitHub, Reddit, roadmaps
 		html += '<section data-tab-panel="best" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
 		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">⭐ Best playlists & must‑read lists</h2></div><div class="p-4 space-y-4 text-sm">';
-		html += '<p class="text-xs text-gray-500 dark:text-gray-400">Opinionated picks: YouTube playlists, GitHub book lists, and awesome repos. All open in a new tab.</p>';
-		// Show topic-specific GitHub repos if available
+		html += '<p class="text-xs text-gray-500 dark:text-gray-400">Curated GitHub repos, Reddit communities, and learning lists. Use the <strong>Roadmap</strong> button in the nav to see step-by-step paths.</p>';
+		if (t.roadmapUrl) {
+			html += '<div><h3 class="font-semibold mb-1">Suggested roadmap for this topic</h3><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Follow a structured path on roadmap.sh (opens in new tab).</p><a href="' + t.roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary/90 text-white px-3 py-1.5 text-sm font-semibold hover:opacity-90">Open roadmap →</a></div>';
+		}
 		if (t.github && t.github.length) {
-			html += '<div><h3 class="font-semibold mb-1">Topic-specific GitHub Repos</h3><ul class="space-y-1">';
+			html += '<div><h3 class="font-semibold mb-1">Topic-specific GitHub repos</h3><ul class="space-y-1">';
 			t.github.forEach(function (g) {
 				html += '<li><a href="' + g.url + '" target="_blank" rel="noopener" class="underline hover:text-primary">⭐ ' + g.name + ' →</a></li>';
+			});
+			html += '</ul></div>';
+		}
+		if (t.reddit && t.reddit.length) {
+			html += '<div><h3 class="font-semibold mb-1">Reddit communities</h3><ul class="space-y-1">';
+			t.reddit.forEach(function (r) {
+				var url = r.url || ('https://www.reddit.com/r/' + (r.subreddit || r.name || '').replace(/^r\//, '') + '/');
+				html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + (r.name || 'r/' + (r.subreddit || '')) + ' →</a></li>';
 			});
 			html += '</ul></div>';
 		}
@@ -296,13 +318,25 @@
 				iframeWrapper.style.aspectRatio = '16 / 9';
 				var iframe = document.createElement('iframe');
 				iframe.className = 'w-full h-full';
-				iframe.src = hv.playlist
-					? 'https://www.youtube.com/embed/videoseries?list=' + hv.id
-					: 'https://www.youtube.com/embed/' + hv.id + '?rel=0';
+				var embedId = (hv.id || '').trim();
+				var isPlaylist = hv.playlist && (embedId.indexOf('PL') === 0 || embedId.length > 15);
+				var listId = (embedId.indexOf('PL') === 0) ? embedId : ('PL' + embedId);
+				if (isPlaylist) {
+					iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + listId + '&rel=0';
+				} else {
+					iframe.src = 'https://www.youtube.com/embed/' + embedId + '?rel=0';
+				}
 				iframe.title = hv.title || '';
 				iframe.allowFullscreen = true;
 				iframeWrapper.appendChild(iframe);
 				left.appendChild(iframeWrapper);
+				var watchLink = document.createElement('a');
+				watchLink.href = isPlaylist ? ('https://www.youtube.com/playlist?list=' + listId) : ('https://www.youtube.com/watch?v=' + embedId);
+				watchLink.target = '_blank';
+				watchLink.rel = 'noopener';
+				watchLink.className = 'text-xs text-primary hover:underline mt-1 inline-block';
+				watchLink.textContent = 'Watch on YouTube →';
+				left.appendChild(watchLink);
 
 				var heroTitle = document.createElement('p');
 				heroTitle.className = 'text-sm font-medium text-gray-800 dark:text-gray-100';
@@ -373,38 +407,51 @@
 				grid.appendChild(right);
 				container.appendChild(grid);
 
+				var searchRow = document.createElement('div');
+				searchRow.className = 'flex flex-wrap items-center gap-2 mt-4';
+				var searchInput = document.createElement('input');
+				searchInput.type = 'text';
+				searchInput.placeholder = 'Search YouTube… e.g. ' + (topic.title || '') + ' tutorial';
+				searchInput.className = 'flex-1 min-w-[180px] rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200';
+				searchInput.setAttribute('aria-label', 'YouTube search query');
+				searchRow.appendChild(searchInput);
 				var searchBtnEl = document.createElement('button');
 				searchBtnEl.type = 'button';
-				searchBtnEl.id = 'yt-search';
 				searchBtnEl.className =
-					'inline-flex items-center gap-1 mt-4 rounded-full border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800';
-				searchBtnEl.textContent = 'Search on YouTube';
+					'rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800';
+				searchBtnEl.textContent = 'Search YouTube';
 				searchBtnEl.addEventListener('click', function () {
-					var q = 'best ' + (topic.title || '') + ' tutorial for beginners';
+					var q = (searchInput.value || '').trim() || ('best ' + (topic.title || '') + ' tutorial');
 					var url = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
 					window.open(url, '_blank', 'noopener');
 				});
-				container.appendChild(searchBtnEl);
+				searchInput.addEventListener('keydown', function (e) {
+					if (e.key === 'Enter') searchBtnEl.click();
+				});
+				searchRow.appendChild(searchBtnEl);
+				container.appendChild(searchRow);
 
-				// Recommended channels: tap channel name to show mini embed (channel uploads) + link to open full channel
+				// Recommended channels: tap to show uploads embed (UU = uploads playlist for channel UC...)
 				var channels = topic.channels || [];
 				if (channels.length) {
 					var chSection = document.createElement('div');
 					chSection.className = 'mt-6 pt-4 border-t border-gray-200 dark:border-gray-700';
 					var chTitle = document.createElement('h3');
 					chTitle.className = 'text-sm font-bold text-gray-800 dark:text-gray-100 mb-2';
-					chTitle.textContent = 'Recommended channels (tap to explore on this page)';
+					chTitle.textContent = 'Recommended channels (tap to load uploads here, or open on YouTube)';
 					chSection.appendChild(chTitle);
 					var chList = document.createElement('div');
 					chList.className = 'flex flex-wrap gap-2';
 					channels.forEach(function (ch) {
 						if (!ch || !ch.id) return;
-						var uploadsListId = 'UU' + ch.id.slice(2);
-						var channelUrl = 'https://www.youtube.com/channel/' + ch.id;
+						var cid = String(ch.id).trim();
+						if (cid.length < 10) return;
+						var uploadsListId = (cid.indexOf('UC') === 0) ? ('UU' + cid.slice(2)) : cid;
+						var channelUrl = (cid.indexOf('UC') === 0) ? ('https://www.youtube.com/channel/' + cid) : ('https://www.youtube.com/' + cid);
 						var btn = document.createElement('button');
 						btn.type = 'button';
 						btn.className = 'resource-channel-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left';
-						btn.setAttribute('data-channel-id', ch.id);
+						btn.setAttribute('data-channel-id', cid);
 						btn.setAttribute('data-uploads-list', uploadsListId);
 						btn.setAttribute('data-channel-url', channelUrl);
 						btn.innerHTML = (ch.name || 'Channel') + (ch.description ? ' <span class="text-gray-500 dark:text-gray-400 font-normal">· ' + ch.description + '</span>' : '');
