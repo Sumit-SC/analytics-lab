@@ -66,11 +66,16 @@
 		try { localStorage.setItem(SAAVN_INDEX_KEY, String(i)); } catch (e) {}
 	}
 
+	// Valid YouTube video ID: exactly 11 chars [a-zA-Z0-9_-]. Check before embed to avoid broken iframes.
+	function isValidYouTubeVideoId(id) {
+		return typeof id === 'string' && /^[a-zA-Z0-9_-]{11}$/.test(id.trim());
+	}
 	function parseVideoId(input) {
 		if (!input || !input.trim()) return '';
 		var s = input.trim();
 		var m = s.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-		return m ? m[1] : (s.length === 11 ? s : '');
+		var id = m ? m[1] : (s.length === 11 ? s : '');
+		return isValidYouTubeVideoId(id) ? id : '';
 	}
 
 	// --- Music bar ---
@@ -308,13 +313,17 @@
 					});
 					return;
 				}
-				var id = parseVideoId(barInput.value);
+				var raw = barInput.value.trim();
+				var id = parseVideoId(raw);
 				if (id) {
 					var q = getQueue();
 					q.push({ id: id, title: '' });
 					setQueue(q);
 					barInput.value = '';
 					loadVideo(id);
+				} else if (raw && /youtube|youtu\.be/i.test(raw)) {
+					if (barTitle) barTitle.textContent = 'Invalid YouTube URL — check the link and try again';
+					setTimeout(function () { updateBarTitle(); }, 3000);
 				}
 			});
 		}
@@ -409,7 +418,7 @@
 		}
 		if (!panelFrame) return;
 		if (!trimmed) {
-			if (!panelFrame.src && DEFAULT_EMBED_ID) {
+			if (!panelFrame.src && DEFAULT_EMBED_ID && isValidYouTubeVideoId(DEFAULT_EMBED_ID)) {
 				panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
 			}
 			return;
@@ -419,10 +428,19 @@
 			panelFrame.src = embedVideoUrl(id);
 			return;
 		}
+		// Looks like a URL but invalid — don't set iframe, show feedback
+		if (/youtube|youtu\.be/i.test(trimmed)) {
+			panelFrame.removeAttribute('src');
+			var oldPlaceholder = panelInput.placeholder;
+			panelInput.placeholder = 'Invalid YouTube URL — check the link or try a video ID';
+			panelInput.value = '';
+			setTimeout(function () { panelInput.placeholder = oldPlaceholder; }, 4000);
+			return;
+		}
 		try {
 			window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(trimmed), '_blank', 'noopener');
 		} catch (e) {}
-		if (!panelFrame.src && DEFAULT_EMBED_ID) {
+		if (!panelFrame.src && DEFAULT_EMBED_ID && isValidYouTubeVideoId(DEFAULT_EMBED_ID)) {
 			panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
 		}
 	}

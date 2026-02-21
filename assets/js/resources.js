@@ -1,11 +1,23 @@
 /**
  * Resources page: topic selector, tabs (YouTube / Read / Courses / Best), fetch resources.json.
+ * Validates YouTube URLs/IDs before embed so invalid links don't break the player.
  */
 (function () {
 	var params = new URLSearchParams(window.location.search);
 	var initialTopic = (params.get('topic') || 'python').toLowerCase().replace(/[^a-z0-9-]/g, '');
 	var root = document.getElementById('resource-root');
 	var notFound = document.getElementById('resource-not-found');
+
+	function isValidYouTubeVideoId(id) {
+		return typeof id === 'string' && /^[a-zA-Z0-9_-]{11}$/.test(id.trim());
+	}
+	function isValidYouTubePlaylistId(id) {
+		return typeof id === 'string' && /^PL[\w-]{10,}$/.test(id.trim());
+	}
+	function isValidYouTubeEntry(v) {
+		if (!v || !v.id) return false;
+		return v.playlist ? isValidYouTubePlaylistId(v.id) : isValidYouTubeVideoId(v.id);
+	}
 
 	function setDocumentTitle(topic) {
 		if (topic && topic.title) {
@@ -55,6 +67,15 @@
 		if (t.summary) {
 			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">' + t.summary + '</p>';
 		}
+		// Help users learn properly: suggested order (Notion-style callout)
+		html += '<div class="mb-6 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">';
+		html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">How to use this page</p>';
+		html += '<ol class="text-sm text-gray-600 dark:text-gray-400 list-decimal list-inside space-y-1">';
+		html += '<li><strong>YouTube</strong> — Watch a short intro or full course to get the big picture.</li>';
+		html += '<li><strong>Read / Books</strong> — Deepen with official docs, books, and blogs.</li>';
+		html += '<li><strong>Courses</strong> — Follow a structured path (e.g. Coursera, freeCodeCamp).</li>';
+		html += '<li><strong>Best</strong> — Curated playlists and lists for this topic.</li>';
+		html += '</ol><p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Pick one tab and work through it; then move to the next. Use the roadmap link below for a full skill checklist.</p></div>';
 		var roadmapUrl = (t.roadmapUrl || '').trim();
 		if (roadmapUrl) {
 			html += '<div class="mb-6 p-4 rounded-xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10">';
@@ -92,28 +113,28 @@
 				'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + name + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + meta + '</div></div></a>';
 		}
 		if (t.books && t.books.length) {
-			html += '<div><h3 class="font-semibold mb-2">Books & official docs</h3><div class="grid gap-3 sm:grid-cols-2">';
+			html += '<div><h3 class="font-semibold mb-2">Books & official docs</h3><div class="resource-gallery">';
 			t.books.forEach(function (r) {
 				html += cardWithThumb(r.url, r.name, 'Book / docs', '📖');
 			});
 			html += '</div></div>';
 		}
 		if (t.blogs && t.blogs.length) {
-			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="grid gap-3 sm:grid-cols-2">';
+			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="resource-gallery">';
 			t.blogs.forEach(function (b) {
 				html += cardWithThumb(b.url, b.name, 'Blog / article', '📄');
 			});
 			html += '</div></div>';
 		}
 		if (t.github && t.github.length) {
-			html += '<div class="mt-2"><h3 class="font-semibold mb-2">GitHub repositories</h3><div class="grid gap-3 sm:grid-cols-2">';
+			html += '<div class="mt-2"><h3 class="font-semibold mb-2">GitHub repositories</h3><div class="resource-gallery">';
 			t.github.forEach(function (g) {
 				html += cardWithThumb(g.url, g.name, 'GitHub repo', '⭐');
 			});
 			html += '</div></div>';
 		}
 		if (t.reddit && t.reddit.length) {
-			html += '<div class="mt-2"><h3 class="font-semibold mb-2">Reddit communities</h3><div class="grid gap-3 sm:grid-cols-2">';
+			html += '<div class="mt-2"><h3 class="font-semibold mb-2">Reddit communities</h3><div class="resource-gallery">';
 			t.reddit.forEach(function (r) {
 				var url = r.url || ('https://www.reddit.com/r/' + (r.subreddit || r.name || '').replace(/^r\//, '') + '/');
 				html += cardWithThumb(url, r.name || ('r/' + (r.subreddit || '')), 'Reddit', '🔴');
@@ -129,7 +150,7 @@
 		html += '<section data-tab-panel="course" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
 		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">🎓 Courses & learning paths</h2></div><div class="p-4 space-y-4 text-sm">';
 		if (t.courses && t.courses.length) {
-			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="grid gap-3 sm:grid-cols-2">';
+			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="resource-gallery">';
 			t.courses.forEach(function (c) {
 				html += '<a class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all" target="_blank" rel="noopener" href="' + c.url + '">' +
 					'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">🎓</div>' +
@@ -227,9 +248,9 @@
 			var container = panel.querySelector('#yt-panel');
 			if (!container) return;
 
-			var vids = (topic.youtube || []).slice(0, 15);
+			var vids = (topic.youtube || []).filter(isValidYouTubeEntry).slice(0, 15);
 			if (!vids.length) {
-				container.innerHTML = '<p class="text-sm text-gray-500">(no curated videos yet)</p>';
+				container.innerHTML = '<p class="text-sm text-gray-500">(no valid curated videos for this topic yet)</p>';
 				return;
 			}
 
@@ -312,14 +333,19 @@
 				var left = document.createElement('div');
 				left.className = 'md:col-span-2 space-y-2';
 				var hv = active[heroIdx];
+				var embedId = (hv.id || '').trim();
+				var isPlaylist = hv.playlist && isValidYouTubePlaylistId(embedId);
+				var validVideo = !hv.playlist && isValidYouTubeVideoId(embedId);
+				if (!isPlaylist && !validVideo) {
+					container.innerHTML = '<p class="text-sm text-gray-500">(invalid video/playlist ID in data)</p>';
+					return;
+				}
 
 				var iframeWrapper = document.createElement('div');
 				iframeWrapper.className = 'rounded-lg overflow-hidden bg-black material-elevation-2';
 				iframeWrapper.style.aspectRatio = '16 / 9';
 				var iframe = document.createElement('iframe');
 				iframe.className = 'w-full h-full';
-				var embedId = (hv.id || '').trim();
-				var isPlaylist = hv.playlist && (embedId.indexOf('PL') === 0 || embedId.length > 15);
 				var listId = (embedId.indexOf('PL') === 0) ? embedId : ('PL' + embedId);
 				if (isPlaylist) {
 					iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + listId + '&rel=0';
