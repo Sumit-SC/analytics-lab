@@ -671,8 +671,12 @@ body {
 	display: none;
 }
 
-/* Homepage quote background: show whole poster (no stretch/crop) */
-/* 1) Contain = entire poster visible; no stretching or cropping */
+/* Homepage quote background: full poster in a fixed aspect-ratio frame (no stretch, no crop) */
+/* 1) Quote panel has poster aspect ratio 2:3 so height is fixed from width; full image fits inside */
+.home-quote-panel {
+	aspect-ratio: 2 / 3;
+	max-height: min(85vh, 720px);
+}
 #home-quote-bg,
 .home-quote-bg-image {
 	background-size: contain;

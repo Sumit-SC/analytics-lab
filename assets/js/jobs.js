@@ -801,6 +801,17 @@
 		var perPage = parseInt(urlParams.get('per_page')) || null;
 		// Check for manual rssjobs URL parameter (fallback)
 		var rssjobsUrl = urlParams.get('rssjobs') || '';
+
+		// Analytics: capture job search (Railway vs Vercel) so dashboard shows usage
+		if (typeof window.trackEvent === 'function') {
+			window.trackEvent('jobs_search_' + (isRailway ? 'railway' : 'vercel'), {
+				backend: isRailway ? 'railway' : 'vercel',
+				query: query || null,
+				days: days || null,
+				limit: limit || null,
+				forceRefresh: !!forceRefresh
+			});
+		}
 		
 		// Railway API: Use /refresh (POST) and /jobs (GET) endpoints
 		if (isRailway) {

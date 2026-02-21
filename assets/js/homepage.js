@@ -779,18 +779,23 @@
 		setInterval(updateClock, 1000);
 	}
 
-	// Weather (Open-Meteo): saved location, search city, or use my location
+	// Weather (Open-Meteo): saved location, search city, or use my location. Runs when DOM is ready.
 	var WEATHER_LOCATION_KEY = 'standalone_weather_location';
-	var weatherEl = document.getElementById('home-weather');
-	var weatherCity = document.getElementById('home-weather-city');
-	var weatherSearch = document.getElementById('home-weather-search');
-	var weatherSetBtn = document.getElementById('home-weather-set');
-	var weatherMyLocBtn = document.getElementById('home-weather-mylocation');
-	var weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
 	var defaultLat = 51.5074, defaultLon = -0.1278;
 	var lastDailyForecast = null;
 
-	function getSavedLocation() {
+	function initWeather() {
+		var weatherEl = document.getElementById('home-weather');
+		var weatherCity = document.getElementById('home-weather-city');
+		var weatherSearch = document.getElementById('home-weather-search');
+		var weatherSetBtn = document.getElementById('home-weather-set');
+		var weatherMyLocBtn = document.getElementById('home-weather-mylocation');
+		var weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
+		if (!weatherEl) return;
+		weatherEl.innerHTML = '<span class="text-sm opacity-70">Loading…</span>';
+		if (weatherCity) weatherCity.textContent = '—';
+
+		function getSavedLocation() {
 		try {
 			var raw = localStorage.getItem(WEATHER_LOCATION_KEY);
 			if (raw) {
@@ -967,14 +972,18 @@
 		});
 	}
 
-	// No auto location popup on load — use saved location or default city only
-	if (weatherEl) {
+		// No auto location popup on load — use saved location or default city only
 		var saved = getSavedLocation();
 		if (saved) {
 			fetchWeather(saved.lat, saved.lon, saved.name);
 		} else {
 			fetchWeather(defaultLat, defaultLon, 'London');
 		}
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initWeather);
+	} else {
+		initWeather();
 	}
 
 	// Focus timer: configurable work/break + session log (localStorage) + presets
