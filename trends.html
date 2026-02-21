@@ -19,6 +19,9 @@
 	<link rel="preconnect" href="https://dev.to">
 	<link rel="preconnect" href="https://www.reddit.com">
 	<link rel="preconnect" href="https://githubtrending.lessx.xyz">
+	<link rel="preconnect" href="https://torrentfreak.com">
+	<link rel="preconnect" href="https://www.xda-developers.com">
+	<link rel="preconnect" href="https://api.tvmaze.com">
 	<link rel="stylesheet" href="./assets/css/main.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
@@ -131,10 +134,21 @@
 				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="entertainment" role="tab" aria-selected="false">Entertainment</button>
 				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="anime" role="tab" aria-selected="false">Anime</button>
 			</div>
+			<div class="mt-3 flex flex-wrap items-center gap-3">
+				<button type="button" id="trends-customize-btn" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 transition-colors" aria-expanded="false" aria-controls="trends-customize-panel">⚙️ Customize sections</button>
+				<label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+					<input type="checkbox" id="trends-piracy-toggle" class="rounded border-gray-400 text-primary focus:ring-primary">
+					<span>Show piracy index &amp; tools</span>
+				</label>
+			</div>
+			<div id="trends-customize-panel" class="hidden mt-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60" aria-hidden="true">
+				<p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Toggle sections on or off. Choices are saved locally.</p>
+				<div id="trends-section-toggles" class="flex flex-wrap gap-3"></div>
+			</div>
 		</header>
 
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6" id="trends-sections-wrap">
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="hn">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Hacker News &middot; tech &amp; dev</h2>
@@ -146,7 +160,19 @@
 				<ul id="trends-hn-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news" data-trend-section-id="google-news">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Google News &middot; headlines</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Top stories from Google News (RSS).</p>
+					</div>
+					<a href="https://news.google.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Google News ↗</a>
+				</div>
+				<p id="trends-google-news-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-google-news-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news" data-trend-section-id="inshorts">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Inshorts &middot; news</h2>
@@ -158,7 +184,7 @@
 				<ul id="trends-inshorts-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news" data-trend-section-id="wiki">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Wikipedia today</h2>
@@ -170,7 +196,7 @@
 				<ul id="trends-wiki-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="medium">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Towards Data Science &middot; Medium</h2>
@@ -182,7 +208,7 @@
 				<ul id="trends-medium-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="devto">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Dev.to &middot; trending</h2>
@@ -194,7 +220,7 @@
 				<ul id="trends-devto-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="reddit-ds">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Reddit &middot; r/datascience</h2>
@@ -206,7 +232,7 @@
 				<ul id="trends-reddit-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="reddit-ml">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Reddit &middot; r/MachineLearning</h2>
@@ -218,7 +244,7 @@
 				<ul id="trends-reddit-ml-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
-			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="github">
 				<div class="flex items-center justify-between mb-2">
 					<div>
 						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">GitHub &middot; trending repos</h2>
@@ -229,35 +255,65 @@
 				<p id="trends-github-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
 				<ul id="trends-github-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="torrentfreak">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">TorrentFreak</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Privacy, piracy &amp; copyright news (RSS).</p>
+					</div>
+					<a href="https://torrentfreak.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open ↗</a>
+				</div>
+				<p id="trends-torrentfreak-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-torrentfreak-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="xda">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">XDA Developers</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Android &amp; tech news (RSS).</p>
+					</div>
+					<a href="https://www.xda-developers.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open ↗</a>
+				</div>
+				<p id="trends-xda-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-xda-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
 		</div>
 
-		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 mt-6" data-trend-category="entertainment">
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 mt-6" data-trend-category="entertainment" data-trend-section-id="social">
 			<div class="flex items-center justify-between mb-2">
 				<div>
-					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Social scroll &middot; IG · Pinterest · YouTube</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400">Quick jumps into visual feeds you actually use. Opens the official sites in a new tab.</p>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Social &amp; visual &middot; IG · Pinterest · YouTube &amp; alternatives</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Quick jumps to feeds and alternatives (Unsplash, Pexels, Piped).</p>
 				</div>
 			</div>
 			<ul class="space-y-2 text-sm text-gray-800 dark:text-gray-100">
-				<li>
-					<a href="https://www.instagram.com/explore/tags/dataanalytics/" target="_blank" rel="noopener" class="text-primary hover:underline">
-						Instagram · #dataanalytics / #datascience
-					</a>
-				</li>
-				<li>
-					<a href="https://www.pinterest.com/search/pins/?q=data%20dashboard%20infographic" target="_blank" rel="noopener" class="text-primary hover:underline">
-						Pinterest · data dashboards &amp; infographics
-					</a>
-				</li>
-				<li>
-					<a href="https://www.youtube.com/results?search_query=data+analytics+career+india" target="_blank" rel="noopener" class="text-primary hover:underline">
-						YouTube · data analytics / BI career videos
-					</a>
-				</li>
+				<li><a href="https://www.instagram.com/explore/tags/dataanalytics/" target="_blank" rel="noopener" class="text-primary hover:underline">Instagram · #dataanalytics / #datascience</a></li>
+				<li><a href="https://www.pinterest.com/search/pins/?q=data%20dashboard%20infographic" target="_blank" rel="noopener" class="text-primary hover:underline">Pinterest · data dashboards &amp; infographics</a></li>
+				<li><a href="https://www.youtube.com/results?search_query=data+analytics+career" target="_blank" rel="noopener" class="text-primary hover:underline">YouTube · data analytics / BI</a></li>
+				<li><a href="https://unsplash.com/s/photos/data-visualization" target="_blank" rel="noopener" class="text-primary hover:underline">Unsplash · data viz &amp; dashboards (free photos)</a></li>
+				<li><a href="https://www.pexels.com/search/data%20analytics/" target="_blank" rel="noopener" class="text-primary hover:underline">Pexels · data analytics (free stock)</a></li>
+				<li><a href="https://piped.video/" target="_blank" rel="noopener" class="text-primary hover:underline">Piped · YouTube front-end (privacy)</a></li>
+				<li><a href="https://odysee.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Odysee · video alternative</a></li>
 			</ul>
 		</section>
 
-		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment">
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="drama">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Drama &amp; Asian media</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">K-drama, C-drama, movies — MyDramaList, AsianWiki (IMDB-like for Asian content).</p>
+				</div>
+			</div>
+			<ul class="space-y-2 text-sm text-gray-800 dark:text-gray-100">
+				<li><a href="https://mydramalist.com/" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · ratings, lists, recent</a></li>
+				<li><a href="https://mydramalist.com/rss/recent" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · RSS recent</a></li>
+				<li><a href="https://asianwiki.com/" target="_blank" rel="noopener" class="text-primary hover:underline">AsianWiki · drama &amp; movie wiki</a></li>
+			</ul>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="visual">
 			<div class="flex items-center justify-between mb-3">
 				<div>
 					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual strip</h2>
@@ -288,15 +344,81 @@
 			<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Images from <a href="https://picsum.photos/" target="_blank" rel="noopener" class="text-primary hover:underline">Picsum</a> (free placeholders).</p>
 		</section>
 
-		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" id="trends-anime-section" data-trend-category="anime">
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="tv-schedule">
 			<div class="flex items-center justify-between mb-2">
 				<div>
-					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Anime (Jikan)</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400">Top anime this season</p>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">TV &amp; episode schedule</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Anime today (Jikan), TV episodes today (TVMaze), and drama trackers.</p>
 				</div>
 			</div>
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div>
+					<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Anime · today</h3>
+					<p id="trends-schedule-anime-status" class="text-xs text-gray-500 dark:text-gray-400 mb-1">Loading…</p>
+					<ul id="trends-schedule-anime-list" class="space-y-1.5 text-sm text-gray-800 dark:text-gray-100 max-h-64 overflow-y-auto"></ul>
+					<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Source: <a href="https://myanimelist.net/anime/season/schedule" target="_blank" rel="noopener" class="text-primary hover:underline">MAL schedule</a></p>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">TV series · today (US)</h3>
+					<p id="trends-schedule-tv-status" class="text-xs text-gray-500 dark:text-gray-400 mb-1">Loading…</p>
+					<ul id="trends-schedule-tv-list" class="space-y-1.5 text-sm text-gray-800 dark:text-gray-100 max-h-64 overflow-y-auto"></ul>
+					<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Source: <a href="https://www.tvmaze.com/schedule" target="_blank" rel="noopener" class="text-primary hover:underline">TVMaze</a></p>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">K-drama &amp; drama trackers</h3>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Episode calendars and “next episode” pages (open in new tab).</p>
+					<ul class="space-y-1.5 text-sm text-gray-800 dark:text-gray-100">
+						<li><a href="https://mydramalist.com/episode-calendar" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · episode calendar</a></li>
+						<li><a href="https://mydramalist.com/shows/airing" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · currently airing</a></li>
+						<li><a href="https://www.episodate.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Episodate · TV &amp; next episodes</a></li>
+						<li><a href="https://www.tvmaze.com/calendar" target="_blank" rel="noopener" class="text-primary hover:underline">TVMaze · calendar</a></li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="actor-search">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Actor search</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Look up TV/film actors (TVMaze). Results open on TVMaze for full cast &amp; credits.</p>
+				</div>
+				<a href="https://www.tvmaze.com/people" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Browse people ↗</a>
+			</div>
+			<div class="flex flex-wrap gap-2 mb-3">
+				<input type="text" id="trends-actor-search-input" class="flex-1 min-w-[140px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Tom Hanks, Song Joong-ki" aria-label="Actor name">
+				<button type="button" id="trends-actor-search-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm transition-colors">Search</button>
+			</div>
+			<p id="trends-actor-search-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2"></p>
+			<ul id="trends-actor-search-results" class="space-y-3 text-sm text-gray-800 dark:text-gray-100"></ul>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" id="trends-anime-section" data-trend-category="anime" data-trend-section-id="anime">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Anime (Jikan) &amp; hubs</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Top anime + MyAnimeList, AniList, Kitsu (IMDB-like for anime).</p>
+				</div>
+			</div>
+			<ul class="space-y-1 text-xs text-gray-600 dark:text-gray-400 mb-2">
+				<li><a href="https://myanimelist.net/" target="_blank" rel="noopener" class="text-primary hover:underline">MyAnimeList</a> &middot; <a href="https://anilist.co/" target="_blank" rel="noopener" class="text-primary hover:underline">AniList</a> &middot; <a href="https://kitsu.io/" target="_blank" rel="noopener" class="text-primary hover:underline">Kitsu</a></li>
+			</ul>
 			<p id="trends-anime-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
 			<ul id="trends-anime-list" class="space-y-2 list-none pl-0"></ul>
+		</section>
+
+		<section id="trends-piracy-wrap" class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 trends-piracy-section hidden" data-trend-category="tech" data-trend-section-id="piracy">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Piracy index &amp; tools</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Community indexes and megathreads (use at your own risk).</p>
+				</div>
+			</div>
+			<ul class="space-y-2 text-sm text-gray-800 dark:text-gray-100">
+				<li><a href="https://www.reddit.com/r/FREEMEDIAHECKYEAH/wiki/index/" target="_blank" rel="noopener" class="text-primary hover:underline">r/FREEMEDIAHECKYEAH · wiki index (FMHY)</a></li>
+				<li><a href="https://www.reddit.com/r/piracy/wiki/megathread/" target="_blank" rel="noopener" class="text-primary hover:underline">r/piracy · megathread</a></li>
+				<li><a href="https://fmhy.pages.dev/" target="_blank" rel="noopener" class="text-primary hover:underline">FMHY · mirror (pages)</a></li>
+			</ul>
 		</section>
 	</main>
 	</div>

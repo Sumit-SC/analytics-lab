@@ -271,6 +271,7 @@
 	});
 
 	// Global: open assistant with a pre-filled message (e.g. from Jobs "Prep for interview")
+	// Opens on-the-fly (like Dictionary) and auto-sends so the chat responds immediately.
 	window.openAssistantWithMessage = function (msg) {
 		if (!msg) return;
 		openPanel();
@@ -279,6 +280,12 @@
 				inputEl.value = msg;
 				inputEl.focus();
 			}
+			// Auto-send so chat prep happens on-the-fly instead of requiring a separate page or manual Send
+			setTimeout(function () {
+				if (sendBtn && inputEl && inputEl.value.trim()) {
+					sendBtn.click();
+				}
+			}, 200);
 		}, 150);
 	};
 })();
