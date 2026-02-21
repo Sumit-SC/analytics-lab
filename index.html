@@ -43,7 +43,6 @@
 						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
 						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
 						<a href="./jobs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Jobs</a>
-						<a href="./docs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Docs</a>
 					</div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
@@ -63,8 +62,7 @@
 			<a href="./trends.html">Trends</a>
 			<a href="./resources.html">Resources</a>
 			<a href="./tools.html">Tools</a>
-			<a href="./jobs.html">Jobs</a>
-			<a href="./docs.html">Docs</a>
+					<a href="./jobs.html">Jobs</a>
 		</nav>
 	</div>
 
@@ -130,9 +128,10 @@
 		<!-- Row 2: Quote + Focus timer side by side (one row, two columns from sm) -->
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
 			<section class="second-brain-card home-focus-panel home-quote-panel relative overflow-hidden p-0">
-				<div id="home-quote-bg" class="absolute inset-0 bg-center home-quote-bg-image" aria-hidden="true"></div>
-				<div class="absolute inset-0 home-quote-bg-overlay" aria-hidden="true"></div>
-				<div class="relative p-5 sm:p-6 home-quote-inner flex flex-col min-h-0">
+				<div id="home-quote-bg" class="home-quote-poster-thumb home-quote-bg-image" aria-hidden="true"></div>
+				<div class="home-quote-content-wrap flex-1 min-w-0 relative flex flex-col">
+					<div class="absolute inset-0 home-quote-bg-overlay" aria-hidden="true"></div>
+					<div class="relative p-5 sm:p-6 home-quote-inner flex flex-col min-h-0 flex-1">
 					<div class="flex flex-wrap items-center justify-between gap-2 mb-3 flex-shrink-0">
 						<p class="home-section-title mb-0">Quote</p>
 						<div class="flex items-center gap-3">
@@ -167,6 +166,7 @@
 						<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
 						<p id="home-quote-attr" class="home-quote-attr">— Plutarch</p>
 						<p id="home-quote-meta" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 hidden"></p>
+					</div>
 					</div>
 				</div>
 			</section>
@@ -263,9 +263,8 @@
 	<footer class="border-t border-gray-200 dark:border-gray-700 mt-16 py-6">
 		<div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-600 dark:text-gray-400">
 			<p>Standalone Playground · Home</p>
-			<p class="text-xs mt-1">© 2021–Present · Sumit S. Chaure</p>
-			<p class="text-[11px] mt-2">Credits: Pyodide, sql.js, Tailwind, JupyterLite, Quotable, Animechan, Open-Meteo, Picsum, Dictionary API, DevDocs (see Powered by above). Analytics: <a href="https://events.colab.indevs.in" target="_blank" rel="noopener noreferrer">events.colab.indevs.in</a>.</p>
-			<p class="text-[11px] mt-2">Credits: Pyodide, sql.js, Tailwind, JupyterLite, Quotable, Animechan, Open-Meteo, Picsum, Dictionary API, DevDocs (see Powered by above for links). Analytics: <a href="https://events.colab.indevs.in" target="_blank" rel="noopener noreferrer">events.colab.indevs.in</a>.</p>
+			<p class="text-xs mt-1">© 2021–Present</p>
+			<p class="text-[11px] mt-2">Credits: Pyodide, sql.js, Tailwind, JupyterLite, Quotable, Animechan, Open-Meteo, Picsum, Dictionary API, DevDocs (see Powered by above). <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a> · Repo &amp; deploy: see README.</p>
 			<p class="text-[11px] mt-3 text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 max-w-xl mx-auto">If the site feels sluggish, try clearing this site’s cache/storage (browser settings). You’ll lose saved data (timer log, to-dos, notes, theme) but the site may run faster.</p>
 		</div>
 	</footer>

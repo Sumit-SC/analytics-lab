@@ -511,7 +511,7 @@
 })();
 
 (function () {
-	// XDA Developers RSS
+	// XDA Developers RSS — load on tap or when section visible
 	var listEl = document.getElementById('trends-xda-list');
 	var statusEl = document.getElementById('trends-xda-status');
 	if (!listEl || !statusEl) return;
@@ -519,120 +519,113 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
-	setStatus('Loading…');
+	setStatus('Tap Load or scroll here to fetch.');
 
-	var rssUrl = encodeURIComponent('https://www.xda-developers.com/feed/');
-	var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
-
-	fetch(apiUrl)
-		.then(function (r) { return r.ok ? r.json() : null; })
-		.then(function (data) {
-			if (!data || !data.items || !data.items.length) {
-				setStatus('No posts right now.');
-				return;
-			}
-			var items = data.items.slice(0, 10);
-			setStatus('Showing ' + items.length + ' posts.');
-			var html = '';
-			items.forEach(function (item) {
-				var title = (item.title || '').trim() || 'Untitled';
-				var url = item.link || item.guid || '#';
-				var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
-				html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
-				html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
-				if (pub) html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">' + pub + '</div>';
-				html += '</li>';
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('xda', listEl, statusEl)) return;
+		setStatus('Loading…');
+		var rssUrl = encodeURIComponent('https://www.xda-developers.com/feed/');
+		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.items || !data.items.length) {
+					setStatus('No posts right now.');
+					return;
+				}
+				var items = data.items.slice(0, 10);
+				setStatus('Showing ' + items.length + ' posts.');
+				var html = '';
+				items.forEach(function (item) {
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.link || item.guid || '#';
+					var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					if (pub) html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">' + pub + '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+				window.__trendsWriteCache('xda', html, 'Showing ' + items.length + ' posts.');
+			})
+			.catch(function () {
+				setStatus('Could not load XDA. Open xda-developers.com instead.');
 			});
-			listEl.innerHTML = html;
-		})
-		.catch(function () {
-			setStatus('Could not load XDA. Open xda-developers.com instead.');
-		});
+	}
+	window.__trendsLoaders.xda = load;
 })();
 
 (function () {
-	// TV schedule: Anime today (Jikan schedules by weekday)
-	var listEl = document.getElementById('trends-schedule-anime-list');
-	var statusEl = document.getElementById('trends-schedule-anime-status');
-	if (!listEl || !statusEl) return;
+	// TV schedule: Anime today + TV today — one loader for section tv-schedule (load on tap or when visible)
+	var animeList = document.getElementById('trends-schedule-anime-list');
+	var animeStatus = document.getElementById('trends-schedule-anime-status');
+	var tvList = document.getElementById('trends-schedule-tv-list');
+	var tvStatus = document.getElementById('trends-schedule-tv-status');
+	if (!animeList || !animeStatus || !tvList || !tvStatus) return;
 
-	var weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-	var today = weekdays[new Date().getDay()];
+	function setAnimeStatus(t) { animeStatus.textContent = t; }
+	function setTvStatus(t) { tvStatus.textContent = t; }
+	setAnimeStatus('Tap Load or scroll here to fetch.');
+	setTvStatus('Tap Load or scroll here to fetch.');
 
-	function setStatus(text) {
-		statusEl.textContent = text;
-	}
-	setStatus('Loading…');
-
-	fetch('https://api.jikan.moe/v4/schedules?filter=' + today)
-		.then(function (r) { return r.ok ? r.json() : null; })
-		.then(function (data) {
+	function load(forceRefresh) {
+		var optExtra = { listEl2: tvList, statusEl2: tvStatus };
+		if (!forceRefresh && window.__trendsApplyCache('tv-schedule', animeList, animeStatus, optExtra)) return;
+		setAnimeStatus('Loading…');
+		setTvStatus('Loading…');
+		var weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+		var today = weekdays[new Date().getDay()];
+		var now = new Date();
+		var dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+		var tvUrl = 'https://api.tvmaze.com/schedule?country=US&date=' + dateStr;
+		Promise.all([
+			fetch('https://api.jikan.moe/v4/schedules?filter=' + today).then(function (r) { return r.ok ? r.json() : null; }),
+			fetch(tvUrl).then(function (r) { return r.ok ? r.json() : null; })
+		]).then(function (results) {
+			var data = results[0];
 			if (!data || !data.data || !data.data.length) {
-				setStatus('No anime scheduled for ' + today + '.');
-				return;
+				setAnimeStatus('No anime scheduled for ' + today + '.');
+			} else {
+				var items = data.data.slice(0, 15);
+				setAnimeStatus('Anime on ' + today + ' (' + items.length + ' shown).');
+				var html = '';
+				items.forEach(function (a) {
+					var title = (a.title || a.title_english || '').trim() || 'Untitled';
+					var url = a.url || ('https://myanimelist.net/anime/' + (a.mal_id || ''));
+					var broadcast = (a.broadcast && a.broadcast.string) ? a.broadcast.string : '';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-1.5 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					if (broadcast) html += '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + broadcast.replace(/</g, '&lt;') + '</div>';
+					html += '</li>';
+				});
+				animeList.innerHTML = html;
 			}
-			var items = data.data.slice(0, 15);
-			setStatus('Anime on ' + today + ' (' + items.length + ' shown).');
-			var html = '';
-			items.forEach(function (a) {
-				var title = (a.title || a.title_english || '').trim() || 'Untitled';
-				var url = a.url || ('https://myanimelist.net/anime/' + (a.mal_id || ''));
-				var broadcast = (a.broadcast && a.broadcast.string) ? a.broadcast.string : '';
-				html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-1.5 last:border-b-0">';
-				html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
-				if (broadcast) html += '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + broadcast.replace(/</g, '&lt;') + '</div>';
-				html += '</li>';
-			});
-			listEl.innerHTML = html;
-		})
-		.catch(function () {
-			setStatus('Could not load schedule. Use MAL schedule link below.');
-		});
-})();
-
-(function () {
-	// TV schedule: TV episodes today (TVMaze)
-	var listEl = document.getElementById('trends-schedule-tv-list');
-	var statusEl = document.getElementById('trends-schedule-tv-status');
-	if (!listEl || !statusEl) return;
-
-	function setStatus(text) {
-		statusEl.textContent = text;
-	}
-	setStatus('Loading…');
-
-	var now = new Date();
-	var y = now.getFullYear();
-	var m = String(now.getMonth() + 1).padStart(2, '0');
-	var d = String(now.getDate()).padStart(2, '0');
-	var dateStr = y + '-' + m + '-' + d;
-	var url = 'https://api.tvmaze.com/schedule?country=US&date=' + dateStr;
-
-	fetch(url)
-		.then(function (r) { return r.ok ? r.json() : null; })
-		.then(function (list) {
+			var list = results[1];
 			if (!Array.isArray(list) || !list.length) {
-				setStatus('No episodes for today.');
-				return;
+				setTvStatus('No episodes for today.');
+			} else {
+				var items = list.slice(0, 20);
+				setTvStatus('Today (' + dateStr + ') · ' + items.length + ' shown.');
+				var html2 = '';
+				items.forEach(function (ep) {
+					var showName = (ep.show && ep.show.name) ? ep.show.name : 'Unknown';
+					var epName = (ep.name || '').trim() || 'Episode ' + (ep.number || '');
+					var airtime = ep.airtime || '';
+					var showUrl = (ep.show && ep.show.url) ? ep.show.url : 'https://www.tvmaze.com/schedule';
+					html2 += '<li class="border-b border-gray-200 dark:border-gray-700 pb-1.5 last:border-b-0">';
+					html2 += '<a href="' + showUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + showName.replace(/</g, '&lt;') + '</a>';
+					html2 += '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + (epName.replace(/</g, '&lt;')) + (airtime ? ' · ' + airtime : '') + '</div>';
+					html2 += '</li>';
+				});
+				tvList.innerHTML = html2;
 			}
-			var items = list.slice(0, 20);
-			setStatus('Today (' + dateStr + ') · ' + items.length + ' shown.');
-			var html = '';
-			items.forEach(function (ep) {
-				var showName = (ep.show && ep.show.name) ? ep.show.name : 'Unknown';
-				var epName = (ep.name || '').trim() || 'Episode ' + (ep.number || '');
-				var airtime = ep.airtime || '';
-				var showUrl = (ep.show && ep.show.url) ? ep.show.url : 'https://www.tvmaze.com/schedule';
-				html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-1.5 last:border-b-0">';
-				html += '<a href="' + showUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + showName.replace(/</g, '&lt;') + '</a>';
-				html += '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + (epName.replace(/</g, '&lt;')) + (airtime ? ' · ' + airtime : '') + '</div>';
-				html += '</li>';
-			});
-			listEl.innerHTML = html;
-		})
-		.catch(function () {
-			setStatus('Could not load TVMaze. Try tvmaze.com/schedule.');
+			window.__trendsWriteCache('tv-schedule', animeList.innerHTML, animeStatus.textContent, { html2: tvList.innerHTML, status2: tvStatus.textContent });
+		}).catch(function () {
+			setAnimeStatus('Could not load schedule. Use MAL link below.');
+			setTvStatus('Could not load TVMaze. Try tvmaze.com/schedule.');
 		});
+	}
+	window.__trendsLoaders['tv-schedule'] = load;
 })();
 
 (function () {
@@ -702,7 +695,7 @@
 })();
 
 (function () {
-	// Visual inspiration grid (Picsum)
+	// Visual inspiration grid (Picsum) — load on tap or when section visible
 	var grid = document.getElementById('trends-visual-grid');
 	var refreshBtn = document.getElementById('trends-visual-refresh');
 	if (!grid) return;
@@ -711,7 +704,6 @@
 		var cards = grid.querySelectorAll('.trends-visual-card');
 		cards.forEach(function (card, idx) {
 			var seed = card.getAttribute('data-seed') || ('trends-' + idx);
-			// Slight randomness per refresh to keep it fun
 			var fullSeed = seed + '-' + Math.floor(Math.random() * 10000);
 			var url = 'https://picsum.photos/seed/' + encodeURIComponent(fullSeed) + '/600/400';
 			card.style.backgroundImage = 'url(' + url + ')';
@@ -722,15 +714,17 @@
 		});
 	}
 
-	if (refreshBtn) {
-		refreshBtn.addEventListener('click', applyImages);
+	function load() {
+		applyImages();
 	}
-
-	applyImages();
+	if (refreshBtn) {
+		refreshBtn.addEventListener('click', function () { load(); });
+	}
+	window.__trendsLoaders.visual = load;
 })();
 
 (function () {
-	// Medium/Towards Data Science RSS feed (via RSS2JSON proxy)
+	// Medium/Towards Data Science RSS — load on tap or when section visible
 	var listEl = document.getElementById('trends-medium-list');
 	var statusEl = document.getElementById('trends-medium-status');
 	if (!listEl || !statusEl) return;
@@ -738,14 +732,13 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
+	setStatus('Tap Load or scroll here to fetch.');
 
-	setStatus('Loading…');
-
-	function fetchMediumArticles() {
-		// Use RSS2JSON to convert RSS to JSON (CORS-friendly)
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('medium', listEl, statusEl)) return;
+		setStatus('Loading…');
 		var rssUrl = encodeURIComponent('https://towardsdatascience.com/feed');
 		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
-
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
@@ -770,17 +763,17 @@
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
+				window.__trendsWriteCache('medium', html, 'Showing ' + items.length + ' latest articles.');
 			})
 			.catch(function () {
 				setStatus('Could not reach Medium feed. Try again later.');
 			});
 	}
-
-	fetchMediumArticles();
+	window.__trendsLoaders.medium = load;
 })();
 
 (function () {
-	// Dev.to trending articles
+	// Dev.to trending articles — load on tap or when section visible
 	var listEl = document.getElementById('trends-devto-list');
 	var statusEl = document.getElementById('trends-devto-status');
 	if (!listEl || !statusEl) return;
@@ -788,15 +781,13 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
+	setStatus('Tap Load or scroll here to fetch.');
 
-	setStatus('Loading…');
-
-	function fetchDevToArticles() {
-		// Top articles from last 7 days
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('devto', listEl, statusEl)) return;
+		setStatus('Loading…');
 		fetch('https://dev.to/api/articles?top=7&per_page=10', {
-			headers: {
-				'User-Agent': 'analytics-lab-trends/1.0'
-			}
+			headers: { 'User-Agent': 'analytics-lab-trends/1.0' }
 		})
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (items) {
@@ -822,17 +813,17 @@
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
+				window.__trendsWriteCache('devto', html, 'Showing ' + items.length + ' trending articles.');
 			})
 			.catch(function () {
 				setStatus('Could not reach Dev.to API. Try again later.');
 			});
 	}
-
-	fetchDevToArticles();
+	window.__trendsLoaders.devto = load;
 })();
 
 (function () {
-	// Reddit r/datascience hot posts
+	// Reddit r/datascience hot posts — load on tap or when section visible
 	var listEl = document.getElementById('trends-reddit-list');
 	var statusEl = document.getElementById('trends-reddit-status');
 	if (!listEl || !statusEl) return;
@@ -840,15 +831,13 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
+	setStatus('Tap Load or scroll here to fetch.');
 
-	setStatus('Loading…');
-
-	function fetchRedditPosts() {
-		// Reddit JSON API - no auth needed for public subreddits
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('reddit-ds', listEl, statusEl)) return;
+		setStatus('Loading…');
 		fetch('https://www.reddit.com/r/datascience/hot.json?limit=10', {
-			headers: {
-				'User-Agent': 'analytics-lab-trends/1.0'
-			}
+			headers: { 'User-Agent': 'analytics-lab-trends/1.0' }
 		})
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
@@ -877,17 +866,17 @@
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
+				window.__trendsWriteCache('reddit-ds', html, 'Showing ' + posts.length + ' hot posts.');
 			})
 			.catch(function () {
 				setStatus('Could not reach Reddit. Try again later.');
 			});
 	}
-
-	fetchRedditPosts();
+	window.__trendsLoaders['reddit-ds'] = load;
 })();
 
 (function () {
-	// Reddit r/MachineLearning hot posts
+	// Reddit r/MachineLearning hot posts — load on tap or when section visible
 	var listEl = document.getElementById('trends-reddit-ml-list');
 	var statusEl = document.getElementById('trends-reddit-ml-status');
 	if (!listEl || !statusEl) return;
@@ -895,15 +884,13 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
+	setStatus('Tap Load or scroll here to fetch.');
 
-	setStatus('Loading…');
-
-	function fetchRedditMLPosts() {
-		// Reddit JSON API - no auth needed for public subreddits
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('reddit-ml', listEl, statusEl)) return;
+		setStatus('Loading…');
 		fetch('https://www.reddit.com/r/MachineLearning/hot.json?limit=10', {
-			headers: {
-				'User-Agent': 'analytics-lab-trends/1.0'
-			}
+			headers: { 'User-Agent': 'analytics-lab-trends/1.0' }
 		})
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
@@ -932,17 +919,17 @@
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
+				window.__trendsWriteCache('reddit-ml', html, 'Showing ' + posts.length + ' hot posts.');
 			})
 			.catch(function () {
 				setStatus('Could not reach Reddit. Try again later.');
 			});
 	}
-
-	fetchRedditMLPosts();
+	window.__trendsLoaders['reddit-ml'] = load;
 })();
 
 (function () {
-	// GitHub trending repositories
+	// GitHub trending repositories — load on tap or when section visible
 	var listEl = document.getElementById('trends-github-list');
 	var statusEl = document.getElementById('trends-github-status');
 	if (!listEl || !statusEl) return;
@@ -950,11 +937,11 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
+	setStatus('Tap Load or scroll here to fetch.');
 
-	setStatus('Loading…');
-
-	function fetchGitHubTrending() {
-		// Using unofficial GitHub trending API
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('github', listEl, statusEl)) return;
+		setStatus('Loading…');
 		fetch('https://githubtrending.lessx.xyz/trending?since=daily&language=&spoken_language_code=en')
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
@@ -985,17 +972,17 @@
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
+				window.__trendsWriteCache('github', html, 'Showing ' + repos.length + ' trending repositories.');
 			})
 			.catch(function () {
 				setStatus('Could not reach GitHub trending API. Try again later.');
 			});
 	}
-
-	fetchGitHubTrending();
+	window.__trendsLoaders.github = load;
 })();
 
 (function () {
-	// Anime: Jikan API (top / seasonal)
+	// Anime: Jikan API (top) — load on tap or when section visible
 	var listEl = document.getElementById('trends-anime-list');
 	var statusEl = document.getElementById('trends-anime-status');
 	if (!listEl || !statusEl) return;
@@ -1003,11 +990,11 @@
 	function setStatus(text) {
 		statusEl.textContent = text;
 	}
+	setStatus('Tap Load or scroll here to fetch.');
 
-	setStatus('Loading…');
-
-	function fetchAnime() {
-		// Jikan v4: top anime, limit 10
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('anime', listEl, statusEl)) return;
+		setStatus('Loading…');
 		fetch('https://api.jikan.moe/v4/top/anime?limit=10')
 			.then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('Jikan error')); })
 			.then(function (data) {
@@ -1034,13 +1021,13 @@
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
+				window.__trendsWriteCache('anime', html, 'Top ' + items.length + ' anime.');
 			})
 			.catch(function () {
 				setStatus('Could not reach Jikan API. Try again later.');
 			});
 	}
-
-	fetchAnime();
+	window.__trendsLoaders.anime = load;
 })();
 
 // Analytics: track visits and time-on-page for Trends

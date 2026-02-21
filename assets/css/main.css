@@ -972,27 +972,52 @@ body {
 	display: none;
 }
 
-/* Homepage quote: card size fixed (aspect-ratio); only the background image scales inside */
-/* Homepage quote background: full poster in a fixed aspect-ratio frame (no stretch, no crop) */
-/* 1) Quote panel has poster aspect ratio 2:3 so height is fixed from width; full image fits inside */
+/* Homepage quote: poster as a contained thumbnail (~1/3 column width), quote content beside it */
 .home-quote-panel {
-	aspect-ratio: 2 / 3;
-	max-height: min(85vh, 720px);
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	min-height: 12rem;
+	max-height: min(85vh, 520px);
 }
-/* Scale the background image to fill the card; card size stays the same */
-#home-quote-bg,
-.home-quote-bg-image {
-	background-size: cover;
+/* Poster: 1/3 of panel width, full image visible (contain), no stretch; height from aspect-ratio */
+.home-quote-poster-thumb,
+#home-quote-bg.home-quote-poster-thumb {
+	flex: 0 0 auto;
+	width: 33.333%;
+	min-width: 100px;
+	max-width: 160px;
+	aspect-ratio: 2 / 3;
+	background-size: contain;
 	background-position: center center;
 	background-repeat: no-repeat;
 	background-color: #e2e8f0;
+	border-radius: 8px 0 0 8px;
+}
+.dark .home-quote-poster-thumb,
+.dark #home-quote-bg.home-quote-poster-thumb {
+	background-color: #1e293b;
+}
+@media (max-width: 639px) {
+	.home-quote-panel {
+		flex-direction: column;
+		max-height: none;
+	}
+	.home-quote-poster-thumb,
+	#home-quote-bg.home-quote-poster-thumb {
+		width: 100%;
+		max-width: 200px;
+		margin: 0 auto;
+		aspect-ratio: 2 / 3;
+		border-radius: 8px 8px 0 0;
+	}
+}
+.home-quote-bg-image {
 	opacity: 1;
 	filter: none;
 	transform: none;
 }
-.dark #home-quote-bg,
 .dark .home-quote-bg-image {
-	background-color: #1e293b;
 	opacity: 1;
 	filter: none;
 }
@@ -1013,16 +1038,16 @@ body {
 @keyframes weather-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.9; } }
 @keyframes weather-shiver { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); } }
 @keyframes weather-drip { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
-/* 2) Base overlay: very light tint so poster mixes with theme, but stays visible */
-.home-quote-bg-overlay {
-	background: rgba(248, 250, 252, 0.20);
+/* 2) Overlay only on the content area (not on the poster thumb) */
+.home-quote-content-wrap .home-quote-bg-overlay {
+	background: rgba(248, 250, 252, 0.25);
 	pointer-events: none;
 }
-.dark .home-quote-bg-overlay {
-	background: rgba(15, 23, 42, 0.6);
+.dark .home-quote-content-wrap .home-quote-bg-overlay {
+	background: rgba(15, 23, 42, 0.5);
 }
 
-/* 3) Quote card: remove heavy white card so the poster is the main background */
+/* 3) Quote card: transparent so poster and content show */
 .home-quote-panel {
 	background: transparent;
 	border-color: transparent;
@@ -1034,36 +1059,36 @@ body {
 	box-shadow: none;
 }
 
-/* 4) Add a soft, theme-tinted wash only within the quote card */
+/* 4) Theme-tinted wash on content area only */
 .home-quote-panel .home-quote-bg-overlay {
 	background: linear-gradient(135deg,
-		rgba(99, 102, 241, 0.35) 0%,
-		rgba(248, 250, 252, 0.18) 40%,
-		rgba(15, 23, 42, 0.10) 100%);
+		rgba(99, 102, 241, 0.28) 0%,
+		rgba(248, 250, 252, 0.20) 45%,
+		rgba(15, 23, 42, 0.08) 100%);
 }
 .dark .home-quote-panel .home-quote-bg-overlay {
 	background: linear-gradient(135deg,
-		rgba(15, 23, 42, 0.75) 0%,
-		rgba(79, 70, 229, 0.45) 40%,
-		rgba(15, 23, 42, 0.85) 100%);
+		rgba(15, 23, 42, 0.78) 0%,
+		rgba(79, 70, 229, 0.4) 45%,
+		rgba(15, 23, 42, 0.88) 100%);
 }
 
-/* 5) Gentle translucent layer directly under the text, not over the whole image */
-.home-quote-panel > .relative {
+/* 5) Translucent layer under the quote text (content area) */
+.home-quote-panel .home-quote-inner {
 	position: relative;
 	z-index: 1;
 	background: radial-gradient(circle at top left,
-		rgba(248, 250, 252, 0.80) 0%,
-		rgba(248, 250, 252, 0.45) 35%,
-		rgba(248, 250, 252, 0.10) 75%,
+		rgba(248, 250, 252, 0.82) 0%,
+		rgba(248, 250, 252, 0.48) 35%,
+		rgba(248, 250, 252, 0.12) 75%,
 		rgba(248, 250, 252, 0.00) 100%);
 	backdrop-filter: blur(2px);
 }
-.dark .home-quote-panel > .relative {
+.dark .home-quote-panel .home-quote-inner {
 	background: radial-gradient(circle at top left,
-		rgba(15, 23, 42, 0.88) 0%,
-		rgba(15, 23, 42, 0.60) 35%,
-		rgba(15, 23, 42, 0.25) 75%,
+		rgba(15, 23, 42, 0.9) 0%,
+		rgba(15, 23, 42, 0.62) 35%,
+		rgba(15, 23, 42, 0.28) 75%,
 		rgba(15, 23, 42, 0.00) 100%);
 	backdrop-filter: blur(2px);
 }

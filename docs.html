@@ -67,6 +67,7 @@
 				<li><a href="./resources.html" class="text-primary hover:underline">Resources</a> — Courses, books, YouTube, GitHub, learning paths by topic</li>
 				<li><a href="./tools.html" class="text-primary hover:underline">Tools</a> — Word editors, notebook, backup/restore, PDF viewer</li>
 				<li><a href="./jobs.html" class="text-primary hover:underline">Jobs</a> — Job listings (playground-serveless / job-search-api), filters, Binder notebook</li>
+				<li><a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test</a> — Cloudflare, Vercel, Railway, project APIs health checks</li>
 				<li><a href="./docs.html" class="text-primary hover:underline">Docs</a> — This page</li>
 			</ul>
 		</section>
@@ -87,22 +88,35 @@
 			<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
 				<li><strong class="text-gray-800 dark:text-gray-200">Jobs</strong> — Configure <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_PROXY_URL</code> to point to your job API (e.g. playground-serveless or job-search-api).</li>
 				<li><strong class="text-gray-800 dark:text-gray-200">OMDb (posters)</strong> — Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">window.OMDB_PROXY_URL</code> to your proxy (e.g. playground-serveless) so the API key stays server-side.</li>
-				<li><strong class="text-gray-800 dark:text-gray-200">Analytics</strong> — Events sent to a configurable endpoint (e.g. <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">https://events.colab.indevs.in/api/events</code>). See <a href="./test-analytics.html" class="text-primary hover:underline">test-analytics.html</a> for health checks.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Analytics</strong> — Events sent to a configurable endpoint. <a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test page</a> checks health and all endpoints.</li>
 			</ul>
 		</section>
 
 		<section class="mb-10">
-			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Analytics</h2>
-			<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Visit and unload events are sent from all main pages. Use <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">?analytics_debug=1</code> or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">localStorage.setItem('analytics_debug','1')</code> and open DevTools to debug. <a href="./test-analytics.html" class="text-primary hover:underline">test-analytics.html</a> provides endpoint test and test-event send.</p>
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">System &amp; API test page</h2>
+			<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Use <a href="./test-analytics.html" class="text-primary hover:underline">test-analytics.html</a> to verify that endpoints are reachable and working:</p>
+			<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 list-disc list-inside">
+				<li><strong class="text-gray-800 dark:text-gray-200">Cloudflare</strong> — Analytics Worker (health at <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">/health</code>), event ingest (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">/api/events</code>), D1-backed dashboard (Basic auth).</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Vercel</strong> — OMDb/CineMaterial proxy, jobs snapshot/cached APIs. Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">OMDB_PROXY_URL</code> in the site; test page uses it for OMDb and jobs checks. Testing ground: deploy <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">api/omdb.js</code> with <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">OMDB_API_KEY</code>.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Railway</strong> — Job-search-api (scrapers, RSS, local UI). Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_PROXY_URL</code> to your Railway app URL for jobs; test page can ping health/root.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Project APIs</strong> — Quotable, Animechan, Open-Meteo, Dictionary, Jikan, Wikipedia, Hacker News, Inshorts, TVMaze, Picsum, GitHub trending, Dev.to, etc. Each has a <strong>Test</strong> button to check connectivity from the browser.</li>
+			</ul>
+			<p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Analytics debug: <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">?analytics_debug=1</code> or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">localStorage.setItem('analytics_debug','1')</code> and DevTools Console.</p>
+		</section>
+
+		<section class="mb-10">
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Analytics (events)</h2>
+			<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Visit and unload events are sent from all main pages to the configured ingest URL. Dashboard is served by the same Cloudflare Worker (Basic auth protected).</p>
 		</section>
 
 		<section class="mb-10">
 			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Repo &amp; deploy</h2>
-			<p class="text-sm text-gray-600 dark:text-gray-400">See the <a href="https://github.com/Sumit-SC/analytics-lab" class="text-primary hover:underline" target="_blank" rel="noopener">analytics-lab README</a> (or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">README.md</code> in the repo) for run locally, deploy (e.g. Vercel), env vars, and roadmap.</p>
+			<p class="text-sm text-gray-600 dark:text-gray-400">See the <strong>analytics-lab README</strong> (or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">README.md</code> in the repo) for run locally, deploy (e.g. Vercel), env vars, and roadmap.</p>
 		</section>
 
 		<footer class="pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-			<p>Made with ❤️ &amp; 🧑‍💻 Sumit S C (mitSu)</p>
+			<p>© 2021–Present</p>
+			<p class="text-[11px] mt-2">Credits: APIs and services listed above and on <a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test</a>.</p>
 		</footer>
 	</main>
 

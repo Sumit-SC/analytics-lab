@@ -7,6 +7,7 @@
 
 	var QUOTE_CATEGORY_KEY = 'home_quote_category';
 	var QUOTE_IMAGE_MODE_KEY = 'home_quote_image_mode'; // 'live' or 'local'
+	// With "Use live posters" ON: images from API (Jikan for anime, OMDb for movie/series) when available, else from quote.images in JSON. OFF: local map + embedded quote.images only.
 
 	// Local quote DB: faster than APIs, no broken endpoints. Loaded from assets/data/quotes-db.json
 	var quotesDb = null;
@@ -149,13 +150,14 @@
 	}
 
 	// Try to fetch an anime poster from Jikan (MyAnimeList API, no key, CORS-friendly)
-	function fetchJikanImage(animeTitle, cb) {
+	// bypassCache: when true (e.g. user clicked "change image"), skip cache and re-fetch from API
+	function fetchJikanImage(animeTitle, cb, bypassCache) {
 		if (!animeTitle || !animeTitle.trim()) {
 			cb(null);
 			return;
 		}
 		var key = 'anime:' + animeTitle.trim();
-		if (quoteImageCache[key] && quoteImageCache[key].url) {
+		if (!bypassCache && quoteImageCache[key] && quoteImageCache[key].url) {
 			cb(quoteImageCache[key].url);
 			return;
 		}
@@ -317,10 +319,10 @@
 
 	function getImageMode() {
 		try {
-			// Default to 'local' so we don't hit OMDb until the user explicitly enables live posters
-			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'local';
+			// Default to 'live' so poster images load from API (OMDb/Jikan) or embedded JSON images
+			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'live';
 		} catch (e) {
-			return 'local';
+			return 'live';
 		}
 	}
 
@@ -372,11 +374,12 @@
 
 	// Fetch poster via backend proxy (key never sent to client). Proxy returns { poster: url, usage: { dailyCount, dailyLimit } } or { poster: null }.
 	// First hit per title is cached in quoteImageCache; tap on wallpaper button cycles lastQuoteFromDb.quote.images (OMDb returns one poster, so we store [url, url]).
-	// type: 'movie' | 'series' | omit. Set window.OMDB_PROXY_URL if proxy is on another host.
-	function fetchOMDBPoster(title, cb, type) {
+	// type: 'movie' | 'series' | omit. bypassCache: when true (e.g. user clicked "change image"), re-fetch from API.
+	// Set window.OMDB_PROXY_URL if proxy is on another host.
+	function fetchOMDBPoster(title, cb, type, bypassCache) {
 		if (!title || !title.trim()) { cb(null); return; }
 		var key = title.trim();
-		if (quoteImageCache[key] && quoteImageCache[key].url) {
+		if (!bypassCache && quoteImageCache[key] && quoteImageCache[key].url) {
 			cb(quoteImageCache[key].url);
 			return;
 		}
@@ -644,11 +647,13 @@
 		quoteBgRefreshBtn.addEventListener('click', function () {
 			var bg = document.getElementById('home-quote-bg');
 			if (!bg) return;
-			var src = getCurrentQuoteSource();
+			// Prefer stored source (show/movie name) so we always hit the right API
+			var src = (lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.source)
+				? lastQuoteFromDb.quote.source.trim()
+				: getCurrentQuoteSource();
 			var cat = currentQuoteCategory || (lastQuoteFromDb && lastQuoteFromDb.category) || getCategory();
 			if (cat === 'movies') cat = 'movie';
 
-			// Fetch a new poster from OMDb/Jikan using current quote's show/movie name (and optional year)
 			function setFetchedImages(urls) {
 				if (!urls || urls.length === 0) return;
 				var imgs = urls.length >= 2 ? [urls[0], urls[1]] : [urls[0], urls[0]];
@@ -665,6 +670,23 @@
 							source: src || '',
 							images: imgs
 						},
+						category: cat
+					};
+				}
+			}
+
+			function setFetchedImagesAndPool(pool) {
+				if (!pool || pool.length === 0) return;
+				var chosen = pool[Math.floor(Math.random() * pool.length)];
+				var imgs = pool.length >= 2 ? [pool[0], pool[1]] : [chosen, chosen];
+				if (bg) bg.style.backgroundImage = 'url(' + chosen + ')';
+				if (lastQuoteFromDb) {
+					lastQuoteFromDb.quote.images = pool.length >= 2 ? pool : [chosen, chosen];
+				} else {
+					var quoteEl = document.getElementById('home-quote-text');
+					var attrEl = document.getElementById('home-quote-attr');
+					lastQuoteFromDb = {
+						quote: { text: quoteEl ? quoteEl.textContent : '', author: attrEl ? (attrEl.textContent || '').replace(/^—\s*/, '') : '', source: src || '', images: imgs },
 						category: cat
 					};
 				}
@@ -688,44 +710,44 @@
 				}
 			}
 
-			if (src && (cat === 'anime' || cat === 'movie' || cat === 'kdrama' || cat === 'bollywood')) {
-				if (cat === 'anime') {
-					fetchJikanImage(src, function (url) {
-						if (url) setFetchedImages([url, url]);
-						else fallbackCycleOrPicsum();
-					});
-					return;
-				}
-				// OMDb/CineMaterial require a proxy; if OMDB_PROXY_URL is not set, same-origin /api/omdb 404s
+			// Anime: re-fetch from Jikan (bypass cache so "change image" gets a fresh request)
+			if (src && cat === 'anime') {
+				fetchJikanImage(src, function (url) {
+					if (url) setFetchedImages([url, url]);
+					else fallbackCycleOrPicsum();
+				}, true);
+				return;
+			}
+
+			// Movie / K-drama / Bollywood / TV show: try CineMaterial first for multiple posters, else OMDb with cache bypass
+			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show')) {
 				if (!getProxyBase()) {
 					fallbackCycleOrPicsum();
 					return;
 				}
-				var omdbType = (cat === 'kdrama') ? 'series' : 'movie';
-				// Fetch OMDb poster first; then try CineMaterial for more posters (movie/series). Requires OMDB_API_KEY on proxy.
-				fetchOMDBPoster(src, function (posterUrl) {
-					if (posterUrl) {
-						setFetchedImages([posterUrl, posterUrl]);
-						// Optionally get more posters from CineMaterial (search by title → imdbID → CineMaterial)
-						fetchOMDBSearch(src, omdbType, function (searchResult) {
-							if (searchResult && searchResult.imdbID) {
-								fetchCineMaterialPosters(searchResult.imdbID, searchResult.title || src, omdbType, function (posters) {
-									if (posters.length > 0) {
-										var combined = [posterUrl];
-										for (var p = 0; p < posters.length && combined.length < 4; p++) {
-											if (posters[p] !== posterUrl) combined.push(posters[p]);
-										}
-										if (lastQuoteFromDb && lastQuoteFromDb.quote) {
-											lastQuoteFromDb.quote.images = combined.length >= 2 ? combined : [combined[0], combined[0]];
-										}
-									}
-								});
+				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
+				// 1) Search OMDb for imdbID, then fetch CineMaterial posters (multiple per title)
+				fetchOMDBSearch(src, omdbType, function (searchResult) {
+					if (searchResult && searchResult.imdbID) {
+						fetchCineMaterialPosters(searchResult.imdbID, searchResult.title || src, omdbType, function (posters) {
+							if (posters.length > 0) {
+								setFetchedImagesAndPool(posters);
+								return;
 							}
+							// No CineMaterial posters: fall back to OMDb poster (bypass cache so we re-fetch)
+							fetchOMDBPoster(src, function (posterUrl) {
+								if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
+								else fallbackCycleOrPicsum();
+							}, omdbType, true);
 						});
 					} else {
-						fallbackCycleOrPicsum();
+						// No search result: try OMDb poster by title with cache bypass
+						fetchOMDBPoster(src, function (posterUrl) {
+							if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
+							else fallbackCycleOrPicsum();
+						}, omdbType, true);
 					}
-				}, omdbType);
+				});
 				return;
 			}
 
