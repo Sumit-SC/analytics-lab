@@ -261,7 +261,7 @@
 			</div>
 		</aside>
 
-	<main class="flex-1 min-w-0 max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+	<main class="flex-1 min-w-0 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 		<!-- Railway UI Embed (Collapsible) -->
 		<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
 			<button type="button" id="railway-ui-embed-toggle" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false" aria-controls="railway-ui-embed-content">
@@ -297,12 +297,12 @@
 
 		<header class="mb-6">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Tracker</h1>
-			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mb-4">
+			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-3xl mb-4">
 				Aggregate and track data science jobs from multiple sources. Jobs are automatically matched with your skillset.
 			</p>
 			
 			<!-- API Backend: Railway (default) | Vercel -->
-			<div class="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
+			<div class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
 				<label class="flex items-center gap-2 cursor-pointer">
 					<input type="radio" name="api-backend" value="railway" id="api-backend-railway" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
@@ -316,11 +316,12 @@
 			</div>
 			
 			<!-- Vercel search: role, location, days + Search button (visible only when Backend = Vercel) -->
-			<div id="vercel-search-section" class="hidden mb-6 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-				<h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+			<div id="vercel-search-section" class="hidden mb-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+				<h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
 					<span>🔍</span> Search (Vercel)
 				</h2>
-				<div class="flex flex-wrap items-end gap-3">
+				<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Indeed, Stack Overflow, WorkingNomads and more. Location is used for Indeed/Stack Overflow.</p>
+				<div class="flex flex-wrap items-end gap-4">
 					<div>
 						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Role</label>
 						<select id="vercel-search-role" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[180px]">
@@ -343,7 +344,7 @@
 							<option value="30">30</option>
 						</select>
 					</div>
-					<button type="button" id="vercel-search-btn" class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm shadow-sm">
+					<button type="button" id="vercel-search-btn" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm shadow-sm transition-all">
 						Search Jobs
 					</button>
 				</div>
@@ -351,12 +352,12 @@
 			
 			<div id="job-tracker-main">
 			<!-- Search Configuration: shown only when Backend = Railway -->
-			<div id="job-search-config-section" class="mb-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
-				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+			<div id="job-search-config-section" class="mb-6 p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
 					<span>⚙️</span> Search Configuration
 				</h2>
-				
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+				<p id="job-search-config-railway-hint" class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Railway uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per site</strong> only.</p>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
 					<!-- Search Term -->
 					<div class="md:col-span-2 lg:col-span-1">
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🔎 Search Term</label>
@@ -421,7 +422,7 @@
 				<!-- Job Sites Multi-Select -->
 				<div class="mb-4">
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🌐 Job Sites (Select Multiple)</label>
-					<div id="job-sites-multiselect" class="max-h-48 overflow-y-auto p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+					<div id="job-sites-multiselect" class="max-h-64 overflow-y-auto p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
 						<!-- Will be populated by JavaScript -->
 					</div>
 				</div>
@@ -447,7 +448,7 @@
 			</div>
 			
 			<!-- Quick Filters Row (visible for both Railway and Vercel) -->
-			<div class="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+			<div class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters:</span>
 				<select id="job-filter-source" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
 					<option value="all">All Sources</option>
@@ -502,7 +503,7 @@
 			<p class="text-xs text-gray-400 dark:text-gray-500" id="job-loading-detail">Fetching from RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri...</p>
 		</div>
 
-		<div id="job-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4" style="display: none;">
+		<div id="job-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display: none;">
 			<!-- Job cards will be inserted here -->
 		</div>
 

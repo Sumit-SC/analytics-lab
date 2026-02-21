@@ -234,10 +234,12 @@
 		if (vercelSearch) vercelSearch.classList.toggle('hidden', backend !== 'vercel');
 	}
 
-	// Gray out / disable form controls that Railway API doesn't use (q, days, limit only)
+	// Railway: disable form controls it doesn't use (q, days, limit only); show hint
 	function applyBackendFormState(backend) {
 		var isRailway = backend === 'railway';
 		if (backend === 'vercel') return;
+		var railwayHint = document.getElementById('job-search-config-railway-hint');
+		if (railwayHint) railwayHint.classList.toggle('hidden', !isRailway);
 		var locationInput = document.getElementById('job-location-input');
 		var countrySelect = document.getElementById('job-country-select');
 		var jobSitesContainer = document.getElementById('job-sites-multiselect');
@@ -250,26 +252,23 @@
 		function setDisabled(el, label, disabled, hint) {
 			if (el) {
 				el.disabled = disabled;
-				el.classList.toggle('opacity-50', disabled);
+				el.classList.toggle('opacity-60', disabled);
 				el.classList.toggle('cursor-not-allowed', disabled);
 				el.setAttribute('title', disabled && hint ? hint : '');
 			}
 			if (label) {
-				label.classList.toggle('opacity-50', disabled);
+				label.classList.toggle('opacity-60', disabled);
 				label.classList.toggle('cursor-not-allowed', disabled);
 			}
 		}
-		// Railway only supports q, days, limit (no location, country, job sites, job type)
-		setDisabled(locationInput, locationLabel, isRailway, 'Not used by Railway API');
-		setDisabled(countrySelect, countryLabel, isRailway, 'Not used by Railway API');
-		setDisabled(jobTypeSelect, jobTypeLabel, isRailway, 'Not used by Railway API');
+		setDisabled(locationInput, locationLabel, isRailway, 'Optional for Railway');
+		setDisabled(countrySelect, countryLabel, isRailway, 'Optional for Railway');
+		setDisabled(jobTypeSelect, jobTypeLabel, isRailway, 'Optional for Railway');
 		if (jobSitesContainer) {
-			jobSitesContainer.classList.toggle('opacity-50', isRailway);
+			jobSitesContainer.classList.toggle('opacity-60', isRailway);
 			jobSitesContainer.classList.toggle('pointer-events-none', isRailway);
-			jobSitesContainer.setAttribute('title', isRailway ? 'Not used by Railway API' : '');
-			if (jobSitesLabel) {
-				jobSitesLabel.classList.toggle('opacity-50', isRailway);
-			}
+			jobSitesContainer.setAttribute('title', isRailway ? 'Optional for Railway' : '');
+			if (jobSitesLabel) jobSitesLabel.classList.toggle('opacity-60', isRailway);
 			var siteInputs = jobSitesContainer.querySelectorAll('input[type="checkbox"]');
 			for (var i = 0; i < siteInputs.length; i++) siteInputs[i].disabled = isRailway;
 		}
@@ -807,18 +806,17 @@
 			fetch(refreshUrl)
 				.then(function (r) { return r.ok ? r.json() : null; })
 				.then(function (refreshData) {
-					// After refresh, always fetch snapshot so UI shows same data as playground
-					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
+					// After refresh, fetch snapshot so UI shows same data as playground
+					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
 				})
 				.catch(function (err) {
 					console.error('Refresh failed:', err);
-					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
+					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
 				});
 			return;
 		}
-		
-		// Primary: use jobs-snapshot (same API as playground) so results and sources match
-		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl);
+		// Primary: use jobs-snapshot (same API as playground); pass location for Vercel (Indeed/Stack Overflow)
+		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
 	}
 	
 	// Fetch jobs from rssjobs.app via Railway /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
@@ -905,7 +903,7 @@
 			var rssjobsFeedUrl = feedUrlInput && feedUrlInput.value ? feedUrlInput.value.trim() : '';
 			var urlParams = new URLSearchParams(window.location.search);
 			var days = urlParams.get('days') || '3';
-			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl);
+			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, loc);
 		}
 	}
 	
@@ -1169,11 +1167,12 @@
 			});
 	}
 	
-	// Primary: jobs-snapshot API (same as Playground — same results and sources). Optional rssjobs = rssjobs.app feed URL.
-	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl) {
-		var apiUrl = proxyUrl 
+	// Primary: jobs-snapshot API (same as Playground). Optional location (for Indeed/Stack Overflow), rssjobs = rssjobs.app feed URL.
+	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, location) {
+		var apiUrl = proxyUrl
 			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
 			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
+		if (location && String(location).trim()) apiUrl += '&location=' + encodeURIComponent(String(location).trim());
 		if (rssjobsFeedUrl && rssjobsFeedUrl.trim().length > 0) {
 			apiUrl += '&rssjobs=' + encodeURIComponent(rssjobsFeedUrl.trim());
 		}
