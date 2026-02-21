@@ -279,22 +279,27 @@
 		var roleSelect = document.getElementById('vercel-search-role');
 		var locationSelect = document.getElementById('vercel-search-location');
 		var searchBtn = document.getElementById('vercel-search-btn');
-		if (!roleSelect || !locationSelect) return;
-		PRIMARY_ROLES.forEach(function (r) {
-			var opt = document.createElement('option');
-			opt.value = r.query;
-			opt.textContent = r.label;
-			if (r.query === 'data analyst') opt.selected = true;
-			roleSelect.appendChild(opt);
-		});
-		PRIMARY_LOCATIONS.forEach(function (loc) {
-			var opt = document.createElement('option');
-			opt.value = loc.value;
-			opt.textContent = loc.label;
-			if (loc.value === 'remote') opt.selected = true;
-			locationSelect.appendChild(opt);
-		});
-		if (searchBtn) searchBtn.addEventListener('click', function () { fetchAllJobs(true); });
+		if (roleSelect) {
+			PRIMARY_ROLES.forEach(function (r) {
+				var opt = document.createElement('option');
+				opt.value = r.query;
+				opt.textContent = r.label;
+				if (r.query === 'data analyst') opt.selected = true;
+				roleSelect.appendChild(opt);
+			});
+		}
+		if (locationSelect) {
+			PRIMARY_LOCATIONS.forEach(function (loc) {
+				var opt = document.createElement('option');
+				opt.value = loc.value;
+				opt.textContent = loc.label;
+				if (loc.value === 'remote') opt.selected = true;
+				locationSelect.appendChild(opt);
+			});
+		}
+		if (searchBtn) {
+			searchBtn.addEventListener('click', function () { fetchAllJobs(true); });
+		}
 	}
 
 	// Railway UI embed at top: collapsible; on expand load iframe; detect block (extensions) and show fallback + banner
@@ -772,7 +777,10 @@
 		
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
 		var railwayRadio = document.getElementById('api-backend-railway');
+		var vercelRadio = document.getElementById('api-backend-vercel');
 		var isRailway = (railwayRadio && railwayRadio.checked);
+		if (!proxyUrl && vercelRadio && vercelRadio.checked) proxyUrl = 'https://playground-serveless.vercel.app';
+		if (!proxyUrl && isRailway) proxyUrl = RAILWAY_API_URL;
 		
 		var urlParams = new URLSearchParams(window.location.search);
 		var searchInput = document.getElementById('job-search-input');
@@ -821,8 +829,9 @@
 				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
 				
 				fetch(refreshUrl, { method: 'POST' })
-					.then(function (r) { return r.ok ? r.json() : null; })
-					.then(function (refreshData) {
+					.then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }).catch(function () { return { ok: false, body: null }; }); })
+					.then(function (res) {
+						var refreshData = res.ok ? res.body : null;
 						if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs)) {
 							// Railway /refresh returns jobs directly, use them
 							allJobs = [];
@@ -864,7 +873,7 @@
 			}
 		}
 		
-		// Vercel API: Use /api/jobs-snapshot and /api/jobs-refresh endpoints
+		// Vercel API: Use /api/jobs-snapshot and /api/jobs-refresh (GET, same as playground)
 		// If forcing refresh, call refresh endpoint; use its response when it has jobs, else fall back to snapshot
 		if (forceRefresh) {
 			var refreshUrl = proxyUrl
@@ -872,8 +881,9 @@
 				: ('/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location));
 
 			fetch(refreshUrl)
-				.then(function (r) { return r.ok ? r.json() : null; })
-				.then(function (refreshData) {
+				.then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }).catch(function () { return { ok: false, body: null }; }); })
+				.then(function (res) {
+					var refreshData = res.ok ? res.body : null;
 					if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs) && refreshData.jobs.length > 0) {
 						allJobs = [];
 						refreshData.jobs.forEach(function (item) {
