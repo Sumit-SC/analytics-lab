@@ -586,8 +586,8 @@
 	var quotePinterestBtn = document.getElementById('home-quote-pinterest');
 
 	function getCategory() {
-		if (quoteCategoryEl) return quoteCategoryEl.value || 'all';
-		try { return localStorage.getItem(QUOTE_CATEGORY_KEY) || 'all'; } catch (e) { return 'all'; }
+		if (quoteCategoryEl) return quoteCategoryEl.value || 'kdrama';
+		try { return localStorage.getItem(QUOTE_CATEGORY_KEY) || 'kdrama'; } catch (e) { return 'kdrama'; }
 	}
 
 	function saveCategory(cat) {
@@ -597,8 +597,10 @@
 	if (quoteCategoryEl) {
 		try {
 			var saved = localStorage.getItem(QUOTE_CATEGORY_KEY);
-			if (saved) quoteCategoryEl.value = saved;
-		} catch (e) {}
+			quoteCategoryEl.value = saved || 'kdrama';
+		} catch (e) {
+			quoteCategoryEl.value = 'kdrama';
+		}
 		quoteCategoryEl.addEventListener('change', function () {
 			saveCategory(quoteCategoryEl.value);
 			loadQuote(quoteCategoryEl.value);
@@ -783,6 +785,7 @@
 	var WEATHER_LOCATION_KEY = 'standalone_weather_location';
 	var defaultLat = 51.5074, defaultLon = -0.1278;
 	var lastDailyForecast = null;
+	var lastWeatherLat = null, lastWeatherLon = null;
 
 	function initWeather() {
 		var weatherEl = document.getElementById('home-weather');
@@ -826,6 +829,17 @@
 		if (n <= 300) return 'Very unhealthy';
 		return 'Hazardous';
 	}
+	function weatherIconAndClass(code, tempC) {
+		var t = tempC != null ? Number(tempC) : NaN;
+		if (code >= 80) return { icon: '☁️', class: 'home-weather-icon-cloudy' };
+		if (code >= 61) return { icon: '🌧️', class: 'home-weather-icon-rain' };
+		if (code >= 51) return { icon: '🌦️', class: 'home-weather-icon-drizzle' };
+		if (code >= 3) return { icon: '⛅', class: 'home-weather-icon-cloudy' };
+		if (code === 1) return { icon: '🌤️', class: 'home-weather-icon-clear' };
+		if (!isNaN(t) && t >= 30) return { icon: '🌡️', class: 'home-weather-icon-hot' };
+		if (!isNaN(t) && t <= 5) return { icon: '❄️', class: 'home-weather-icon-cold' };
+		return { icon: '☀️', class: 'home-weather-icon-clear' };
+	}
 	function renderForecastPanel(panel, daily) {
 		if (!panel || !daily) return;
 		var times = daily.time || [];
@@ -852,36 +866,24 @@
 	function renderWeather(data, aqiData, locationName) {
 		if (!weatherEl || !data) return;
 		lastDailyForecast = data.daily || null;
-		var temp = data.current_weather && data.current_weather.temperature != null
-			? Math.round(data.current_weather.temperature) + '°C'
-			: '—';
+		var tempC = data.current_weather && data.current_weather.temperature != null ? data.current_weather.temperature : null;
+		var temp = tempC != null ? Math.round(tempC) + '°C' : '—';
 		var code = (data.current_weather && data.current_weather.weathercode) || 0;
 		var desc = weatherCodeToDesc(code);
-		var aqiHtml = '';
 		var usAqi = aqiData && aqiData.current && aqiData.current.us_aqi != null ? aqiData.current.us_aqi : null;
-		if (usAqi != null) {
-			var label = aqiLabel(usAqi);
-			aqiHtml = ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + usAqi + ' ' + (label || '') + '</span>';
-		}
+		var aqiLabelText = usAqi != null ? aqiLabel(usAqi) : null;
+		var aqiHtml = ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + (usAqi != null ? usAqi + ' ' + (aqiLabelText || '') : '—') + '</span>';
+		var iconInfo = weatherIconAndClass(code, tempC);
 		weatherEl.innerHTML =
+			'<span class="home-weather-icon-wrap ' + iconInfo.class + '" aria-hidden="true">' + iconInfo.icon + '</span>' +
 			'<span class="home-weather-temp font-semibold text-lg">' + temp + '</span>' +
 			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' + aqiHtml +
-			'<div class="mt-2">' +
-			'<button type="button" id="home-weather-forecast-btn" class="text-xs font-semibold text-primary hover:underline py-0.5">7-day forecast</button>' +
-			'</div>';
+			'<div class="mt-1"><a href="https://open-meteo.com/en/docs' + (lastWeatherLat != null && lastWeatherLon != null ? '?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon : '') + '" target="_blank" rel="noopener" class="text-xs font-semibold text-primary hover:underline">Full forecast →</a></div>';
 		if (weatherCity) weatherCity.textContent = locationName || (data.timezone ? data.timezone.split('/').pop().replace(/_/g, ' ') : '—');
-		var forecastBtn = document.getElementById('home-weather-forecast-btn');
-		if (forecastBtn && weatherForecastPanel) {
-			forecastBtn.addEventListener('click', function () {
-				var isHidden = weatherForecastPanel.classList.contains('hidden');
-				weatherForecastPanel.classList.toggle('hidden', !isHidden);
-				weatherForecastPanel.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
-				if (isHidden && lastDailyForecast) renderForecastPanel(weatherForecastPanel, lastDailyForecast);
-			});
-		}
-		if (weatherForecastPanel) {
-			weatherForecastPanel.classList.add('hidden');
-			weatherForecastPanel.setAttribute('aria-hidden', 'true');
+		if (weatherForecastPanel && lastDailyForecast) {
+			renderForecastPanel(weatherForecastPanel, lastDailyForecast);
+			weatherForecastPanel.classList.remove('hidden');
+			weatherForecastPanel.setAttribute('aria-hidden', 'false');
 		}
 	}
 
@@ -895,6 +897,8 @@
 		]).then(function (results) {
 			var data = results[0];
 			var aqiData = results[1];
+			lastWeatherLat = lat;
+			lastWeatherLon = lon;
 			if (data && (data.current_weather || data.error !== true)) {
 				renderWeather(data, aqiData, locationName);
 			} else {
@@ -965,7 +969,15 @@
 					if (typeof window.trackEvent === 'function') {
 						window.trackEvent('home_weather_location_allowed', { latitude: lat, longitude: lon });
 					}
-					setWeatherByCoords(lat, lon, 'My location');
+					var revUrl = 'https://geocoding-api.open-meteo.com/v1/reverse?latitude=' + lat + '&longitude=' + lon + '&count=1';
+					fetch(revUrl).then(function (r) { return r.json(); }).then(function (rev) {
+						var name = 'My location';
+						if (rev.results && rev.results[0]) {
+							var r = rev.results[0];
+							name = (r.name || '') + (r.country_code ? ', ' + r.country_code.toUpperCase() : '');
+						}
+						setWeatherByCoords(lat, lon, name);
+					}).catch(function () { setWeatherByCoords(lat, lon, 'My location'); });
 				},
 				function () { setWeatherByCoords(defaultLat, defaultLon, 'London (location denied)'); }
 			);

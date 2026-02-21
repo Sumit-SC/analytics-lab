@@ -703,9 +703,10 @@ body {
 	aspect-ratio: 2 / 3;
 	max-height: min(85vh, 720px);
 }
+/* Scale the background image to fill the card; card size stays the same */
 #home-quote-bg,
 .home-quote-bg-image {
-	background-size: contain;
+	background-size: cover;
 	background-position: center center;
 	background-repeat: no-repeat;
 	background-color: #e2e8f0;
@@ -719,6 +720,23 @@ body {
 	opacity: 1;
 	filter: none;
 }
+
+/* Weather icon: animate by condition (temp / AQI reflected in icon style) */
+.home-weather-icon-wrap {
+	display: inline-block;
+	margin-right: 0.25rem;
+	font-size: 1.25rem;
+	line-height: 1;
+	vertical-align: middle;
+}
+.home-weather-icon-clear { animation: weather-pulse 2.5s ease-in-out infinite; }
+.home-weather-icon-hot { animation: weather-pulse 1.2s ease-in-out infinite; }
+.home-weather-icon-cold { animation: weather-shiver 0.4s ease-in-out infinite; }
+.home-weather-icon-rain { animation: weather-drip 1.5s ease-in-out infinite; }
+.home-weather-icon-cloudy { opacity: 0.9; }
+@keyframes weather-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.9; } }
+@keyframes weather-shiver { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); } }
+@keyframes weather-drip { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
 /* 2) Base overlay: very light tint so poster mixes with theme, but stays visible */
 .home-quote-bg-overlay {
 	background: rgba(248, 250, 252, 0.20);
