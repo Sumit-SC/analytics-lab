@@ -33,72 +33,72 @@
 </head>
 <body>
     <h1>System & API test</h1>
-    <p class="subtitle">Cloudflare Worker, Vercel APIs, Railway, and project APIs used across the site. Use this page to verify endpoints and see <a href="./docs.html">Docs</a> for details.</p>
+    <p class="subtitle">Our project: Cloudflare (Workers, D1, health/ingest). Vercel &amp; Railway: APIs used, endpoints, testing. Project APIs: YouTube (embed), Trends, Dictionary, Quotes, OMDb (via proxy), and more — test buttons below. Full details in <a href="./docs.html">Docs</a>.</p>
 
-    <!-- Cloudflare: Analytics Worker + D1 -->
+    <!-- Our project: Cloudflare implementation -->
     <div class="section">
-        <h2>Cloudflare — Analytics Worker & D1</h2>
-        <p class="muted">Our analytics: Worker (ingest + dashboard), D1 for event storage.</p>
+        <h2>Our project — Cloudflare implementation</h2>
+        <p class="muted">Workers (ingest + dashboard), D1 for event storage, health endpoint. Base URL must be the Worker URL; <code>GET /health</code> must return 200 with body <code>OK</code> (redeploy from <code>worker.analytics.js</code> if it fails).</p>
         <p><strong>Worker base:</strong> <code id="cf-base">—</code></p>
         <div class="api-row">
-            <span class="api-name">Health check</span>
-            <span class="api-desc">GET /health (uptime check)</span>
+            <span class="api-name">Health</span>
+            <span class="api-desc">GET /health — uptime check (Workers)</span>
             <button onclick="testCfHealth()">Test</button>
             <span class="test-result" id="cf-health-result">—</span>
         </div>
         <div class="api-row">
-            <span class="api-name">Ingest (events)</span>
-            <span class="api-desc">POST /api/events — send visit/unload events</span>
+            <span class="api-name">Ingest</span>
+            <span class="api-desc">POST /api/events — send visit/unload events (DB)</span>
             <button onclick="testCfIngest()">Send test event</button>
             <span class="test-result" id="cf-ingest-result">—</span>
         </div>
-        <p class="muted">Dashboard: same origin, Basic auth protected. See Docs for dashboard URL and credentials.</p>
+        <p class="muted">Dashboard: same origin, Basic auth. See <a href="./docs.html">Docs</a> for dashboard URL and credentials.</p>
     </div>
 
-    <!-- Vercel: OMDb, jobs, etc. -->
+    <!-- Vercel: APIs used + testing ground -->
     <div class="section">
-        <h2>Vercel — APIs used by the project</h2>
-        <p class="muted">e.g. playground-serveless: OMDb/CineMaterial proxy, job snapshot/cached. Set <code>OMDB_PROXY_URL</code> / <code>JOB_PROXY_URL</code> in the main site.</p>
+        <h2>Vercel — APIs used in the project &amp; testing ground</h2>
+        <p class="muted">APIs used: OMDb proxy, jobs snapshot/cached. Links and testing: deploy your own (e.g. playground-serveless) with <code>OMDB_API_KEY</code>.</p>
         <p><strong>Proxy base:</strong> <code id="vercel-base">—</code></p>
         <div class="api-row">
             <span class="api-name">OMDb proxy</span>
-            <span class="api-desc">GET /api/omdb?t=Inception — poster/search (needs API key on server)</span>
+            <span class="api-desc">GET /api/omdb?t=Inception — poster/search (Playground)</span>
             <button onclick="testVercelOmdb()">Test</button>
             <span class="test-result" id="vercel-omdb-result">—</span>
         </div>
         <div class="api-row">
             <span class="api-name">Jobs API</span>
-            <span class="api-desc">GET /api/jobs-snapshot or /api/jobs-cached — job listings</span>
+            <span class="api-desc">GET /api/jobs-snapshot or /api/jobs-cached</span>
             <button onclick="testVercelJobs()">Test</button>
             <span class="test-result" id="vercel-jobs-result">—</span>
         </div>
-        <p class="muted">Testing ground: deploy your own Vercel project with api/omdb.js, set env <code>OMDB_API_KEY</code>.</p>
+        <p class="muted">Testing ground: Vercel project with api/omdb.js; set <code>OMDB_PROXY_URL</code> / <code>JOB_PROXY_URL</code> in the main site. See Docs for links.</p>
     </div>
 
-    <!-- Railway: Job-search-api -->
+    <!-- Railway: API + endpoints + testing page -->
     <div class="section">
-        <h2>Railway — Job search API & UI</h2>
-        <p class="muted">job-search-api: scrapers, RSS, local UI. Events from Railway UI send site=railway-ui to analytics.</p>
+        <h2>Railway — API used, endpoints &amp; testing page</h2>
+        <p class="muted">job-search-api: scrapers, RSS, local UI. Endpoints and testing page at your Railway app URL.</p>
         <p><strong>Base URL:</strong> <code id="railway-base">—</code></p>
         <div class="api-row">
-            <span class="api-name">Jobs / health</span>
-            <span class="api-desc">Health or jobs endpoint — depends on your Railway deploy</span>
+            <span class="api-name">Health / root</span>
+            <span class="api-desc">GET / or /health — depends on Railway deploy</span>
             <button onclick="testRailway()">Test</button>
             <span class="test-result" id="railway-result">—</span>
         </div>
-        <p class="muted">Testing page: your Railway app URL (e.g. job-search-api index, jobspy, rssjobs). See Docs.</p>
+        <p class="muted">Set <code>JOB_PROXY_URL</code> for jobs. Testing page: your Railway app (job-search-api, jobspy, rssjobs). See Docs.</p>
     </div>
 
-    <!-- Project APIs: used across Home, Trends, Playground, etc. -->
+    <!-- Project APIs: YT, Trends, Dictionary, bots, Quotes, OMDb, etc. -->
     <div class="section">
-        <h2>Project APIs — used on Home, Trends, Playground</h2>
-        <p class="muted">Third-party and public APIs. Test connectivity from this page.</p>
+        <h2>Project APIs — used in main project (Home, Trends, Playground, bots)</h2>
+        <p class="muted">YouTube, Trends, Dictionary, Quotes, OMDb, and more. Use the buttons below to check if each API is working.</p>
         <div id="project-apis-list"></div>
     </div>
 
     <div class="section docs-link">
-        <h2>Docs & details</h2>
-        <p>For run locally, deploy (Vercel/GitHub Pages), env vars, roadmap, and full API list: see the <a href="./docs.html">Docs &amp; Sitemap</a> page.</p>
+        <h2>Docs — full details</h2>
+        <p>Run locally, deploy (Vercel/GitHub Pages), env vars, roadmap, and full API list: <a href="./docs.html">Docs &amp; Sitemap</a>.</p>
         <a href="./docs.html" class="btn">Open Docs</a>
     </div>
 
@@ -131,17 +131,29 @@
 
         async function testCfHealth() {
             setResult('cf-health-result', '…', false);
+            var healthUrl = CONFIG.cloudflareBase + '/health';
+            // Avoid cache and optional cookie issues
+            var opts = { method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store' };
             try {
-                // Worker serves GET /health with 200 "OK" — root "/" redirects to /recent
-                var r = await fetch(CONFIG.cloudflareBase + '/health');
+                var r = await fetch(healthUrl + '?t=' + Date.now(), opts);
                 var text = await r.text();
-                if (r.ok && text.trim() === 'OK') {
+                var bodyOk = (text && (text.trim() === 'OK' || text.trim().indexOf('OK') !== -1));
+                if (r.ok && bodyOk) {
                     setResult('cf-health-result', '✓ OK', false);
-                } else {
-                    setResult('cf-health-result', '✗ ' + r.status + ' ' + text.slice(0, 50), true);
+                    return;
                 }
+                if (r.status === 302 || r.type === 'opaqueredirect') {
+                    setResult('cf-health-result', '✗ Redirect — redeploy Worker so GET /health returns 200 OK (not redirect). See Docs.', true);
+                    return;
+                }
+                if (r.status === 404) {
+                    setResult('cf-health-result', '✗ 404 — redeploy Worker; add GET /health → 200 "OK" (worker.analytics.js). See Docs.', true);
+                    return;
+                }
+                setResult('cf-health-result', '✗ ' + r.status + (text ? ' ' + String(text).slice(0, 50) : ''), true);
             } catch (e) {
-                setResult('cf-health-result', '✗ ' + e.message, true);
+                var msg = (e && e.message) ? e.message : 'Failed';
+                setResult('cf-health-result', '✗ ' + msg + ' — check base URL, CORS, and that Worker is deployed. See Docs.', true);
             }
         }
 
