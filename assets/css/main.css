@@ -639,19 +639,53 @@ body {
 	color: rgb(148 163 184);
 }
 
-/* Homepage quote background: show poster clearly with a soft translucent veil */
-/* 1) The image itself is sharp and fills the card */
+/* Home weather: current block animation + forecast panel */
+.home-weather-section .home-weather-current {
+	animation: home-weather-fade-in 0.5s ease-out;
+}
+@keyframes home-weather-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.home-weather-temp {
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+.home-weather-section:hover .home-weather-temp {
+	transform: scale(1.02);
+}
+.home-weather-aqi {
+	display: inline-block;
+	margin-left: 0.25rem;
+}
+.home-weather-forecast-panel {
+	animation: home-weather-fade-in 0.3s ease-out;
+}
+.home-weather-forecast-panel.hidden {
+	display: none;
+}
+
+/* Homepage quote background: show whole poster (no stretch/crop) */
+/* 1) Contain = entire poster visible; no stretching or cropping */
 #home-quote-bg,
 .home-quote-bg-image {
-	background-size: cover;
+	background-size: contain;
 	background-position: center center;
 	background-repeat: no-repeat;
+	background-color: #e2e8f0;
 	opacity: 1;
 	filter: none;
 	transform: none;
 }
 .dark #home-quote-bg,
 .dark .home-quote-bg-image {
+	background-color: #1e293b;
 	opacity: 1;
 	filter: none;
 }

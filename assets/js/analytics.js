@@ -202,6 +202,16 @@
     }
   }
 
+  var lastConfig = null;
+
+  window.trackEvent = function trackEvent(eventName, extra) {
+    try {
+      if (lastConfig && lastConfig.endpoint && eventName) {
+        sendAnalyticsEvent(lastConfig, eventName, extra);
+      }
+    } catch (e) {}
+  };
+
   window.initAnalyticsTracking = function initAnalyticsTracking(options) {
     try {
       var pageLoadMs = Date.now();
@@ -213,6 +223,7 @@
         secret: (options && options.secret) || DEFAULT_SECRET || null,
         sessionId: sessionId
       };
+      lastConfig = cfg;
 
       if (!cfg.endpoint) return;
 

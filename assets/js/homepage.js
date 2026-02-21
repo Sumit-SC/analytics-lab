@@ -786,7 +786,9 @@
 	var weatherSearch = document.getElementById('home-weather-search');
 	var weatherSetBtn = document.getElementById('home-weather-set');
 	var weatherMyLocBtn = document.getElementById('home-weather-mylocation');
+	var weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
 	var defaultLat = 51.5074, defaultLon = -0.1278;
+	var lastDailyForecast = null;
 
 	function getSavedLocation() {
 		try {
@@ -802,34 +804,104 @@
 		try { localStorage.setItem(WEATHER_LOCATION_KEY, JSON.stringify({ lat: lat, lon: lon, name: name || '' })); } catch (e) {}
 	}
 
-	function renderWeather(data, locationName) {
+	function weatherCodeToDesc(code) {
+		if (code >= 80) return 'Cloudy';
+		if (code >= 61) return 'Rain';
+		if (code >= 51) return 'Drizzle';
+		if (code >= 3) return 'Cloudy';
+		return code === 1 ? 'Clear' : 'Clear';
+	}
+	function aqiLabel(value) {
+		if (value == null) return null;
+		var n = Number(value);
+		if (n <= 50) return 'Good';
+		if (n <= 100) return 'Moderate';
+		if (n <= 150) return 'Unhealthy (sensitive)';
+		if (n <= 200) return 'Unhealthy';
+		if (n <= 300) return 'Very unhealthy';
+		return 'Hazardous';
+	}
+	function renderForecastPanel(panel, daily) {
+		if (!panel || !daily) return;
+		var times = daily.time || [];
+		var codes = daily.weathercode || [];
+		var maxT = daily.temperature_2m_max || [];
+		var minT = daily.temperature_2m_min || [];
+		var html = '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Next 7 days</p><div class="grid grid-cols-7 gap-1 text-center">';
+		for (var i = 0; i < Math.min(7, times.length); i++) {
+			var d = new Date(times[i]);
+			var dayName = d.toLocaleDateString([], { weekday: 'short' });
+			var code = codes[i] != null ? codes[i] : 0;
+			var desc = weatherCodeToDesc(code);
+			var hi = maxT[i] != null ? Math.round(maxT[i]) + '°' : '—';
+			var lo = minT[i] != null ? Math.round(minT[i]) + '°' : '—';
+			html += '<div class="rounded px-1 py-1.5 bg-gray-100/80 dark:bg-gray-800/80">' +
+				'<div class="text-[10px] font-medium text-gray-600 dark:text-gray-400">' + dayName + '</div>' +
+				'<div class="text-xs font-semibold text-gray-800 dark:text-gray-100">' + hi + '</div>' +
+				'<div class="text-[10px] text-gray-500 dark:text-gray-400">' + lo + '</div>' +
+				'<div class="text-[10px] opacity-80">' + desc + '</div></div>';
+		}
+		html += '</div>';
+		panel.innerHTML = html;
+	}
+	function renderWeather(data, aqiData, locationName) {
 		if (!weatherEl || !data) return;
+		lastDailyForecast = data.daily || null;
 		var temp = data.current_weather && data.current_weather.temperature != null
 			? Math.round(data.current_weather.temperature) + '°C'
 			: '—';
 		var code = (data.current_weather && data.current_weather.weathercode) || 0;
-		var desc = code >= 80 ? 'Cloudy' : code >= 61 ? 'Rain' : code >= 51 ? 'Drizzle' : code >= 3 ? 'Cloudy' : code === 1 ? 'Clear' : 'Clear';
-		weatherEl.innerHTML = '<span class="font-semibold text-lg">' + temp + '</span><span class="text-sm opacity-80 ml-1">' + desc + '</span>';
+		var desc = weatherCodeToDesc(code);
+		var aqiHtml = '';
+		var usAqi = aqiData && aqiData.current && aqiData.current.us_aqi != null ? aqiData.current.us_aqi : null;
+		if (usAqi != null) {
+			var label = aqiLabel(usAqi);
+			aqiHtml = ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + usAqi + ' ' + (label || '') + '</span>';
+		}
+		weatherEl.innerHTML =
+			'<span class="home-weather-temp font-semibold text-lg">' + temp + '</span>' +
+			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' + aqiHtml +
+			'<div class="mt-2">' +
+			'<button type="button" id="home-weather-forecast-btn" class="text-xs font-semibold text-primary hover:underline py-0.5">7-day forecast</button>' +
+			'</div>';
 		if (weatherCity) weatherCity.textContent = locationName || (data.timezone ? data.timezone.split('/').pop().replace(/_/g, ' ') : '—');
+		var forecastBtn = document.getElementById('home-weather-forecast-btn');
+		if (forecastBtn && weatherForecastPanel) {
+			forecastBtn.addEventListener('click', function () {
+				var isHidden = weatherForecastPanel.classList.contains('hidden');
+				weatherForecastPanel.classList.toggle('hidden', !isHidden);
+				weatherForecastPanel.setAttribute('aria-hidden', isHidden ? 'false' : 'true');
+				if (isHidden && lastDailyForecast) renderForecastPanel(weatherForecastPanel, lastDailyForecast);
+			});
+		}
+		if (weatherForecastPanel) {
+			weatherForecastPanel.classList.add('hidden');
+			weatherForecastPanel.setAttribute('aria-hidden', 'true');
+		}
 	}
 
 	function fetchWeather(lat, lon, locationName) {
-		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true';
-		fetch(url)
-			.then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); })
-			.then(function (data) {
-				if (data && (data.current_weather || data.error !== true)) {
-					renderWeather(data, locationName);
-				} else {
-					renderWeatherUnavailable();
-				}
-			})
-			.catch(function () {
+		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+			'&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7';
+		var aqiUrl = 'https://air-quality.api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lon + '&current=us_aqi';
+		Promise.all([
+			fetch(url).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); }),
+			fetch(aqiUrl).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+		]).then(function (results) {
+			var data = results[0];
+			var aqiData = results[1];
+			if (data && (data.current_weather || data.error !== true)) {
+				renderWeather(data, aqiData, locationName);
+			} else {
 				renderWeatherUnavailable();
-			});
+			}
+		}).catch(function () {
+			renderWeatherUnavailable();
+		});
 	}
 	function renderWeatherUnavailable() {
 		if (!weatherEl) return;
+		lastDailyForecast = null;
 		weatherEl.innerHTML = '<span class="text-sm opacity-70">Weather unavailable</span>' +
 			'<div class="flex gap-2 mt-1">' +
 			'<button type="button" class="weather-retry-btn text-xs font-semibold text-primary hover:underline">Retry</button>' +
@@ -881,21 +953,25 @@
 				return;
 			}
 			navigator.geolocation.getCurrentPosition(
-				function (pos) { setWeatherByCoords(pos.coords.latitude, pos.coords.longitude, 'My location'); },
+				function (pos) {
+					var lat = pos.coords.latitude;
+					var lon = pos.coords.longitude;
+					console.log('[Weather] Location allowed — latitude:', lat, 'longitude:', lon);
+					if (typeof window.trackEvent === 'function') {
+						window.trackEvent('home_weather_location_allowed', { latitude: lat, longitude: lon });
+					}
+					setWeatherByCoords(lat, lon, 'My location');
+				},
 				function () { setWeatherByCoords(defaultLat, defaultLon, 'London (location denied)'); }
 			);
 		});
 	}
 
+	// No auto location popup on load — use saved location or default city only
 	if (weatherEl) {
 		var saved = getSavedLocation();
 		if (saved) {
 			fetchWeather(saved.lat, saved.lon, saved.name);
-		} else if (navigator.geolocation && navigator.geolocation.getCurrentPosition) {
-			navigator.geolocation.getCurrentPosition(
-				function (pos) { setWeatherByCoords(pos.coords.latitude, pos.coords.longitude, 'My location'); },
-				function () { fetchWeather(defaultLat, defaultLon, 'London'); }
-			);
 		} else {
 			fetchWeather(defaultLat, defaultLon, 'London');
 		}
