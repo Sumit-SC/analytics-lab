@@ -106,6 +106,8 @@ All pages (Home, Playground, Tools, Resources, Trends) send **visit** and **unlo
 
 Deploy the **analytics-lab** folder to any static host (GitHub Pages, Netlify, Vercel, etc.). No build step; no server required.
 
+**Environment / config:** For jobs, set `JOB_PROXY_URL` (e.g. to your playground-serveless or job-search-api URL) where your frontend is configured. For OMDb posters, use a proxy and set `OMDB_PROXY_URL` (or add `OMDB_API_KEY` in the backend project that serves the proxy). See sections below.
+
 ### OMDb API key (posters / wallpapers)
 
 The key is **never** sent to the browser. A small backend calls OMDb and returns only poster/search/details.
