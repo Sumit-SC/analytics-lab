@@ -2,6 +2,11 @@
  * Assistant panel (shared): persists chat locally (localStorage).
  * - Stores last 50 messages
  * - Optional full offline chatbot (~80MB) via transformers.js
+ *
+ * Future: jobs-page context (see SITE-AND-JOB-PREP-TODO.md)
+ * - When opened on jobs page (body data-page="jobs" or pathname includes "jobs"): show job-prep-focused welcome and suggested prompts.
+ * - Optional: read current role/company from page (e.g. from a job card or global "target role" field) and pass into first prompt or suggestions.
+ * - Add job-prep FAQ entries to light mode (STAR, common technical/behavioral questions) so value without downloading 80MB model.
  */
 
 (function () {
@@ -79,20 +84,25 @@
 		messagesEl.scrollTop = messagesEl.scrollHeight;
 	}
 
+	function isJobsPage() {
+		try {
+			if (document.body && document.body.getAttribute('data-page') === 'jobs') return true;
+			var p = (window.location.pathname || '').toLowerCase();
+			return p.indexOf('jobs') !== -1;
+		} catch (e) { return false; }
+	}
+
 	function openPanel() {
 		panel.classList.add('open');
 		if (overlay) overlay.classList.add('show');
 		if (messagesEl.children.length === 0) {
-			add(
-				'assistant',
-				'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).',
-				'what is flan t5 small model size'
-			);
-			push({
-				role: 'assistant',
-				text: 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).',
-				searchQuery: 'what is flan t5 small model size',
-			});
+			var onJobs = isJobsPage();
+			var welcome = onJobs
+				? 'You\'re on the jobs page. I can help with interview prep, mock questions, or explaining your experience. Ask anything or enable the full chatbot (~80MB) below. Chat is saved in your browser.'
+				: 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).';
+			var searchQuery = onJobs ? 'STAR method interview answer' : 'what is flan t5 small model size';
+			add('assistant', welcome, searchQuery);
+			push({ role: 'assistant', text: welcome, searchQuery: searchQuery });
 		}
 	}
 	function closePanel() {

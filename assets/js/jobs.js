@@ -1366,6 +1366,24 @@
 
 	var currentDetailJob = null;
 
+	function buildChatGPTPrepPrompt(job) {
+		var role = job.title || 'this role';
+		var company = job.company || '';
+		var location = job.location || '';
+		var desc = String(job.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+		if (desc.length > 8000) desc = desc.slice(0, 8000) + '...';
+		var header = 'I am preparing for an interview. Please help me as follows.\n\n' +
+			'**Role:** ' + role + (company ? '\n**Company:** ' + company : '') + (location ? '\n**Location:** ' + location : '') + '\n\n' +
+			'**Job description:**\n' + (desc || '(No description provided.)') + '\n\n' +
+			'**Instructions for you (the AI):**\n' +
+			'1. First, ask me about my background and relevant experience (e.g. years of experience, key skills, recent roles). Wait for my answer.\n' +
+			'2. Then, using the job description above, act as an interviewer. Ask me one interview question at a time (behavioral, technical, or role-specific). Base each question on this role and JD.\n' +
+			'3. After each answer, give brief constructive feedback, then ask the next question.\n' +
+			'4. After 5–7 questions, give a short overall prep tip. Keep responses concise.\n\n' +
+			'Start by asking about my background.';
+		return header;
+	}
+
 	function openJobDetails(job) {
 		var modal = document.getElementById('job-detail-modal');
 		if (!modal || !job) return;
@@ -1421,6 +1439,19 @@
 				} else {
 					window.alert('Assistant is loading. Try again in a moment.');
 				}
+			};
+		}
+
+		var copyChatBtn = document.getElementById('job-detail-copy-chatgpt');
+		if (copyChatBtn) {
+			copyChatBtn.onclick = function () {
+				var prompt = buildChatGPTPrepPrompt(job);
+				navigator.clipboard.writeText(prompt).then(function () {
+					window.open('https://chat.openai.com/', '_blank', 'noopener');
+					window.alert('Prompt copied. Paste it in the new ChatGPT tab to start. The AI will ask about your background first, then run a mock interview based on this JD.');
+				}).catch(function () {
+					window.prompt('Copy this prompt and paste it into ChatGPT or Gemini:', prompt);
+				});
 			};
 		}
 
@@ -2475,6 +2506,7 @@
 			html += sourceInfo;
 			html += '<div class="flex items-center gap-2">';
 			html += '<button type="button" class="job-details-btn text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" data-job-id="' + job.id + '" title="Quick view">Details</button>';
+			html += '<button type="button" class="job-prep-chatgpt-btn text-xs px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Copy JD + prompt and open ChatGPT/Gemini">Prepare</button>';
 			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
 			html += '</div>';
@@ -2492,6 +2524,22 @@
 				applications[jobId] = newStatus;
 				saveApplications();
 				applyFilters(); // Re-render to update stats
+			});
+		});
+
+		// Add event listeners for "Prepare" (Copy for ChatGPT/Gemini) buttons
+		jobListEl.querySelectorAll('.job-prep-chatgpt-btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var jobId = this.getAttribute('data-job-id');
+				var job = filteredJobs.find(function (j) { return j.id === jobId; });
+				if (!job) return;
+				var prompt = buildChatGPTPrepPrompt(job);
+				navigator.clipboard.writeText(prompt).then(function () {
+					window.open('https://chat.openai.com/', '_blank', 'noopener');
+					window.alert('Prompt copied. Paste it in the new ChatGPT tab. The AI will ask about your background first, then run a mock interview based on this JD.');
+				}).catch(function () {
+					window.prompt('Copy this prompt and paste into ChatGPT or Gemini:', prompt);
+				});
 			});
 		});
 
