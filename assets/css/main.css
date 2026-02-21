@@ -654,6 +654,17 @@ body {
 	opacity: 0.9;
 	margin-top: 0.5rem;
 }
+.home-quote-inner {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.home-quote-block {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
 .home-section-title {
 	font-size: 0.7rem;
 	font-weight: 600;
@@ -663,6 +674,24 @@ body {
 }
 .dark .home-section-title {
 	color: rgb(148 163 184);
+}
+
+/* Row 1: Clock half width, Weather expanded; tips & time align with poster row */
+.home-row-1-grid {
+	align-items: stretch;
+}
+@media (min-width: 640px) {
+	.home-row-1-grid {
+		grid-template-columns: 1fr 0.5fr 1.5fr;
+	}
+}
+.home-clock-section .home-clock-time {
+	font-size: 1rem;
+}
+@media (min-width: 640px) {
+	.home-clock-section .home-clock-time {
+		font-size: 1.125rem;
+	}
 }
 
 /* Home weather: current block animation + forecast panel */
@@ -697,6 +726,25 @@ body {
 	display: none;
 }
 
+/* Row 1: Refresh (tips), Clock half width, Weather expanded — align with poster row */
+.home-row-1-grid {
+	align-items: stretch;
+}
+@media (min-width: 640px) {
+	.home-row-1-grid {
+		grid-template-columns: 1fr 0.5fr 1.5fr;
+	}
+}
+.home-clock-section .home-clock-time {
+	font-size: 1rem;
+}
+@media (min-width: 640px) {
+	.home-clock-section .home-clock-time {
+		font-size: 1.125rem;
+	}
+}
+
+/* Homepage quote: card size fixed (aspect-ratio); only the background image scales inside */
 /* Homepage quote background: full poster in a fixed aspect-ratio frame (no stretch, no crop) */
 /* 1) Quote panel has poster aspect ratio 2:3 so height is fixed from width; full image fits inside */
 .home-quote-panel {
