@@ -28,6 +28,7 @@
 						<a href="./resources.html?topic=python" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Resources</a>
 						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
 						<a href="./jobs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Jobs</a>
+						<a href="./docs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Docs</a>
 						<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
 					</div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
@@ -49,8 +50,25 @@
 			<a href="./resources.html" class="text-primary border-primary">Resources</a>
 			<a href="./tools.html">Tools</a>
 			<a href="./jobs.html">Jobs</a>
+			<a href="./docs.html">Docs</a>
 			<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent" aria-label="Toggle Roadmap">Roadmap</button>
 		</nav>
+	</div>
+
+	<!-- Resource detail popup (Notion/Medium-style: open in same page) -->
+	<div id="resource-detail-overlay" class="resource-detail-overlay" aria-hidden="true">
+		<div class="resource-detail-modal" role="dialog" aria-label="Resource preview">
+			<div class="resource-detail-header">
+				<span id="resource-detail-title" class="resource-detail-title">Resource</span>
+				<div class="resource-detail-actions">
+					<a id="resource-detail-open-tab" href="#" target="_blank" rel="noopener" class="text-sm font-semibold text-primary hover:underline">Open in new tab</a>
+					<button type="button" id="resource-detail-close" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">Close</button>
+				</div>
+			</div>
+			<div class="resource-detail-iframe-wrap">
+				<iframe id="resource-detail-iframe" title="Resource preview"></iframe>
+			</div>
+		</div>
 	</div>
 
 	<main class="max-w-6xl mx-auto px-4 sm:px-8 py-10">
@@ -164,6 +182,7 @@
 		<div class="global-music-source">
 			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
 			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+			<button type="button" id="global-music-source-radio" class="global-music-source-btn" aria-pressed="false" data-source="radio" title="Free internet radio (no API)">Radio</button>
 		</div>
 		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
 		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>

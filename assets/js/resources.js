@@ -1,12 +1,67 @@
 /**
  * Resources page: topic selector, tabs (YouTube / Read / Courses / Best), fetch resources.json.
- * Validates YouTube URLs/IDs before embed so invalid links don't break the player.
+ * Notion-style gallery/list view; open links in same-page popup (Medium-style). Validates YouTube before embed.
  */
 (function () {
 	var params = new URLSearchParams(window.location.search);
 	var initialTopic = (params.get('topic') || 'python').toLowerCase().replace(/[^a-z0-9-]/g, '');
 	var root = document.getElementById('resource-root');
 	var notFound = document.getElementById('resource-not-found');
+
+	var resourceViewMode = 'gallery'; // 'gallery' | 'list'
+	var RESOURCE_VIEW_KEY = 'resources_view_mode';
+
+	function escapeHtml(s) {
+		if (s == null) return '';
+		var div = document.createElement('div');
+		div.textContent = s;
+		return div.innerHTML;
+	}
+
+	function getResourceViewMode() {
+		try { return localStorage.getItem(RESOURCE_VIEW_KEY) || 'gallery'; } catch (e) { return 'gallery'; }
+	}
+	function setResourceViewMode(mode) {
+		try { localStorage.setItem(RESOURCE_VIEW_KEY, mode); } catch (e) {}
+		resourceViewMode = mode;
+	}
+
+	// Resource detail popup (Notion/Medium-style)
+	function openResourcePopup(url, name) {
+		var overlay = document.getElementById('resource-detail-overlay');
+		var iframe = document.getElementById('resource-detail-iframe');
+		var titleEl = document.getElementById('resource-detail-title');
+		var openTab = document.getElementById('resource-detail-open-tab');
+		var closeBtn = document.getElementById('resource-detail-close');
+		if (!overlay || !iframe || !openTab) return;
+		titleEl.textContent = name || 'Resource';
+		openTab.href = url;
+		iframe.src = url;
+		overlay.classList.add('resource-detail-open');
+		overlay.setAttribute('aria-hidden', 'false');
+	}
+	function closeResourcePopup() {
+		var overlay = document.getElementById('resource-detail-overlay');
+		var iframe = document.getElementById('resource-detail-iframe');
+		if (overlay) {
+			overlay.classList.remove('resource-detail-open');
+			overlay.setAttribute('aria-hidden', 'true');
+		}
+		if (iframe) iframe.src = 'about:blank';
+	}
+	function initResourcePopup() {
+		var overlay = document.getElementById('resource-detail-overlay');
+		var closeBtn = document.getElementById('resource-detail-close');
+		if (overlay) {
+			overlay.addEventListener('click', function (e) {
+				if (e.target === overlay) closeResourcePopup();
+			});
+		}
+		if (closeBtn) closeBtn.addEventListener('click', closeResourcePopup);
+		document.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape') closeResourcePopup();
+		});
+	}
 
 	function isValidYouTubeVideoId(id) {
 		return typeof id === 'string' && /^[a-zA-Z0-9_-]{11}$/.test(id.trim());
@@ -103,38 +158,46 @@
 		html += '<div id="yt-panel" class="p-5"></div>';
 		html += '</section>';
 
-		// Panel: Read / Blogs / Books — Notion-like cards with thumbnail
+		// Panel: Read / Blogs / Books — Notion-like cards; gallery/list view; open in popup
+		resourceViewMode = getResourceViewMode();
+		var readViewClass = resourceViewMode === 'list' ? 'resource-list' : 'resource-gallery';
 		html += '<section data-tab-panel="read" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
-		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">📖 Read / blogs / books</h2></div><div class="p-4 space-y-4 text-sm">';
+		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
+		html += '<h2 class="text-lg font-bold">📖 Read / blogs / books</h2>';
+		html += '<div class="resource-view-toggle" role="group" aria-label="View mode"><button type="button" class="resource-view-btn ' + (resourceViewMode === 'gallery' ? 'active' : '') + '" data-view="gallery">Gallery</button><button type="button" class="resource-view-btn ' + (resourceViewMode === 'list' ? 'active' : '') + '" data-view="list">List</button></div></div>';
+		html += '<div class="p-4 space-y-4 text-sm">';
 		function cardWithThumb(url, name, meta, icon) {
 			var thumb = icon || '📄';
-			return '<a class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all" target="_blank" rel="noopener" href="' + url + '">' +
+			var safeUrl = escapeHtml(url);
+			var safeName = escapeHtml(name || '');
+			var safeMeta = escapeHtml(meta || '');
+			return '<button type="button" class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all w-full text-left" data-resource-url="' + safeUrl + '" data-resource-name="' + safeName + '">' +
 				'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">' + thumb + '</div>' +
-				'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + name + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + meta + '</div></div></a>';
+				'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + safeName + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + safeMeta + '</div></div></button>';
 		}
 		if (t.books && t.books.length) {
-			html += '<div><h3 class="font-semibold mb-2">Books & official docs</h3><div class="resource-gallery">';
+			html += '<div><h3 class="font-semibold mb-2">Books & official docs</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
 			t.books.forEach(function (r) {
 				html += cardWithThumb(r.url, r.name, 'Book / docs', '📖');
 			});
 			html += '</div></div>';
 		}
 		if (t.blogs && t.blogs.length) {
-			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="resource-gallery">';
+			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
 			t.blogs.forEach(function (b) {
 				html += cardWithThumb(b.url, b.name, 'Blog / article', '📄');
 			});
 			html += '</div></div>';
 		}
 		if (t.github && t.github.length) {
-			html += '<div class="mt-2"><h3 class="font-semibold mb-2">GitHub repositories</h3><div class="resource-gallery">';
+			html += '<div class="mt-2"><h3 class="font-semibold mb-2">GitHub repositories</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
 			t.github.forEach(function (g) {
 				html += cardWithThumb(g.url, g.name, 'GitHub repo', '⭐');
 			});
 			html += '</div></div>';
 		}
 		if (t.reddit && t.reddit.length) {
-			html += '<div class="mt-2"><h3 class="font-semibold mb-2">Reddit communities</h3><div class="resource-gallery">';
+			html += '<div class="mt-2"><h3 class="font-semibold mb-2">Reddit communities</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
 			t.reddit.forEach(function (r) {
 				var url = r.url || ('https://www.reddit.com/r/' + (r.subreddit || r.name || '').replace(/^r\//, '') + '/');
 				html += cardWithThumb(url, r.name || ('r/' + (r.subreddit || '')), 'Reddit', '🔴');
@@ -146,15 +209,18 @@
 		}
 		html += '</div></section>';
 
-		// Panel: Courses & paths — Notion-like cards with thumbnail
+		// Panel: Courses & paths — Notion-like cards; gallery/list; open in popup
 		html += '<section data-tab-panel="course" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
-		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">🎓 Courses & learning paths</h2></div><div class="p-4 space-y-4 text-sm">';
+		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
+		html += '<h2 class="text-lg font-bold">🎓 Courses & learning paths</h2>';
+		html += '<div class="resource-view-toggle" role="group" aria-label="View mode"><button type="button" class="resource-view-btn ' + (resourceViewMode === 'gallery' ? 'active' : '') + '" data-view="gallery">Gallery</button><button type="button" class="resource-view-btn ' + (resourceViewMode === 'list' ? 'active' : '') + '" data-view="list">List</button></div></div>';
+		html += '<div class="p-4 space-y-4 text-sm">';
 		if (t.courses && t.courses.length) {
-			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="resource-gallery">';
+			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="resource-cards-wrap course-cards ' + readViewClass + '">';
 			t.courses.forEach(function (c) {
-				html += '<a class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all" target="_blank" rel="noopener" href="' + c.url + '">' +
+				html += '<button type="button" class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all w-full text-left" data-resource-url="' + escapeHtml(c.url) + '" data-resource-name="' + escapeHtml(c.name || '') + '">' +
 					'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">🎓</div>' +
-					'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + c.name + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Course</div></div></a>';
+					'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + escapeHtml(c.name || '') + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Course</div></div></button>';
 			});
 			html += '</div></div>';
 		} else {
@@ -213,6 +279,34 @@
 
 		html += '</div>';
 		root.innerHTML = html;
+
+		// Resource cards: open in same-page popup (Notion/Medium-style)
+		root.querySelectorAll('.resource-card-with-thumb[data-resource-url]').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var url = btn.getAttribute('data-resource-url');
+				var name = btn.getAttribute('data-resource-name') || '';
+				if (url) openResourcePopup(url, name);
+			});
+		});
+		// View toggle (Gallery / List)
+		function applyViewMode(view) {
+			setResourceViewMode(view);
+			var isList = view === 'list';
+			var cls = isList ? 'resource-list' : 'resource-gallery';
+			root.querySelectorAll('.resource-cards-wrap').forEach(function (wrap) {
+				wrap.classList.remove('resource-gallery', 'resource-list');
+				wrap.classList.add(cls);
+			});
+			root.querySelectorAll('.resource-view-btn').forEach(function (b) {
+				b.classList.toggle('active', b.getAttribute('data-view') === view);
+			});
+		}
+		root.querySelectorAll('.resource-view-btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var view = btn.getAttribute('data-view');
+				if (view) applyViewMode(view);
+			});
+		});
 
 		var selectEl = document.getElementById('topic-select');
 		if (selectEl) {
@@ -347,10 +441,11 @@
 				var iframe = document.createElement('iframe');
 				iframe.className = 'w-full h-full';
 				var listId = (embedId.indexOf('PL') === 0) ? embedId : ('PL' + embedId);
+				var ytBase = 'https://www.youtube-nocookie.com/embed';
 				if (isPlaylist) {
-					iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + listId + '&rel=0';
+					iframe.src = ytBase + '/videoseries?list=' + listId + '&rel=0&modestbranding=1';
 				} else {
-					iframe.src = 'https://www.youtube.com/embed/' + embedId + '?rel=0';
+					iframe.src = ytBase + '/' + embedId + '?rel=0&modestbranding=1';
 				}
 				iframe.title = hv.title || '';
 				iframe.allowFullscreen = true;
@@ -516,7 +611,7 @@
 						iframeWrap.style.minHeight = '200px';
 						var iframe = document.createElement('iframe');
 						iframe.className = 'w-full h-full';
-						iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + uploadsListId + '&rel=0';
+						iframe.src = 'https://www.youtube-nocookie.com/embed/videoseries?list=' + uploadsListId + '&rel=0&modestbranding=1';
 						iframe.title = 'Channel uploads';
 						iframe.allowFullscreen = true;
 						iframeWrap.appendChild(iframe);
@@ -549,6 +644,8 @@
 			render();
 		})(t);
 	}
+
+		initResourcePopup();
 
 	fetch('./assets/resources.json')
 		.then(function (res) {

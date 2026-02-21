@@ -8,17 +8,27 @@
 	var QUEUE_KEY = 'standalone_music_queue';
 	var CURRENT_KEY = 'standalone_music_current';
 	var PANEL_OPEN_KEY = 'standalone_yt_panel_open';
-	var MUSIC_SOURCE_KEY = 'standalone_music_source'; // 'yt' | 'saavn'
+	var MUSIC_SOURCE_KEY = 'standalone_music_source'; // 'yt' | 'saavn' | 'radio'
 	var SAAVN_QUEUE_KEY = 'standalone_saavn_queue';
 	var SAAVN_INDEX_KEY = 'standalone_saavn_index';
 	var YT_API_LOADED = false;
 	var ytApiPendingCb = null;
 	var ytPlayer = null;
+	var ytFallbackIframe = null; // when YT IFrame API fails or is blocked
 	var playerReady = false;
 	var JIOSAAVN_API_BASE = 'https://saavn.sumit.co';
 	var saavnAudio = null;
 	var saavnQueue = [];
 	var saavnCurrentIndex = 0;
+	var radioAudio = null;
+	var radioIndex = 0;
+	// Open-source / free streams that work without API keys (direct MP3/AAC; no Spotify/Apple/JioSaavn API)
+	var RADIO_STREAMS = [
+		{ name: 'Radio Paradise (main)', url: 'https://stream.radioparadise.com/mp3-128', type: 'stream' },
+		{ name: 'SomaFM Groove Salad', url: 'https://ice2.somafm.com/groovesalad-128-mp3', type: 'stream' },
+		{ name: 'SomaFM Space Station', url: 'https://ice2.somafm.com/spacestation-128-mp3', type: 'stream' },
+		{ name: 'Chillhop', url: 'https://stream.chillhop.com/stream', type: 'stream' }
+	];
 
 	// Must be on window before the YouTube script loads (API calls it when ready)
 	window.onYouTubeIframeAPIReady = function () {
@@ -190,6 +200,19 @@
 		tag.async = true;
 		var first = document.getElementsByTagName('script')[0];
 		first.parentNode.insertBefore(tag, first);
+		// Fallback: if API never loads (blocked, slow), use iframe embed so at least Video panel works
+		setTimeout(function () {
+			if (YT_API_LOADED || ytPlayer) return;
+			if (playerDiv && !document.getElementById('global-yt-fallback-iframe')) {
+				var fallback = document.createElement('iframe');
+				fallback.id = 'global-yt-fallback-iframe';
+				fallback.setAttribute('style', 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;');
+				fallback.title = 'YouTube fallback';
+				playerDiv.appendChild(fallback);
+				ytFallbackIframe = fallback;
+			}
+			if (cb) cb();
+		}, 5000);
 	}
 
 	function initPlayer() {
@@ -197,7 +220,9 @@
 		var container = document.getElementById('global-yt-player-iframe');
 		if (!container) return;
 		loadYtApi(function () {
+			if (ytFallbackIframe) return; // API didn't load; fallback will be used in loadVideo
 			try {
+				if (!window.YT || !window.YT.Player) return;
 				ytPlayer = new YT.Player('global-yt-player-iframe', {
 					height: '1',
 					width: '1',
@@ -213,19 +238,36 @@
 			} catch (e) {
 				playerReady = false;
 				ytPlayer = null;
+				if (playerDiv && !ytFallbackIframe) {
+					var fallback = document.createElement('iframe');
+					fallback.id = 'global-yt-fallback-iframe';
+					fallback.setAttribute('style', 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;');
+					fallback.title = 'YouTube fallback';
+					playerDiv.appendChild(fallback);
+					ytFallbackIframe = fallback;
+				}
 			}
 		});
 	}
 
 	function loadVideo(id) {
 		setCurrent(id);
+		if (ytFallbackIframe && id) {
+			ytFallbackIframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&modestbranding=1';
+			updateBarTitle();
+			return;
+		}
 		if (ytPlayer && ytPlayer.loadVideoById) {
 			ytPlayer.loadVideoById(id || '');
 		} else if (playerDiv) {
 			initPlayer();
 			setTimeout(function () {
-				if (ytPlayer && ytPlayer.loadVideoById) ytPlayer.loadVideoById(id || '');
-			}, 500);
+				if (ytFallbackIframe && id) {
+					ytFallbackIframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&modestbranding=1';
+				} else if (ytPlayer && ytPlayer.loadVideoById) {
+					ytPlayer.loadVideoById(id || '');
+				}
+			}, 600);
 		}
 		updateBarTitle();
 	}
@@ -245,6 +287,11 @@
 
 	function updateBarTitle() {
 		if (!barTitle) return;
+		if (getMusicSource() === 'radio') {
+			var s = RADIO_STREAMS[radioIndex];
+			barTitle.textContent = (s && s.name) ? s.name : (RADIO_STREAMS.length ? 'Radio' : 'Radio');
+			return;
+		}
 		if (getMusicSource() === 'saavn') {
 			var q = getSaavnQueue();
 			var idx = getSaavnIndex();
@@ -258,29 +305,59 @@
 		var t = (item && item.title) ? item.title : (cur ? 'Playing' : 'Paste YouTube URL or ID');
 		barTitle.textContent = t;
 	}
+
+	// --- Radio (open-source streams: no API key) ---
+	function playRadio(idx) {
+		if (idx < 0 || idx >= RADIO_STREAMS.length) return;
+		radioIndex = idx;
+		var s = RADIO_STREAMS[radioIndex];
+		if (!s || !s.url) return;
+		if (!radioAudio) {
+			radioAudio = new Audio();
+		}
+		radioAudio.src = s.url;
+		radioAudio.play().catch(function () {});
+		updateBarTitle();
+	}
+	function pauseRadio() {
+		if (radioAudio) radioAudio.pause();
+	}
+	function nextRadio() {
+		radioIndex = (radioIndex + 1) % RADIO_STREAMS.length;
+		playRadio(radioIndex);
+	}
+
 	function setSourceUI(src) {
 		var isSaavn = src === 'saavn';
-		if (barInput) barInput.placeholder = isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or video ID';
+		var isRadio = src === 'radio';
+		if (barInput) {
+			barInput.placeholder = isRadio ? 'Click Play or Next for stations' : (isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or video ID');
+			barInput.style.display = isRadio ? 'none' : '';
+		}
 		var panelInput = document.getElementById('global-yt-panel-input');
 		if (panelInput) panelInput.placeholder = isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or type search…';
 		var pipedLabel = document.querySelector('.global-yt-panel-piped-label');
-		if (pipedLabel) pipedLabel.style.display = isSaavn ? 'none' : '';
+		if (pipedLabel) pipedLabel.style.display = isSaavn || isRadio ? 'none' : '';
 		var focusBtn = document.getElementById('global-music-focus');
-		if (focusBtn) focusBtn.style.display = isSaavn ? 'none' : '';
+		if (focusBtn) focusBtn.style.display = isSaavn || isRadio ? 'none' : '';
 		var panelIframe = document.getElementById('global-yt-panel-iframe');
 		var saavnResults = document.getElementById('global-saavn-results');
 		if (panelIframe && saavnResults) {
-			panelIframe.style.display = isSaavn ? 'none' : 'block';
+			panelIframe.style.display = isSaavn || isRadio ? 'none' : 'block';
 			saavnResults.style.display = isSaavn ? 'block' : 'none';
 		}
+		var addBtn = document.getElementById('global-music-add');
+		if (addBtn) addBtn.style.display = isRadio ? 'none' : '';
 		updateBarTitle();
 	}
 	function switchSource(src) {
 		setMusicSource(src);
 		var btnYt = document.getElementById('global-music-source-yt');
 		var btnSaavn = document.getElementById('global-music-source-saavn');
+		var btnRadio = document.getElementById('global-music-source-radio');
 		if (btnYt) { btnYt.classList.toggle('active', src === 'yt'); btnYt.setAttribute('aria-pressed', src === 'yt'); }
 		if (btnSaavn) { btnSaavn.classList.toggle('active', src === 'saavn'); btnSaavn.setAttribute('aria-pressed', src === 'saavn'); }
+		if (btnRadio) { btnRadio.classList.toggle('active', src === 'radio'); btnRadio.setAttribute('aria-pressed', src === 'radio'); }
 		setSourceUI(src);
 	}
 
@@ -290,6 +367,7 @@
 
 		document.getElementById('global-music-source-yt') && document.getElementById('global-music-source-yt').addEventListener('click', function () { switchSource('yt'); });
 		document.getElementById('global-music-source-saavn') && document.getElementById('global-music-source-saavn').addEventListener('click', function () { switchSource('saavn'); });
+		document.getElementById('global-music-source-radio') && document.getElementById('global-music-source-radio').addEventListener('click', function () { switchSource('radio'); });
 
 		// Player div must exist before YT.Player() runs (API injects iframe into it)
 		if (playerDiv && !document.getElementById('global-yt-player-iframe')) {
@@ -338,6 +416,10 @@
 		});
 
 		if (barPlay) barPlay.addEventListener('click', function () {
+			if (getMusicSource() === 'radio') {
+				playRadio(radioIndex);
+				return;
+			}
 			if (getMusicSource() === 'saavn') {
 				if (saavnAudio && saavnQueue.length > 0) saavnAudio.play().catch(function () {});
 				else if (saavnQueue.length > 0) playSaavnAt(getSaavnIndex());
@@ -353,6 +435,10 @@
 			}
 		});
 		if (barPause) barPause.addEventListener('click', function () {
+			if (getMusicSource() === 'radio') {
+				pauseRadio();
+				return;
+			}
 			if (getMusicSource() === 'saavn') {
 				if (saavnAudio) saavnAudio.pause();
 				return;
@@ -362,6 +448,10 @@
 			}
 		});
 		if (barNext) barNext.addEventListener('click', function () {
+			if (getMusicSource() === 'radio') {
+				nextRadio();
+				return;
+			}
 			if (getMusicSource() === 'saavn') {
 				playNextSaavn();
 				return;
@@ -395,9 +485,8 @@
 	}
 
 	function embedVideoUrl(id) {
-		// When "Piped" is enabled, fall back to YouTube's privacy‑enhanced domain instead of third‑party instances
-		if (getPiped()) return 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&modestbranding=1&rel=0';
-		return 'https://www.youtube.com/embed/' + id + '?autoplay=1';
+		// Prefer privacy-enhanced domain (works when main YT embed is blocked in some regions)
+		return 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&modestbranding=1&rel=0';
 	}
 
 	function openSearch(q) {

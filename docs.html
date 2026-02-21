@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Docs &amp; Sitemap — Standalone Playground</title>
+	<meta name="description" content="Documentation, site map, and reference for the Standalone Playground (analytics-lab): pages, features, APIs, analytics." />
+	<script src="./assets/js/tailwind-loader.js" defer></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+	<link rel="stylesheet" href="./assets/css/main.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
+	<nav class="app-bar bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
+		<div class="max-w-5xl mx-auto px-4 sm:px-6">
+			<div class="flex items-center justify-between py-3">
+				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<div class="flex items-center gap-2">
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
+					<div class="nav-links-inline flex items-center gap-2">
+						<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
+						<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
+						<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
+						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
+						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
+						<a href="./jobs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Jobs</a>
+						<a href="./docs.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Docs</a>
+					</div>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links">
+			<a href="./index.html">Home</a>
+			<a href="./playground.html">Playground</a>
+			<a href="./trends.html">Trends</a>
+			<a href="./resources.html">Resources</a>
+			<a href="./tools.html">Tools</a>
+			<a href="./jobs.html">Jobs</a>
+			<a href="./docs.html" class="text-primary border-primary">Docs</a>
+		</nav>
+	</div>
+
+	<main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+		<header class="mb-8">
+			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Docs &amp; Sitemap</h1>
+			<p class="text-gray-600 dark:text-gray-400 mt-2">Site map, feature overview, and references for the Standalone Playground.</p>
+		</header>
+
+		<section class="mb-10">
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Sitemap</h2>
+			<p class="text-gray-600 dark:text-gray-400 text-sm mb-4">All main pages. For search engines, use the XML sitemap: <a href="./sitemap.xml" class="text-primary hover:underline">sitemap.xml</a>. Replace <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">YOUR_DEPLOYMENT_URL</code> in <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">sitemap.xml</code> with your live site URL before deploying.</p>
+			<ul class="space-y-2 text-sm">
+				<li><a href="./index.html" class="text-primary hover:underline">Home</a> — Second brain hub, quotes, weather, focus timer, notes</li>
+				<li><a href="./playground.html" class="text-primary hover:underline">Playground</a> — Code runner (Python/JS/SQL), DevDocs, GitHub, search hub, JupyterLite</li>
+				<li><a href="./trends.html" class="text-primary hover:underline">Trends</a> — Hacker News, Inshorts, Wikipedia pageviews, filters</li>
+				<li><a href="./resources.html" class="text-primary hover:underline">Resources</a> — Courses, books, YouTube, GitHub, learning paths by topic</li>
+				<li><a href="./tools.html" class="text-primary hover:underline">Tools</a> — Word editors, notebook, backup/restore, PDF viewer</li>
+				<li><a href="./jobs.html" class="text-primary hover:underline">Jobs</a> — Job listings (playground-serveless / job-search-api), filters, Binder notebook</li>
+				<li><a href="./docs.html" class="text-primary hover:underline">Docs</a> — This page</li>
+			</ul>
+		</section>
+
+		<section class="mb-10">
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Features overview</h2>
+			<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+				<li><strong class="text-gray-800 dark:text-gray-200">No backend</strong> — Static HTML/JS; free APIs and client-side runtimes (Pyodide, sql.js, JupyterLite).</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Playground</strong> — Tech mode: DevDocs, GitHub, code runner. Non-tech: DuckDuckGo, Wikipedia, Stack Overflow, Word links.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Resources</strong> — Curated by topic (Data Analytics, ML, Data Engineering, BI, etc.) with courses, books, YouTube, GitHub.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Jobs</strong> — Powered by <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">playground-serveless</code> or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">job-search-api</code>; set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_PROXY_URL</code> in the Jobs page config.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Music bar &amp; Video panel</strong> — YouTube and JioSaavn (global bar + right-side panel on supported pages).</li>
+			</ul>
+		</section>
+
+		<section class="mb-10">
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">APIs &amp; integrations</h2>
+			<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+				<li><strong class="text-gray-800 dark:text-gray-200">Jobs</strong> — Configure <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_PROXY_URL</code> to point to your job API (e.g. playground-serveless or job-search-api).</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">OMDb (posters)</strong> — Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">window.OMDB_PROXY_URL</code> to your proxy (e.g. playground-serveless) so the API key stays server-side.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Analytics</strong> — Events sent to a configurable endpoint (e.g. <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">https://events.colab.indevs.in/api/events</code>). See <a href="./test-analytics.html" class="text-primary hover:underline">test-analytics.html</a> for health checks.</li>
+			</ul>
+		</section>
+
+		<section class="mb-10">
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Analytics</h2>
+			<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Visit and unload events are sent from all main pages. Use <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">?analytics_debug=1</code> or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">localStorage.setItem('analytics_debug','1')</code> and open DevTools to debug. <a href="./test-analytics.html" class="text-primary hover:underline">test-analytics.html</a> provides endpoint test and test-event send.</p>
+		</section>
+
+		<section class="mb-10">
+			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Repo &amp; deploy</h2>
+			<p class="text-sm text-gray-600 dark:text-gray-400">See the <a href="https://github.com/Sumit-SC/analytics-lab" class="text-primary hover:underline" target="_blank" rel="noopener">analytics-lab README</a> (or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">README.md</code> in the repo) for run locally, deploy (e.g. Vercel), env vars, and roadmap.</p>
+		</section>
+
+		<footer class="pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+			<p>Made with ❤️ &amp; 🧑‍💻 Sumit S C (mitSu)</p>
+		</footer>
+	</main>
+
+	<script src="./assets/js/nav-mobile.js" defer></script>
+	<script src="./assets/js/color-theme.js" defer></script>
+	<script src="./assets/js/theme.js" defer></script>
+</body>
+</html>

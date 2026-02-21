@@ -20,6 +20,14 @@
       {
         "name": "Python for Everybody (Coursera)",
         "url": "https://www.coursera.org/specializations/python"
+      },
+      {
+        "name": "edX · Introduction to Python",
+        "url": "https://www.edx.org/learn/python"
+      },
+      {
+        "name": "Microsoft Learn · Python for beginners",
+        "url": "https://learn.microsoft.com/en-us/training/paths/beginner-python/"
       }
     ],
     "books": [
@@ -60,6 +68,14 @@
       {
         "name": "freeCodeCamp Python articles",
         "url": "https://www.freecodecamp.org/news/tag/python/"
+      },
+      {
+        "name": "Full Stack Python",
+        "url": "https://www.fullstackpython.com/"
+      },
+      {
+        "name": "Python Weekly (newsletter archive)",
+        "url": "https://www.pythonweekly.com/"
       }
     ],
     "youtube": [

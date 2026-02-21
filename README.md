@@ -90,6 +90,13 @@ Then open **http://localhost:8000/** (Home) or **http://localhost:8000/playgroun
 
 ---
 
+## Docs & Sitemap
+
+- **Docs page:** [docs.html](docs.html) — In-app documentation: site map, features overview, APIs, analytics. Linked from the main nav (**Docs**).
+- **Sitemap (XML):** [sitemap.xml](sitemap.xml) — For search engines. **Before deploy:** replace `YOUR_DEPLOYMENT_URL` in `sitemap.xml` with your live site URL (e.g. `https://your-app.vercel.app`).
+
+---
+
 ## Analytics
 
 All pages (Home, Playground, Tools, Resources, Trends) send **visit** and **unload** events to the configured endpoint (e.g. `https://events.colab.indevs.in/api/events`) so you can see traffic in your dashboard. On the Playground, analytics is initialized **at the start** of the script so it runs even if later code throws.
