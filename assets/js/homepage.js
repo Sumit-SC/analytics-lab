@@ -337,43 +337,6 @@
 		return base;
 	}
 
-	// OMDb search: returns first result's { poster, imdbID, title } for use with CineMaterial. Same origin or OMDB_PROXY_URL.
-	function fetchOMDBSearch(title, type, cb) {
-		if (!title || !title.trim()) { cb(null); return; }
-		var base = getProxyBase();
-		var source = 'website';
-		try {
-			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) source = 'vercel_app';
-		} catch (e) {}
-		var apiUrl = (base || '') + '/api/omdb?s=' + encodeURIComponent(title.trim()) + '&source=' + encodeURIComponent(source);
-		fetch(apiUrl)
-			.then(function (r) { return r.ok ? r.json() : null; })
-			.then(function (data) {
-				var list = data && data.results && Array.isArray(data.results) ? data.results : [];
-				var first = list[0];
-				if (!first) { cb(null); return; }
-				var poster = first.Poster && first.Poster.indexOf('http') === 0 ? first.Poster : null;
-				var imdbID = first.imdbID && /^tt\d+$/.test(first.imdbID) ? first.imdbID : null;
-				cb(imdbID ? { poster: poster, imdbID: imdbID, title: first.Title || title } : null);
-			})
-			.catch(function () { cb(null); });
-	}
-
-	// CineMaterial: returns array of poster URLs for a given imdbID (from OMDb search). Gives multiple posters for wallpaper cycle.
-	function fetchCineMaterialPosters(imdbID, title, type, cb) {
-		if (!imdbID || !/^tt\d+$/.test(imdbID)) { cb([]); return; }
-		var base = getProxyBase();
-		var path = (base || '') + '/api/cinematerial?i=' + encodeURIComponent(imdbID) + '&title=' + encodeURIComponent((title || '').trim()) + '&type=' + (type === 'series' ? 'series' : 'movie');
-		fetch(path)
-			.then(function (r) { return r.ok ? r.json() : null; })
-			.then(function (data) {
-				var raw = (data && data.posters && Array.isArray(data.posters)) ? data.posters : [];
-				var posters = raw.map(function (p) { return (p && (p.url || p)) || ''; }).filter(function (u) { return u && u.indexOf('http') === 0; });
-				cb(posters);
-			})
-			.catch(function () { cb([]); });
-	}
-
 	// Fetch poster via backend proxy (key never sent to client). Proxy returns { poster: url, usage: { dailyCount, dailyLimit } } or { poster: null }.
 	// First hit per title is cached in quoteImageCache; tap on wallpaper button cycles lastQuoteFromDb.quote.images (OMDb returns one poster, so we store [url, url]).
 	// type: 'movie' | 'series' | omit. bypassCache: when true (e.g. user clicked "change image"), re-fetch from API.

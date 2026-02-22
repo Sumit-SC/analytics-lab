@@ -982,6 +982,19 @@ body {
 	display: none;
 }
 
+/* Row 2: Quote | Focus timer — consistent column sizing, no overflow */
+.home-row-2-grid {
+	align-items: stretch;
+}
+.home-row-2-grid > * {
+	min-width: 0;
+}
+@media (min-width: 640px) {
+	.home-focus-panel {
+		min-height: 12rem;
+	}
+}
+
 /* Homepage quote: poster as a contained thumbnail (~1/3 column width), quote content beside it */
 .home-quote-panel {
 	display: flex;
