@@ -259,19 +259,17 @@
 		if (!url && source && quoteImageCache[source] && quoteImageCache[source].url) {
 			url = quoteImageCache[source].url;
 		}
-		if (url) {
+		if (url && url.indexOf('http') === 0) {
 			bg.style.backgroundImage = 'url(' + url + ')';
 			return;
 		}
-		// Fallback immediately: Picsum with seed from source or seed so same source = same image
-		var s = (source || seedOrSource || Date.now()).toString().replace(/\W/g, '') || Date.now();
+		// Fallback: Picsum with seed from source so same source = same image
+		var s = (source || (seedOrSource && String(seedOrSource)) || Date.now()).toString().replace(/\W/g, '') || String(Date.now());
 		bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + s + '/800/400)';
 		// Then try to upgrade to a Wikipedia image for this source (async override)
 		if (source) {
 			fetchWikipediaImage(source, function (foundUrl) {
-				if (foundUrl) {
-					bg.style.backgroundImage = 'url(' + foundUrl + ')';
-				}
+				if (foundUrl && bg && bg.style) bg.style.backgroundImage = 'url(' + foundUrl + ')';
 			});
 		}
 	}
@@ -302,17 +300,21 @@
 		return pick(quotesDb[category]);
 	}
 
-	// Resolve 1–2 source-accurate image URLs: map by source/author, or use quote.images if they're real URLs (not Picsum)
+	// Resolve 1–2 image URLs: prefer quote.images from DB (including Picsum), then QUOTE_IMAGE_MAP by source/author
 	function getSourceImages(quote) {
+		var urls = quote.images;
+		if (Array.isArray(urls) && urls.length > 0) {
+			var first = urls[0] && String(urls[0]).trim();
+			if (first && first.indexOf('http') === 0) {
+				return urls.length >= 2 && urls[1] && String(urls[1]).trim().indexOf('http') === 0
+					? [first, String(urls[1]).trim()] : [first, first];
+			}
+		}
 		var src = (quote.source && quote.source.trim()) || '';
 		var attr = (quote.author && quote.author.trim()) || '';
 		var fromMap = (src && QUOTE_IMAGE_MAP[src]) || (attr && QUOTE_IMAGE_MAP[attr]);
 		if (fromMap) {
 			return Array.isArray(fromMap) ? fromMap : [fromMap, fromMap];
-		}
-		var urls = quote.images;
-		if (urls && urls.length > 0 && urls[0] && urls[0].indexOf('picsum') === -1) {
-			return urls.length >= 2 ? [urls[0], urls[1]] : [urls[0], urls[0]];
 		}
 		return null;
 	}
@@ -413,9 +415,10 @@
 		lastQuoteFromDb = { quote: { text: quote.text, author: quote.author, source: quote.source, images: quote.images && quote.images.length ? quote.images : (resolved || []) }, category: category };
 
 		function setBgAndImages(urls) {
-			if (urls && urls.length > 0) {
-				lastQuoteFromDb.quote.images = urls.length >= 2 ? urls : [urls[0], urls[0]];
-				if (bg) bg.style.backgroundImage = 'url(' + lastQuoteFromDb.quote.images[0] + ')';
+			var firstUrl = urls && urls.length > 0 && urls[0] && String(urls[0]).trim();
+			if (firstUrl && firstUrl.indexOf('http') === 0 && bg) {
+				lastQuoteFromDb.quote.images = urls.length >= 2 && urls[1] ? [urls[0], urls[1]] : [urls[0], urls[0]];
+				bg.style.backgroundImage = 'url(' + firstUrl + ')';
 			} else {
 				lastQuoteFromDb.quote.images = [];
 				setQuoteImage(null, quote.author || quote.source);
@@ -425,6 +428,7 @@
 		var livePosters = isLivePostersEnabled();
 
 		if (livePosters && category === 'anime' && quote.source && quote.source.trim()) {
+			setBgAndImages(resolved); // show DB/map image immediately
 			fetchJikanImage(quote.source.trim(), function (url) {
 				if (url) setBgAndImages([url, url]);
 				else setBgAndImages(resolved);
@@ -446,6 +450,7 @@
 				tryOmdb = true;
 			}
 			if (tryOmdb) {
+				setBgAndImages(resolved); // show DB/map image immediately
 				fetchOMDBPoster(quote.source.trim(), function (url) {
 					if (url) setBgAndImages([url, url]);
 					else setBgAndImages(resolved);
