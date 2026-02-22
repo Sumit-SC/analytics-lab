@@ -913,13 +913,23 @@ body {
 .home-row-1-grid {
 	align-items: stretch;
 }
+.home-row-1-grid > * {
+	min-width: 0; /* allow shrink within grid; card content controls size */
+}
 @media (min-width: 640px) {
 	.home-row-1-grid {
 		grid-template-columns: 1fr 1fr;
 	}
+	.home-weather-section {
+		min-height: 12rem; /* match left column (tips + clock) height */
+	}
 }
 .home-tips-calendar-wrap {
 	align-items: stretch;
+	min-width: 0;
+}
+.home-tips-calendar-wrap > * {
+	min-width: 0;
 }
 .home-tips-card,
 .home-clock-section {
@@ -1098,10 +1108,14 @@ body {
 	--notion-go-radius: 0.75rem;
 	--notion-go-border: 1px solid rgba(148, 163, 184, 0.2);
 }
+.notion-go-section .grid > * {
+	min-width: 0; /* prevent overflow on small screens */
+}
 .dark .notion-go-section {
 	--notion-go-border: 1px solid rgba(71, 85, 105, 0.4);
 }
 .notion-go-card {
+	min-height: 6rem; /* consistent card size */
 	display: block;
 	padding: 1.25rem 1.5rem;
 	border-radius: var(--notion-go-radius);

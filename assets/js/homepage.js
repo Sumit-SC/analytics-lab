@@ -724,35 +724,17 @@
 				return;
 			}
 
-			// Movie / K-drama / Bollywood / TV show: try CineMaterial first for multiple posters, else OMDb with cache bypass
+			// Movie / K-drama / Bollywood / TV show: OMDb poster only (first API)
 			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show')) {
 				if (!getProxyBase()) {
 					fallbackCycleOrPicsum();
 					return;
 				}
 				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
-				// 1) Search OMDb for imdbID, then fetch CineMaterial posters (multiple per title)
-				fetchOMDBSearch(src, omdbType, function (searchResult) {
-					if (searchResult && searchResult.imdbID) {
-						fetchCineMaterialPosters(searchResult.imdbID, searchResult.title || src, omdbType, function (posters) {
-							if (posters.length > 0) {
-								setFetchedImagesAndPool(posters);
-								return;
-							}
-							// No CineMaterial posters: fall back to OMDb poster (bypass cache so we re-fetch)
-							fetchOMDBPoster(src, function (posterUrl) {
-								if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
-								else fallbackCycleOrPicsum();
-							}, omdbType, true);
-						});
-					} else {
-						// No search result: try OMDb poster by title with cache bypass
-						fetchOMDBPoster(src, function (posterUrl) {
-							if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
-							else fallbackCycleOrPicsum();
-						}, omdbType, true);
-					}
-				});
+				fetchOMDBPoster(src, function (posterUrl) {
+					if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
+					else fallbackCycleOrPicsum();
+				}, omdbType, true);
 				return;
 			}
 
