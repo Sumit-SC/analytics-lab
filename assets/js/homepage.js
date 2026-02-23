@@ -497,6 +497,31 @@
 			.catch(function () { cb(null); });
 	}
 
+	// Fetch MoviePosterDB poster URLs by IMDb ID (proxy /api/movieposterdb). cb(urls) with array of image URL strings.
+	function fetchMoviePosterDbPosters(imdbID, title, cb) {
+		if (!imdbID || !/^tt\d+$/.test(String(imdbID).trim())) { cb(null); return; }
+		var base = getProxyBase();
+		if (!base) { cb(null); return; }
+		var q = 'i=' + encodeURIComponent(imdbID.trim()) + '&title=' + encodeURIComponent((title || '').trim() || 'title');
+		fetch(base + '/api/movieposterdb?' + q)
+			.then(function (r) {
+				if (!r.ok) return null;
+				return r.json().catch(function () { return null; });
+			})
+			.then(function (data) {
+				if (!data || !data.posters) { cb(null); return; }
+				var list = data.posters;
+				var urls = [];
+				for (var i = 0; i < list.length; i++) {
+					var item = list[i];
+					var u = (item && (item.url || (typeof item === 'string' ? item : null))) || null;
+					if (u && typeof u === 'string' && u.indexOf('http') === 0) urls.push(u);
+				}
+				cb(urls.length ? urls : null);
+			})
+			.catch(function () { cb(null); });
+	}
+
 	// True when source is empty or is the category name (e.g. "K-drama") — not a real show/title for API search
 	function isGenericSource(source, cat) {
 		if (!source || !String(source).trim()) return true;
@@ -935,7 +960,9 @@
 				return;
 			}
 
-			// Movie / K-drama / Bollywood / TV show: CineMaterial when we have imdbID (no OMDb); else try Wikipedia or one OMDb to get imdbID then CineMaterial
+			// Movie / K-drama / Bollywood / TV show:
+			// - Movies / K-drama / TV: CineMaterial when we have imdbID (no OMDb); else try Wikipedia or one OMDb to get imdbID then CineMaterial
+			// - Bollywood: MoviePosterDB when we have imdbID; else one OMDb to get imdbID then MoviePosterDB (then Wikipedia/Picsum fallback)
 			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show') && !isGenericSource(src, cat)) {
 				var searchTitle = cleanTitleForSearch(src);
 				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
@@ -951,21 +978,32 @@
 						});
 					});
 				}
-				function tryCineMaterialThenWiki(imdbID, omdbTitle, omdbTypeStr) {
+				function tryProviderThenWiki(imdbID, omdbTitle, omdbTypeStr) {
 					if (!imdbID || !getProxyBase()) { tryWikiThenFallback(); return; }
-					fetchCineMaterialPosters(imdbID, omdbTitle, omdbTypeStr, function (cinemaUrls) {
-						if (cinemaUrls && cinemaUrls.length > 0) {
-							setFetchedImagesAndPool(cinemaUrls);
-						} else {
-							tryWikiThenFallback();
-						}
-					});
+					// Bollywood: use MoviePosterDB; others: CineMaterial
+					if (cat === 'bollywood') {
+						fetchMoviePosterDbPosters(imdbID, omdbTitle, function (movieUrls) {
+							if (movieUrls && movieUrls.length > 0) {
+								setFetchedImagesAndPool(movieUrls);
+							} else {
+								tryWikiThenFallback();
+							}
+						});
+					} else {
+						fetchCineMaterialPosters(imdbID, omdbTitle, omdbTypeStr, function (cinemaUrls) {
+							if (cinemaUrls && cinemaUrls.length > 0) {
+								setFetchedImagesAndPool(cinemaUrls);
+							} else {
+								tryWikiThenFallback();
+							}
+						});
+					}
 				}
 				var cachedImdb = (domImdbId && /^tt\d+$/.test(domImdbId))
 					? domImdbId
 					: (lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.imdbID && String(lastQuoteFromDb.quote.imdbID).trim());
 				if (cachedImdb && /^tt\d+$/.test(cachedImdb) && getProxyBase()) {
-					tryCineMaterialThenWiki(
+					tryProviderThenWiki(
 						cachedImdb,
 						(lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.omdbTitle) || searchTitle || src,
 						(lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.omdbType) || omdbType
@@ -981,7 +1019,7 @@
 								lastQuoteFromDb.quote.omdbType = result.type || omdbType;
 							}
 							if (imdbDebugEl) imdbDebugEl.textContent = result.imdbID;
-							tryCineMaterialThenWiki(result.imdbID, result.title || searchTitle || src, result.type || omdbType);
+							tryProviderThenWiki(result.imdbID, result.title || searchTitle || src, result.type || omdbType);
 						} else if (result && result.poster) {
 							setFetchedImages([result.poster, result.poster]);
 						} else {

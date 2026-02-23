@@ -42,19 +42,39 @@ function extractImageUrls(html, baseUrl) {
 			}
 		}
 	} catch (e) {
-		// Ignore JSON-LD parse errors; fall back to <img> scraping
+		// Ignore JSON-LD parse errors
 	}
 
-	const srcRegex = /<img[^>]+(?:src|data-src)=["']([^"']+)["']/gi;
-	let m;
-	while ((m = srcRegex.exec(html)) !== null) {
-		let u = m[1].trim();
-		if (u.startsWith('//')) u = 'https:' + u;
-		else if (u.startsWith('/')) u = BASE + u;
-		if (!u.startsWith('http')) continue;
-		// Prefer CineMaterial CDN poster URLs: https://cdn.cinematerial.com/p/...
-		if (u.indexOf('cdn.cinematerial.com') !== -1 && /\/p\//.test(u)) {
-			urls.push(u);
+	// Prefer poster tiles: <a href="/movies|/tv/.../p/..." class="w-full group"> ... <img data-src="https://cdn.cinematerial.com/p/...">
+	try {
+		const tileRegex = /<a[^>]+href=["'](\/(?:movies|tv)[^"']*\/p\/[^"']+)["'][^>]*class=["'][^"']*\bw-full\s+group\b[^"']*["'][^>]*>[\s\S]*?<img[^>]+(?:data-src|src)=["']([^"']+)["'][^>]*>[\s\S]*?<\/a>/gi;
+		let mTile;
+		while ((mTile = tileRegex.exec(html)) !== null) {
+			let u = mTile[2].trim();
+			if (u.startsWith('//')) u = 'https:' + u;
+			else if (u.startsWith('/')) u = BASE + u;
+			if (!u.startsWith('http')) continue;
+			if (u.indexOf('cdn.cinematerial.com') !== -1 && /\/p\//.test(u)) {
+				urls.push(u);
+			}
+		}
+	} catch (e) {
+		// Ignore; fallback below will still work
+	}
+
+	// Fallback: generic <img> scrape restricted to CDN /p/ images
+	if (!urls.length) {
+		const srcRegex = /<img[^>]+(?:src|data-src)=["']([^"']+)["']/gi;
+		let m;
+		while ((m = srcRegex.exec(html)) !== null) {
+			let u = m[1].trim();
+			if (u.startsWith('//')) u = 'https:' + u;
+			else if (u.startsWith('/')) u = BASE + u;
+			if (!u.startsWith('http')) continue;
+			// Prefer CineMaterial CDN poster URLs: https://cdn.cinematerial.com/p/...
+			if (u.indexOf('cdn.cinematerial.com') !== -1 && /\/p\//.test(u)) {
+				urls.push(u);
+			}
 		}
 	}
 	// Filter down to real posters (skip logos etc), and prefer larger sizes
