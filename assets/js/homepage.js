@@ -553,8 +553,21 @@
 		if (imdbDebugEl) imdbDebugEl.textContent = '';
 		var bg = document.getElementById('home-quote-bg');
 		var resolved = getSourceImages(quote);
-		// Keep a copy so we can set .images after async fetch; wallpaper uses lastQuoteFromDb.quote.images + imdbID (for CineMaterial without hitting OMDb again)
-		lastQuoteFromDb = { quote: { text: quote.text, author: quote.author, source: quote.source, images: quote.images && quote.images.length ? quote.images : (resolved || []), imdbID: null, omdbTitle: null, omdbType: null }, category: category };
+		// Keep a copy so we can set .images after async fetch; wallpaper uses lastQuoteFromDb.quote.images + imdbID (for CineMaterial/MoviePosterDB without hitting OMDb again)
+		lastQuoteFromDb = {
+			quote: {
+				text: quote.text,
+				author: quote.author,
+				source: quote.source,
+				images: quote.images && quote.images.length ? quote.images : (resolved || []),
+				imdbID: null,
+				omdbTitle: null,
+				omdbType: null,
+				posterPool: null,
+				posterPoolIndex: 0
+			},
+			category: category
+		};
 
 		function setBgAndImages(urls) {
 			var firstUrl = urls && urls.length > 0 && urls[0] && String(urls[0]).trim();
@@ -657,15 +670,6 @@
 					fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
 						if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
 					});
-				});
-			}
-		}
-		// Books (from DB): try Open Library for book cover by title or author
-		if (actualCategory === 'books') {
-			var bookQuery = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
-			if (bookQuery) {
-				fetchOpenLibraryCover(bookQuery, function (coverUrl) {
-					if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
 				});
 			}
 		}
@@ -882,6 +886,7 @@
 				: getCurrentQuoteSource();
 			var cat = currentQuoteCategory || (lastQuoteFromDb && lastQuoteFromDb.category) || getCategory();
 			if (cat === 'movies') cat = 'movie';
+			var livePosters = isLivePostersEnabled();
 			function setFetchedImages(urls) {
 				if (!urls || urls.length === 0) return;
 				var first = urls[0] && String(urls[0]).trim();
@@ -925,6 +930,19 @@
 			}
 
 			function fallbackCycleOrPicsum() {
+				// If we have a dedicated poster pool for this quote, prefer cycling that first
+				if (lastQuoteFromDb && lastQuoteFromDb.quote && Array.isArray(lastQuoteFromDb.quote.posterPool) && lastQuoteFromDb.quote.posterPool.length > 0) {
+					var pool = lastQuoteFromDb.quote.posterPool;
+					var idxPool = lastQuoteFromDb.quote.posterPoolIndex || 0;
+					var nextPoolIdx = (idxPool + 1) % pool.length;
+					var nextPoolUrl = pool[nextPoolIdx];
+					if (bg && isValidImageUrl(nextPoolUrl)) {
+						setQuoteBgImage(bg, nextPoolUrl);
+						lastQuoteFromDb.quote.posterPoolIndex = nextPoolIdx;
+						return;
+					}
+				}
+				// Otherwise fall back to the simple images array or Picsum
 				if (lastQuoteFromDb && lastQuoteFromDb.quote.images && lastQuoteFromDb.quote.images.length > 0) {
 					var imgs = lastQuoteFromDb.quote.images;
 					var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
@@ -948,10 +966,53 @@
 				}
 			}
 
-			// Simplified behavior: for reliability and to avoid API quota issues,
-			// the Change wallpaper button now only cycles through already-known
-			// images for this quote (or a Picsum fallback), without calling
-			// external poster APIs again.
+			// For categories where IMDb IDs and poster providers make sense,
+			// use the cached imdbID exactly once per quote to build a poster pool,
+			// then simply rotate through that pool on subsequent clicks.
+			if (livePosters && lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.imdbID && (cat === 'movie' || cat === 'kdrama' || cat === 'tv_show' || cat === 'bollywood') && getProxyBase()) {
+				// If poster pool already loaded, just rotate it
+				if (Array.isArray(lastQuoteFromDb.quote.posterPool) && lastQuoteFromDb.quote.posterPool.length > 0) {
+					fallbackCycleOrPicsum();
+					return;
+				}
+				var imdbID = lastQuoteFromDb.quote.imdbID;
+				var titleForProvider = lastQuoteFromDb.quote.omdbTitle || src || '';
+				// Bollywood: MoviePosterDB; others: CineMaterial
+				if (cat === 'bollywood') {
+					fetchMoviePosterDbPosters(imdbID, titleForProvider, function (urls) {
+						if (urls && urls.length > 0 && lastQuoteFromDb && lastQuoteFromDb.quote) {
+							lastQuoteFromDb.quote.posterPool = urls;
+							lastQuoteFromDb.quote.posterPoolIndex = 0;
+							var first = urls[0] && String(urls[0]).trim();
+							if (bg && isValidImageUrl(first)) {
+								setQuoteBgImage(bg, first);
+								return;
+							}
+						}
+						// If provider failed or returned nothing, fall back to simpler behavior
+						fallbackCycleOrPicsum();
+					});
+					return;
+				} else {
+					var providerType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
+					fetchCineMaterialPosters(imdbID, titleForProvider, providerType, function (urls) {
+						if (urls && urls.length > 0 && lastQuoteFromDb && lastQuoteFromDb.quote) {
+							lastQuoteFromDb.quote.posterPool = urls;
+							lastQuoteFromDb.quote.posterPoolIndex = 0;
+							var first = urls[0] && String(urls[0]).trim();
+							if (bg && isValidImageUrl(first)) {
+								setQuoteBgImage(bg, first);
+								return;
+							}
+						}
+						fallbackCycleOrPicsum();
+					});
+					return;
+				}
+			}
+
+			// For all other cases (no imdbID, non-movie categories, live posters off),
+			// just rotate through the existing images or Picsum.
 			fallbackCycleOrPicsum();
 		});
 	}
