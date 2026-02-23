@@ -929,16 +929,131 @@ body {
 	}
 }
 .home-left-column {
-	min-height: 28rem;
+	min-height: 32rem;
 }
 @media (min-width: 640px) {
 	.home-left-column {
-		min-height: 32rem;
+		min-height: 38rem;
 	}
 }
 .home-right-column {
 	min-height: 0;
 }
+
+/* Weather card: larger min-height; animated background by condition */
+.home-weather-section {
+	position: relative;
+	min-height: 14rem;
+	overflow: hidden;
+}
+@media (min-width: 640px) {
+	.home-weather-section {
+		min-height: 18rem;
+	}
+}
+.home-weather-card-bg {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	opacity: 0.08;
+}
+.home-weather-section.weather-rain .home-weather-card-bg {
+	background: linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.15) 100%);
+	animation: weather-rain-bg 3s ease-in-out infinite;
+}
+.home-weather-section.weather-wind .home-weather-card-bg {
+	background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.2) 50%, transparent 100%);
+	animation: weather-wind-bg 4s ease-in-out infinite;
+}
+.home-weather-section.weather-hot .home-weather-card-bg {
+	background: linear-gradient(180deg, rgba(251, 146, 60, 0.12) 0%, transparent 50%);
+	animation: weather-hot-bg 5s ease-in-out infinite;
+}
+.home-weather-section.weather-cold .home-weather-card-bg {
+	background: linear-gradient(180deg, rgba(147, 197, 253, 0.12) 0%, transparent 60%);
+	animation: weather-cold-bg 4s ease-in-out infinite;
+}
+.home-weather-section.weather-clear .home-weather-card-bg {
+	background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(250, 204, 21, 0.08), transparent);
+}
+@keyframes weather-rain-bg {
+	0%, 100% { opacity: 0.06; }
+	50% { opacity: 0.12; }
+}
+@keyframes weather-wind-bg {
+	0%, 100% { transform: translateX(0); }
+	50% { transform: translateX(4px); }
+}
+@keyframes weather-hot-bg {
+	0%, 100% { opacity: 0.08; }
+	50% { opacity: 0.14; }
+}
+@keyframes weather-cold-bg {
+	0%, 100% { opacity: 0.06; }
+	50% { opacity: 0.12; }
+}
+
+.home-weather-extra {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.25rem 1rem;
+}
+
+/* Hourly forecast modal */
+.home-weather-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+}
+.home-weather-modal[aria-hidden="true"],
+.home-weather-modal[hidden] {
+	display: none;
+}
+.home-weather-modal-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+}
+.home-weather-modal-content {
+	position: relative;
+	background: var(--tw-bg-opacity, 1);
+	background-color: rgb(255 255 255);
+	border-radius: 1rem;
+	padding: 1.25rem;
+	max-width: 28rem;
+	width: 100%;
+	max-height: 85vh;
+	overflow: auto;
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.dark .home-weather-modal-content {
+	background-color: rgb(17 24 39);
+}
+.home-weather-modal-close {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 9999px;
+	border: 1px solid rgba(148, 163, 184, 0.4);
+	background: rgba(255, 255, 255, 0.9);
+	font-size: 1.25rem;
+	line-height: 1;
+	cursor: pointer;
+	color: inherit;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.home-weather-hourly-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
 .home-tips-calendar-wrap {
 	align-items: start;
 	min-width: 0;
@@ -1027,7 +1142,15 @@ body {
 
 @media (min-width: 640px) {
 	.home-focus-panel {
-		min-height: 12rem;
+		min-height: 14rem;
+	}
+}
+.home-quote-panel {
+	min-height: 18rem;
+}
+@media (min-width: 640px) {
+	.home-quote-panel {
+		min-height: 22rem;
 	}
 }
 
@@ -1045,13 +1168,13 @@ body {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Poster: scale to fill entire card (cover); lives inside content-wrap so it stacks behind overlay */
+/* Poster: contain to avoid cropping top/bottom; center so it doesn't stretch */
 #home-quote-bg.home-quote-bg-image {
 	position: absolute;
 	inset: 0;
 	width: 100%;
 	height: 100%;
-	background-size: cover;
+	background-size: contain;
 	background-position: center center;
 	background-repeat: no-repeat;
 	background-color: #e2e8f0;

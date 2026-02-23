@@ -1212,7 +1212,11 @@
 	var WEATHER_LOCATION_KEY = 'standalone_weather_location';
 	var defaultLat = 51.5074, defaultLon = -0.1278;
 	var lastDailyForecast = null;
+	var lastWeatherHourly = null;
 	var lastWeatherLat = null, lastWeatherLon = null;
+	var lastWeatherData = null;
+	var lastAqiData = null;
+	var lastLocationName = '';
 
 	function initWeather() {
 		var weatherEl = document.getElementById('home-weather');
@@ -1290,6 +1294,20 @@
 		html += '</div>';
 		panel.innerHTML = html;
 	}
+	function formatTime(isoStr) {
+		if (!isoStr) return '—';
+		var d = new Date(isoStr);
+		return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+	function weatherCardAnimationClass(code, tempC) {
+		var t = tempC != null ? Number(tempC) : NaN;
+		if (code >= 61) return 'weather-rain';
+		if (code >= 51) return 'weather-rain';
+		if (code >= 3 && code < 51) return 'weather-wind';
+		if (!isNaN(t) && t >= 32) return 'weather-hot';
+		if (!isNaN(t) && t <= 5) return 'weather-cold';
+		return 'weather-clear';
+	}
 	function renderWeather(data, aqiData, locationName) {
 		if (!weatherEl || !data) return;
 		lastDailyForecast = data.daily || null;
@@ -1299,14 +1317,39 @@
 		var desc = weatherCodeToDesc(code);
 		var usAqi = aqiData && aqiData.current && aqiData.current.us_aqi != null ? aqiData.current.us_aqi : null;
 		var aqiLabelText = usAqi != null ? aqiLabel(usAqi) : null;
-		var aqiHtml = ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + (usAqi != null ? usAqi + ' ' + (aqiLabelText || '') : '—') + '</span>';
+		var windSpeed = (data.current_weather && data.current_weather.windspeed != null) ? data.current_weather.windspeed : null;
+		var daily = data.daily || {};
+		var sunrise = (daily.sunrise && daily.sunrise[0]) ? formatTime(daily.sunrise[0]) : '—';
+		var sunset = (daily.sunset && daily.sunset[0]) ? formatTime(daily.sunset[0]) : '—';
+		var maxT = (daily.temperature_2m_max && daily.temperature_2m_max[0] != null) ? Math.round(daily.temperature_2m_max[0]) + '°' : '—';
+		var minT = (daily.temperature_2m_min && daily.temperature_2m_min[0] != null) ? Math.round(daily.temperature_2m_min[0]) + '°' : '—';
+		var precip = (daily.precipitation_sum && daily.precipitation_sum[0] != null) ? daily.precipitation_sum[0] : null;
+		var rainStr = precip != null ? (precip > 0 ? precip + ' mm' : '0 mm') : '—';
 		var iconInfo = weatherIconAndClass(code, tempC);
 		weatherEl.innerHTML =
 			'<span class="home-weather-icon-wrap ' + iconInfo.class + '" aria-hidden="true">' + iconInfo.icon + '</span>' +
 			'<span class="home-weather-temp font-semibold text-lg">' + temp + '</span>' +
-			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' + aqiHtml +
-			'<div class="mt-1"><a href="https://open-meteo.com/en/docs' + (lastWeatherLat != null && lastWeatherLon != null ? '?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon : '') + '" target="_blank" rel="noopener" class="text-xs font-semibold text-primary hover:underline">Full forecast →</a></div>';
+			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' +
+			' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + (usAqi != null ? usAqi + ' ' + (aqiLabelText || '') : '—') + '</span>';
 		if (weatherCity) weatherCity.textContent = locationName || (data.timezone ? data.timezone.split('/').pop().replace(/_/g, ' ') : '—');
+		var extraEl = document.getElementById('home-weather-extra');
+		if (extraEl) {
+			extraEl.innerHTML =
+				'<span>Wind: ' + (windSpeed != null ? windSpeed + ' km/h' : '—') + '</span>' +
+				'<span>Sunrise: ' + sunrise + '</span>' +
+				'<span>Sunset: ' + sunset + '</span>' +
+				'<span>Min/Max: ' + minT + ' / ' + maxT + '</span>' +
+				'<span>Rain: ' + rainStr + '</span>';
+		}
+		var forecastLink = document.getElementById('home-weather-forecast-link');
+		if (forecastLink && lastWeatherLat != null && lastWeatherLon != null) {
+			forecastLink.href = 'https://open-meteo.com/en/docs?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon;
+		}
+		var card = document.getElementById('home-weather-card');
+		if (card) {
+			card.classList.remove('weather-rain', 'weather-wind', 'weather-hot', 'weather-cold', 'weather-clear');
+			card.classList.add(weatherCardAnimationClass(code, tempC));
+		}
 		if (weatherForecastPanel && lastDailyForecast) {
 			renderForecastPanel(weatherForecastPanel, lastDailyForecast);
 			weatherForecastPanel.classList.remove('hidden');
@@ -1316,7 +1359,9 @@
 
 	function fetchWeather(lat, lon, locationName) {
 		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
-			'&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7';
+			'&current_weather=true' +
+			'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=7' +
+			'&hourly=temperature_2m,weathercode,precipitation,windspeed_10m&forecast_days=2';
 		var aqiUrl = 'https://air-quality.api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lon + '&current=us_aqi';
 		Promise.all([
 			fetch(url).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); }),
@@ -1326,6 +1371,10 @@
 			var aqiData = results[1];
 			lastWeatherLat = lat;
 			lastWeatherLon = lon;
+			lastWeatherData = data;
+			lastAqiData = aqiData;
+			lastLocationName = locationName || '';
+			lastWeatherHourly = (data && data.hourly) ? data.hourly : null;
 			if (data && (data.current_weather || data.error !== true)) {
 				renderWeather(data, aqiData, locationName);
 			} else {
@@ -1410,6 +1459,56 @@
 			);
 		});
 	}
+
+		function renderHourlyModal() {
+			var modal = document.getElementById('home-weather-hourly-modal');
+			var body = document.getElementById('home-weather-hourly-body');
+			if (!modal || !body) return;
+			var h = lastWeatherHourly;
+			if (!h || !h.time || !h.time.length) {
+				body.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Hourly data not available.</p>';
+				return;
+			}
+			var times = h.time || [];
+			var temps = h.temperature_2m || [];
+			var codes = h.weathercode || [];
+			var precip = h.precipitation || [];
+			var wind = h.windspeed_10m || [];
+			var html = '<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">' + (lastLocationName || 'Current location') + '</p>';
+			html += '<div class="grid grid-cols-4 gap-x-2 gap-y-1 text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">';
+			html += '<span>Time</span><span>Temp</span><span>Rain</span><span>Wind</span></div>';
+			for (var i = 0; i < Math.min(24, times.length); i++) {
+				var t = new Date(times[i]);
+				var timeStr = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+				var tempStr = temps[i] != null ? Math.round(temps[i]) + '°' : '—';
+				var precipStr = precip[i] != null && precip[i] > 0 ? precip[i] + ' mm' : '—';
+				var windStr = wind[i] != null ? wind[i] + ' km/h' : '—';
+				html += '<div class="grid grid-cols-4 gap-x-2 gap-y-1 py-1 border-b border-gray-100 dark:border-gray-700 text-sm">';
+				html += '<span>' + timeStr + '</span><span>' + tempStr + '</span><span>' + precipStr + '</span><span>' + windStr + '</span></div>';
+			}
+			body.innerHTML = html;
+		}
+		var hourlyBtn = document.getElementById('home-weather-hourly-btn');
+		var hourlyModal = document.getElementById('home-weather-hourly-modal');
+		var hourlyClose = document.getElementById('home-weather-hourly-close');
+		if (hourlyBtn && hourlyModal) {
+			hourlyBtn.addEventListener('click', function () {
+				renderHourlyModal();
+				hourlyModal.removeAttribute('hidden');
+				hourlyModal.setAttribute('aria-hidden', 'false');
+			});
+		}
+		if (hourlyClose && hourlyModal) {
+			hourlyClose.addEventListener('click', function () {
+				hourlyModal.setAttribute('aria-hidden', 'true');
+				hourlyModal.setAttribute('hidden', '');
+			});
+			var overlay = hourlyModal.querySelector('.home-weather-modal-overlay');
+			if (overlay) overlay.addEventListener('click', function () {
+				hourlyModal.setAttribute('aria-hidden', 'true');
+				hourlyModal.setAttribute('hidden', '');
+			});
+		}
 
 		// No auto location popup on load — use saved location or default city only
 		var saved = getSavedLocation();
