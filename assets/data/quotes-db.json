@@ -905,6 +905,96 @@
         "https://picsum.photos/seed/books50a/800/400",
         "https://picsum.photos/seed/books50b/800/400"
       ]
+    },
+    {
+      "text": "In the middle of difficulty lies opportunity.",
+      "author": "Albert Einstein",
+      "source": "The World As I See It (1934)",
+      "images": [
+        "https://picsum.photos/seed/book51a/800/400",
+        "https://picsum.photos/seed/book51b/800/400"
+      ]
+    },
+    {
+      "text": "The only thing we have to fear is fear itself.",
+      "author": "Franklin D. Roosevelt",
+      "source": "First Inaugural Address (1933)",
+      "images": [
+        "https://picsum.photos/seed/book52a/800/400",
+        "https://picsum.photos/seed/book52b/800/400"
+      ]
+    },
+    {
+      "text": "One day, in retrospect, the years of struggle will strike you as the most beautiful.",
+      "author": "Sigmund Freud",
+      "source": "Letters of Sigmund Freud (1960)",
+      "images": [
+        "https://picsum.photos/seed/book53a/800/400",
+        "https://picsum.photos/seed/book53b/800/400"
+      ]
+    },
+    {
+      "text": "It is not the critic who counts; the credit belongs to the man in the arena.",
+      "author": "Theodore Roosevelt",
+      "source": "Citizenship in a Republic (1910)",
+      "images": [
+        "https://picsum.photos/seed/book54a/800/400",
+        "https://picsum.photos/seed/book54b/800/400"
+      ]
+    },
+    {
+      "text": "We accept the love we think we deserve.",
+      "author": "Stephen Chbosky",
+      "source": "The Perks of Being a Wallflower (1999)",
+      "images": [
+        "https://picsum.photos/seed/book55a/800/400",
+        "https://picsum.photos/seed/book55b/800/400"
+      ]
+    },
+    {
+      "text": "It was a pleasure to burn.",
+      "author": "Ray Bradbury",
+      "source": "Fahrenheit 451 (1953)",
+      "images": [
+        "https://picsum.photos/seed/book56a/800/400",
+        "https://picsum.photos/seed/book56b/800/400"
+      ]
+    },
+    {
+      "text": "There is no greater agony than bearing an untold story inside you.",
+      "author": "Maya Angelou",
+      "source": "I Know Why the Caged Bird Sings (1969)",
+      "images": [
+        "https://picsum.photos/seed/book57a/800/400",
+        "https://picsum.photos/seed/book57b/800/400"
+      ]
+    },
+    {
+      "text": "The unexamined life is not worth living.",
+      "author": "Plato",
+      "source": "Apology (c. 399 BCE)",
+      "images": [
+        "https://picsum.photos/seed/book58a/800/400",
+        "https://picsum.photos/seed/book58b/800/400"
+      ]
+    },
+    {
+      "text": "Life is what happens when you're busy making other plans.",
+      "author": "Allen Saunders",
+      "source": "Reader's Digest (1957)",
+      "images": [
+        "https://picsum.photos/seed/book59a/800/400",
+        "https://picsum.photos/seed/book59b/800/400"
+      ]
+    },
+    {
+      "text": "What we think, we become.",
+      "author": "Buddha",
+      "source": "Dhammapada (c. 500 BCE)",
+      "images": [
+        "https://picsum.photos/seed/book60a/800/400",
+        "https://picsum.photos/seed/book60b/800/400"
+      ]
     }
   ],
   "wisdom": [
@@ -2261,6 +2351,96 @@
         "https://picsum.photos/seed/movie50a/800/400",
         "https://picsum.photos/seed/movie50b/800/400"
       ]
+    },
+    {
+      "text": "I see dead people.",
+      "author": "Cole Sear",
+      "source": "The Sixth Sense (1999)",
+      "images": [
+        "https://picsum.photos/seed/mov51a/800/400",
+        "https://picsum.photos/seed/mov51b/800/400"
+      ]
+    },
+    {
+      "text": "You either die a hero or live long enough to see yourself become the villain.",
+      "author": "Harvey Dent",
+      "source": "The Dark Knight (2008)",
+      "images": [
+        "https://picsum.photos/seed/mov52a/800/400",
+        "https://picsum.photos/seed/mov52b/800/400"
+      ]
+    },
+    {
+      "text": "Why so serious?",
+      "author": "The Joker",
+      "source": "The Dark Knight (2008)",
+      "images": [
+        "https://picsum.photos/seed/mov53a/800/400",
+        "https://picsum.photos/seed/mov53b/800/400"
+      ]
+    },
+    {
+      "text": "I'm the king of the world!",
+      "author": "Jack Dawson",
+      "source": "Titanic (1997)",
+      "images": [
+        "https://picsum.photos/seed/mov54a/800/400",
+        "https://picsum.photos/seed/mov54b/800/400"
+      ]
+    },
+    {
+      "text": "To infinity and beyond!",
+      "author": "Buzz Lightyear",
+      "source": "Toy Story (1995)",
+      "images": [
+        "https://picsum.photos/seed/mov55a/800/400",
+        "https://picsum.photos/seed/mov55b/800/400"
+      ]
+    },
+    {
+      "text": "You can't handle the truth!",
+      "author": "Colonel Nathan Jessup",
+      "source": "A Few Good Men (1992)",
+      "images": [
+        "https://picsum.photos/seed/mov56a/800/400",
+        "https://picsum.photos/seed/mov56b/800/400"
+      ]
+    },
+    {
+      "text": "I'll be back.",
+      "author": "The Terminator",
+      "source": "The Terminator (1984)",
+      "images": [
+        "https://picsum.photos/seed/mov57a/800/400",
+        "https://picsum.photos/seed/mov57b/800/400"
+      ]
+    },
+    {
+      "text": "My precious.",
+      "author": "Gollum",
+      "source": "The Lord of the Rings: The Two Towers (2002)",
+      "images": [
+        "https://picsum.photos/seed/mov58a/800/400",
+        "https://picsum.photos/seed/mov58b/800/400"
+      ]
+    },
+    {
+      "text": "Run, Forrest, run!",
+      "author": "Jenny Curran",
+      "source": "Forrest Gump (1994)",
+      "images": [
+        "https://picsum.photos/seed/mov59a/800/400",
+        "https://picsum.photos/seed/mov59b/800/400"
+      ]
+    },
+    {
+      "text": "Life is like a box of chocolates. You never know what you're gonna get.",
+      "author": "Forrest Gump",
+      "source": "Forrest Gump (1994)",
+      "images": [
+        "https://picsum.photos/seed/mov60a/800/400",
+        "https://picsum.photos/seed/mov60b/800/400"
+      ]
     }
   ],
   "kdrama": [
@@ -2473,8 +2653,8 @@
     },
     {
       "text": "Every moment with you is precious.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Hotel del Luna",
+      "source": "Hotel del Luna (2019)",
       "images": [
         "https://picsum.photos/seed/kdrama24a/800/400",
         "https://picsum.photos/seed/kdrama24b/800/400"
@@ -2482,17 +2662,17 @@
     },
     {
       "text": "Let's meet again in our next life.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Goblin",
+      "source": "Guardian: The Lonely and Great God (2016)",
       "images": [
-        "https://picsum.photos/seed/kdrama25a/800/400",
-        "https://picsum.photos/seed/kdrama25b/800/400"
+        "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg",
+        "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg"
       ]
     },
     {
       "text": "I'll protect you no matter what.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Strong Girl Bong-soon",
+      "source": "Strong Girl Bong-soon (2017)",
       "images": [
         "https://picsum.photos/seed/kdrama26a/800/400",
         "https://picsum.photos/seed/kdrama26b/800/400"
@@ -2500,8 +2680,8 @@
     },
     {
       "text": "Don't cry. I'm here.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Descendants of the Sun",
+      "source": "Descendants of the Sun (2016)",
       "images": [
         "https://picsum.photos/seed/kdrama27a/800/400",
         "https://picsum.photos/seed/kdrama27b/800/400"
@@ -2509,8 +2689,8 @@
     },
     {
       "text": "Fate brings us together.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "My Love from the Star",
+      "source": "My Love from the Star (2013)",
       "images": [
         "https://picsum.photos/seed/kdrama28a/800/400",
         "https://picsum.photos/seed/kdrama28b/800/400"
@@ -2518,8 +2698,8 @@
     },
     {
       "text": "Your smile is my happiness.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Weightlifting Fairy Kim Bok-joo",
+      "source": "Weightlifting Fairy Kim Bok-joo (2016)",
       "images": [
         "https://picsum.photos/seed/kdrama29a/800/400",
         "https://picsum.photos/seed/kdrama29b/800/400"
@@ -2527,8 +2707,8 @@
     },
     {
       "text": "I've been waiting for you.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "The King: Eternal Monarch",
+      "source": "The King: Eternal Monarch (2020)",
       "images": [
         "https://picsum.photos/seed/kdrama30a/800/400",
         "https://picsum.photos/seed/kdrama30b/800/400"
@@ -2536,17 +2716,17 @@
     },
     {
       "text": "Let's be happy together.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Reply 1988",
+      "source": "Reply 1988 (2015)",
       "images": [
-        "https://picsum.photos/seed/kdrama31a/800/400",
-        "https://picsum.photos/seed/kdrama31b/800/400"
+        "https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%8D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%8D%BC_1988%29_poster.jpg",
+        "https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%8D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%8D%BC_1988%29_poster.jpg"
       ]
     },
     {
       "text": "I'll never let you go.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Goblin",
+      "source": "Guardian: The Lonely and Great God (2016)",
       "images": [
         "https://picsum.photos/seed/kdrama32a/800/400",
         "https://picsum.photos/seed/kdrama32b/800/400"
@@ -2554,8 +2734,8 @@
     },
     {
       "text": "Thank you for being in my life.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Start-Up",
+      "source": "Start-Up (2020)",
       "images": [
         "https://picsum.photos/seed/kdrama33a/800/400",
         "https://picsum.photos/seed/kdrama33b/800/400"
@@ -2563,8 +2743,8 @@
     },
     {
       "text": "We'll get through this together.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Crash Landing on You",
+      "source": "Crash Landing on You (2019)",
       "images": [
         "https://picsum.photos/seed/kdrama34a/800/400",
         "https://picsum.photos/seed/kdrama34b/800/400"
@@ -2572,8 +2752,8 @@
     },
     {
       "text": "You're not alone anymore.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Itaewon Class",
+      "source": "Itaewon Class (2020)",
       "images": [
         "https://picsum.photos/seed/kdrama35a/800/400",
         "https://picsum.photos/seed/kdrama35b/800/400"
@@ -2581,8 +2761,8 @@
     },
     {
       "text": "I believe in us.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Hometown Cha-Cha-Cha",
+      "source": "Hometown Cha-Cha-Cha (2021)",
       "images": [
         "https://picsum.photos/seed/kdrama36a/800/400",
         "https://picsum.photos/seed/kdrama36b/800/400"
@@ -2590,8 +2770,8 @@
     },
     {
       "text": "Every scar tells a story.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "The Glory",
+      "source": "The Glory (2022)",
       "images": [
         "https://picsum.photos/seed/kdrama37a/800/400",
         "https://picsum.photos/seed/kdrama37b/800/400"
@@ -2599,8 +2779,8 @@
     },
     {
       "text": "Love is worth the wait.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Twenty Five Twenty One",
+      "source": "Twenty Five Twenty One (2022)",
       "images": [
         "https://picsum.photos/seed/kdrama38a/800/400",
         "https://picsum.photos/seed/kdrama38b/800/400"
@@ -2608,8 +2788,8 @@
     },
     {
       "text": "I'll find you no matter where you are.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Hotel del Luna",
+      "source": "Hotel del Luna (2019)",
       "images": [
         "https://picsum.photos/seed/kdrama39a/800/400",
         "https://picsum.photos/seed/kdrama39b/800/400"
@@ -2617,8 +2797,8 @@
     },
     {
       "text": "Our story is just beginning.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Vincenzo",
+      "source": "Vincenzo (2021)",
       "images": [
         "https://picsum.photos/seed/kdrama40a/800/400",
         "https://picsum.photos/seed/kdrama40b/800/400"
@@ -2626,8 +2806,8 @@
     },
     {
       "text": "Don't give up on love.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Reply 1988",
+      "source": "Reply 1988 (2015)",
       "images": [
         "https://picsum.photos/seed/kdrama41a/800/400",
         "https://picsum.photos/seed/kdrama41b/800/400"
@@ -2635,8 +2815,8 @@
     },
     {
       "text": "You're my destiny.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "My Love from the Star",
+      "source": "My Love from the Star (2013)",
       "images": [
         "https://picsum.photos/seed/kdrama42a/800/400",
         "https://picsum.photos/seed/kdrama42b/800/400"
@@ -2644,8 +2824,8 @@
     },
     {
       "text": "Let's make a promise.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Our Beloved Summer",
+      "source": "Our Beloved Summer (2021)",
       "images": [
         "https://picsum.photos/seed/kdrama43a/800/400",
         "https://picsum.photos/seed/kdrama43b/800/400"
@@ -2653,8 +2833,8 @@
     },
     {
       "text": "I'll wait for you.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Moon Lovers: Scarlet Heart Ryeo",
+      "source": "Moon Lovers: Scarlet Heart Ryeo (2016)",
       "images": [
         "https://picsum.photos/seed/kdrama44a/800/400",
         "https://picsum.photos/seed/kdrama44b/800/400"
@@ -2662,8 +2842,8 @@
     },
     {
       "text": "You're my reason to live.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Vincenzo",
+      "source": "Vincenzo (2021)",
       "images": [
         "https://picsum.photos/seed/kdrama45a/800/400",
         "https://picsum.photos/seed/kdrama45b/800/400"
@@ -2671,8 +2851,8 @@
     },
     {
       "text": "We're meant to be.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "True Beauty",
+      "source": "True Beauty (2020)",
       "images": [
         "https://picsum.photos/seed/kdrama46a/800/400",
         "https://picsum.photos/seed/kdrama46b/800/400"
@@ -2680,8 +2860,8 @@
     },
     {
       "text": "Stay with me.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Descendants of the Sun",
+      "source": "Descendants of the Sun (2016)",
       "images": [
         "https://picsum.photos/seed/kdrama47a/800/400",
         "https://picsum.photos/seed/kdrama47b/800/400"
@@ -2689,8 +2869,8 @@
     },
     {
       "text": "I'll never forget you.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Moon Lovers: Scarlet Heart Ryeo",
+      "source": "Moon Lovers: Scarlet Heart Ryeo (2016)",
       "images": [
         "https://picsum.photos/seed/kdrama48a/800/400",
         "https://picsum.photos/seed/kdrama48b/800/400"
@@ -2698,8 +2878,8 @@
     },
     {
       "text": "Your happiness is my happiness.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "Our Beloved Summer",
+      "source": "Our Beloved Summer (2021)",
       "images": [
         "https://picsum.photos/seed/kdrama49a/800/400",
         "https://picsum.photos/seed/kdrama49b/800/400"
@@ -2707,8 +2887,8 @@
     },
     {
       "text": "Let's create our own ending.",
-      "author": "Unknown",
-      "source": "K-drama",
+      "author": "The Glory",
+      "source": "The Glory (2022)",
       "images": [
         "https://picsum.photos/seed/kdrama50a/800/400",
         "https://picsum.photos/seed/kdrama50b/800/400"

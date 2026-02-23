@@ -98,69 +98,51 @@
 			</div>
 		</section>
 
-		<!-- Row 1: [Tips | Calendar] (half-half, same width as poster) | Weather (same width as pomodoro) -->
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 home-row-1-grid">
-			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 home-tips-calendar-wrap">
-				<section class="second-brain-card p-4 sm:p-5 home-tips-card">
-					<p class="home-section-title mb-1 text-xs">Refresh</p>
-					<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-2">Take a breath. Stretch.</p>
-					<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
-				</section>
-				<section class="second-brain-card p-4 sm:p-5 home-clock-section">
-					<p class="home-section-title mb-1 text-xs">Clock &amp; calendar</p>
-					<p id="home-clock-time" class="home-clock-time text-xl font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
-					<p id="home-clock-date" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">—</p>
-				</section>
-			</div>
-			<section class="second-brain-card p-4 sm:p-5 home-weather-section">
-				<p class="home-section-title mb-1 text-xs">Weather</p>
-				<div class="flex flex-wrap items-center gap-1.5 mb-1.5">
-					<input type="text" id="home-weather-search" placeholder="City…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
-					<button type="button" id="home-weather-set" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
-					<button type="button" id="home-weather-mylocation" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
+		<!-- Two columns: Left = Tips + Clock (small) then Quote card (fills rest). Right = Weather then Focus timer -->
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 home-main-grid">
+			<div class="flex flex-col gap-3 sm:gap-4 min-h-0 home-left-column">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 home-tips-calendar-wrap">
+					<section class="second-brain-card home-tips-card">
+						<p class="home-section-title mb-0.5 text-xs">Refresh</p>
+						<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-1">Take a breath. Stretch.</p>
+						<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
+					</section>
+					<section class="second-brain-card home-clock-section">
+						<p class="home-section-title mb-0.5 text-xs">Clock &amp; calendar</p>
+						<p id="home-clock-time" class="home-clock-time text-lg font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
+						<p id="home-clock-date" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">—</p>
+					</section>
 				</div>
-				<div id="home-weather" class="text-sm text-gray-800 dark:text-gray-200 home-weather-current">…</div>
-				<p id="home-weather-city" class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">—</p>
-				<div id="home-weather-forecast-panel" class="home-weather-forecast-panel hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-700" aria-hidden="true"></div>
-			</section>
-		</div>
-
-		<!-- Row 2: Quote + Focus timer side by side (one row, two columns from sm) -->
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 home-row-2-grid">
-			<section class="second-brain-card home-focus-panel home-quote-panel relative overflow-hidden p-0">
-				<div id="home-quote-bg" class="home-quote-poster-thumb home-quote-bg-image" aria-hidden="true" style="background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Plutarch_engraving.jpg/800px-Plutarch_engraving.jpg);"></div>
+				<section class="second-brain-card home-focus-panel home-quote-panel relative overflow-hidden p-0 flex-1 min-h-0 flex flex-col">
+				<div id="home-quote-bg" class="home-quote-bg-image" aria-hidden="true" style="background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Plutarch_engraving.jpg/800px-Plutarch_engraving.jpg);"></div>
 				<div class="home-quote-content-wrap flex-1 min-w-0 relative flex flex-col">
 					<div class="absolute inset-0 home-quote-bg-overlay" aria-hidden="true"></div>
-					<div class="relative p-5 sm:p-6 home-quote-inner flex flex-col min-h-0 flex-1">
-					<div class="flex flex-wrap items-center justify-between gap-2 mb-3 flex-shrink-0">
-						<p class="home-section-title mb-0">Quote</p>
-						<div class="flex items-center gap-3">
-							<div class="flex items-center gap-2">
-								<label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
-								<select id="home-quote-category" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1.5 text-xs font-medium">
-									<option value="kdrama" selected>K-drama</option>
-									<option value="all">All</option>
-									<option value="random">Random</option>
-									<option value="anime">Anime</option>
-									<option value="movies">Movies</option>
-									<option value="books">Books</option>
-									<option value="tv_show">TV shows</option>
-									<option value="leaders">Leaders</option>
-									<option value="meme">Meme</option>
-									<option value="bollywood">Bollywood</option>
-									<option value="life">Life</option>
-								</select>
-							</div>
-							<label class="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-								<input type="checkbox" id="home-quote-image-live" class="rounded border-gray-300 dark:border-gray-600">
-								<span>Use live posters</span>
-							</label>
-							<button type="button" id="home-quote-refresh" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90 transition-opacity" title="New quote">↻ Quote</button>
-							<button type="button" id="home-quote-bg-refresh" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" title="Change wallpaper">🖼</button>
-							<button type="button" id="home-quote-pinterest" class="px-2 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center" title="Open Pinterest search for this source">
-								<img src="https://img.icons8.com/ios-filled/50/000000/pinterest.png" alt="Pinterest" class="w-4 h-4 dark:invert" loading="lazy" />
-							</button>
-						</div>
+					<div class="relative home-quote-inner flex flex-col min-h-0 flex-1">
+					<p class="home-section-title mb-1">Quote</p>
+					<div class="home-quote-controls-single">
+						<span class="home-quote-controls-emoji" aria-hidden="true">🏷️</span>
+						<select id="home-quote-category" class="home-quote-select rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs font-medium" aria-label="Quote category">
+							<option value="kdrama" selected>K-drama</option>
+							<option value="all">All</option>
+							<option value="random">Random</option>
+							<option value="anime">Anime</option>
+							<option value="movies">Movies</option>
+							<option value="books">Books</option>
+							<option value="tv_show">TV shows</option>
+							<option value="leaders">Leaders</option>
+							<option value="meme">Meme</option>
+							<option value="bollywood">Bollywood</option>
+							<option value="life">Life</option>
+						</select>
+						<label class="home-quote-live-wrap">
+							<input type="checkbox" id="home-quote-image-live" class="rounded border-gray-300 dark:border-gray-600">
+							<span class="text-xs text-gray-500 dark:text-gray-400">Use live posters</span>
+						</label>
+						<button type="button" id="home-quote-refresh" class="home-quote-btn-icon" title="New quote" aria-label="New quote">↻</button>
+						<button type="button" id="home-quote-bg-refresh" class="home-quote-btn-icon" title="Change wallpaper" aria-label="Change wallpaper">🖼</button>
+						<button type="button" id="home-quote-pinterest" class="home-quote-btn-icon home-quote-pinterest-btn" title="Open Pinterest search" aria-label="Pinterest">
+							<img src="https://img.icons8.com/ios-filled/50/000000/pinterest.png" alt="" class="w-4 h-4 dark:invert" loading="lazy" />
+						</button>
 					</div>
 					<div class="home-quote-block flex-1 flex flex-col justify-center mt-2">
 						<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
@@ -170,8 +152,21 @@
 					</div>
 				</div>
 			</section>
+			</div>
 
-			<section class="second-brain-card home-focus-panel p-5 sm:p-6">
+			<div class="flex flex-col gap-4 sm:gap-5 min-h-0 home-right-column">
+				<section class="second-brain-card p-4 sm:p-5 home-weather-section">
+					<p class="home-section-title mb-1 text-xs">Weather</p>
+					<div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+						<input type="text" id="home-weather-search" placeholder="City…" class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name">
+						<button type="button" id="home-weather-set" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
+						<button type="button" id="home-weather-mylocation" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
+					</div>
+					<div id="home-weather" class="text-sm text-gray-800 dark:text-gray-200 home-weather-current">…</div>
+					<p id="home-weather-city" class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">—</p>
+					<div id="home-weather-forecast-panel" class="home-weather-forecast-panel hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-700" aria-hidden="true"></div>
+				</section>
+				<section class="second-brain-card home-focus-panel p-5 sm:p-6">
 				<p class="home-section-title mb-2">Focus timer</p>
 				<!-- Presets and rounds -->
 				<div class="flex flex-wrap items-center gap-2 mb-2 text-[11px] text-gray-500 dark:text-gray-400">
@@ -223,6 +218,7 @@
 					<ul id="home-timer-log-entries" class="text-xs text-gray-600 dark:text-gray-400 space-y-0.5 max-h-24 overflow-y-auto"></ul>
 				</div>
 			</section>
+			</div>
 		</div>
 
 		<!-- Row 3: Notes / To-do (full width) -->

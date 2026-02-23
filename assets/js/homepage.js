@@ -113,7 +113,7 @@
 		try { localStorage.setItem(QUOTE_IMAGE_CACHE_KEY, JSON.stringify(quoteImageCache)); } catch (e) {}
 	}
 
-	// Try to fetch a poster/thumbnail for a given source from Wikipedia (no API key)
+	// Try to fetch a poster/thumbnail for a given source from Wikipedia (no API key). Uses exact title match.
 	function fetchWikipediaImage(source, cb) {
 		if (!source || !source.trim()) {
 			cb(null);
@@ -145,6 +145,69 @@
 				} else {
 					cb(null);
 				}
+			})
+			.catch(function () { cb(null); });
+	}
+
+	// Wikipedia image by search (better for "Reply 1988" -> finds "Reply 1988 (TV series)" etc.)
+	function fetchWikipediaImageBySearch(searchTerm, cb) {
+		if (!searchTerm || !String(searchTerm).trim()) { cb(null); return; }
+		var term = String(searchTerm).trim();
+		var cacheKey = 'wiki_search:' + term;
+		if (quoteImageCache[cacheKey] && quoteImageCache[cacheKey].url) {
+			cb(quoteImageCache[cacheKey].url);
+			return;
+		}
+		var searchUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' +
+			encodeURIComponent(term) + '&srlimit=3&format=json&origin=*';
+		fetch(searchUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var title = data && data.query && data.query.search && data.query.search[0] && data.query.search[0].title;
+				if (!title) {
+					cb(null);
+					return;
+				}
+				var imgUrl = 'https://en.wikipedia.org/w/api.php?action=query&titles=' +
+					encodeURIComponent(title) + '&prop=pageimages&format=json&pithumbsize=800&origin=*';
+				return fetch(imgUrl).then(function (r2) { return r2.ok ? r2.json() : null; }).then(function (imgData) {
+					if (!imgData || !imgData.query || !imgData.query.pages) { cb(null); return; }
+					var pages = imgData.query.pages;
+					var pageId = Object.keys(pages)[0];
+					var thumb = pages[pageId] && pages[pageId].thumbnail && pages[pageId].thumbnail.source;
+					if (thumb) {
+						quoteImageCache[cacheKey] = { url: thumb };
+						saveQuoteImageCache();
+						cb(thumb);
+					} else {
+						cb(null);
+					}
+				});
+			})
+			.catch(function () { cb(null); });
+	}
+
+	// Try to fetch a book cover from Open Library (no API key, CORS-friendly)
+	function fetchOpenLibraryCover(query, cb) {
+		if (!query || !String(query).trim()) { cb(null); return; }
+		var q = String(query).trim();
+		var key = 'book:' + q;
+		if (quoteImageCache[key] && quoteImageCache[key].url) {
+			cb(quoteImageCache[key].url);
+			return;
+		}
+		var url = 'https://openlibrary.org/search.json?q=' + encodeURIComponent(q) + '&limit=3&fields=cover_i,title';
+		fetch(url)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data || !data.docs || !data.docs.length) { cb(null); return; }
+				var doc = data.docs[0];
+				var coverI = doc && (doc.cover_i != null) ? doc.cover_i : null;
+				if (coverI == null) { cb(null); return; }
+				var src = 'https://covers.openlibrary.org/b/id/' + coverI + '-L.jpg';
+				quoteImageCache[key] = { url: src };
+				saveQuoteImageCache();
+				cb(src);
 			})
 			.catch(function () { cb(null); });
 	}
@@ -347,17 +410,21 @@
 	// Set window.OMDB_PROXY_URL if proxy is on another host.
 	function fetchOMDBPoster(title, cb, type, bypassCache) {
 		if (!title || !title.trim()) { cb(null); return; }
+		var base = getProxyBase();
+		if (!base) {
+			cb(null);
+			return;
+		}
 		var key = title.trim();
 		if (!bypassCache && quoteImageCache[key] && quoteImageCache[key].url) {
 			cb(quoteImageCache[key].url);
 			return;
 		}
-		var base = getProxyBase();
 		var source = 'website';
 		try {
 			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) source = 'vercel_app';
 		} catch (e) {}
-		var apiUrl = (base || '') + '/api/omdb?t=' + encodeURIComponent(title.trim()) + (type === 'movie' || type === 'series' ? '&type=' + type : '') + '&source=' + encodeURIComponent(source);
+		var apiUrl = base + '/api/omdb?t=' + encodeURIComponent(key) + (type === 'movie' || type === 'series' ? '&type=' + type : '') + '&source=' + encodeURIComponent(source);
 		fetch(apiUrl)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
@@ -371,8 +438,30 @@
 			.catch(function () { cb(null); });
 	}
 
-	// Apply a quote from the local DB: resolve source-accurate images (Jikan for anime, OMDB for movie if key set, else map/JSON)
-	function applyQuoteFromDb(quote, category) {
+	// True when source is empty or is the category name (e.g. "K-drama") — not a real show/title for API search
+	function isGenericSource(source, cat) {
+		if (!source || !String(source).trim()) return true;
+		var s = String(source).trim().toLowerCase();
+		if (s === 'k-drama' || s === 'kdrama' || s === 'anime' || s === 'bollywood' || s === 'tv show' || s === 'tv_show') return true;
+		return false;
+	}
+
+	// Strip trailing " (YYYY)" or " (YYYY-YY)" so OMDb/Wikipedia can match (e.g. "Reply 1988 (2015)" -> "Reply 1988")
+	function cleanTitleForSearch(source) {
+		if (!source || typeof source !== 'string') return (source && source.trim()) ? source.trim() : '';
+		var s = source.trim();
+		var m = s.match(/^(.+?)\s*\((\d{4})(?:-?\d{0,4})?\)\s*$/);
+		return m ? m[1].trim() : s;
+	}
+
+	function isPicsumUrl(url) {
+		return url && typeof url === 'string' && url.indexOf('picsum.photos') !== -1;
+	}
+
+	// Apply a quote from the local DB: resolve source-accurate images (Jikan, OMDb, Wikipedia, Open Library)
+	// category = dropdown value (e.g. 'random', 'books'); actualCategory = DB key (e.g. 'books', 'kdrama')
+	function applyQuoteFromDb(quote, category, actualCategory) {
+		if (actualCategory === undefined) actualCategory = category;
 		currentQuoteCategory = category === 'movies' ? 'movie' : category;
 		var meta = (quote.source && quote.source.trim()) ? 'From: ' + quote.source.trim() : '';
 		setQuoteUI(quote.text, quote.author || '', meta);
@@ -395,7 +484,7 @@
 
 		var livePosters = isLivePostersEnabled();
 
-		if (livePosters && category === 'anime' && quote.source && quote.source.trim()) {
+		if (livePosters && actualCategory === 'anime' && quote.source && quote.source.trim()) {
 			setBgAndImages(resolved); // show DB/map image immediately
 			fetchJikanImage(quote.source.trim(), function (url) {
 				if (url) setBgAndImages([url, url]);
@@ -403,30 +492,86 @@
 			});
 			return;
 		}
-		// OMDb for posters/wallpapers via backend proxy (movies, K-drama, Bollywood)
-		if (livePosters && quote.source && quote.source.trim()) {
+		// OMDb for posters via backend proxy (movies, K-drama, Bollywood, TV shows); only when source is a real title
+		if (livePosters && quote.source && quote.source.trim() && !isGenericSource(quote.source, actualCategory)) {
 			var omdbType = null;
 			var tryOmdb = false;
-			if (category === 'movies' || category === 'movie') {
+			if (actualCategory === 'movies' || actualCategory === 'movie') {
 				omdbType = 'movie';
 				tryOmdb = true;
-			} else if (category === 'kdrama') {
+			} else if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
 				omdbType = 'series';
 				tryOmdb = true;
-			} else if (category === 'bollywood') {
+			} else if (actualCategory === 'bollywood') {
 				omdbType = 'movie';
 				tryOmdb = true;
 			}
 			if (tryOmdb) {
-				setBgAndImages(resolved); // show DB/map image immediately
-				fetchOMDBPoster(quote.source.trim(), function (url) {
-					if (url) setBgAndImages([url, url]);
-					else setBgAndImages(resolved);
+				var searchTitle = cleanTitleForSearch(quote.source);
+				var fullSource = quote.source && quote.source.trim() ? quote.source.trim() : '';
+				// Show DB/resolved image immediately so user sees something; API will overwrite when it succeeds
+				setBgAndImages(resolved);
+
+				function tryWikipediaThenResolved() {
+					fetchWikipediaImage(searchTitle || fullSource, function (wikiUrl) {
+						if (isValidImageUrl(wikiUrl)) {
+							setBgAndImages([wikiUrl, wikiUrl]);
+							return;
+						}
+						fetchWikipediaImageBySearch(searchTitle || fullSource, function (searchUrl) {
+							if (isValidImageUrl(searchUrl)) setBgAndImages([searchUrl, searchUrl]);
+							else setBgAndImages(resolved);
+						});
+					});
+				}
+
+				if (!getProxyBase()) {
+					// No OMDb proxy: for kdrama/tv try Wikipedia (exact then search); else just keep resolved
+					if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
+						tryWikipediaThenResolved();
+					}
+					return;
+				}
+
+				fetchOMDBPoster(searchTitle || fullSource, function (url) {
+					if (url) {
+						setBgAndImages([url, url]);
+					} else {
+						if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
+							tryWikipediaThenResolved();
+						} else {
+							setBgAndImages(resolved);
+						}
+					}
 				}, omdbType);
 				return;
 			}
 		}
+		// Leaders, life, meme: use resolved then try Wikipedia (exact then search) to upgrade
 		setBgAndImages(resolved);
+		if (actualCategory === 'leaders' || actualCategory === 'life' || actualCategory === 'meme') {
+			var authorOrSource = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
+			if (authorOrSource) {
+				fetchWikipediaImage(authorOrSource, function (wikiUrl) {
+					if (isValidImageUrl(wikiUrl) && bg) {
+						bg.style.backgroundImage = 'url(' + wikiUrl + ')';
+						return;
+					}
+					fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
+						if (isValidImageUrl(searchUrl) && bg) bg.style.backgroundImage = 'url(' + searchUrl + ')';
+					});
+				});
+			}
+		}
+		// Books (from DB): try Open Library for book cover by title or author
+		if (actualCategory === 'books') {
+			var bookQuery = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
+			if (bookQuery) {
+				fetchOpenLibraryCover(bookQuery, function (coverUrl) {
+					if (isValidImageUrl(coverUrl) && bg) bg.style.backgroundImage = 'url(' + coverUrl + ')';
+				});
+			}
+		}
 	}
 
 	function fetchQuotable(tags, done) {
@@ -466,7 +611,7 @@
 	function setQuoteLoading(loading) {
 		if (quoteRefreshBtn) {
 			quoteRefreshBtn.disabled = !!loading;
-			quoteRefreshBtn.textContent = loading ? '…' : '↻ Refresh';
+			quoteRefreshBtn.textContent = loading ? '…' : '↻';
 		}
 	}
 
@@ -497,7 +642,7 @@
 		// Prefer local DB (fast, no broken APIs)
 		var fromDb = pickFromLocalDb(actualCategory);
 		if (fromDb) {
-			applyQuoteFromDb(fromDb, category); // Pass original category for OMDb logic
+			applyQuoteFromDb(fromDb, category, actualCategory); // category = dropdown, actualCategory = DB category
 			setQuoteLoading(false);
 			return;
 		}
@@ -531,11 +676,25 @@
 
 		if (category === 'books') {
 			currentQuoteCategory = 'books';
+			var bookFromDb = pickFromLocalDb('books');
+			if (bookFromDb) {
+				applyQuoteFromDb(bookFromDb, 'books', 'books'); // uses Open Library for cover
+				setQuoteLoading(false);
+				return;
+			}
 			fetchQuotable(['literature'], function (q) {
 				setQuoteLoading(false);
 				if (q) {
 					setQuoteUI(q.text, q.attr, q.meta);
-					setQuoteImage(null, q.attr);
+					setQuoteImage(null, q.attr); // map or Picsum + Wikipedia by author
+					if (q.attr && q.attr.trim()) {
+						fetchOpenLibraryCover(q.attr.trim(), function (coverUrl) {
+							if (isValidImageUrl(coverUrl)) {
+								var bg = document.getElementById('home-quote-bg');
+								if (bg) bg.style.backgroundImage = 'url(' + coverUrl + ')';
+							}
+						});
+					}
 				} else {
 					useFallback('all');
 				}
@@ -702,17 +861,41 @@
 				return;
 			}
 
-			// Movie / K-drama / Bollywood / TV show: OMDb poster only (first API)
-			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show')) {
+			// Movie / K-drama / Bollywood / TV show: OMDb then Wikipedia fallback (only when src is a real title)
+			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show') && !isGenericSource(src, cat)) {
+				var searchTitle = cleanTitleForSearch(src);
+				function tryWikiThenFallback() {
+					fetchWikipediaImage(searchTitle || src, function (wikiUrl) {
+						if (isValidImageUrl(wikiUrl)) {
+							setFetchedImages([wikiUrl, wikiUrl]);
+							return;
+						}
+						fetchWikipediaImageBySearch(searchTitle || src, function (searchUrl) {
+							if (isValidImageUrl(searchUrl)) setFetchedImages([searchUrl, searchUrl]);
+							else fallbackCycleOrPicsum();
+						});
+					});
+				}
 				if (!getProxyBase()) {
-					fallbackCycleOrPicsum();
+					if (cat === 'kdrama' || cat === 'tv_show') tryWikiThenFallback();
+					else fallbackCycleOrPicsum();
 					return;
 				}
 				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
-				fetchOMDBPoster(src, function (posterUrl) {
+				fetchOMDBPoster(searchTitle || src, function (posterUrl) {
 					if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
+					else if (cat === 'kdrama' || cat === 'tv_show') tryWikiThenFallback();
 					else fallbackCycleOrPicsum();
 				}, omdbType, true);
+				return;
+			}
+
+			// Books: try Open Library cover when changing wallpaper
+			if (src && cat === 'books') {
+				fetchOpenLibraryCover(src, function (coverUrl) {
+					if (isValidImageUrl(coverUrl)) setFetchedImages([coverUrl, coverUrl]);
+					else fallbackCycleOrPicsum();
+				});
 				return;
 			}
 
@@ -741,6 +924,15 @@
 			if (data && typeof data === 'object') {
 				quotesDb = data;
 				if (quotesDb.meta) delete quotesDb.meta;
+				// Temporarily exclude entries with author "Unknown" so we can verify DB works with known entries
+				Object.keys(quotesDb).forEach(function (key) {
+					if (Array.isArray(quotesDb[key])) {
+						quotesDb[key] = quotesDb[key].filter(function (entry) {
+							var a = entry && entry.author && String(entry.author).trim();
+							return a && a.toLowerCase() !== 'unknown';
+						});
+					}
+				});
 			}
 			loadQuote(getCategory());
 		})
