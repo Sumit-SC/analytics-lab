@@ -397,16 +397,15 @@
 	}
 
 	function getImageMode() {
-		try {
-			// Default to 'live' so poster images load from API (OMDb/Jikan) or embedded JSON images
-			return localStorage.getItem(QUOTE_IMAGE_MODE_KEY) || 'live';
-		} catch (e) {
-			return 'live';
-		}
+		// Live/local image mode toggle temporarily disabled.
+		// Always behave as if "Use live posters" is ON so that
+		// APIs (OMDb/Jikan/Open Library) and DB images are used.
+		return 'live';
 	}
 
 	function isLivePostersEnabled() {
-		return getImageMode() !== 'local';
+		// With the toggle disabled, this is always true.
+		return true;
 	}
 
 	function getProxyBase() {
@@ -670,6 +669,15 @@
 					fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
 						if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
 					});
+				});
+			}
+		}
+		// Books (from DB): try Open Library for book cover by title or author
+		if (actualCategory === 'books') {
+			var bookQuery = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
+			if (bookQuery) {
+				fetchOpenLibraryCover(bookQuery, function (coverUrl) {
+					if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
 				});
 			}
 		}
