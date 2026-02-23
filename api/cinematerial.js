@@ -28,6 +28,23 @@ function buildPageUrl(imdbId, title, type) {
 
 function extractImageUrls(html, baseUrl) {
 	const urls = [];
+
+	// Try JSON-LD first: it usually contains the primary poster image
+	try {
+		const ldMatch = html.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i);
+		if (ldMatch && ldMatch[1]) {
+			let jsonText = ldMatch[1].trim();
+			jsonText = jsonText.replace(/^\s*<!--/, '').replace(/-->\s*$/, '');
+			const data = JSON.parse(jsonText);
+			const img = (data && typeof data.image === 'string') ? data.image.trim() : '';
+			if (img && img.indexOf('http') === 0) {
+				urls.push(img);
+			}
+		}
+	} catch (e) {
+		// Ignore JSON-LD parse errors; fall back to <img> scraping
+	}
+
 	const srcRegex = /<img[^>]+(?:src|data-src)=["']([^"']+)["']/gi;
 	let m;
 	while ((m = srcRegex.exec(html)) !== null) {
