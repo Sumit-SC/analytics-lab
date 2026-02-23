@@ -317,6 +317,16 @@
 		return url && typeof url === 'string' && (url = url.trim()) && url.indexOf('http') === 0;
 	}
 
+	function setQuoteBgImage(bgEl, url) {
+		if (!bgEl || !url || typeof url !== 'string' || url.indexOf('http') !== 0) return;
+		var safe = url.trim().replace(/["']/g, '');
+		// Clear first to force browser to drop cached paint, then set new URL so the new image is visible
+		bgEl.style.backgroundImage = 'none';
+		bgEl.offsetHeight;
+		bgEl.style.backgroundImage = 'url(' + safe + ')';
+		bgEl.offsetHeight;
+	}
+
 	function setQuoteImage(seedOrSource, attr) {
 		var bg = document.getElementById('home-quote-bg');
 		if (!bg) return;
@@ -327,16 +337,16 @@
 			url = quoteImageCache[source].url;
 		}
 		if (isValidImageUrl(url)) {
-			bg.style.backgroundImage = 'url(' + url + ')';
+			setQuoteBgImage(bg, url);
 			return;
 		}
 		// Fallback: Picsum with seed from source so same source = same image
 		var s = (source || (seedOrSource && String(seedOrSource)) || Date.now()).toString().replace(/\W/g, '') || String(Date.now());
-		bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + s + '/800/400)';
+		setQuoteBgImage(bg, 'https://picsum.photos/seed/' + s + '/800/400');
 		// Then try to upgrade to a Wikipedia image for this source (async override)
 		if (source) {
 			fetchWikipediaImage(source, function (foundUrl) {
-				if (isValidImageUrl(foundUrl) && bg && bg.style) bg.style.backgroundImage = 'url(' + foundUrl + ')';
+				if (isValidImageUrl(foundUrl) && bg) setQuoteBgImage(bg, foundUrl);
 			});
 		}
 	}
@@ -438,6 +448,55 @@
 			.catch(function () { cb(null); });
 	}
 
+	// Fetch OMDb by title and return poster + imdbID/title/type (for CineMaterial). cb(result) where result = { poster, imdbID, title, type }.
+	function fetchOMDBPosterAndId(title, type, bypassCache, cb) {
+		if (!title || !title.trim()) { cb(null); return; }
+		var base = getProxyBase();
+		if (!base) { cb(null); return; }
+		var key = title.trim();
+		var source = 'website';
+		try {
+			if (typeof window !== 'undefined' && window.location && window.location.hostname && window.location.hostname.indexOf('vercel.app') !== -1) source = 'vercel_app';
+		} catch (e) {}
+		var apiUrl = base + '/api/omdb?t=' + encodeURIComponent(key) + (type === 'movie' || type === 'series' ? '&type=' + type : '') + '&source=' + encodeURIComponent(source);
+		fetch(apiUrl)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (!data) { cb(null); return; }
+				var poster = data.poster && String(data.poster).indexOf('http') === 0 ? data.poster : null;
+				var imdbID = data.imdbID && /^tt\d+$/.test(String(data.imdbID).trim()) ? String(data.imdbID).trim() : null;
+				var titleOut = typeof data.title === 'string' ? data.title.trim() : key;
+				var typeOut = data.type === 'series' ? 'series' : 'movie';
+				cb({ poster: poster, imdbID: imdbID, title: titleOut, type: typeOut });
+			})
+			.catch(function () { cb(null); });
+	}
+
+	// Fetch CineMaterial poster URLs by IMDb ID (proxy /api/cinematerial). cb(urls) with array of image URL strings.
+	function fetchCineMaterialPosters(imdbID, title, type, cb) {
+		if (!imdbID || !/^tt\d+$/.test(String(imdbID).trim())) { cb(null); return; }
+		var base = getProxyBase();
+		if (!base) { cb(null); return; }
+		var q = 'i=' + encodeURIComponent(imdbID.trim()) + '&title=' + encodeURIComponent((title || '').trim() || 'title') + '&type=' + (type === 'series' ? 'series' : 'movie');
+		fetch(base + '/api/cinematerial?' + q)
+			.then(function (r) {
+				if (!r.ok) return null;
+				return r.json().catch(function () { return null; });
+			})
+			.then(function (data) {
+				if (!data) { cb(null); return; }
+				var list = (data.posters && Array.isArray(data.posters)) ? data.posters : (Array.isArray(data) ? data : []);
+				var urls = [];
+				for (var i = 0; i < list.length; i++) {
+					var item = list[i];
+					var u = (item && (item.url || (typeof item === 'string' ? item : null))) || null;
+					if (u && typeof u === 'string' && u.indexOf('http') === 0) urls.push(u);
+				}
+				cb(urls.length ? urls : null);
+			})
+			.catch(function () { cb(null); });
+	}
+
 	// True when source is empty or is the category name (e.g. "K-drama") — not a real show/title for API search
 	function isGenericSource(source, cat) {
 		if (!source || !String(source).trim()) return true;
@@ -465,16 +524,18 @@
 		currentQuoteCategory = category === 'movies' ? 'movie' : category;
 		var meta = (quote.source && quote.source.trim()) ? 'From: ' + quote.source.trim() : '';
 		setQuoteUI(quote.text, quote.author || '', meta);
+		var imdbDebugEl = document.getElementById('home-quote-imdbid');
+		if (imdbDebugEl) imdbDebugEl.textContent = '';
 		var bg = document.getElementById('home-quote-bg');
 		var resolved = getSourceImages(quote);
-		// Keep a copy so we can set .images after async fetch; wallpaper refresh uses lastQuoteFromDb.quote.images
-		lastQuoteFromDb = { quote: { text: quote.text, author: quote.author, source: quote.source, images: quote.images && quote.images.length ? quote.images : (resolved || []) }, category: category };
+		// Keep a copy so we can set .images after async fetch; wallpaper uses lastQuoteFromDb.quote.images + imdbID (for CineMaterial without hitting OMDb again)
+		lastQuoteFromDb = { quote: { text: quote.text, author: quote.author, source: quote.source, images: quote.images && quote.images.length ? quote.images : (resolved || []), imdbID: null, omdbTitle: null, omdbType: null }, category: category };
 
 		function setBgAndImages(urls) {
 			var firstUrl = urls && urls.length > 0 && urls[0] && String(urls[0]).trim();
 			if (bg && isValidImageUrl(firstUrl)) {
 				lastQuoteFromDb.quote.images = urls.length >= 2 && urls[1] ? [urls[0], urls[1]] : [urls[0], urls[0]];
-				bg.style.backgroundImage = 'url(' + firstUrl + ')';
+				setQuoteBgImage(bg, firstUrl);
 			} else {
 				lastQuoteFromDb.quote.images = [];
 				// Fallback so poster always shows: map or Picsum by author/source
@@ -533,17 +594,28 @@
 					return;
 				}
 
-				fetchOMDBPoster(searchTitle || fullSource, function (url) {
-					if (url) {
-						setBgAndImages([url, url]);
-					} else {
-						if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
-							tryWikipediaThenResolved();
-						} else {
-							setBgAndImages(resolved);
+				// Use fetchOMDBPosterAndId so we store imdbID for "Change image" (CineMaterial) without hitting OMDb again
+				fetchOMDBPosterAndId(searchTitle || fullSource, omdbType, false, function (result) {
+					if (result && lastQuoteFromDb && lastQuoteFromDb.quote) {
+						var stillSameQuote = (lastQuoteFromDb.quote.source || '').trim() === (quote.source || '').trim();
+						if (stillSameQuote && result.imdbID) {
+							lastQuoteFromDb.quote.imdbID = result.imdbID;
+							lastQuoteFromDb.quote.omdbTitle = result.title || fullSource;
+							lastQuoteFromDb.quote.omdbType = result.type || omdbType;
+							var debugEl = document.getElementById('home-quote-imdbid');
+							if (debugEl) debugEl.textContent = result.imdbID;
 						}
+						if (result.poster) {
+							setBgAndImages([result.poster, result.poster]);
+						} else {
+							if (actualCategory === 'kdrama' || actualCategory === 'tv_show') tryWikipediaThenResolved();
+							else setBgAndImages(resolved);
+						}
+					} else {
+						if (actualCategory === 'kdrama' || actualCategory === 'tv_show') tryWikipediaThenResolved();
+						else setBgAndImages(resolved);
 					}
-				}, omdbType);
+				});
 				return;
 			}
 		}
@@ -554,11 +626,11 @@
 			if (authorOrSource) {
 				fetchWikipediaImage(authorOrSource, function (wikiUrl) {
 					if (isValidImageUrl(wikiUrl) && bg) {
-						bg.style.backgroundImage = 'url(' + wikiUrl + ')';
+						setQuoteBgImage(bg, wikiUrl);
 						return;
 					}
 					fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
-						if (isValidImageUrl(searchUrl) && bg) bg.style.backgroundImage = 'url(' + searchUrl + ')';
+						if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
 					});
 				});
 			}
@@ -568,7 +640,7 @@
 			var bookQuery = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
 			if (bookQuery) {
 				fetchOpenLibraryCover(bookQuery, function (coverUrl) {
-					if (isValidImageUrl(coverUrl) && bg) bg.style.backgroundImage = 'url(' + coverUrl + ')';
+					if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
 				});
 			}
 		}
@@ -659,7 +731,7 @@
 						fetchJikanImage(animeName, function (url) {
 							if (isValidImageUrl(url)) {
 								var bg = document.getElementById('home-quote-bg');
-								if (bg) bg.style.backgroundImage = 'url(' + url + ')';
+								if (bg) setQuoteBgImage(bg, url);
 							} else {
 								setQuoteImage(null, animeName || q.attr);
 							}
@@ -691,7 +763,7 @@
 						fetchOpenLibraryCover(q.attr.trim(), function (coverUrl) {
 							if (isValidImageUrl(coverUrl)) {
 								var bg = document.getElementById('home-quote-bg');
-								if (bg) bg.style.backgroundImage = 'url(' + coverUrl + ')';
+								if (bg) setQuoteBgImage(bg, coverUrl);
 							}
 						});
 					}
@@ -785,13 +857,15 @@
 				: getCurrentQuoteSource();
 			var cat = currentQuoteCategory || (lastQuoteFromDb && lastQuoteFromDb.category) || getCategory();
 			if (cat === 'movies') cat = 'movie';
+			var imdbDebugEl = document.getElementById('home-quote-imdbid');
+			var domImdbId = imdbDebugEl && imdbDebugEl.textContent ? imdbDebugEl.textContent.trim() : '';
 
 			function setFetchedImages(urls) {
 				if (!urls || urls.length === 0) return;
 				var first = urls[0] && String(urls[0]).trim();
 				if (!bg || !isValidImageUrl(first)) return;
 				var imgs = urls.length >= 2 ? [urls[0], urls[1]] : [urls[0], urls[0]];
-				bg.style.backgroundImage = 'url(' + imgs[0] + ')';
+				setQuoteBgImage(bg, first);
 				if (lastQuoteFromDb) {
 					lastQuoteFromDb.quote.images = imgs;
 				} else {
@@ -815,7 +889,7 @@
 				var chosenStr = chosen && String(chosen).trim();
 				if (!bg || !isValidImageUrl(chosenStr)) return;
 				var imgs = pool.length >= 2 ? [pool[0], pool[1]] : [chosen, chosen];
-				bg.style.backgroundImage = 'url(' + chosen + ')';
+				setQuoteBgImage(bg, chosenStr);
 				if (lastQuoteFromDb) {
 					lastQuoteFromDb.quote.images = pool.length >= 2 ? pool : [chosen, chosen];
 				} else {
@@ -839,16 +913,16 @@
 					if (idx === -1) idx = 0;
 					var nextIdx = (idx + 1) % imgs.length;
 					var nextUrl = imgs[nextIdx];
-					if (bg && isValidImageUrl(nextUrl)) bg.style.backgroundImage = 'url(' + nextUrl + ')';
+					if (bg && isValidImageUrl(nextUrl)) setQuoteBgImage(bg, nextUrl);
 					else if (bg) {
 						var seed = (src || 'quote') + '-' + Date.now();
 						seed = seed.replace(/\W/g, '') || Date.now();
-						bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+						setQuoteBgImage(bg, 'https://picsum.photos/seed/' + seed + '/800/400');
 					}
 				} else if (bg) {
 					var seed = (src || 'quote') + '-' + Date.now();
 					seed = seed.replace(/\W/g, '') || Date.now();
-					bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+					setQuoteBgImage(bg, 'https://picsum.photos/seed/' + seed + '/800/400');
 				}
 			}
 
@@ -861,9 +935,10 @@
 				return;
 			}
 
-			// Movie / K-drama / Bollywood / TV show: OMDb then Wikipedia fallback (only when src is a real title)
+			// Movie / K-drama / Bollywood / TV show: CineMaterial when we have imdbID (no OMDb); else try Wikipedia or one OMDb to get imdbID then CineMaterial
 			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show') && !isGenericSource(src, cat)) {
 				var searchTitle = cleanTitleForSearch(src);
+				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
 				function tryWikiThenFallback() {
 					fetchWikipediaImage(searchTitle || src, function (wikiUrl) {
 						if (isValidImageUrl(wikiUrl)) {
@@ -876,17 +951,46 @@
 						});
 					});
 				}
-				if (!getProxyBase()) {
-					if (cat === 'kdrama' || cat === 'tv_show') tryWikiThenFallback();
-					else fallbackCycleOrPicsum();
+				function tryCineMaterialThenWiki(imdbID, omdbTitle, omdbTypeStr) {
+					if (!imdbID || !getProxyBase()) { tryWikiThenFallback(); return; }
+					fetchCineMaterialPosters(imdbID, omdbTitle, omdbTypeStr, function (cinemaUrls) {
+						if (cinemaUrls && cinemaUrls.length > 0) {
+							setFetchedImagesAndPool(cinemaUrls);
+						} else {
+							tryWikiThenFallback();
+						}
+					});
+				}
+				var cachedImdb = (domImdbId && /^tt\d+$/.test(domImdbId))
+					? domImdbId
+					: (lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.imdbID && String(lastQuoteFromDb.quote.imdbID).trim());
+				if (cachedImdb && /^tt\d+$/.test(cachedImdb) && getProxyBase()) {
+					tryCineMaterialThenWiki(
+						cachedImdb,
+						(lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.omdbTitle) || searchTitle || src,
+						(lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.omdbType) || omdbType
+					);
 					return;
 				}
-				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
-				fetchOMDBPoster(searchTitle || src, function (posterUrl) {
-					if (posterUrl) setFetchedImages([posterUrl, posterUrl]);
-					else if (cat === 'kdrama' || cat === 'tv_show') tryWikiThenFallback();
-					else fallbackCycleOrPicsum();
-				}, omdbType, true);
+				if (getProxyBase()) {
+					fetchOMDBPosterAndId(searchTitle || src, omdbType, true, function (result) {
+						if (result && result.imdbID) {
+							if (lastQuoteFromDb && lastQuoteFromDb.quote) {
+								lastQuoteFromDb.quote.imdbID = result.imdbID;
+								lastQuoteFromDb.quote.omdbTitle = result.title || searchTitle || src;
+								lastQuoteFromDb.quote.omdbType = result.type || omdbType;
+							}
+							if (imdbDebugEl) imdbDebugEl.textContent = result.imdbID;
+							tryCineMaterialThenWiki(result.imdbID, result.title || searchTitle || src, result.type || omdbType);
+						} else if (result && result.poster) {
+							setFetchedImages([result.poster, result.poster]);
+						} else {
+							tryWikiThenFallback();
+						}
+					});
+					return;
+				}
+				tryWikiThenFallback();
 				return;
 			}
 

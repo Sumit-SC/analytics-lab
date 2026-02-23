@@ -241,11 +241,20 @@ return res.status(502).json({ error: 'Upstream error', usage: usagePayload() });
 		const r = await fetch(url);
 		const data = await r.json().catch(function () { return null; });
 		const poster = data && data.Poster && data.Poster !== 'N/A' && String(data.Poster).indexOf('http') === 0 ? data.Poster : null;
+		const imdbID = data && data.imdbID && /^tt\d+$/.test(String(data.imdbID).trim()) ? String(data.imdbID).trim() : null;
+		const title = data && typeof data.Title === 'string' ? data.Title.trim() : '';
+		const type = (data && data.Type === 'series') ? 'series' : 'movie';
 		setCors();
 		res.setHeader('Cache-Control', 'public, max-age=86400');
-		return res.status(200).json({ poster: poster, usage: usagePayload() });
+		return res.status(200).json({
+			poster: poster,
+			imdbID: imdbID || null,
+			title: title || null,
+			type: type,
+			usage: usagePayload()
+		});
 	} catch (e) {
 		res.setHeader('Access-Control-Allow-Origin', origin || '*');
-		return res.status(502).json({ poster: null, error: 'Upstream error', usage: usagePayload() });
+		return res.status(502).json({ poster: null, imdbID: null, error: 'Upstream error', usage: usagePayload() });
 	}
 };
