@@ -876,15 +876,12 @@
 		quoteBgRefreshBtn.addEventListener('click', function () {
 			var bg = document.getElementById('home-quote-bg');
 			if (!bg) return;
-			// Prefer stored source (show/movie name) so we always hit the right API
+			// Prefer stored source (show/movie name) so we keep cycling images that match the quote
 			var src = (lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.source)
 				? lastQuoteFromDb.quote.source.trim()
 				: getCurrentQuoteSource();
 			var cat = currentQuoteCategory || (lastQuoteFromDb && lastQuoteFromDb.category) || getCategory();
 			if (cat === 'movies') cat = 'movie';
-			var imdbDebugEl = document.getElementById('home-quote-imdbid');
-			var domImdbId = imdbDebugEl && imdbDebugEl.textContent ? imdbDebugEl.textContent.trim() : '';
-
 			function setFetchedImages(urls) {
 				if (!urls || urls.length === 0) return;
 				var first = urls[0] && String(urls[0]).trim();
@@ -951,96 +948,10 @@
 				}
 			}
 
-			// Anime: re-fetch from Jikan (bypass cache so "change image" gets a fresh request)
-			if (src && cat === 'anime') {
-				fetchJikanImage(src, function (url) {
-					if (url) setFetchedImages([url, url]);
-					else fallbackCycleOrPicsum();
-				}, true);
-				return;
-			}
-
-			// Movie / K-drama / Bollywood / TV show:
-			// - Movies / K-drama / TV: CineMaterial when we have imdbID (no OMDb); else try Wikipedia or one OMDb to get imdbID then CineMaterial
-			// - Bollywood: MoviePosterDB when we have imdbID; else one OMDb to get imdbID then MoviePosterDB (then Wikipedia/Picsum fallback)
-			if (src && (cat === 'movie' || cat === 'kdrama' || cat === 'bollywood' || cat === 'tv_show') && !isGenericSource(src, cat)) {
-				var searchTitle = cleanTitleForSearch(src);
-				var omdbType = (cat === 'kdrama' || cat === 'tv_show') ? 'series' : 'movie';
-				function tryWikiThenFallback() {
-					fetchWikipediaImage(searchTitle || src, function (wikiUrl) {
-						if (isValidImageUrl(wikiUrl)) {
-							setFetchedImages([wikiUrl, wikiUrl]);
-							return;
-						}
-						fetchWikipediaImageBySearch(searchTitle || src, function (searchUrl) {
-							if (isValidImageUrl(searchUrl)) setFetchedImages([searchUrl, searchUrl]);
-							else fallbackCycleOrPicsum();
-						});
-					});
-				}
-				function tryProviderThenWiki(imdbID, omdbTitle, omdbTypeStr) {
-					if (!imdbID || !getProxyBase()) { tryWikiThenFallback(); return; }
-					// Bollywood: use MoviePosterDB; others: CineMaterial
-					if (cat === 'bollywood') {
-						fetchMoviePosterDbPosters(imdbID, omdbTitle, function (movieUrls) {
-							if (movieUrls && movieUrls.length > 0) {
-								setFetchedImagesAndPool(movieUrls);
-							} else {
-								tryWikiThenFallback();
-							}
-						});
-					} else {
-						fetchCineMaterialPosters(imdbID, omdbTitle, omdbTypeStr, function (cinemaUrls) {
-							if (cinemaUrls && cinemaUrls.length > 0) {
-								setFetchedImagesAndPool(cinemaUrls);
-							} else {
-								tryWikiThenFallback();
-							}
-						});
-					}
-				}
-				var cachedImdb = (domImdbId && /^tt\d+$/.test(domImdbId))
-					? domImdbId
-					: (lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.imdbID && String(lastQuoteFromDb.quote.imdbID).trim());
-				if (cachedImdb && /^tt\d+$/.test(cachedImdb) && getProxyBase()) {
-					tryProviderThenWiki(
-						cachedImdb,
-						(lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.omdbTitle) || searchTitle || src,
-						(lastQuoteFromDb && lastQuoteFromDb.quote && lastQuoteFromDb.quote.omdbType) || omdbType
-					);
-					return;
-				}
-				if (getProxyBase()) {
-					fetchOMDBPosterAndId(searchTitle || src, omdbType, true, function (result) {
-						if (result && result.imdbID) {
-							if (lastQuoteFromDb && lastQuoteFromDb.quote) {
-								lastQuoteFromDb.quote.imdbID = result.imdbID;
-								lastQuoteFromDb.quote.omdbTitle = result.title || searchTitle || src;
-								lastQuoteFromDb.quote.omdbType = result.type || omdbType;
-							}
-							if (imdbDebugEl) imdbDebugEl.textContent = result.imdbID;
-							tryProviderThenWiki(result.imdbID, result.title || searchTitle || src, result.type || omdbType);
-						} else if (result && result.poster) {
-							setFetchedImages([result.poster, result.poster]);
-						} else {
-							tryWikiThenFallback();
-						}
-					});
-					return;
-				}
-				tryWikiThenFallback();
-				return;
-			}
-
-			// Books: try Open Library cover when changing wallpaper
-			if (src && cat === 'books') {
-				fetchOpenLibraryCover(src, function (coverUrl) {
-					if (isValidImageUrl(coverUrl)) setFetchedImages([coverUrl, coverUrl]);
-					else fallbackCycleOrPicsum();
-				});
-				return;
-			}
-
+			// Simplified behavior: for reliability and to avoid API quota issues,
+			// the Change wallpaper button now only cycles through already-known
+			// images for this quote (or a Picsum fallback), without calling
+			// external poster APIs again.
 			fallbackCycleOrPicsum();
 		});
 	}
