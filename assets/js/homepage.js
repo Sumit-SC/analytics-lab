@@ -377,19 +377,38 @@
 		return pick(quotesDb[category]);
 	}
 
-	// Resolve 1–2 image URLs: prefer quote.images from DB (including Picsum), then QUOTE_IMAGE_MAP by source/author
+	// Resolve 1–2 image URLs: prefer quote.images from DB (v2: string[], v4: [{ type, url }]), then QUOTE_IMAGE_MAP by source/author.
+	// For entertainment: non-Picsum URLs are preferred as first so poster shows, not placeholder.
 	function getSourceImages(quote) {
-		var urls = quote.images;
+		var urls = quote && quote.images;
+
+		// Support both legacy ["url1", "url2"] and new [{ type, url }] formats
 		if (Array.isArray(urls) && urls.length > 0) {
-			var first = urls[0] && String(urls[0]).trim();
-			if (first && first.indexOf('http') === 0) {
-				return urls.length >= 2 && urls[1] && String(urls[1]).trim().indexOf('http') === 0
-					? [first, String(urls[1]).trim()] : [first, first];
+			var flat = urls
+				.map(function (u) {
+					if (!u) return null;
+					if (typeof u === 'string') return u;
+					if (u.url) return String(u.url);
+					return null;
+				})
+				.filter(function (u) {
+					return u && String(u).trim().indexOf('http') === 0;
+				});
+
+			if (flat.length > 0) {
+				// Prefer non-Picsum as first image so poster/link shows instead of placeholder
+				var nonPicsum = flat.filter(function (u) { return u && u.indexOf('picsum.photos') === -1; });
+				var ordered = nonPicsum.length > 0 ? nonPicsum : flat;
+				var first = String(ordered[0]).trim();
+				var second = ordered[1] ? String(ordered[1]).trim() : first;
+				return [first, second];
 			}
 		}
+
 		var src = (quote.source && quote.source.trim()) || '';
 		var attr = (quote.author && quote.author.trim()) || '';
-		var fromMap = (src && QUOTE_IMAGE_MAP[src]) || (attr && QUOTE_IMAGE_MAP[attr]);
+		var srcShort = src ? src.split(':')[0].trim() : '';
+		var fromMap = (src && QUOTE_IMAGE_MAP[src]) || (srcShort && QUOTE_IMAGE_MAP[srcShort]) || (attr && QUOTE_IMAGE_MAP[attr]);
 		if (fromMap) {
 			return Array.isArray(fromMap) ? fromMap : [fromMap, fromMap];
 		}
@@ -541,6 +560,14 @@
 		return url && typeof url === 'string' && url.indexOf('picsum.photos') !== -1;
 	}
 
+	// True when we should try API first and only fall back to local after timeout (avoids showing Picsum/placeholder immediately)
+	var API_FIRST_TIMEOUT_MS = 4500;
+	function isResolvedPlaceholder(resolved) {
+		if (!resolved || !resolved.length) return true;
+		var first = resolved[0] && String(resolved[0]).trim();
+		return !first || isPicsumUrl(first);
+	}
+
 	// Apply a quote from the local DB: resolve source-accurate images (Jikan, OMDb, Wikipedia, Open Library)
 	// category = dropdown value (e.g. 'random', 'books'); actualCategory = DB key (e.g. 'books', 'kdrama')
 	function applyQuoteFromDb(quote, category, actualCategory) {
@@ -575,19 +602,43 @@
 				setQuoteBgImage(bg, firstUrl);
 			} else {
 				lastQuoteFromDb.quote.images = [];
-				// Fallback so poster always shows: map or Picsum by author/source
-				setQuoteImage(null, quote.author || quote.source);
+				// Fallback: try QUOTE_IMAGE_MAP by source, short source (e.g. "Star Wars: Episode IV" -> "Star Wars"), then author
+				var src = (quote.source && quote.source.trim()) || '';
+				var attr = (quote.author && quote.author.trim()) || '';
+				var srcShort = src ? src.split(':')[0].trim() : '';
+				var mapUrl = (src && QUOTE_IMAGE_MAP[src]) || (srcShort && QUOTE_IMAGE_MAP[srcShort]) || (attr && QUOTE_IMAGE_MAP[attr]);
+				if (mapUrl && isValidImageUrl(mapUrl)) {
+					var arr = Array.isArray(mapUrl) ? mapUrl : [mapUrl, mapUrl];
+					lastQuoteFromDb.quote.images = arr;
+					setQuoteBgImage(bg, String(arr[0]).trim());
+				} else {
+					setQuoteImage(null, attr || src);
+				}
 			}
 		}
 
 		var livePosters = isLivePostersEnabled();
 
 		if (livePosters && actualCategory === 'anime' && quote.source && quote.source.trim()) {
-			setBgAndImages(resolved); // show DB/map image immediately
-			fetchJikanImage(quote.source.trim(), function (url) {
-				if (url) setBgAndImages([url, url]);
-				else setBgAndImages(resolved);
-			});
+			var useApiFirst = isResolvedPlaceholder(resolved);
+			if (useApiFirst) {
+				var timedOut = false;
+				var animeFallbackTimer = setTimeout(function () {
+					timedOut = true;
+					setBgAndImages(resolved);
+				}, API_FIRST_TIMEOUT_MS);
+				fetchJikanImage(quote.source.trim(), function (url) {
+					if (timedOut) return;
+					clearTimeout(animeFallbackTimer);
+					if (url) setBgAndImages([url, url]);
+					else setBgAndImages(resolved);
+				});
+			} else {
+				setBgAndImages(resolved);
+				fetchJikanImage(quote.source.trim(), function (url) {
+					if (url) setBgAndImages([url, url]);
+				});
+			}
 			return;
 		}
 		// OMDb for posters via backend proxy (movies, K-drama, Bollywood, TV shows); only when source is a real title
@@ -607,32 +658,59 @@
 			if (tryOmdb) {
 				var searchTitle = cleanTitleForSearch(quote.source);
 				var fullSource = quote.source && quote.source.trim() ? quote.source.trim() : '';
-				// Show DB/resolved image immediately so user sees something; API will overwrite when it succeeds
-				setBgAndImages(resolved);
+				var useApiFirst = isResolvedPlaceholder(resolved);
 
-				function tryWikipediaThenResolved() {
+				function tryWikipediaThenResolved(done) {
 					fetchWikipediaImage(searchTitle || fullSource, function (wikiUrl) {
 						if (isValidImageUrl(wikiUrl)) {
-							setBgAndImages([wikiUrl, wikiUrl]);
+							if (done) done([wikiUrl, wikiUrl]);
+							else setBgAndImages([wikiUrl, wikiUrl]);
 							return;
 						}
 						fetchWikipediaImageBySearch(searchTitle || fullSource, function (searchUrl) {
-							if (isValidImageUrl(searchUrl)) setBgAndImages([searchUrl, searchUrl]);
+							if (isValidImageUrl(searchUrl)) {
+								if (done) done([searchUrl, searchUrl]);
+								else setBgAndImages([searchUrl, searchUrl]);
+							} else if (done) done(null);
 							else setBgAndImages(resolved);
 						});
 					});
 				}
 
+				function applyFallback() {
+					setBgAndImages(resolved);
+				}
+
+				var mediaFallbackTimer = null;
+				var mediaTimedOut = false;
+				if (useApiFirst) {
+					mediaFallbackTimer = setTimeout(function () {
+						mediaTimedOut = true;
+						applyFallback();
+					}, API_FIRST_TIMEOUT_MS);
+				} else {
+					setBgAndImages(resolved);
+				}
+
+				function onApiDone(apiUrls) {
+					if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
+					if (mediaTimedOut) return;
+					if (apiUrls && apiUrls.length) setBgAndImages(apiUrls);
+					else applyFallback();
+				}
+
 				if (!getProxyBase()) {
-					// No OMDb proxy: for kdrama/tv try Wikipedia (exact then search); else just keep resolved
 					if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
-						tryWikipediaThenResolved();
+						tryWikipediaThenResolved(useApiFirst ? onApiDone : undefined);
+					} else if (useApiFirst) {
+						if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
+						applyFallback();
 					}
 					return;
 				}
 
-				// Use fetchOMDBPosterAndId so we store imdbID for "Change image" (CineMaterial) without hitting OMDb again
 				fetchOMDBPosterAndId(searchTitle || fullSource, omdbType, false, function (result) {
+					if (mediaTimedOut) return;
 					if (result && lastQuoteFromDb && lastQuoteFromDb.quote) {
 						var stillSameQuote = (lastQuoteFromDb.quote.source || '').trim() === (quote.source || '').trim();
 						if (stillSameQuote && result.imdbID) {
@@ -643,42 +721,84 @@
 							if (debugEl) debugEl.textContent = result.imdbID;
 						}
 						if (result.poster) {
+							if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
 							setBgAndImages([result.poster, result.poster]);
-						} else {
-							if (actualCategory === 'kdrama' || actualCategory === 'tv_show') tryWikipediaThenResolved();
-							else setBgAndImages(resolved);
+							return;
 						}
+					}
+					if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
+						tryWikipediaThenResolved(useApiFirst ? onApiDone : undefined);
 					} else {
-						if (actualCategory === 'kdrama' || actualCategory === 'tv_show') tryWikipediaThenResolved();
-						else setBgAndImages(resolved);
+						if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
+						applyFallback();
 					}
 				});
 				return;
 			}
 		}
-		// Leaders, life, meme: use resolved then try Wikipedia (exact then search) to upgrade
-		setBgAndImages(resolved);
+		// Leaders, life, meme: when placeholder try API first with delay before showing local
 		if (actualCategory === 'leaders' || actualCategory === 'life' || actualCategory === 'meme') {
 			var authorOrSource = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
-			if (authorOrSource) {
+			var useApiFirst = isResolvedPlaceholder(resolved);
+			if (useApiFirst && authorOrSource) {
+				var leaderTimedOut = false;
+				var leaderFallbackTimer = setTimeout(function () {
+					leaderTimedOut = true;
+					setBgAndImages(resolved);
+				}, API_FIRST_TIMEOUT_MS);
 				fetchWikipediaImage(authorOrSource, function (wikiUrl) {
+					if (leaderTimedOut) return;
+					clearTimeout(leaderFallbackTimer);
 					if (isValidImageUrl(wikiUrl) && bg) {
 						setQuoteBgImage(bg, wikiUrl);
 						return;
 					}
 					fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
+						if (leaderTimedOut) return;
+						clearTimeout(leaderFallbackTimer);
 						if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
+						else setBgAndImages(resolved);
 					});
 				});
+			} else {
+				setBgAndImages(resolved);
+				if (authorOrSource) {
+					fetchWikipediaImage(authorOrSource, function (wikiUrl) {
+						if (isValidImageUrl(wikiUrl) && bg) setQuoteBgImage(bg, wikiUrl);
+						else fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
+							if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
+						});
+					});
+				}
 			}
+		} else if (actualCategory !== 'books') {
+			setBgAndImages(resolved);
 		}
-		// Books (from DB): try Open Library for book cover by title or author
+		// Books (from DB): when placeholder try Open Library first with delay before local
 		if (actualCategory === 'books') {
 			var bookQuery = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
 			if (bookQuery) {
-				fetchOpenLibraryCover(bookQuery, function (coverUrl) {
-					if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
-				});
+				var useApiFirstBook = isResolvedPlaceholder(resolved);
+				if (useApiFirstBook) {
+					var bookTimedOut = false;
+					var bookFallbackTimer = setTimeout(function () {
+						bookTimedOut = true;
+						setBgAndImages(resolved);
+					}, API_FIRST_TIMEOUT_MS);
+					fetchOpenLibraryCover(bookQuery, function (coverUrl) {
+						if (bookTimedOut) return;
+						clearTimeout(bookFallbackTimer);
+						if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
+						else setBgAndImages(resolved);
+					});
+				} else {
+					setBgAndImages(resolved);
+					fetchOpenLibraryCover(bookQuery, function (coverUrl) {
+						if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
+					});
+				}
+			} else {
+				setBgAndImages(resolved);
 			}
 		}
 	}
@@ -1040,12 +1160,14 @@
 	if (bgEl) setQuoteImage(null, 'Plutarch');
 
 	// Load local quote DB then show initial quote (faster than APIs)
-	fetch('./assets/data/quotes-db.json')
+	fetch('./assets/data/quotes-db.v4.json')
 		.then(function (r) { return r.ok ? r.json() : null; })
 		.then(function (data) {
 			if (data && typeof data === 'object') {
-				quotesDb = data;
-				if (quotesDb.meta) delete quotesDb.meta;
+				// Support both old flat shape and new v4 { meta, categories } shape
+				var categories = data.categories || data;
+				quotesDb = categories;
+
 				// Temporarily exclude entries with author "Unknown" so we can verify DB works with known entries
 				Object.keys(quotesDb).forEach(function (key) {
 					if (Array.isArray(quotesDb[key])) {
