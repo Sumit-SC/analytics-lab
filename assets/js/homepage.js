@@ -250,6 +250,10 @@
 		}
 	}
 
+	function isValidImageUrl(url) {
+		return url && typeof url === 'string' && (url = url.trim()) && url.indexOf('http') === 0;
+	}
+
 	function setQuoteImage(seedOrSource, attr) {
 		var bg = document.getElementById('home-quote-bg');
 		if (!bg) return;
@@ -259,7 +263,7 @@
 		if (!url && source && quoteImageCache[source] && quoteImageCache[source].url) {
 			url = quoteImageCache[source].url;
 		}
-		if (url && url.indexOf('http') === 0) {
+		if (isValidImageUrl(url)) {
 			bg.style.backgroundImage = 'url(' + url + ')';
 			return;
 		}
@@ -269,7 +273,7 @@
 		// Then try to upgrade to a Wikipedia image for this source (async override)
 		if (source) {
 			fetchWikipediaImage(source, function (foundUrl) {
-				if (foundUrl && bg && bg.style) bg.style.backgroundImage = 'url(' + foundUrl + ')';
+				if (isValidImageUrl(foundUrl) && bg && bg.style) bg.style.backgroundImage = 'url(' + foundUrl + ')';
 			});
 		}
 	}
@@ -379,7 +383,7 @@
 
 		function setBgAndImages(urls) {
 			var firstUrl = urls && urls.length > 0 && urls[0] && String(urls[0]).trim();
-			if (firstUrl && firstUrl.indexOf('http') === 0 && bg) {
+			if (bg && isValidImageUrl(firstUrl)) {
 				lastQuoteFromDb.quote.images = urls.length >= 2 && urls[1] ? [urls[0], urls[1]] : [urls[0], urls[0]];
 				bg.style.backgroundImage = 'url(' + firstUrl + ')';
 			} else {
@@ -508,7 +512,7 @@
 					// Prefer proper anime posters from Jikan; fall back to normal quote image logic
 					if (animeName) {
 						fetchJikanImage(animeName, function (url) {
-							if (url) {
+							if (isValidImageUrl(url)) {
 								var bg = document.getElementById('home-quote-bg');
 								if (bg) bg.style.backgroundImage = 'url(' + url + ')';
 							} else {
@@ -625,8 +629,10 @@
 
 			function setFetchedImages(urls) {
 				if (!urls || urls.length === 0) return;
+				var first = urls[0] && String(urls[0]).trim();
+				if (!bg || !isValidImageUrl(first)) return;
 				var imgs = urls.length >= 2 ? [urls[0], urls[1]] : [urls[0], urls[0]];
-				if (bg) bg.style.backgroundImage = 'url(' + imgs[0] + ')';
+				bg.style.backgroundImage = 'url(' + imgs[0] + ')';
 				if (lastQuoteFromDb) {
 					lastQuoteFromDb.quote.images = imgs;
 				} else {
@@ -647,8 +653,10 @@
 			function setFetchedImagesAndPool(pool) {
 				if (!pool || pool.length === 0) return;
 				var chosen = pool[Math.floor(Math.random() * pool.length)];
+				var chosenStr = chosen && String(chosen).trim();
+				if (!bg || !isValidImageUrl(chosenStr)) return;
 				var imgs = pool.length >= 2 ? [pool[0], pool[1]] : [chosen, chosen];
-				if (bg) bg.style.backgroundImage = 'url(' + chosen + ')';
+				bg.style.backgroundImage = 'url(' + chosen + ')';
 				if (lastQuoteFromDb) {
 					lastQuoteFromDb.quote.images = pool.length >= 2 ? pool : [chosen, chosen];
 				} else {
@@ -667,12 +675,18 @@
 					var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
 					var idx = -1;
 					for (var i = 0; i < imgs.length; i++) {
-						if (currentUrl.indexOf(imgs[i]) !== -1) { idx = i; break; }
+						if (imgs[i] && currentUrl.indexOf(imgs[i]) !== -1) { idx = i; break; }
 					}
 					if (idx === -1) idx = 0;
 					var nextIdx = (idx + 1) % imgs.length;
-					bg.style.backgroundImage = 'url(' + imgs[nextIdx] + ')';
-				} else {
+					var nextUrl = imgs[nextIdx];
+					if (bg && isValidImageUrl(nextUrl)) bg.style.backgroundImage = 'url(' + nextUrl + ')';
+					else if (bg) {
+						var seed = (src || 'quote') + '-' + Date.now();
+						seed = seed.replace(/\W/g, '') || Date.now();
+						bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
+					}
+				} else if (bg) {
 					var seed = (src || 'quote') + '-' + Date.now();
 					seed = seed.replace(/\W/g, '') || Date.now();
 					bg.style.backgroundImage = 'url(https://picsum.photos/seed/' + seed + '/800/400)';
