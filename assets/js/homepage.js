@@ -384,6 +384,7 @@
 				bg.style.backgroundImage = 'url(' + firstUrl + ')';
 			} else {
 				lastQuoteFromDb.quote.images = [];
+				// Fallback so poster always shows: map or Picsum by author/source
 				setQuoteImage(null, quote.author || quote.source);
 			}
 		}
@@ -714,6 +715,10 @@
 			} catch (e) {}
 		});
 	}
+
+	// Set default poster immediately so poster is never blank (default quote in HTML is Plutarch)
+	var bgEl = document.getElementById('home-quote-bg');
+	if (bgEl) setQuoteImage(null, 'Plutarch');
 
 	// Load local quote DB then show initial quote (faster than APIs)
 	fetch('./assets/data/quotes-db.json')

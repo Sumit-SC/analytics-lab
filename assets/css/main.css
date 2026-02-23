@@ -1002,24 +1002,34 @@ body {
 	align-items: stretch;
 	min-height: 12rem;
 	max-height: min(85vh, 520px);
+	border: 1px solid rgba(148, 163, 184, 0.25);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
-/* Poster: 1/3 of panel width, full image visible (contain), no stretch; height from aspect-ratio */
+.dark .home-quote-panel {
+	border-color: rgba(71, 85, 105, 0.4);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+/* Poster: 1/3 of panel width, full image visible (contain); keep aspect ratio so poster always shows */
 .home-quote-poster-thumb,
 #home-quote-bg.home-quote-poster-thumb {
 	flex: 0 0 auto;
 	width: 33.333%;
-	min-width: 100px;
-	max-width: 160px;
+	min-width: 120px;
+	max-width: 180px;
+	min-height: 160px;
 	aspect-ratio: 2 / 3;
-	background-size: contain;
+	align-self: center;
+	background-size: cover;
 	background-position: center center;
 	background-repeat: no-repeat;
 	background-color: #e2e8f0;
 	border-radius: 8px 0 0 8px;
+	border-right: 1px solid rgba(148, 163, 184, 0.2);
 }
 .dark .home-quote-poster-thumb,
 .dark #home-quote-bg.home-quote-poster-thumb {
 	background-color: #1e293b;
+	border-right-color: rgba(71, 85, 105, 0.4);
 }
 @media (max-width: 639px) {
 	.home-quote-panel {
@@ -1029,10 +1039,19 @@ body {
 	.home-quote-poster-thumb,
 	#home-quote-bg.home-quote-poster-thumb {
 		width: 100%;
-		max-width: 200px;
+		min-width: 0;
+		max-width: 220px;
+		min-height: 200px;
 		margin: 0 auto;
+		align-self: stretch;
 		aspect-ratio: 2 / 3;
 		border-radius: 8px 8px 0 0;
+		border-right: none;
+		border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+	}
+	.dark .home-quote-poster-thumb,
+	.dark #home-quote-bg.home-quote-poster-thumb {
+		border-bottom-color: rgba(71, 85, 105, 0.4);
 	}
 }
 .home-quote-bg-image {
