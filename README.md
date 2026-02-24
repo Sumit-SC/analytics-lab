@@ -21,7 +21,7 @@ A **second-brain hub** (Notion-like UI and use): **JS libraries** and **free on-
 
 | Area | Features |
 |------|----------|
-| **Home** (`index.html`) | **Second-brain dashboard**: **Quote** (local DB + Quotable, Animechan fallback — categories: All, Anime, Books, Wisdom, Leaders, Inspiring, Life, Love, Friendship, Heartbreak, Wishes, Past, Future, Hollywood, International, Bollywood, K-drama) with **source-matched images**: anime → Jikan poster; movie / K-drama / Bollywood / International → OMDb poster (via backend proxy) or Wikimedia; books/leaders → Wikimedia. Same source reuses the same poster; 1–2 images per quote for wallpaper cycle. **Clock & calendar** (real-time), **Weather** (Open-Meteo with location search + "My location"), **Focus timer** (configurable work/break durations, session labels, auto work→break cycles), **Refresh tips**, **Notes & to-do** (export .md). Quick links to Playground, Resources, Tools. Notion/DeepMind-style cards. |
+| **Home** (`index.html`) | **Second-brain dashboard**: **Quote** (local DB + Quotable, Animechan fallback — categories: All, Anime, Books, Wisdom, Leaders, Inspiring, Life, Love, Friendship, Heartbreak, Wishes, Past, Future, Hollywood, International, Bollywood, K-drama) with **source-matched images**: anime → Jikan poster; movie / K-drama / Bollywood / International → OMDb poster (via backend proxy) or Wikimedia; books/leaders → Wikimedia. **Use live posters** (quote card toggle): when **ON**, images come from OMDb/Jikan when available; when **OFF**, only DB/map (faster, no API). Same source reuses the same poster; 1–2 images per quote for wallpaper cycle. **Clock & calendar** (real-time), **Weather** (Open-Meteo with location search + "My location"), **Focus timer** (configurable work/break durations, session labels, auto work→break cycles), **Refresh tips**, **Notes & to-do** (export .md). Quick links to Playground, Resources, Tools. Notion/DeepMind-style cards. |
 | **Playground** (`playground.html`) | **Tech mode:** Code runner (Python/JS/SQL), **Search hub** with **search history** (last 10 queries, clickable to reuse, clear button) → **DevDocs** (embedded iframe, always visible, minimize-able), **GitHub** (embedded API results with repo name, description, stars, language), JupyterLite, quick launch, roadmap panel, learning assistant. **Non-tech mode:** Search hub → **DuckDuckGo** (embedded), **Wikipedia** (embedded API results), **Stack Overflow** (embedded API results); **Word processor** cards (Microsoft Word Online, Google Docs links). All result panels have minimize/close buttons. Mode persisted in `localStorage`. Bottom bar = global music player: **YouTube** (paste URL / Focus mix) or **JioSaavn** (search songs, play via unofficial API); right-side panel = YouTube player or JioSaavn search results. |
 | **Trends** (`trends.html`) | **Filter by category:** All, Tech, News, Entertainment, Anime. **Tech:** Hacker News top stories (Firebase API). **News:** [Inshorts API](https://inshorts.vercel.app/) (unofficial, by Sumit Kolhe) short headlines + **Wikipedia** top pageviews (Wikimedia). **Entertainment:** visual inspiration strip (Picsum). **Anime:** placeholder for future Jikan / Pinterest / Shorts-style embeds. Filter choice is saved in `localStorage`. Same global music bar, dictionary, video panel as other pages. |
 | **Resources** (`resources.html`) | Curated topics (Programming, Data Analytics, Data Science & ML, Data Engineering, BI, etc.) with **courses**, **books**, **YouTube** (hero + queue), **GitHub**, and **learning paths**. Notion-style cards; sidebar nav. |
@@ -46,6 +46,8 @@ A **second-brain hub** (Notion-like UI and use): **JS libraries** and **free on-
 ---
 
 ## Music & Video bar (YouTube + JioSaavn)
+
+**JioSaavn** depends on a backend; the default is `https://saavn.sumit.co`. To use your own proxy, set `JIOSAAVN_API_BASE` in `assets/js/global-widgets.js` (around line 19) to your backend URL.
 
 A **global bar** at the bottom of the page lets you play **YouTube** or **JioSaavn** without leaving the site. A **Video** panel on the right edge shows the current video or JioSaavn search results.
 
@@ -76,6 +78,12 @@ Search works from **either** the bottom bar input **or** the input inside the Vi
 
 ---
 
+## Script load order
+
+Each page expects scripts in this order to avoid breakage: **(1)** Tailwind (e.g. `tailwind-loader.js` or CDN), **(2)** `assets/css/main.css`, **(3)** analytics (if used), **(4)** page-specific script (e.g. `homepage.js`, `playground.js`). Do not reorder or lazy-load these before the page has rendered; a comment block at the top of each HTML lists the required order for that page.
+
+---
+
 ## Run locally
 
 Serve the `analytics-lab` folder with any static server:
@@ -86,13 +94,21 @@ cd analytics-lab
 python -m http.server 8000
 ```
 
-Then open **http://localhost:8000/** (Home) or **http://localhost:8000/playground.html** (Playground).
+Then open **http://localhost:8000/** (Home) or **http://localhost:8000/pages/playground.html** (Playground).
+
+---
+
+## Project structure
+
+- **Root:** `index.html` (Home), `README.md`, `sitemap.xml`, `vercel.json`, `sw.js`, plus `assets/`, `api/`, `scripts/`, `.github/`.
+- **pages/** — All other app pages: `playground.html`, `trends.html`, `resources.html`, `tools.html`, `jobs.html`, `docs.html`, `test-analytics.html`, `poster-test.html`.
+- **docs/** — Project documentation: `ROADMAP.md`, `TODO.md`, `REFACTOR-TODO.md`, `TODO-TOMORROW.md`, `REMAINING-TASKS-AND-RESOURCES.md`, `BINDER-TEST.md`, `BINDER-SETUP.md`, `HOME-LAYOUT-LOGIC.md`, `IMPROVEMENTS.md`. See **Project docs** below for links.
 
 ---
 
 ## Docs & Sitemap
 
-- **Docs page:** [docs.html](docs.html) — In-app documentation: site map, features overview, APIs, analytics. Linked from the main nav (**Docs**).
+- **Docs page:** [pages/docs.html](pages/docs.html) — In-app documentation: site map, features overview, APIs, analytics. Linked from the main nav (**Docs**).
 - **Sitemap (XML):** [sitemap.xml](sitemap.xml) — For search engines. **Before deploy:** replace `YOUR_DEPLOYMENT_URL` in `sitemap.xml` with your live site URL (e.g. `https://your-app.vercel.app`).
 
 ---
@@ -104,7 +120,7 @@ All pages (Home, Playground, Tools, Resources, Trends) send **visit** and **unlo
 **If the dashboard shows no logs from the Playground (or any page):**
 
 1. **Debug in the browser:** Open the page with `?analytics_debug=1` (e.g. `playground.html?analytics_debug=1`) or set `localStorage.setItem('analytics_debug','1')`, then open DevTools → Console. You should see `[Analytics] Init: ...` and either `Sent via sendBeacon` / `Sent via fetch` or warnings if requests are blocked or fail.
-2. **Test connectivity:** Use **test-analytics.html** (Health check, endpoint test, send test event) and open the dashboard link for **Playground** to confirm events are stored.
+2. **Test connectivity:** Use **pages/test-analytics.html** (Health check, endpoint test, send test event) and open the dashboard link for **Playground** to confirm events are stored.
 3. **Ad-blockers:** Some blockers filter requests to analytics/events domains; try disabling them for the site or use a different network.
 
 ---
@@ -125,7 +141,7 @@ Get a free key at [omdbapi.com](https://www.omdbapi.com/).
 
 1. Use the **`omdb-proxy`** folder (sibling to `analytics-lab` in this workspace). Copy it into a **new GitHub repo** (e.g. `omdb-proxy`) and push.
 2. Deploy that repo on **Vercel**: Import the repo → add env var **`OMDB_API_KEY`** → deploy. Note the URL (e.g. `https://omdb-proxy-xxx.vercel.app`).
-3. In your **main site** (e.g. in `index.html` and `playground.html`), set before other scripts:  
+3. In your **main site** (e.g. in `index.html` and `pages/playground.html`), set before other scripts:  
    `window.OMDB_PROXY_URL = 'https://omdb-proxy-xxx.vercel.app';`  
    (Use your real Vercel URL; no trailing slash.)
 
@@ -164,6 +180,21 @@ Edit **`assets/resources.json`** to add or change topics, courses, books, YouTub
 ## Meta & sharing
 
 - **index**, **resources**, and **tools** include `meta name="description"` and `og:title` / `og:description` for better SEO and link previews.
+
+---
+
+---
+
+## Project docs
+
+Backlog and setup details live in **docs/**:
+
+- [docs/ROADMAP.md](docs/ROADMAP.md) — Priorities, quick wins, job tracker, trends, codebase structure.
+- [docs/TODO.md](docs/TODO.md) — Quick list; see also ROADMAP.
+- [docs/REFACTOR-TODO.md](docs/REFACTOR-TODO.md) — Root cleanup, HTML refactor, tests.
+- [docs/REMAINING-TASKS-AND-RESOURCES.md](docs/REMAINING-TASKS-AND-RESOURCES.md) — Consolidated tasks and resource dump (APIs, env, files).
+- [docs/TODO-TOMORROW.md](docs/TODO-TOMORROW.md) — Session-focused checklist.
+- Binder, layout, improvements: see other `.md` files in **docs/**.
 
 ---
 

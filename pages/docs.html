@@ -1,33 +1,25 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+	<!-- Script order: tailwind-loader.js → main.css → page scripts. Do not reorder. -->
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<title>Docs &amp; Sitemap — Standalone Playground</title>
 	<meta name="description" content="Documentation, site map, and reference for the Standalone Playground (analytics-lab): pages, features, APIs, analytics." />
-	<script src="./assets/js/tailwind-loader.js" defer></script>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-	<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
-	<link rel="stylesheet" href="./assets/css/main.css">
+	<script src="../assets/js/tailwind-loader.js" defer></script>
+	<!-- No Google Fonts: system font stack only (no external trackers) -->
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script src="../assets/js/nav-data.js" defer></script>
+	<script src="../assets/js/nav-inject.js" defer></script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
+<body class="page-docs bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="docs">
 	<nav class="app-bar bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
 		<div class="max-w-5xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
-				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<a href="../index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
 					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
-					<div class="nav-links-inline flex items-center gap-2">
-						<a href="./index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
-						<a href="./playground.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Playground</a>
-						<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
-						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
-						<a href="./jobs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Jobs</a>
-						<a href="./docs.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Docs</a>
-					</div>
+					<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
 				</div>
@@ -40,15 +32,7 @@
 			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
 			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
 		</div>
-		<nav class="nav-drawer-links">
-			<a href="./index.html">Home</a>
-			<a href="./playground.html">Playground</a>
-			<a href="./trends.html">Trends</a>
-			<a href="./resources.html">Resources</a>
-			<a href="./tools.html">Tools</a>
-			<a href="./jobs.html">Jobs</a>
-			<a href="./docs.html" class="text-primary border-primary">Docs</a>
-		</nav>
+		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
 	</div>
 
 	<main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -59,9 +43,9 @@
 
 		<section class="mb-10">
 			<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Sitemap</h2>
-			<p class="text-gray-600 dark:text-gray-400 text-sm mb-4">All main pages. For search engines, use the XML sitemap: <a href="./sitemap.xml" class="text-primary hover:underline">sitemap.xml</a>. Replace <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">YOUR_DEPLOYMENT_URL</code> in <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">sitemap.xml</code> with your live site URL before deploying.</p>
+			<p class="text-gray-600 dark:text-gray-400 text-sm mb-4">All main pages. For search engines, use the XML sitemap: <a href="../sitemap.xml" class="text-primary hover:underline">sitemap.xml</a>. Replace <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">YOUR_DEPLOYMENT_URL</code> in <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">sitemap.xml</code> with your live site URL before deploying.</p>
 			<ul class="space-y-2 text-sm">
-				<li><a href="./index.html" class="text-primary hover:underline">Home</a> — Second brain hub, quotes, weather, focus timer, notes</li>
+				<li><a href="../index.html" class="text-primary hover:underline">Home</a> — Second brain hub, quotes, weather, focus timer, notes</li>
 				<li><a href="./playground.html" class="text-primary hover:underline">Playground</a> — Code runner (Python/JS/SQL), DevDocs, GitHub, search hub, JupyterLite</li>
 				<li><a href="./trends.html" class="text-primary hover:underline">Trends</a> — Hacker News, Inshorts, Wikipedia pageviews, filters</li>
 				<li><a href="./resources.html" class="text-primary hover:underline">Resources</a> — Courses, books, YouTube, GitHub, learning paths by topic</li>
@@ -120,8 +104,8 @@
 		</footer>
 	</main>
 
-	<script src="./assets/js/nav-mobile.js" defer></script>
-	<script src="./assets/js/color-theme.js" defer></script>
-	<script src="./assets/js/theme.js" defer></script>
+	<script src="../assets/js/nav-mobile.js" defer></script>
+	<script src="../assets/js/color-theme.js" defer></script>
+	<script src="../assets/js/theme.js" defer></script>
 </body>
 </html>

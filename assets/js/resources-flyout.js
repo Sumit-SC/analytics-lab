@@ -40,7 +40,8 @@
 		]}
 	];
 
-	var resourcesPath = 'resources.html';
+	var inPages = typeof window !== 'undefined' && window.location && (window.location.pathname.indexOf('/pages/') !== -1 || window.location.pathname.indexOf('\\pages\\') !== -1);
+	var resourcesPath = inPages ? './resources.html' : 'pages/resources.html';
 
 	var html = '<p class="global-resources-flyout-title">Learn by topic</p><nav class="global-resources-nav">';
 	topics.forEach(function (group) {

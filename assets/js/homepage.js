@@ -317,6 +317,8 @@
 		return url && typeof url === 'string' && (url = url.trim()) && url.indexOf('http') === 0;
 	}
 
+	// Allow OMDb/IMDb (Amazon CDN) poster URLs so quote cards work in Chrome/incognito when
+	// the proxy returns them. Previously we blocked these and posters stayed blank.
 	function setQuoteBgImage(bgEl, url) {
 		if (!bgEl || !url || typeof url !== 'string' || url.indexOf('http') !== 0) return;
 		var safe = url.trim().replace(/["']/g, '');
@@ -377,19 +379,38 @@
 		return pick(quotesDb[category]);
 	}
 
-	// Resolve 1–2 image URLs: prefer quote.images from DB (including Picsum), then QUOTE_IMAGE_MAP by source/author
+	// Resolve 1–2 image URLs: prefer quote.images from DB (v2: string[], v4: [{ type, url }]), then QUOTE_IMAGE_MAP by source/author.
+	// For entertainment: non-Picsum URLs are preferred as first so poster shows, not placeholder.
 	function getSourceImages(quote) {
-		var urls = quote.images;
+		var urls = quote && quote.images;
+
+		// Support both legacy ["url1", "url2"] and new [{ type, url }] formats
 		if (Array.isArray(urls) && urls.length > 0) {
-			var first = urls[0] && String(urls[0]).trim();
-			if (first && first.indexOf('http') === 0) {
-				return urls.length >= 2 && urls[1] && String(urls[1]).trim().indexOf('http') === 0
-					? [first, String(urls[1]).trim()] : [first, first];
+			var flat = urls
+				.map(function (u) {
+					if (!u) return null;
+					if (typeof u === 'string') return u;
+					if (u.url) return String(u.url);
+					return null;
+				})
+				.filter(function (u) {
+					return u && String(u).trim().indexOf('http') === 0;
+				});
+
+			if (flat.length > 0) {
+				// Prefer non-Picsum as first image so poster/link shows instead of placeholder
+				var nonPicsum = flat.filter(function (u) { return u && u.indexOf('picsum.photos') === -1; });
+				var ordered = nonPicsum.length > 0 ? nonPicsum : flat;
+				var first = String(ordered[0]).trim();
+				var second = ordered[1] ? String(ordered[1]).trim() : first;
+				return [first, second];
 			}
 		}
+
 		var src = (quote.source && quote.source.trim()) || '';
 		var attr = (quote.author && quote.author.trim()) || '';
-		var fromMap = (src && QUOTE_IMAGE_MAP[src]) || (attr && QUOTE_IMAGE_MAP[attr]);
+		var srcShort = src ? src.split(':')[0].trim() : '';
+		var fromMap = (src && QUOTE_IMAGE_MAP[src]) || (srcShort && QUOTE_IMAGE_MAP[srcShort]) || (attr && QUOTE_IMAGE_MAP[attr]);
 		if (fromMap) {
 			return Array.isArray(fromMap) ? fromMap : [fromMap, fromMap];
 		}
@@ -541,6 +562,14 @@
 		return url && typeof url === 'string' && url.indexOf('picsum.photos') !== -1;
 	}
 
+	// True when we should try API first and only fall back to local after timeout (avoids showing Picsum/placeholder immediately)
+	var API_FIRST_TIMEOUT_MS = 4500;
+	function isResolvedPlaceholder(resolved) {
+		if (!resolved || !resolved.length) return true;
+		var first = resolved[0] && String(resolved[0]).trim();
+		return !first || isPicsumUrl(first);
+	}
+
 	// Apply a quote from the local DB: resolve source-accurate images (Jikan, OMDb, Wikipedia, Open Library)
 	// category = dropdown value (e.g. 'random', 'books'); actualCategory = DB key (e.g. 'books', 'kdrama')
 	function applyQuoteFromDb(quote, category, actualCategory) {
@@ -575,19 +604,43 @@
 				setQuoteBgImage(bg, firstUrl);
 			} else {
 				lastQuoteFromDb.quote.images = [];
-				// Fallback so poster always shows: map or Picsum by author/source
-				setQuoteImage(null, quote.author || quote.source);
+				// Fallback: try QUOTE_IMAGE_MAP by source, short source (e.g. "Star Wars: Episode IV" -> "Star Wars"), then author
+				var src = (quote.source && quote.source.trim()) || '';
+				var attr = (quote.author && quote.author.trim()) || '';
+				var srcShort = src ? src.split(':')[0].trim() : '';
+				var mapUrl = (src && QUOTE_IMAGE_MAP[src]) || (srcShort && QUOTE_IMAGE_MAP[srcShort]) || (attr && QUOTE_IMAGE_MAP[attr]);
+				if (mapUrl && isValidImageUrl(mapUrl)) {
+					var arr = Array.isArray(mapUrl) ? mapUrl : [mapUrl, mapUrl];
+					lastQuoteFromDb.quote.images = arr;
+					setQuoteBgImage(bg, String(arr[0]).trim());
+				} else {
+					setQuoteImage(null, attr || src);
+				}
 			}
 		}
 
 		var livePosters = isLivePostersEnabled();
 
 		if (livePosters && actualCategory === 'anime' && quote.source && quote.source.trim()) {
-			setBgAndImages(resolved); // show DB/map image immediately
-			fetchJikanImage(quote.source.trim(), function (url) {
-				if (url) setBgAndImages([url, url]);
-				else setBgAndImages(resolved);
-			});
+			var useApiFirst = isResolvedPlaceholder(resolved);
+			if (useApiFirst) {
+				var timedOut = false;
+				var animeFallbackTimer = setTimeout(function () {
+					timedOut = true;
+					setBgAndImages(resolved);
+				}, API_FIRST_TIMEOUT_MS);
+				fetchJikanImage(quote.source.trim(), function (url) {
+					if (timedOut) return;
+					clearTimeout(animeFallbackTimer);
+					if (url) setBgAndImages([url, url]);
+					else setBgAndImages(resolved);
+				});
+			} else {
+				setBgAndImages(resolved);
+				fetchJikanImage(quote.source.trim(), function (url) {
+					if (url) setBgAndImages([url, url]);
+				});
+			}
 			return;
 		}
 		// OMDb for posters via backend proxy (movies, K-drama, Bollywood, TV shows); only when source is a real title
@@ -607,32 +660,59 @@
 			if (tryOmdb) {
 				var searchTitle = cleanTitleForSearch(quote.source);
 				var fullSource = quote.source && quote.source.trim() ? quote.source.trim() : '';
-				// Show DB/resolved image immediately so user sees something; API will overwrite when it succeeds
-				setBgAndImages(resolved);
+				var useApiFirst = isResolvedPlaceholder(resolved);
 
-				function tryWikipediaThenResolved() {
+				function tryWikipediaThenResolved(done) {
 					fetchWikipediaImage(searchTitle || fullSource, function (wikiUrl) {
 						if (isValidImageUrl(wikiUrl)) {
-							setBgAndImages([wikiUrl, wikiUrl]);
+							if (done) done([wikiUrl, wikiUrl]);
+							else setBgAndImages([wikiUrl, wikiUrl]);
 							return;
 						}
 						fetchWikipediaImageBySearch(searchTitle || fullSource, function (searchUrl) {
-							if (isValidImageUrl(searchUrl)) setBgAndImages([searchUrl, searchUrl]);
+							if (isValidImageUrl(searchUrl)) {
+								if (done) done([searchUrl, searchUrl]);
+								else setBgAndImages([searchUrl, searchUrl]);
+							} else if (done) done(null);
 							else setBgAndImages(resolved);
 						});
 					});
 				}
 
+				function applyFallback() {
+					setBgAndImages(resolved);
+				}
+
+				var mediaFallbackTimer = null;
+				var mediaTimedOut = false;
+				if (useApiFirst) {
+					mediaFallbackTimer = setTimeout(function () {
+						mediaTimedOut = true;
+						applyFallback();
+					}, API_FIRST_TIMEOUT_MS);
+				} else {
+					setBgAndImages(resolved);
+				}
+
+				function onApiDone(apiUrls) {
+					if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
+					if (mediaTimedOut) return;
+					if (apiUrls && apiUrls.length) setBgAndImages(apiUrls);
+					else applyFallback();
+				}
+
 				if (!getProxyBase()) {
-					// No OMDb proxy: for kdrama/tv try Wikipedia (exact then search); else just keep resolved
 					if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
-						tryWikipediaThenResolved();
+						tryWikipediaThenResolved(useApiFirst ? onApiDone : undefined);
+					} else if (useApiFirst) {
+						if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
+						applyFallback();
 					}
 					return;
 				}
 
-				// Use fetchOMDBPosterAndId so we store imdbID for "Change image" (CineMaterial) without hitting OMDb again
 				fetchOMDBPosterAndId(searchTitle || fullSource, omdbType, false, function (result) {
+					if (mediaTimedOut) return;
 					if (result && lastQuoteFromDb && lastQuoteFromDb.quote) {
 						var stillSameQuote = (lastQuoteFromDb.quote.source || '').trim() === (quote.source || '').trim();
 						if (stillSameQuote && result.imdbID) {
@@ -643,42 +723,84 @@
 							if (debugEl) debugEl.textContent = result.imdbID;
 						}
 						if (result.poster) {
+							if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
 							setBgAndImages([result.poster, result.poster]);
-						} else {
-							if (actualCategory === 'kdrama' || actualCategory === 'tv_show') tryWikipediaThenResolved();
-							else setBgAndImages(resolved);
+							return;
 						}
+					}
+					if (actualCategory === 'kdrama' || actualCategory === 'tv_show') {
+						tryWikipediaThenResolved(useApiFirst ? onApiDone : undefined);
 					} else {
-						if (actualCategory === 'kdrama' || actualCategory === 'tv_show') tryWikipediaThenResolved();
-						else setBgAndImages(resolved);
+						if (mediaFallbackTimer) clearTimeout(mediaFallbackTimer);
+						applyFallback();
 					}
 				});
 				return;
 			}
 		}
-		// Leaders, life, meme: use resolved then try Wikipedia (exact then search) to upgrade
-		setBgAndImages(resolved);
+		// Leaders, life, meme: when placeholder try API first with delay before showing local
 		if (actualCategory === 'leaders' || actualCategory === 'life' || actualCategory === 'meme') {
 			var authorOrSource = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
-			if (authorOrSource) {
+			var useApiFirst = isResolvedPlaceholder(resolved);
+			if (useApiFirst && authorOrSource) {
+				var leaderTimedOut = false;
+				var leaderFallbackTimer = setTimeout(function () {
+					leaderTimedOut = true;
+					setBgAndImages(resolved);
+				}, API_FIRST_TIMEOUT_MS);
 				fetchWikipediaImage(authorOrSource, function (wikiUrl) {
+					if (leaderTimedOut) return;
+					clearTimeout(leaderFallbackTimer);
 					if (isValidImageUrl(wikiUrl) && bg) {
 						setQuoteBgImage(bg, wikiUrl);
 						return;
 					}
 					fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
+						if (leaderTimedOut) return;
+						clearTimeout(leaderFallbackTimer);
 						if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
+						else setBgAndImages(resolved);
 					});
 				});
+			} else {
+				setBgAndImages(resolved);
+				if (authorOrSource) {
+					fetchWikipediaImage(authorOrSource, function (wikiUrl) {
+						if (isValidImageUrl(wikiUrl) && bg) setQuoteBgImage(bg, wikiUrl);
+						else fetchWikipediaImageBySearch(authorOrSource, function (searchUrl) {
+							if (isValidImageUrl(searchUrl) && bg) setQuoteBgImage(bg, searchUrl);
+						});
+					});
+				}
 			}
+		} else if (actualCategory !== 'books') {
+			setBgAndImages(resolved);
 		}
-		// Books (from DB): try Open Library for book cover by title or author
+		// Books (from DB): when placeholder try Open Library first with delay before local
 		if (actualCategory === 'books') {
 			var bookQuery = (quote.source && quote.source.trim()) || (quote.author && quote.author.trim());
 			if (bookQuery) {
-				fetchOpenLibraryCover(bookQuery, function (coverUrl) {
-					if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
-				});
+				var useApiFirstBook = isResolvedPlaceholder(resolved);
+				if (useApiFirstBook) {
+					var bookTimedOut = false;
+					var bookFallbackTimer = setTimeout(function () {
+						bookTimedOut = true;
+						setBgAndImages(resolved);
+					}, API_FIRST_TIMEOUT_MS);
+					fetchOpenLibraryCover(bookQuery, function (coverUrl) {
+						if (bookTimedOut) return;
+						clearTimeout(bookFallbackTimer);
+						if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
+						else setBgAndImages(resolved);
+					});
+				} else {
+					setBgAndImages(resolved);
+					fetchOpenLibraryCover(bookQuery, function (coverUrl) {
+						if (isValidImageUrl(coverUrl) && bg) setQuoteBgImage(bg, coverUrl);
+					});
+				}
+			} else {
+				setBgAndImages(resolved);
 			}
 		}
 	}
@@ -1040,12 +1162,14 @@
 	if (bgEl) setQuoteImage(null, 'Plutarch');
 
 	// Load local quote DB then show initial quote (faster than APIs)
-	fetch('./assets/data/quotes-db.json')
+	fetch('./assets/data/quotes-db.v4.json')
 		.then(function (r) { return r.ok ? r.json() : null; })
 		.then(function (data) {
 			if (data && typeof data === 'object') {
-				quotesDb = data;
-				if (quotesDb.meta) delete quotesDb.meta;
+				// Support both old flat shape and new v4 { meta, categories } shape
+				var categories = data.categories || data;
+				quotesDb = categories;
+
 				// Temporarily exclude entries with author "Unknown" so we can verify DB works with known entries
 				Object.keys(quotesDb).forEach(function (key) {
 					if (Array.isArray(quotesDb[key])) {
@@ -1090,15 +1214,27 @@
 	var WEATHER_LOCATION_KEY = 'standalone_weather_location';
 	var defaultLat = 51.5074, defaultLon = -0.1278;
 	var lastDailyForecast = null;
+	var lastWeatherHourly = null;
 	var lastWeatherLat = null, lastWeatherLon = null;
+	var lastWeatherData = null;
+	var lastAqiData = null;
+	var lastLocationName = '';
+	var weatherSelectedDayIndex = 2; // 0 = 2 days ago, 1 = yesterday, 2 = today, 3..9 = next 7 days
+	// Shared DOM refs for weather card
+	var weatherEl = null;
+	var weatherCity = null;
+	var weatherSearch = null;
+	var weatherSetBtn = null;
+	var weatherMyLocBtn = null;
+	var weatherForecastPanel = null;
 
 	function initWeather() {
-		var weatherEl = document.getElementById('home-weather');
-		var weatherCity = document.getElementById('home-weather-city');
-		var weatherSearch = document.getElementById('home-weather-search');
-		var weatherSetBtn = document.getElementById('home-weather-set');
-		var weatherMyLocBtn = document.getElementById('home-weather-mylocation');
-		var weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
+		weatherEl = document.getElementById('home-weather');
+		weatherCity = document.getElementById('home-weather-city');
+		weatherSearch = document.getElementById('home-weather-search');
+		weatherSetBtn = document.getElementById('home-weather-set');
+		weatherMyLocBtn = document.getElementById('home-weather-mylocation');
+		weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
 		if (!weatherEl) return;
 		weatherEl.innerHTML = '<span class="text-sm opacity-70">Loading…</span>';
 		if (weatherCity) weatherCity.textContent = '—';
@@ -1145,14 +1281,70 @@
 		if (!isNaN(t) && t <= 5) return { icon: '❄️', class: 'home-weather-icon-cold' };
 		return { icon: '☀️', class: 'home-weather-icon-clear' };
 	}
+	function dayLabel(i, times) {
+		if (!times || !times[i]) return '';
+		var d = new Date(times[i]);
+		var today = new Date();
+		today.setHours(0, 0, 0, 0);
+		var that = new Date(d);
+		that.setHours(0, 0, 0, 0);
+		var diff = Math.round((that - today) / 86400000);
+		if (diff === 0) return 'Today';
+		if (diff === -1) return 'Yesterday';
+		if (diff === -2) return '2d ago';
+		if (diff === 1) return 'Tomorrow';
+		return d.toLocaleDateString([], { weekday: 'short' });
+	}
+	function renderDayStrip(daily, selectedIndex) {
+		var strip = document.getElementById('home-weather-day-strip');
+		if (!strip || !daily) return;
+		var times = daily.time || [];
+		var codes = daily.weathercode || [];
+		var maxT = daily.temperature_2m_max || [];
+		var minT = daily.temperature_2m_min || [];
+		strip.innerHTML = '';
+		for (var i = 0; i < times.length; i++) {
+			var isSelected = i === selectedIndex;
+			var label = dayLabel(i, times);
+			var code = codes[i] != null ? codes[i] : 0;
+			var iconInfo = weatherIconAndClass(code, maxT[i]);
+			var hi = maxT[i] != null ? Math.round(maxT[i]) + '°' : '—';
+			var lo = minT[i] != null ? Math.round(minT[i]) + '°' : '—';
+			var pill = document.createElement('button');
+			pill.type = 'button';
+			pill.className = 'home-weather-day-pill' + (isSelected ? ' active' : '');
+			pill.setAttribute('role', 'tab');
+			pill.setAttribute('aria-selected', isSelected);
+			pill.setAttribute('data-day-index', i);
+			pill.innerHTML = '<span class="home-weather-day-pill-label">' + label + '</span>' +
+				'<span class="home-weather-day-pill-icon" aria-hidden="true">' + iconInfo.icon + '</span>' +
+				'<span class="home-weather-day-pill-temp">' + hi + '/' + lo + '</span>';
+			strip.appendChild(pill);
+		}
+		strip.querySelectorAll('.home-weather-day-pill').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var idx = parseInt(btn.getAttribute('data-day-index'), 10);
+				if (idx === weatherSelectedDayIndex) return;
+				weatherSelectedDayIndex = idx;
+				strip.querySelectorAll('.home-weather-day-pill').forEach(function (b) {
+					b.classList.remove('active');
+					b.setAttribute('aria-selected', false);
+				});
+				btn.classList.add('active');
+				btn.setAttribute('aria-selected', true);
+				renderWeatherForSelectedDay();
+			});
+		});
+	}
 	function renderForecastPanel(panel, daily) {
 		if (!panel || !daily) return;
 		var times = daily.time || [];
 		var codes = daily.weathercode || [];
 		var maxT = daily.temperature_2m_max || [];
 		var minT = daily.temperature_2m_min || [];
-		var html = '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Next 7 days</p><div class="grid grid-cols-7 gap-1 text-center">';
-		for (var i = 0; i < Math.min(7, times.length); i++) {
+		var start = Math.max(0, 2); // from today onward
+		var html = '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Next 7 days</p><div class="grid grid-cols-4 sm:grid-cols-7 gap-1 text-center">';
+		for (var i = start; i < Math.min(start + 7, times.length); i++) {
 			var d = new Date(times[i]);
 			var dayName = d.toLocaleDateString([], { weekday: 'short' });
 			var code = codes[i] != null ? codes[i] : 0;
@@ -1168,23 +1360,126 @@
 		html += '</div>';
 		panel.innerHTML = html;
 	}
-	function renderWeather(data, aqiData, locationName) {
+	function renderMoreDetailsBody(dayIndex) {
+		var body = document.getElementById('home-weather-more-body');
+		if (!body || !lastWeatherData) return;
+		var data = lastWeatherData;
+		var daily = data.daily || {};
+		var hourly = data.hourly || {};
+		var current = Object.assign({}, data.current_weather || {}, data.current || {});
+		var parts = [];
+		var idx = dayIndex;
+		if (idx === 2) {
+			if (current.relative_humidity_2m != null) parts.push('Humidity: ' + current.relative_humidity_2m + '%');
+			if (current.visibility != null) parts.push('Visibility: ' + (current.visibility >= 1000 ? (current.visibility / 1000) + ' km' : current.visibility + ' m'));
+		}
+		var times = hourly.time || [];
+		var now = new Date();
+		var hourIdx = -1;
+		for (var h = 0; h < times.length; h++) {
+			if (new Date(times[h]) > now) { hourIdx = h > 0 ? h - 1 : 0; break; }
+		}
+		if (hourIdx < 0 && times.length) hourIdx = times.length - 1;
+		if (idx === 2 && current.relative_humidity_2m == null && hourly.relative_humidity_2m && hourIdx >= 0 && hourly.relative_humidity_2m[hourIdx] != null)
+			parts.push('Humidity: ' + hourly.relative_humidity_2m[hourIdx] + '%');
+		if (hourly.precipitation_probability && hourIdx >= 0 && hourly.precipitation_probability[hourIdx] != null)
+			parts.push('Precip chance: ' + hourly.precipitation_probability[hourIdx] + '%');
+		if (idx === 2 && current.visibility == null && hourly.visibility && hourIdx >= 0 && hourly.visibility[hourIdx] != null) {
+			var v = hourly.visibility[hourIdx];
+			parts.push('Visibility: ' + (v >= 1000 ? (v / 1000) + ' km' : v + ' m'));
+		}
+		if (hourly.sunshine_duration && hourIdx >= 0 && hourly.sunshine_duration[hourIdx] != null) {
+			var sec = hourly.sunshine_duration[hourIdx];
+			parts.push('Sun: ' + (sec / 60).toFixed(0) + ' min');
+		}
+		if (hourly.dew_point_2m && hourIdx >= 0 && hourly.dew_point_2m[hourIdx] != null)
+			parts.push('Dew point: ' + Math.round(hourly.dew_point_2m[hourIdx]) + '°C');
+		body.innerHTML = parts.length ? parts.join(' · ') : '—';
+	}
+	function renderWeatherForSelectedDay() {
+		if (!lastWeatherData || !weatherEl) return;
+		var card = document.getElementById('home-weather-card');
+		if (card) card.classList.add('home-weather-brief-transition');
+		setTimeout(function () {
+			renderWeather(lastWeatherData, lastAqiData, lastLocationName, weatherSelectedDayIndex);
+			renderDayStrip(lastWeatherData.daily || null, weatherSelectedDayIndex);
+			renderMoreDetailsBody(weatherSelectedDayIndex);
+			if (card) card.classList.remove('home-weather-brief-transition');
+		}, 80);
+	}
+	function formatTime(isoStr) {
+		if (!isoStr) return '—';
+		var d = new Date(isoStr);
+		return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+	function weatherCardAnimationClass(code, tempC) {
+		var t = tempC != null ? Number(tempC) : NaN;
+		if (code >= 61) return 'weather-rain';
+		if (code >= 51) return 'weather-rain';
+		if (code >= 3 && code < 51) return 'weather-wind';
+		if (!isNaN(t) && t >= 32) return 'weather-hot';
+		if (!isNaN(t) && t <= 5) return 'weather-cold';
+		return 'weather-clear';
+	}
+	function renderWeather(data, aqiData, locationName, dayIndex) {
 		if (!weatherEl || !data) return;
+		dayIndex = dayIndex != null ? dayIndex : weatherSelectedDayIndex;
+		weatherSelectedDayIndex = dayIndex;
 		lastDailyForecast = data.daily || null;
-		var tempC = data.current_weather && data.current_weather.temperature != null ? data.current_weather.temperature : null;
+		var daily = data.daily || {};
+		var current = data.current_weather || {};
+		var times = daily.time || [];
+		var idx = Math.max(0, Math.min(dayIndex, times.length ? times.length - 1 : 0));
+		var isToday = idx === 2;
+		var tempC = isToday && current.temperature != null ? current.temperature : null;
+		if (tempC == null && daily.temperature_2m_max && daily.temperature_2m_max[idx] != null)
+			tempC = (daily.temperature_2m_max[idx] + (daily.temperature_2m_min[idx] != null ? daily.temperature_2m_min[idx] : daily.temperature_2m_max[idx])) / 2;
 		var temp = tempC != null ? Math.round(tempC) + '°C' : '—';
-		var code = (data.current_weather && data.current_weather.weathercode) || 0;
+		var code = isToday && current.weathercode != null ? current.weathercode : (daily.weathercode && daily.weathercode[idx] != null ? daily.weathercode[idx] : 0);
 		var desc = weatherCodeToDesc(code);
-		var usAqi = aqiData && aqiData.current && aqiData.current.us_aqi != null ? aqiData.current.us_aqi : null;
+		var usAqi = (isToday && aqiData && aqiData.current && aqiData.current.us_aqi != null) ? aqiData.current.us_aqi : null;
 		var aqiLabelText = usAqi != null ? aqiLabel(usAqi) : null;
-		var aqiHtml = ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + (usAqi != null ? usAqi + ' ' + (aqiLabelText || '') : '—') + '</span>';
+		var windSpeed = isToday && current.windspeed != null ? current.windspeed : null;
+		var sunrise = (daily.sunrise && daily.sunrise[idx]) ? formatTime(daily.sunrise[idx]) : '—';
+		var sunset = (daily.sunset && daily.sunset[idx]) ? formatTime(daily.sunset[idx]) : '—';
+		var maxT = (daily.temperature_2m_max && daily.temperature_2m_max[idx] != null) ? Math.round(daily.temperature_2m_max[idx]) + '°' : '—';
+		var minT = (daily.temperature_2m_min && daily.temperature_2m_min[idx] != null) ? Math.round(daily.temperature_2m_min[idx]) + '°' : '—';
+		var precip = (daily.precipitation_sum && daily.precipitation_sum[idx] != null) ? daily.precipitation_sum[idx] : null;
+		var rainStr = precip != null ? (precip > 0 ? precip + ' mm' : '0 mm') : '—';
 		var iconInfo = weatherIconAndClass(code, tempC);
 		weatherEl.innerHTML =
 			'<span class="home-weather-icon-wrap ' + iconInfo.class + '" aria-hidden="true">' + iconInfo.icon + '</span>' +
 			'<span class="home-weather-temp font-semibold text-lg">' + temp + '</span>' +
-			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' + aqiHtml +
-			'<div class="mt-1"><a href="https://open-meteo.com/en/docs' + (lastWeatherLat != null && lastWeatherLon != null ? '?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon : '') + '" target="_blank" rel="noopener" class="text-xs font-semibold text-primary hover:underline">Full forecast →</a></div>';
+			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' +
+			(isToday && usAqi != null ? ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + usAqi + ' ' + (aqiLabelText || '') + '</span>' : '');
 		if (weatherCity) weatherCity.textContent = locationName || (data.timezone ? data.timezone.split('/').pop().replace(/_/g, ' ') : '—');
+		var extraEl = document.getElementById('home-weather-extra');
+		if (extraEl) {
+			extraEl.innerHTML =
+				'<span>Wind: ' + (windSpeed != null ? windSpeed + ' km/h' : '—') + '</span>' +
+				'<span>Sunrise: ' + sunrise + '</span>' +
+				'<span>Sunset: ' + sunset + '</span>' +
+				'<span>Min/Max: ' + minT + ' / ' + maxT + '</span>' +
+				'<span>Rain: ' + rainStr + '</span>';
+		}
+		var forecastLink = document.getElementById('home-weather-forecast-link');
+		if (forecastLink && lastWeatherLat != null && lastWeatherLon != null) {
+			// User-facing full forecast: generic weather search (no account / API required)
+			var q = locationName || (lastWeatherLat + ',' + lastWeatherLon);
+			forecastLink.href = 'https://www.google.com/search?q=' + encodeURIComponent('weather ' + q);
+		}
+		var mapLink = document.getElementById('home-weather-map-link');
+		if (mapLink && lastWeatherLat != null && lastWeatherLon != null) {
+			// Map search for this location
+			mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + lastWeatherLat + ',' + lastWeatherLon;
+		}
+		var card = document.getElementById('home-weather-card');
+		if (card) {
+			card.classList.remove('weather-rain', 'weather-wind', 'weather-hot', 'weather-cold', 'weather-clear');
+			card.classList.add(weatherCardAnimationClass(code, tempC));
+		}
+		renderDayStrip(daily, dayIndex);
+		renderMoreDetailsBody(dayIndex);
 		if (weatherForecastPanel && lastDailyForecast) {
 			renderForecastPanel(weatherForecastPanel, lastDailyForecast);
 			weatherForecastPanel.classList.remove('hidden');
@@ -1194,7 +1489,9 @@
 
 	function fetchWeather(lat, lon, locationName) {
 		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
-			'&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7';
+			'&current_weather=true&current=temperature_2m,relative_humidity_2m,weathercode,windspeed_10m,precipitation,visibility&past_days=2' +
+			'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=8' +
+			'&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,showers,weathercode,visibility,windspeed_10m,sunshine_duration,dew_point_2m&forecast_days=3';
 		var aqiUrl = 'https://air-quality.api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lon + '&current=us_aqi';
 		Promise.all([
 			fetch(url).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); }),
@@ -1204,8 +1501,13 @@
 			var aqiData = results[1];
 			lastWeatherLat = lat;
 			lastWeatherLon = lon;
+			lastWeatherData = data;
+			lastAqiData = aqiData;
+			lastLocationName = locationName || '';
+			lastWeatherHourly = (data && data.hourly) ? data.hourly : null;
 			if (data && (data.current_weather || data.error !== true)) {
-				renderWeather(data, aqiData, locationName);
+				weatherSelectedDayIndex = 2;
+				renderWeather(data, aqiData, locationName, 2);
 			} else {
 				renderWeatherUnavailable();
 			}
@@ -1288,6 +1590,56 @@
 			);
 		});
 	}
+
+		function renderHourlyModal() {
+			var modal = document.getElementById('home-weather-hourly-modal');
+			var body = document.getElementById('home-weather-hourly-body');
+			if (!modal || !body) return;
+			var h = lastWeatherHourly;
+			if (!h || !h.time || !h.time.length) {
+				body.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Hourly data not available.</p>';
+				return;
+			}
+			var times = h.time || [];
+			var temps = h.temperature_2m || [];
+			var codes = h.weathercode || [];
+			var precip = h.precipitation || [];
+			var wind = h.windspeed_10m || [];
+			var html = '<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">' + (lastLocationName || 'Current location') + '</p>';
+			html += '<div class="grid grid-cols-4 gap-x-2 gap-y-1 text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">';
+			html += '<span>Time</span><span>Temp</span><span>Rain</span><span>Wind</span></div>';
+			for (var i = 0; i < Math.min(24, times.length); i++) {
+				var t = new Date(times[i]);
+				var timeStr = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+				var tempStr = temps[i] != null ? Math.round(temps[i]) + '°' : '—';
+				var precipStr = precip[i] != null && precip[i] > 0 ? precip[i] + ' mm' : '—';
+				var windStr = wind[i] != null ? wind[i] + ' km/h' : '—';
+				html += '<div class="grid grid-cols-4 gap-x-2 gap-y-1 py-1 border-b border-gray-100 dark:border-gray-700 text-sm">';
+				html += '<span>' + timeStr + '</span><span>' + tempStr + '</span><span>' + precipStr + '</span><span>' + windStr + '</span></div>';
+			}
+			body.innerHTML = html;
+		}
+		var hourlyBtn = document.getElementById('home-weather-hourly-btn');
+		var hourlyModal = document.getElementById('home-weather-hourly-modal');
+		var hourlyClose = document.getElementById('home-weather-hourly-close');
+		if (hourlyBtn && hourlyModal) {
+			hourlyBtn.addEventListener('click', function () {
+				renderHourlyModal();
+				hourlyModal.removeAttribute('hidden');
+				hourlyModal.setAttribute('aria-hidden', 'false');
+			});
+		}
+		if (hourlyClose && hourlyModal) {
+			hourlyClose.addEventListener('click', function () {
+				hourlyModal.setAttribute('aria-hidden', 'true');
+				hourlyModal.setAttribute('hidden', '');
+			});
+			var overlay = hourlyModal.querySelector('.home-weather-modal-overlay');
+			if (overlay) overlay.addEventListener('click', function () {
+				hourlyModal.setAttribute('aria-hidden', 'true');
+				hourlyModal.setAttribute('hidden', '');
+			});
+		}
 
 		// No auto location popup on load — use saved location or default city only
 		var saved = getSavedLocation();
@@ -1765,6 +2117,28 @@
 	}
 
 	renderTodos();
+
+	// Continue learning card (uses last topic from Resources page)
+	(function initContinueLearningCard() {
+		var card = document.getElementById('home-continue-learning-card');
+		var link = document.getElementById('home-continue-learning-link');
+		var text = document.getElementById('home-continue-learning-text');
+		if (!card || !link || !text) return;
+		var topicKey = '';
+		var topicTitle = '';
+		try {
+			topicKey = localStorage.getItem('resources_last_topic') || '';
+			topicTitle = localStorage.getItem('resources_last_topic_title') || '';
+		} catch (e) {}
+		if (!topicKey) return;
+		var label = topicTitle || topicKey;
+		link.href = 'pages/resources.html?topic=' + encodeURIComponent(topicKey);
+		text.textContent = 'Jump back into ' + label + ' resources.';
+		card.classList.remove('hidden');
+	})();
+
+	// Signal that the app has loaded so the JS-required banner can be hidden (or stay visible if scripts were blocked)
+	window.__standalonePlaygroundReady = true;
 })();
 
 // Analytics: track visits and time-on-page for Home

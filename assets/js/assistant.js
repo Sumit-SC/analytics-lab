@@ -95,6 +95,10 @@
 	function openPanel() {
 		panel.classList.add('open');
 		if (overlay) overlay.classList.add('show');
+		btn.setAttribute('aria-expanded', 'true');
+		panel.setAttribute('aria-hidden', 'false');
+		if (overlay) overlay.setAttribute('aria-hidden', 'false');
+		if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
 		if (messagesEl.children.length === 0) {
 			var onJobs = isJobsPage();
 			var welcome = onJobs
@@ -108,11 +112,21 @@
 	function closePanel() {
 		panel.classList.remove('open');
 		if (overlay) overlay.classList.remove('show');
+		btn.setAttribute('aria-expanded', 'false');
+		panel.setAttribute('aria-hidden', 'true');
+		if (overlay) overlay.setAttribute('aria-hidden', 'true');
+		if (btn && typeof btn.focus === 'function') btn.focus();
 	}
 
+	btn.setAttribute('aria-expanded', 'false');
+	btn.setAttribute('aria-controls', 'assistant-panel');
+	panel.setAttribute('aria-hidden', 'true');
 	btn.addEventListener('click', openPanel);
 	if (closeBtn) closeBtn.addEventListener('click', closePanel);
 	if (overlay) overlay.addEventListener('click', closePanel);
+	document.addEventListener('keydown', function (e) {
+		if (e.key === 'Escape' && panel && panel.classList.contains('open')) closePanel();
+	});
 
 	(function restore() {
 		var raw = null;

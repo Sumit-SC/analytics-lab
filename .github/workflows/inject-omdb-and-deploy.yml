@@ -14,13 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Add your deploy step here. Example: GitHub Pages (uncomment and set branch).
-      # - name: Deploy to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./analytics-lab
-      #     publish_branch: gh-pages
-      #
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
+
       # For OMDb posters: deploy the API separately (e.g. Vercel with Root = analytics-lab)
       # and set OMDB_API_KEY in Vercel Environment Variables. No key in the repo or client.

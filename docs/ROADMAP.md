@@ -6,39 +6,39 @@ A single backlog for the Standalone Playground (analytics-lab). Each item has **
 
 ## Quick wins (effort: Quick, good impact)
 
-- [ ] **Document script load order** – Add a short “Script order” section in README and a comment block in each HTML listing required order (e.g. Tailwind → main.css → analytics → page script). Prevents breakage if someone reorders or lazy-loads. *Priority: P1 · Effort: Quick*
-- [ ] **Planner export (CSV/JSON)** – On Jobs page, add “Export planner” button to download application planner entries as CSV or JSON for backup or use in spreadsheets. Data is already in `localStorage`; no backend. *Priority: P2 · Effort: Quick*
+- [x] **Document script load order** – “Script order” section in README + comment block in each main HTML. *Priority: P1 · Effort: Quick*
+- [x] **Planner export (CSV/JSON)** – Already on Jobs page (“Export JSON” / “Export CSV” for planner). *Priority: P2 · Effort: Quick*
 
 ---
 
 ## Setup & configuration
 
-- [ ] **Pipeline (GitHub Actions)** – Add a deploy step (e.g. GitHub Pages) so the site is deployed after the OMDb inject workflow. See `.github/workflows/inject-omdb-and-deploy.yml`. *Priority: P0 if you deploy via Actions · Effort: Medium*
+- [x] **Pipeline (GitHub Actions)** – Deploy step (GitHub Pages) added in `.github/workflows/inject-omdb-and-deploy.yml`. *Priority: P0 if you deploy via Actions · Effort: Medium*
 - [ ] **OMDb API key** – Configure once:
   - **Local:** Browser Console → `localStorage.setItem('omdb_api_key', 'YOUR_KEY')` then refresh. Key from [omdbapi.com](https://www.omdbapi.com/).
   - **Production:** Repo → Settings → Secrets → Actions → New secret `OMDB_API_KEY`. *Priority: P0 for live posters · Effort: Quick*
 - [ ] **Quote categories** – Edit or extend categories and data in `assets/data/quotes-db.json`. Current: All, Random, Movies, Bollywood, K-drama, Anime, Books, Leaders. *Priority: P2 · Effort: Quick*
-- [ ] **Use live posters** – Document in README: Home quote card “Use live posters” = OMDb/Jikan when on; off = DB/map only (faster, no API). *Priority: P2 · Effort: Quick (doc only)*
+- [x] **Use live posters** – Documented in README. *Priority: P2 · Effort: Quick (doc only)*
 
 ---
 
 ## Job tracker
 
-- [ ] **Indeed source** – Implement backend proxy (e.g. serverless at `/api/indeed`) and wire it in `jobs.js`; currently a placeholder. *Priority: P1 · Effort: Medium*
-- [ ] **Other job proxies** – Instahyre, Hirist, Himalaya, LinkedIn: stubs exist in `api/`. Set `window.JOB_PROXY_URL` and implement or stub responses. *Priority: P2 · Effort: Medium per source*
+- [x] **Indeed source** – Stub at `api/indeed.js` (returns empty + “Not configured”). Wire real API (HasData/SerpAPI) when keys set. *Priority: P1 · Effort: Medium*
+- [x] **Other job proxies** – Instahyre, Hirist, Himalaya return `configured: false` and clear message. *Priority: P2 · Effort: Medium per source*
 
 ---
 
 ## Trends & content
 
-- [ ] **Anime feed** – Replace Trends “Anime” placeholder with real data (e.g. Jikan seasonal, or links to Pinterest/Shorts-style embeds). *Priority: P2 · Effort: Medium*
+- [x] **Anime feed** – Trends uses Jikan top list + TV schedule (`/v4/schedules?filter=<weekday>`). *Priority: P2 · Effort: Medium*
 - [ ] **Entertainment strip** – Optional: replace or complement Picsum with a themed/curated image source. *Priority: P2 · Effort: Quick–Medium*
 
 ---
 
 ## Codebase & structure (from IMPROVEMENTS.md)
 
-- [ ] **Single nav source** – Nav is duplicated in every HTML. Add a shared fragment (e.g. JS that injects nav, or Eleventy includes) so nav is defined once. *Priority: P1 · Effort: Medium*
+- [x] **Single nav source** – `nav-data.js` + `nav-inject.js`; nav defined once, injected on index, trends, tools, jobs, docs. *Priority: P1 · Effort: Medium*
 - [ ] **Split Playground logic** – Break `playground.js` into smaller modules (e.g. `playground-mode.js`, `playground-runner.js`, `playground-search.js`, `playground-assistant.js`) or use a minimal framework. *Priority: P2 · Effort: Large*
 - [ ] **Single Tools UI** – Use one implementation of editor/PDF (e.g. always iframe `tools.html` from Playground non-tech) instead of two. *Priority: P2 · Effort: Medium*
 - [ ] **Accessibility** – Add `aria-expanded`, `aria-label`, `role="dialog"` where needed; focus trap in overlays; theme/mode announced to screen readers. *Priority: P1 · Effort: Medium*
