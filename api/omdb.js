@@ -6,12 +6,13 @@
 
 const OMDB_BASE = 'https://www.omdbapi.com/';
 
-// OMDb poster URLs are often m.media-amazon.com (IMDb/Amazon CDN). We do not expose them to avoid loading external trackers.
+// OMDb poster URLs are often m.media-amazon.com (IMDb CDN). We pass them through so quote cards
+// and API cards show posters reliably in all browsers (Chrome, Edge, incognito). Previously
+// we stripped these to avoid trackers but that left posters blank when Wikipedia/Jikan failed.
 function stripTrackerPoster(url) {
 	if (!url || typeof url !== 'string') return null;
 	const u = url.trim();
 	if (u.indexOf('http') !== 0) return null;
-	if (/m\.media-amazon\.com|imdb\.com|images-amazon\.com/i.test(u)) return null;
 	return u;
 }
 const MAX_TITLE_LENGTH = 200;

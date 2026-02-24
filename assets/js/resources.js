@@ -10,6 +10,8 @@
 
 	var resourceViewMode = 'gallery'; // 'gallery' | 'list'
 	var RESOURCE_VIEW_KEY = 'resources_view_mode';
+	var LAST_TOPIC_KEY = 'resources_last_topic';
+	var LAST_TOPIC_TITLE_KEY = 'resources_last_topic_title';
 
 	function escapeHtml(s) {
 		if (s == null) return '';
@@ -101,11 +103,17 @@
 		notFound.classList.add('hidden');
 		setDocumentTitle(t);
 
+		// Remember last topic for Home "Continue learning" card
+		try {
+			localStorage.setItem(LAST_TOPIC_KEY, topicKey);
+			if (t && t.title) localStorage.setItem(LAST_TOPIC_TITLE_KEY, t.title);
+		} catch (e) {}
+
 		var topicKeys = Object.keys(topics);
 
 		var html = '';
 		html += '<div class="mb-4 flex flex-wrap items-center justify-between gap-3">';
-		html += '  <a href="./index.html" class="text-primary hover:underline text-sm">← Back to Playground</a>';
+		html += '  <a href="./playground.html" class="text-primary hover:underline text-sm">← Back to Playground</a>';
 		html += '  <div class="flex items-center gap-2 text-sm">';
 		html += '    <label for="topic-select" class="text-gray-600 dark:text-gray-300">Topic:</label>';
 		html += '    <select id="topic-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-sm">';
@@ -131,6 +139,17 @@
 		html += '<li><strong>Courses</strong> — Follow a structured path (e.g. Coursera, freeCodeCamp).</li>';
 		html += '<li><strong>Best</strong> — Curated playlists and lists for this topic.</li>';
 		html += '</ol><p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Pick one tab and work through it; then move to the next. Use the roadmap link below for a full skill checklist.</p></div>';
+
+		// Quick study shortcuts: topic-aware search links on big free sites
+		var quickLabel = encodeURIComponent(t.title || topicKey);
+		html += '<div class="mb-6 p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40">';
+		html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">Quick study shortcuts</p>';
+		html += '<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">One click to search popular free sites for this topic.</p>';
+		html += '<div class="flex flex-wrap gap-2 text-xs">';
+		html += '<a href="https://www.geeksforgeeks.org/?s=' + quickLabel + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">GeeksforGeeks search</a>';
+		html += '<a href="https://www.analyticsvidhya.com/?s=' + quickLabel + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">Analytics Vidhya search</a>';
+		html += '<a href="https://www.freecodecamp.org/news/search/?query=' + quickLabel + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">freeCodeCamp News search</a>';
+		html += '</div></div>';
 		var roadmapUrl = (t.roadmapUrl || '').trim();
 		if (roadmapUrl) {
 			html += '<div class="mb-6 p-4 rounded-xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10">';
@@ -269,12 +288,47 @@
 		html += '<li><a href="https://github.com/rasbt/python-machine-learning-book-3rd-edition" target="_blank" rel="noopener" class="underline hover:text-primary">Python ML book (code)</a> · Python ML examples</li>';
 		html += '<li><a href="https://github.com/fastai/fastbook" target="_blank" rel="noopener" class="underline hover:text-primary">fastbook</a> · Deep Learning for Coders (fast.ai)</li>';
 		html += '</ul></div>';
+		html += '<div><h3 class="font-semibold mb-1">Practice & reference (free)</h3><ul class="space-y-1">';
+		html += '<li><a href="https://www.geeksforgeeks.org" target="_blank" rel="noopener" class="underline hover:text-primary">GeeksforGeeks</a> · data structures, algorithms, and language practice</li>';
+		html += '<li><a href="https://www.analyticsvidhya.com" target="_blank" rel="noopener" class="underline hover:text-primary">Analytics Vidhya</a> · data analytics & ML articles</li>';
+		html += '</ul></div>';
 		html += '<div><h3 class="font-semibold mb-1">Must‑read blogs & magazines</h3><ul class="space-y-1">';
 		html += '<li><a href="https://www.freecodecamp.org/news/" target="_blank" rel="noopener" class="underline hover:text-primary">freeCodeCamp News</a> · long‑form tutorials</li>';
 		html += '<li><a href="https://towardsdatascience.com" target="_blank" rel="noopener" class="underline hover:text-primary">Towards Data Science</a> · data / ML stories & guides</li>';
 		html += '<li><a href="https://medium.com/tag/data-science" target="_blank" rel="noopener" class="underline hover:text-primary">Medium · Data Science tag</a> · curated DS posts</li>';
 		html += '<li><a href="https://medium.com/tag/machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">Medium · Machine Learning tag</a> · ML deep dives</li>';
 		html += '</ul></div>';
+		html += '</div></section>';
+
+		// Live topic feed (Medium/TDS, Dev.to, Reddit) — per-topic sidebar-style block
+		html += '<section id="resource-live-trends" class="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-5 space-y-4">';
+		html += '<div class="flex flex-wrap items-center justify-between gap-2">';
+		html += '<div>';
+		html += '<h2 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100">Live topic feed</h2>';
+		html += '<p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Latest articles and posts about ' + escapeHtml(t.title || topicKey) + ' from Medium/TDS, Dev.to, and Reddit.</p>';
+		html += '</div>';
+		html += '<button type="button" id="resource-live-refresh" class="text-[11px] sm:text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Refresh</button>';
+		html += '</div>';
+		html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">';
+
+		html += '<div class="space-y-1">';
+		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Medium / TDS</p>';
+		html += '<ul id="resource-live-medium-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
+		html += '<p id="resource-live-medium-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
+		html += '</div>';
+
+		html += '<div class="space-y-1">';
+		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Dev.to</p>';
+		html += '<ul id="resource-live-devto-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
+		html += '<p id="resource-live-devto-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
+		html += '</div>';
+
+		html += '<div class="space-y-1">';
+		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Reddit</p>';
+		html += '<ul id="resource-live-reddit-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
+		html += '<p id="resource-live-reddit-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
+		html += '</div>';
+
 		html += '</div></section>';
 
 		html += '</div>';
@@ -528,6 +582,33 @@
 				grid.appendChild(right);
 				container.appendChild(grid);
 
+				// Hindi-friendly quick search helpers
+				var hindiRow = document.createElement('div');
+				hindiRow.className = 'mt-4 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700';
+				var hindiTitle = document.createElement('p');
+				hindiTitle.className = 'text-[11px] sm:text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1';
+				hindiTitle.textContent = 'Prefer Hindi one‑shot tutorials?';
+				hindiRow.appendChild(hindiTitle);
+				var hindiLinks = document.createElement('div');
+				hindiLinks.className = 'flex flex-wrap gap-2 text-[11px] sm:text-xs';
+
+				function makeHindiLink(label, querySuffix) {
+					var a = document.createElement('a');
+					var base = (topic.title || topicKey || '').trim() || 'data science';
+					var q = base + ' ' + querySuffix;
+					a.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+					a.target = '_blank';
+					a.rel = 'noopener';
+					a.className = 'inline-flex items-center px-2 py-1 rounded-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800';
+					a.textContent = label;
+					return a;
+				}
+
+				hindiLinks.appendChild(makeHindiLink('One‑shot Hindi tutorial', 'Hindi one shot full course'));
+				hindiLinks.appendChild(makeHindiLink('Topic recap (Hindi)', 'Hindi crash course'));
+				hindiRow.appendChild(hindiLinks);
+				container.appendChild(hindiRow);
+
 				var searchRow = document.createElement('div');
 				searchRow.className = 'flex flex-wrap items-center gap-2 mt-4';
 				var searchInput = document.createElement('input');
@@ -643,6 +724,236 @@
 
 			render();
 		})(t);
+
+		// Live topic trends: Medium/TDS tag feed, Dev.to tag feed, Reddit hot posts
+		(function setupResourceTrends(topicKeyLocal, topicMeta) {
+			var section = document.getElementById('resource-live-trends');
+			if (!section) return;
+
+			var cachePrefix = 'resources_live_';
+			var ttlMs = 5 * 60 * 1000;
+
+			function applyCache(key, listEl, statusEl) {
+				try {
+					var raw = sessionStorage.getItem(key);
+					if (!raw) return false;
+					var data = JSON.parse(raw);
+					if (!data || (data.ts && (Date.now() - data.ts > ttlMs))) return false;
+					if (listEl && data.html != null) listEl.innerHTML = data.html;
+					if (statusEl && data.status != null) statusEl.textContent = data.status;
+					return true;
+				} catch (e) {
+					return false;
+				}
+			}
+
+			function writeCache(key, html, status) {
+				try {
+					sessionStorage.setItem(
+						key,
+						JSON.stringify({ html: html, status: status, ts: Date.now() })
+					);
+				} catch (e) {}
+			}
+
+			function deriveTag() {
+				// Prefer Towards Data Science tag URL from blogs; fallback to Medium tag or topic key
+				var blogs = (topicMeta && topicMeta.blogs) || [];
+				for (var i = 0; i < blogs.length; i++) {
+					var u = blogs[i] && blogs[i].url;
+					if (!u || typeof u !== 'string') continue;
+					var m = u.match(/towardsdatascience\.com\/tagged\/([^/?#]+)/i);
+					if (m && m[1]) return decodeURIComponent(m[1]);
+					var m2 = u.match(/medium\.com\/tag\/([^/?#]+)/i);
+					if (m2 && m2[1]) return decodeURIComponent(m2[1]);
+				}
+				return (topicKeyLocal || '').toLowerCase();
+			}
+
+			function getPrimarySubreddit() {
+				var subs = (topicMeta && topicMeta.reddit) || [];
+				if (!subs.length) return '';
+				var r = subs[0] || {};
+				var s = (r.subreddit || r.name || '').trim();
+				if (!s) return '';
+				return s.replace(/^r\//i, '');
+			}
+
+			function loadMedium(forceRefresh) {
+				var listEl = document.getElementById('resource-live-medium-list');
+				var statusEl = document.getElementById('resource-live-medium-status');
+				if (!listEl || !statusEl) return;
+
+				var tag = deriveTag();
+				if (!tag) {
+					statusEl.textContent = 'No topic-specific Medium/TDS feed configured.';
+					listEl.innerHTML = '';
+					return;
+				}
+				var feedUrl = 'https://towardsdatascience.com/feed/tagged/' + encodeURIComponent(tag);
+				var cacheKey = cachePrefix + 'medium_' + tag.toLowerCase();
+				if (!forceRefresh && applyCache(cacheKey, listEl, statusEl)) return;
+
+				statusEl.textContent = 'Loading latest stories…';
+				listEl.innerHTML = '';
+				var rssUrl = encodeURIComponent(feedUrl);
+				var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=5';
+
+				fetch(apiUrl)
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) {
+						var items = (data && data.items) || [];
+						if (!items.length) {
+							statusEl.textContent = 'No recent Medium/TDS stories found.';
+							listEl.innerHTML = '';
+							writeCache(cacheKey, '', statusEl.textContent);
+							return;
+						}
+						var html = '';
+						items.slice(0, 5).forEach(function (item) {
+							if (!item) return;
+							var title = escapeHtml(item.title || 'Article');
+							var url = item.link || item.url || '#';
+							var date = '';
+							if (item.pubDate) {
+								try {
+									var d = new Date(item.pubDate);
+									if (!isNaN(d.getTime())) {
+										date = d.toLocaleDateString();
+									}
+								} catch (e) {}
+							}
+							html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + title + '</a>';
+							if (date) {
+								html += ' <span class="text-[11px] text-gray-500 dark:text-gray-500">· ' + date + '</span>';
+							}
+							html += '</li>';
+						});
+						listEl.innerHTML = html;
+						statusEl.textContent = 'Updated from Towards Data Science.';
+						writeCache(cacheKey, html, statusEl.textContent);
+					})
+					.catch(function () {
+						statusEl.textContent = 'Could not load Medium/TDS right now.';
+					});
+			}
+
+			function loadDevto(forceRefresh) {
+				var listEl = document.getElementById('resource-live-devto-list');
+				var statusEl = document.getElementById('resource-live-devto-status');
+				if (!listEl || !statusEl) return;
+
+				var tag = deriveTag();
+				if (!tag) {
+					statusEl.textContent = 'No Dev.to tag configured.';
+					listEl.innerHTML = '';
+					return;
+				}
+				var cacheKey = cachePrefix + 'devto_' + tag.toLowerCase();
+				if (!forceRefresh && applyCache(cacheKey, listEl, statusEl)) return;
+
+				statusEl.textContent = 'Loading Dev.to posts…';
+				listEl.innerHTML = '';
+				var apiUrl = 'https://dev.to/api/articles?tag=' + encodeURIComponent(tag) + '&top=7&per_page=5';
+
+				fetch(apiUrl)
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (items) {
+						if (!Array.isArray(items) || !items.length) {
+							statusEl.textContent = 'No recent Dev.to posts for this tag.';
+							listEl.innerHTML = '';
+							writeCache(cacheKey, '', statusEl.textContent);
+							return;
+						}
+						var html = '';
+						items.slice(0, 5).forEach(function (item) {
+							if (!item) return;
+							var title = escapeHtml(item.title || 'Post');
+							var url = item.url || ('https://dev.to' + (item.path || ''));
+							var reactions = item.positive_reactions_count || 0;
+							html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + title + '</a>';
+							if (reactions) {
+								html += ' <span class="text-[11px] text-gray-500 dark:text-gray-500">· ' + reactions + ' reactions</span>';
+							}
+							html += '</li>';
+						});
+						listEl.innerHTML = html;
+						statusEl.textContent = 'Updated from Dev.to.';
+						writeCache(cacheKey, html, statusEl.textContent);
+					})
+					.catch(function () {
+						statusEl.textContent = 'Could not load Dev.to right now.';
+					});
+			}
+
+			function loadReddit(forceRefresh) {
+				var listEl = document.getElementById('resource-live-reddit-list');
+				var statusEl = document.getElementById('resource-live-reddit-status');
+				if (!listEl || !statusEl) return;
+
+				var sub = getPrimarySubreddit();
+				if (!sub) {
+					statusEl.textContent = 'No subreddit configured for this topic yet.';
+					listEl.innerHTML = '';
+					return;
+				}
+				var cacheKey = cachePrefix + 'reddit_' + sub.toLowerCase();
+				if (!forceRefresh && applyCache(cacheKey, listEl, statusEl)) return;
+
+				statusEl.textContent = 'Loading hot posts from r/' + sub + '…';
+				listEl.innerHTML = '';
+				var apiUrl = 'https://www.reddit.com/r/' + encodeURIComponent(sub) + '/hot.json?limit=5';
+
+				fetch(apiUrl, {
+					method: 'GET',
+					headers: { 'Accept': 'application/json' }
+				})
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) {
+						var posts = (data && data.data && Array.isArray(data.data.children)) ? data.data.children : [];
+						if (!posts.length) {
+							statusEl.textContent = 'No hot posts found for r/' + sub + '.';
+							listEl.innerHTML = '';
+							writeCache(cacheKey, '', statusEl.textContent);
+							return;
+						}
+						var html = '';
+						posts.forEach(function (child) {
+							var item = child && child.data;
+							if (!item) return;
+							var title = escapeHtml(item.title || 'Post');
+							var url = item.url || ('https://www.reddit.com' + (item.permalink || ''));
+							var score = item.score || 0;
+							html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + title + '</a>';
+							if (score) {
+								html += ' <span class="text-[11px] text-gray-500 dark:text-gray-500">· ' + score + ' upvotes</span>';
+							}
+							html += '</li>';
+						});
+						listEl.innerHTML = html;
+						statusEl.textContent = 'Updated from r/' + sub + '.';
+						writeCache(cacheKey, html, statusEl.textContent);
+					})
+					.catch(function () {
+						statusEl.textContent = 'Could not load Reddit right now.';
+					});
+			}
+
+			function loadAll(forceRefresh) {
+				loadMedium(!!forceRefresh);
+				loadDevto(!!forceRefresh);
+				loadReddit(!!forceRefresh);
+			}
+
+			var refreshBtn = document.getElementById('resource-live-refresh');
+			if (refreshBtn) {
+				refreshBtn.addEventListener('click', function () {
+					loadAll(true);
+				});
+			}
+
+			loadAll(false);
+		})(topicKey, t);
 	}
 
 		initResourcePopup();

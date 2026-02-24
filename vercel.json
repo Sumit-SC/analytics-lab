@@ -1,11 +1,1 @@
-{
-  "version": 2,
-  "rewrites": [
-    {"source": "/jobs", "destination": "/jobs.html"},
-    {"source": "/playground", "destination": "/playground.html"},
-    {"source": "/resources", "destination": "/resources.html"},
-    {"source": "/tools", "destination": "/tools.html"},
-    {"source": "/trends", "destination": "/trends.html"},
-    {"source": "/", "destination": "/index.html"}
-  ]
-}
+{"version":2,"rewrites":[{"source":"/jobs","destination":"/pages/jobs.html"},{"source":"/playground","destination":"/pages/playground.html"},{"source":"/resources","destination":"/pages/resources.html"},{"source":"/tools","destination":"/pages/tools.html"},{"source":"/trends","destination":"/pages/trends.html"},{"source":"/docs","destination":"/pages/docs.html"},{"source":"/","destination":"/index.html"}]}

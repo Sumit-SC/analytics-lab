@@ -11,16 +11,27 @@
 
 	if (!roadmapToggle || !roadmapPanel || !roadmapOverlay || !roadmapClose) return;
 
+	roadmapToggle.setAttribute('aria-expanded', 'false');
+	roadmapToggle.setAttribute('aria-controls', 'roadmap-panel');
+	roadmapPanel.setAttribute('aria-hidden', 'true');
+	roadmapPanel.setAttribute('aria-modal', 'true');
+
 	function showRoadmap() {
 		roadmapPanel.classList.remove('hidden');
 		roadmapOverlay.classList.remove('hidden');
+		roadmapToggle.setAttribute('aria-expanded', 'true');
+		roadmapPanel.setAttribute('aria-hidden', 'false');
 		document.body.style.overflow = 'hidden'; // Prevent body scroll when panel is open
+		if (typeof roadmapClose.focus === 'function') roadmapClose.focus();
 	}
 
 	function hideRoadmap() {
 		roadmapPanel.classList.add('hidden');
 		roadmapOverlay.classList.add('hidden');
+		roadmapToggle.setAttribute('aria-expanded', 'false');
+		roadmapPanel.setAttribute('aria-hidden', 'true');
 		document.body.style.overflow = ''; // Restore scrolling
+		if (typeof roadmapToggle.focus === 'function') roadmapToggle.focus();
 	}
 
 	function toggleRoadmap() {

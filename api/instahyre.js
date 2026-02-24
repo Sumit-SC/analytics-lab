@@ -22,12 +22,13 @@ module.exports = async (req, res) => {
 		//   return res.status(500).json({ error: 'Apify API key not configured' });
 		// }
 
-		// For now, return empty results with a note
+		// Not configured: return empty results with a clear message.
 		return res.status(200).json({
 			success: true,
 			results: [],
 			count: 0,
-			note: 'Instahyre scraping requires backend setup with Apify/ScraperAPI. Configure APIFY_API_KEY or SCRAPER_API_KEY environment variable.'
+			configured: false,
+			note: 'Not configured. Instahyre requires backend setup (Apify/ScraperAPI). Set APIFY_API_KEY or SCRAPER_API_KEY in project env to enable.'
 		});
 
 	} catch (error) {

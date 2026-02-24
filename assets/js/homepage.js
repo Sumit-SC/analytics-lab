@@ -317,15 +317,10 @@
 		return url && typeof url === 'string' && (url = url.trim()) && url.indexOf('http') === 0;
 	}
 
-	// Do not load images from Amazon/IMDb CDNs to avoid external trackers.
-	function isTrackerImageUrl(url) {
-		if (!url || typeof url !== 'string') return true;
-		return /m\.media-amazon\.com|imdb\.com|images-amazon\.com/i.test(url.trim());
-	}
-
+	// Allow OMDb/IMDb (Amazon CDN) poster URLs so quote cards work in Chrome/incognito when
+	// the proxy returns them. Previously we blocked these and posters stayed blank.
 	function setQuoteBgImage(bgEl, url) {
 		if (!bgEl || !url || typeof url !== 'string' || url.indexOf('http') !== 0) return;
-		if (isTrackerImageUrl(url)) return;
 		var safe = url.trim().replace(/["']/g, '');
 		// Clear first to force browser to drop cached paint, then set new URL so the new image is visible
 		bgEl.style.backgroundImage = 'none';
@@ -1225,14 +1220,21 @@
 	var lastAqiData = null;
 	var lastLocationName = '';
 	var weatherSelectedDayIndex = 2; // 0 = 2 days ago, 1 = yesterday, 2 = today, 3..9 = next 7 days
+	// Shared DOM refs for weather card
+	var weatherEl = null;
+	var weatherCity = null;
+	var weatherSearch = null;
+	var weatherSetBtn = null;
+	var weatherMyLocBtn = null;
+	var weatherForecastPanel = null;
 
 	function initWeather() {
-		var weatherEl = document.getElementById('home-weather');
-		var weatherCity = document.getElementById('home-weather-city');
-		var weatherSearch = document.getElementById('home-weather-search');
-		var weatherSetBtn = document.getElementById('home-weather-set');
-		var weatherMyLocBtn = document.getElementById('home-weather-mylocation');
-		var weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
+		weatherEl = document.getElementById('home-weather');
+		weatherCity = document.getElementById('home-weather-city');
+		weatherSearch = document.getElementById('home-weather-search');
+		weatherSetBtn = document.getElementById('home-weather-set');
+		weatherMyLocBtn = document.getElementById('home-weather-mylocation');
+		weatherForecastPanel = document.getElementById('home-weather-forecast-panel');
 		if (!weatherEl) return;
 		weatherEl.innerHTML = '<span class="text-sm opacity-70">Loading…</span>';
 		if (weatherCity) weatherCity.textContent = '—';
@@ -1462,11 +1464,14 @@
 		}
 		var forecastLink = document.getElementById('home-weather-forecast-link');
 		if (forecastLink && lastWeatherLat != null && lastWeatherLon != null) {
-			forecastLink.href = 'https://open-meteo.com/en/docs?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon + '&past_days=2&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,showers,weathercode,visibility,windspeed_10m,sunshine_duration&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum';
+			// User-facing full forecast: generic weather search (no account / API required)
+			var q = locationName || (lastWeatherLat + ',' + lastWeatherLon);
+			forecastLink.href = 'https://www.google.com/search?q=' + encodeURIComponent('weather ' + q);
 		}
 		var mapLink = document.getElementById('home-weather-map-link');
 		if (mapLink && lastWeatherLat != null && lastWeatherLon != null) {
-			mapLink.href = 'https://open-meteo.com/maps?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon + '&zoom=6';
+			// Map search for this location
+			mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + lastWeatherLat + ',' + lastWeatherLon;
 		}
 		var card = document.getElementById('home-weather-card');
 		if (card) {
@@ -2112,6 +2117,25 @@
 	}
 
 	renderTodos();
+
+	// Continue learning card (uses last topic from Resources page)
+	(function initContinueLearningCard() {
+		var card = document.getElementById('home-continue-learning-card');
+		var link = document.getElementById('home-continue-learning-link');
+		var text = document.getElementById('home-continue-learning-text');
+		if (!card || !link || !text) return;
+		var topicKey = '';
+		var topicTitle = '';
+		try {
+			topicKey = localStorage.getItem('resources_last_topic') || '';
+			topicTitle = localStorage.getItem('resources_last_topic_title') || '';
+		} catch (e) {}
+		if (!topicKey) return;
+		var label = topicTitle || topicKey;
+		link.href = 'pages/resources.html?topic=' + encodeURIComponent(topicKey);
+		text.textContent = 'Jump back into ' + label + ' resources.';
+		card.classList.remove('hidden');
+	})();
 
 	// Signal that the app has loaded so the JS-required banner can be hidden (or stay visible if scripts were blocked)
 	window.__standalonePlaygroundReady = true;

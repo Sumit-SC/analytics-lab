@@ -15,11 +15,13 @@ module.exports = async (req, res) => {
 		// This would require web scraping
 		// For now, return a placeholder response
 
+		// Not configured: return empty results with a clear message.
 		return res.status(200).json({
 			success: true,
 			results: [],
 			count: 0,
-			note: 'Himalaya scraping requires backend setup with Apify/ScraperAPI. Configure APIFY_API_KEY or SCRAPER_API_KEY environment variable.'
+			configured: false,
+			note: 'Not configured. Himalaya requires backend setup (Apify/ScraperAPI). Set APIFY_API_KEY or SCRAPER_API_KEY in project env to enable.'
 		});
 
 	} catch (error) {

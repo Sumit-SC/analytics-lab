@@ -1170,6 +1170,75 @@ body {
 	}
 }
 
+/* Extra small phones: tighten home layout so it feels less cramped */
+@media (max-width: 480px) {
+	.page-home main {
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+	}
+	.page-home h1 {
+		font-size: 1.7rem;
+		line-height: 1.2;
+	}
+	.page-home .home-quote {
+		font-size: 1.05rem;
+		line-height: 1.5;
+	}
+	.page-home .home-quote-attr {
+		font-size: 0.8rem;
+	}
+	/* Weather: make controls clearly stacked and tappable */
+	.page-home #home-weather-card .flex.items-center {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.page-home #home-weather-search {
+		width: 100%;
+	}
+	.page-home #home-weather-set,
+	.page-home #home-weather-mylocation {
+		width: 100%;
+		justify-content: center;
+	}
+	/* Focus timer: avoid long horizontal rows on tiny screens */
+	.page-home .home-focus-panel .flex.items-center {
+		align-items: flex-start;
+	}
+	.page-home .home-focus-panel input[type="number"] {
+		max-width: 4rem;
+	}
+}
+
+/* Other app pages: tighten mobile layout without breaking desktop Tailwind grids */
+@media (max-width: 640px) {
+	.page-playground main,
+	.page-tools main,
+	.page-trends main,
+	.page-resources main,
+	.page-jobs main,
+	.page-docs main {
+		padding-left: max(1rem, env(safe-area-inset-left));
+		padding-right: max(1rem, env(safe-area-inset-right));
+	}
+
+	/* Stack page headers and controls vertically on phones */
+	.page-playground .flex.flex-col.sm\:flex-row,
+	.page-trends header > .flex.flex-wrap,
+	.page-tools header + section > .flex.flex-wrap,
+	.page-jobs header + section > .flex.flex-wrap {
+		align-items: flex-start;
+	}
+
+	/* Let toolbars and chip bars wrap cleanly */
+	.page-playground .flex.flex-col.sm\:flex-row,
+	.page-playground .flex.flex-wrap,
+	.page-tools .flex.flex-wrap,
+	.page-trends .flex.flex-wrap,
+	.page-resources .flex.flex-wrap {
+		gap: 0.5rem;
+	}
+}
+
 /* Weather card: larger min-height; animated background by condition */
 .home-weather-section {
 	position: relative;

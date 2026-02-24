@@ -16,11 +16,13 @@ module.exports = async (req, res) => {
 		// For now, return a placeholder response
 		// In production, you'd need to use a scraping service like Apify, ScraperAPI, or build a custom scraper
 
+		// Not configured: return empty results with a clear message.
 		return res.status(200).json({
 			success: true,
 			results: [],
 			count: 0,
-			note: 'Hirist scraping requires backend setup with Apify/ScraperAPI. Configure APIFY_API_KEY or SCRAPER_API_KEY environment variable.'
+			configured: false,
+			note: 'Not configured. Hirist requires backend setup (Apify/ScraperAPI). Set APIFY_API_KEY or SCRAPER_API_KEY in project env to enable.'
 		});
 
 	} catch (error) {

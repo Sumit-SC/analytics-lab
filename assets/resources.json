@@ -133,7 +133,7 @@
     ],
     "channels": [
       { "name": "Corey Schafer", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Python & dev tutorials" },
-      { "name": "freeCodeCamp.org", "id": "UCX8OftAXkEIJB7DoMyEiqKw", "description": "Free courses & projects" },
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Free courses & projects" },
       { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, ML, data science" }
     ],
     "github": [

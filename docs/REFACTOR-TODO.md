@@ -7,9 +7,9 @@ Use with [ROADMAP.md](./ROADMAP.md) for full backlog; this file focuses on struc
 
 ## 1. Root directory – keep clean & simple
 
-- [ ] **Move all docs into `/docs`**  
-  Move: `BINDER-TEST.md`, `BINDER-SETUP.md`, `HOME-LAYOUT-LOGIC.md`, `IMPROVEMENTS.md`, `ROADMAP.md`, `TODO-TOMORROW.md` → `docs/`.  
-  Keep in root: `README.md`, `TODO.md`, `.gitignore`, `vercel.json`, `sitemap.xml`, `sw.js`.
+- [x] **Move all docs into `/docs`**  
+  Done: `BINDER-TEST.md`, `BINDER-SETUP.md`, `HOME-LAYOUT-LOGIC.md`, `IMPROVEMENTS.md`, `ROADMAP.md`, `TODO-TOMORROW.md`, `TODO.md`, `REFACTOR-TODO.md`, `REMAINING-TASKS-AND-RESOURCES.md` → `docs/`.  
+  Root: `README.md` only (of .md files), plus `.gitignore`, `vercel.json`, `sitemap.xml`, `sw.js`.
 
 - [ ] **Move notebooks into a single place**  
   Keep `notebooks/` as-is or rename to `docs/notebooks` if you want all non-app content under `docs/`.  
@@ -22,7 +22,7 @@ Use with [ROADMAP.md](./ROADMAP.md) for full backlog; this file focuses on struc
   In root `README.md`, add a short “Project docs” section with links to `docs/` (and `ROADMAP.md` / `TODO.md` if they stay in root).
 
 **Target root (minimal):**  
-`index.html`, main app HTML files, `README.md`, `TODO.md`, `REFACTOR-TODO.md`, `assets/`, `scripts/`, `api/` (or under scripts), `docs/`, `notebooks/`, config files, `.github/`.
+`index.html`, `README.md`, `assets/`, `scripts/`, `api/`, `docs/`, `pages/`, `notebooks/`, config files, `.github/`. All other HTML live in `pages/`; all other .md in `docs/`.
 
 ---
 
