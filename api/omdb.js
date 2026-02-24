@@ -5,6 +5,15 @@
  */
 
 const OMDB_BASE = 'https://www.omdbapi.com/';
+
+// OMDb poster URLs are often m.media-amazon.com (IMDb/Amazon CDN). We do not expose them to avoid loading external trackers.
+function stripTrackerPoster(url) {
+	if (!url || typeof url !== 'string') return null;
+	const u = url.trim();
+	if (u.indexOf('http') !== 0) return null;
+	if (/m\.media-amazon\.com|imdb\.com|images-amazon\.com/i.test(u)) return null;
+	return u;
+}
 const MAX_TITLE_LENGTH = 200;
 const DAILY_LIMIT = 1000;
 
@@ -173,7 +182,7 @@ module.exports = async function handler(req, res) {
 					Title: item.Title || '',
 					Year: item.Year || '',
 					imdbID: item.imdbID || '',
-					Poster: (item.Poster && item.Poster !== 'N/A' && String(item.Poster).indexOf('http') === 0) ? item.Poster : null,
+					Poster: stripTrackerPoster(item.Poster) || null,
 					Type: item.Type || ''
 				};
 			});
@@ -213,7 +222,7 @@ module.exports = async function handler(req, res) {
 				Country: data.Country || '',
 				Awards: data.Awards || '',
 				BoxOffice: data.BoxOffice || '',
-				Poster: (data.Poster && data.Poster !== 'N/A' && String(data.Poster).indexOf('http') === 0) ? data.Poster : null,
+				Poster: stripTrackerPoster(data.Poster) || null,
 				imdbRating: data.imdbRating || '',
 				imdbID: data.imdbID || '',
 				Type: data.Type || ''
@@ -240,7 +249,7 @@ return res.status(502).json({ error: 'Upstream error', usage: usagePayload() });
 	try {
 		const r = await fetch(url);
 		const data = await r.json().catch(function () { return null; });
-		const poster = data && data.Poster && data.Poster !== 'N/A' && String(data.Poster).indexOf('http') === 0 ? data.Poster : null;
+		const poster = (data && stripTrackerPoster(data.Poster)) || null;
 		const imdbID = data && data.imdbID && /^tt\d+$/.test(String(data.imdbID).trim()) ? String(data.imdbID).trim() : null;
 		const title = data && typeof data.Title === 'string' ? data.Title.trim() : '';
 		const type = (data && data.Type === 'series') ? 'series' : 'movie';

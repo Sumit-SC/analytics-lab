@@ -317,8 +317,15 @@
 		return url && typeof url === 'string' && (url = url.trim()) && url.indexOf('http') === 0;
 	}
 
+	// Do not load images from Amazon/IMDb CDNs to avoid external trackers.
+	function isTrackerImageUrl(url) {
+		if (!url || typeof url !== 'string') return true;
+		return /m\.media-amazon\.com|imdb\.com|images-amazon\.com/i.test(url.trim());
+	}
+
 	function setQuoteBgImage(bgEl, url) {
 		if (!bgEl || !url || typeof url !== 'string' || url.indexOf('http') !== 0) return;
+		if (isTrackerImageUrl(url)) return;
 		var safe = url.trim().replace(/["']/g, '');
 		// Clear first to force browser to drop cached paint, then set new URL so the new image is visible
 		bgEl.style.backgroundImage = 'none';
@@ -1217,6 +1224,7 @@
 	var lastWeatherData = null;
 	var lastAqiData = null;
 	var lastLocationName = '';
+	var weatherSelectedDayIndex = 2; // 0 = 2 days ago, 1 = yesterday, 2 = today, 3..9 = next 7 days
 
 	function initWeather() {
 		var weatherEl = document.getElementById('home-weather');
@@ -1271,14 +1279,70 @@
 		if (!isNaN(t) && t <= 5) return { icon: '❄️', class: 'home-weather-icon-cold' };
 		return { icon: '☀️', class: 'home-weather-icon-clear' };
 	}
+	function dayLabel(i, times) {
+		if (!times || !times[i]) return '';
+		var d = new Date(times[i]);
+		var today = new Date();
+		today.setHours(0, 0, 0, 0);
+		var that = new Date(d);
+		that.setHours(0, 0, 0, 0);
+		var diff = Math.round((that - today) / 86400000);
+		if (diff === 0) return 'Today';
+		if (diff === -1) return 'Yesterday';
+		if (diff === -2) return '2d ago';
+		if (diff === 1) return 'Tomorrow';
+		return d.toLocaleDateString([], { weekday: 'short' });
+	}
+	function renderDayStrip(daily, selectedIndex) {
+		var strip = document.getElementById('home-weather-day-strip');
+		if (!strip || !daily) return;
+		var times = daily.time || [];
+		var codes = daily.weathercode || [];
+		var maxT = daily.temperature_2m_max || [];
+		var minT = daily.temperature_2m_min || [];
+		strip.innerHTML = '';
+		for (var i = 0; i < times.length; i++) {
+			var isSelected = i === selectedIndex;
+			var label = dayLabel(i, times);
+			var code = codes[i] != null ? codes[i] : 0;
+			var iconInfo = weatherIconAndClass(code, maxT[i]);
+			var hi = maxT[i] != null ? Math.round(maxT[i]) + '°' : '—';
+			var lo = minT[i] != null ? Math.round(minT[i]) + '°' : '—';
+			var pill = document.createElement('button');
+			pill.type = 'button';
+			pill.className = 'home-weather-day-pill' + (isSelected ? ' active' : '');
+			pill.setAttribute('role', 'tab');
+			pill.setAttribute('aria-selected', isSelected);
+			pill.setAttribute('data-day-index', i);
+			pill.innerHTML = '<span class="home-weather-day-pill-label">' + label + '</span>' +
+				'<span class="home-weather-day-pill-icon" aria-hidden="true">' + iconInfo.icon + '</span>' +
+				'<span class="home-weather-day-pill-temp">' + hi + '/' + lo + '</span>';
+			strip.appendChild(pill);
+		}
+		strip.querySelectorAll('.home-weather-day-pill').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var idx = parseInt(btn.getAttribute('data-day-index'), 10);
+				if (idx === weatherSelectedDayIndex) return;
+				weatherSelectedDayIndex = idx;
+				strip.querySelectorAll('.home-weather-day-pill').forEach(function (b) {
+					b.classList.remove('active');
+					b.setAttribute('aria-selected', false);
+				});
+				btn.classList.add('active');
+				btn.setAttribute('aria-selected', true);
+				renderWeatherForSelectedDay();
+			});
+		});
+	}
 	function renderForecastPanel(panel, daily) {
 		if (!panel || !daily) return;
 		var times = daily.time || [];
 		var codes = daily.weathercode || [];
 		var maxT = daily.temperature_2m_max || [];
 		var minT = daily.temperature_2m_min || [];
-		var html = '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Next 7 days</p><div class="grid grid-cols-7 gap-1 text-center">';
-		for (var i = 0; i < Math.min(7, times.length); i++) {
+		var start = Math.max(0, 2); // from today onward
+		var html = '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Next 7 days</p><div class="grid grid-cols-4 sm:grid-cols-7 gap-1 text-center">';
+		for (var i = start; i < Math.min(start + 7, times.length); i++) {
 			var d = new Date(times[i]);
 			var dayName = d.toLocaleDateString([], { weekday: 'short' });
 			var code = codes[i] != null ? codes[i] : 0;
@@ -1294,6 +1358,53 @@
 		html += '</div>';
 		panel.innerHTML = html;
 	}
+	function renderMoreDetailsBody(dayIndex) {
+		var body = document.getElementById('home-weather-more-body');
+		if (!body || !lastWeatherData) return;
+		var data = lastWeatherData;
+		var daily = data.daily || {};
+		var hourly = data.hourly || {};
+		var current = Object.assign({}, data.current_weather || {}, data.current || {});
+		var parts = [];
+		var idx = dayIndex;
+		if (idx === 2) {
+			if (current.relative_humidity_2m != null) parts.push('Humidity: ' + current.relative_humidity_2m + '%');
+			if (current.visibility != null) parts.push('Visibility: ' + (current.visibility >= 1000 ? (current.visibility / 1000) + ' km' : current.visibility + ' m'));
+		}
+		var times = hourly.time || [];
+		var now = new Date();
+		var hourIdx = -1;
+		for (var h = 0; h < times.length; h++) {
+			if (new Date(times[h]) > now) { hourIdx = h > 0 ? h - 1 : 0; break; }
+		}
+		if (hourIdx < 0 && times.length) hourIdx = times.length - 1;
+		if (idx === 2 && current.relative_humidity_2m == null && hourly.relative_humidity_2m && hourIdx >= 0 && hourly.relative_humidity_2m[hourIdx] != null)
+			parts.push('Humidity: ' + hourly.relative_humidity_2m[hourIdx] + '%');
+		if (hourly.precipitation_probability && hourIdx >= 0 && hourly.precipitation_probability[hourIdx] != null)
+			parts.push('Precip chance: ' + hourly.precipitation_probability[hourIdx] + '%');
+		if (idx === 2 && current.visibility == null && hourly.visibility && hourIdx >= 0 && hourly.visibility[hourIdx] != null) {
+			var v = hourly.visibility[hourIdx];
+			parts.push('Visibility: ' + (v >= 1000 ? (v / 1000) + ' km' : v + ' m'));
+		}
+		if (hourly.sunshine_duration && hourIdx >= 0 && hourly.sunshine_duration[hourIdx] != null) {
+			var sec = hourly.sunshine_duration[hourIdx];
+			parts.push('Sun: ' + (sec / 60).toFixed(0) + ' min');
+		}
+		if (hourly.dew_point_2m && hourIdx >= 0 && hourly.dew_point_2m[hourIdx] != null)
+			parts.push('Dew point: ' + Math.round(hourly.dew_point_2m[hourIdx]) + '°C');
+		body.innerHTML = parts.length ? parts.join(' · ') : '—';
+	}
+	function renderWeatherForSelectedDay() {
+		if (!lastWeatherData || !weatherEl) return;
+		var card = document.getElementById('home-weather-card');
+		if (card) card.classList.add('home-weather-brief-transition');
+		setTimeout(function () {
+			renderWeather(lastWeatherData, lastAqiData, lastLocationName, weatherSelectedDayIndex);
+			renderDayStrip(lastWeatherData.daily || null, weatherSelectedDayIndex);
+			renderMoreDetailsBody(weatherSelectedDayIndex);
+			if (card) card.classList.remove('home-weather-brief-transition');
+		}, 80);
+	}
 	function formatTime(isoStr) {
 		if (!isoStr) return '—';
 		var d = new Date(isoStr);
@@ -1308,29 +1419,37 @@
 		if (!isNaN(t) && t <= 5) return 'weather-cold';
 		return 'weather-clear';
 	}
-	function renderWeather(data, aqiData, locationName) {
+	function renderWeather(data, aqiData, locationName, dayIndex) {
 		if (!weatherEl || !data) return;
+		dayIndex = dayIndex != null ? dayIndex : weatherSelectedDayIndex;
+		weatherSelectedDayIndex = dayIndex;
 		lastDailyForecast = data.daily || null;
-		var tempC = data.current_weather && data.current_weather.temperature != null ? data.current_weather.temperature : null;
-		var temp = tempC != null ? Math.round(tempC) + '°C' : '—';
-		var code = (data.current_weather && data.current_weather.weathercode) || 0;
-		var desc = weatherCodeToDesc(code);
-		var usAqi = aqiData && aqiData.current && aqiData.current.us_aqi != null ? aqiData.current.us_aqi : null;
-		var aqiLabelText = usAqi != null ? aqiLabel(usAqi) : null;
-		var windSpeed = (data.current_weather && data.current_weather.windspeed != null) ? data.current_weather.windspeed : null;
 		var daily = data.daily || {};
-		var sunrise = (daily.sunrise && daily.sunrise[0]) ? formatTime(daily.sunrise[0]) : '—';
-		var sunset = (daily.sunset && daily.sunset[0]) ? formatTime(daily.sunset[0]) : '—';
-		var maxT = (daily.temperature_2m_max && daily.temperature_2m_max[0] != null) ? Math.round(daily.temperature_2m_max[0]) + '°' : '—';
-		var minT = (daily.temperature_2m_min && daily.temperature_2m_min[0] != null) ? Math.round(daily.temperature_2m_min[0]) + '°' : '—';
-		var precip = (daily.precipitation_sum && daily.precipitation_sum[0] != null) ? daily.precipitation_sum[0] : null;
+		var current = data.current_weather || {};
+		var times = daily.time || [];
+		var idx = Math.max(0, Math.min(dayIndex, times.length ? times.length - 1 : 0));
+		var isToday = idx === 2;
+		var tempC = isToday && current.temperature != null ? current.temperature : null;
+		if (tempC == null && daily.temperature_2m_max && daily.temperature_2m_max[idx] != null)
+			tempC = (daily.temperature_2m_max[idx] + (daily.temperature_2m_min[idx] != null ? daily.temperature_2m_min[idx] : daily.temperature_2m_max[idx])) / 2;
+		var temp = tempC != null ? Math.round(tempC) + '°C' : '—';
+		var code = isToday && current.weathercode != null ? current.weathercode : (daily.weathercode && daily.weathercode[idx] != null ? daily.weathercode[idx] : 0);
+		var desc = weatherCodeToDesc(code);
+		var usAqi = (isToday && aqiData && aqiData.current && aqiData.current.us_aqi != null) ? aqiData.current.us_aqi : null;
+		var aqiLabelText = usAqi != null ? aqiLabel(usAqi) : null;
+		var windSpeed = isToday && current.windspeed != null ? current.windspeed : null;
+		var sunrise = (daily.sunrise && daily.sunrise[idx]) ? formatTime(daily.sunrise[idx]) : '—';
+		var sunset = (daily.sunset && daily.sunset[idx]) ? formatTime(daily.sunset[idx]) : '—';
+		var maxT = (daily.temperature_2m_max && daily.temperature_2m_max[idx] != null) ? Math.round(daily.temperature_2m_max[idx]) + '°' : '—';
+		var minT = (daily.temperature_2m_min && daily.temperature_2m_min[idx] != null) ? Math.round(daily.temperature_2m_min[idx]) + '°' : '—';
+		var precip = (daily.precipitation_sum && daily.precipitation_sum[idx] != null) ? daily.precipitation_sum[idx] : null;
 		var rainStr = precip != null ? (precip > 0 ? precip + ' mm' : '0 mm') : '—';
 		var iconInfo = weatherIconAndClass(code, tempC);
 		weatherEl.innerHTML =
 			'<span class="home-weather-icon-wrap ' + iconInfo.class + '" aria-hidden="true">' + iconInfo.icon + '</span>' +
 			'<span class="home-weather-temp font-semibold text-lg">' + temp + '</span>' +
 			'<span class="text-sm opacity-80 ml-1">' + desc + '</span>' +
-			' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + (usAqi != null ? usAqi + ' ' + (aqiLabelText || '') : '—') + '</span>';
+			(isToday && usAqi != null ? ' <span class="home-weather-aqi text-xs opacity-90">· AQI ' + usAqi + ' ' + (aqiLabelText || '') + '</span>' : '');
 		if (weatherCity) weatherCity.textContent = locationName || (data.timezone ? data.timezone.split('/').pop().replace(/_/g, ' ') : '—');
 		var extraEl = document.getElementById('home-weather-extra');
 		if (extraEl) {
@@ -1343,13 +1462,19 @@
 		}
 		var forecastLink = document.getElementById('home-weather-forecast-link');
 		if (forecastLink && lastWeatherLat != null && lastWeatherLon != null) {
-			forecastLink.href = 'https://open-meteo.com/en/docs?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon;
+			forecastLink.href = 'https://open-meteo.com/en/docs?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon + '&past_days=2&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,showers,weathercode,visibility,windspeed_10m,sunshine_duration&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum';
+		}
+		var mapLink = document.getElementById('home-weather-map-link');
+		if (mapLink && lastWeatherLat != null && lastWeatherLon != null) {
+			mapLink.href = 'https://open-meteo.com/maps?lat=' + lastWeatherLat + '&lon=' + lastWeatherLon + '&zoom=6';
 		}
 		var card = document.getElementById('home-weather-card');
 		if (card) {
 			card.classList.remove('weather-rain', 'weather-wind', 'weather-hot', 'weather-cold', 'weather-clear');
 			card.classList.add(weatherCardAnimationClass(code, tempC));
 		}
+		renderDayStrip(daily, dayIndex);
+		renderMoreDetailsBody(dayIndex);
 		if (weatherForecastPanel && lastDailyForecast) {
 			renderForecastPanel(weatherForecastPanel, lastDailyForecast);
 			weatherForecastPanel.classList.remove('hidden');
@@ -1359,9 +1484,9 @@
 
 	function fetchWeather(lat, lon, locationName) {
 		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
-			'&current_weather=true' +
-			'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=7' +
-			'&hourly=temperature_2m,weathercode,precipitation,windspeed_10m&forecast_days=2';
+			'&current_weather=true&current=temperature_2m,relative_humidity_2m,weathercode,windspeed_10m,precipitation,visibility&past_days=2' +
+			'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=8' +
+			'&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,showers,weathercode,visibility,windspeed_10m,sunshine_duration,dew_point_2m&forecast_days=3';
 		var aqiUrl = 'https://air-quality.api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lon + '&current=us_aqi';
 		Promise.all([
 			fetch(url).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); }),
@@ -1376,7 +1501,8 @@
 			lastLocationName = locationName || '';
 			lastWeatherHourly = (data && data.hourly) ? data.hourly : null;
 			if (data && (data.current_weather || data.error !== true)) {
-				renderWeather(data, aqiData, locationName);
+				weatherSelectedDayIndex = 2;
+				renderWeather(data, aqiData, locationName, 2);
 			} else {
 				renderWeatherUnavailable();
 			}
@@ -1986,6 +2112,9 @@
 	}
 
 	renderTodos();
+
+	// Signal that the app has loaded so the JS-required banner can be hidden (or stay visible if scripts were blocked)
+	window.__standalonePlaygroundReady = true;
 })();
 
 // Analytics: track visits and time-on-page for Home

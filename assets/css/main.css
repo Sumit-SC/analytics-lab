@@ -4,9 +4,21 @@
 	--color-accent: #818cf8;
 }
 
-/* Base */
+/* Base: no Google Fonts (no external trackers). Inter only used if loaded; otherwise system font. */
 body {
-	font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* JS-required banner: stack on narrow screens, ensure touch target for Dismiss */
+@media (max-width: 480px) {
+	.js-required-banner-inner {
+		flex-direction: column;
+		align-items: stretch;
+		text-align: center;
+	}
+	#js-required-dismiss {
+		min-height: 44px;
+	}
 }
 
 /* Responsive & mobile-first: safe area, base font, touch targets */
@@ -94,6 +106,164 @@ body {
 	main p, main li, main td, main th, .material-card {
 		word-wrap: break-word;
 		overflow-wrap: break-word;
+	}
+}
+
+/* ========== Site-wide mobile: all pages, standard viewport behavior ========== */
+@media (max-width: 767px) {
+	/* Contain layout to viewport; prevent horizontal scroll */
+	html {
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+	}
+	body {
+		min-height: 100vh;
+		min-height: 100dvh;
+		overflow-x: hidden;
+		width: 100%;
+		max-width: 100vw;
+		box-sizing: border-box;
+	}
+	body *,
+	body *::before,
+	body *::after {
+		box-sizing: inherit;
+	}
+
+	/* Main content: full width, safe-area padding (reinforce) */
+	main {
+		width: 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
+		padding-left: max(1rem, env(safe-area-inset-left));
+		padding-right: max(1rem, env(safe-area-inset-right));
+		padding-top: 1rem;
+		padding-bottom: 1.5rem;
+		overflow-x: hidden;
+	}
+
+	/* Content wrappers (Tailwind max-w-*): don't constrain to fixed width on small screens */
+	main .max-w-5xl,
+	main .max-w-6xl,
+	main .max-w-4xl,
+	main .max-w-7xl {
+		width: 100%;
+		max-width: 100%;
+		margin-left: 0;
+		margin-right: 0;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	/* All grids in main: single column on mobile for standard flow */
+	main .grid {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+	main .grid.gap-2 { gap: 0.5rem; }
+	main .grid.gap-3 { gap: 0.75rem; }
+	main .grid.gap-4 { gap: 1rem; }
+	main .grid.gap-5 { gap: 1.25rem; }
+	main .grid.gap-6 { gap: 1.5rem; }
+
+	/* Flex rows in main: allow wrap so items stack */
+	main .flex {
+		flex-wrap: wrap;
+	}
+	main .flex > * {
+		min-width: 0;
+	}
+
+	/* Playground: content area full width when sidebar is drawer */
+	body .flex.relative {
+		display: block;
+		width: 100%;
+		overflow-x: hidden;
+	}
+	body .flex.relative > #sidebar {
+		/* Sidebar is fixed drawer on mobile; no layout space */
+	}
+	body .flex.relative > main,
+	body .flex.relative > div:not(#sidebar-overlay) {
+		width: 100%;
+		min-width: 0;
+		max-width: 100%;
+		margin: 0;
+		padding-left: max(1rem, env(safe-area-inset-left));
+		padding-right: max(1rem, env(safe-area-inset-right));
+	}
+	body .flex.relative > main.max-w-6xl {
+		width: 100%;
+		max-width: 100%;
+		padding-left: max(1rem, env(safe-area-inset-left));
+		padding-right: max(1rem, env(safe-area-inset-right));
+	}
+
+	/* Resources: topic list and content full width */
+	#resource-root,
+	#resource-root .grid,
+	#resource-not-found {
+		max-width: 100%;
+		width: 100%;
+	}
+
+	/* Jobs: config and filters stack; table scrolls */
+	#job-tracker-main .grid {
+		grid-template-columns: 1fr;
+	}
+	#job-tracker-main .flex-wrap {
+		gap: 0.75rem;
+	}
+	#job-tracker-main input[type="text"],
+	#job-tracker-main input[type="number"],
+	#job-tracker-main select,
+	#job-tracker-main .px-4 {
+		max-width: 100%;
+	}
+
+	/* Trends: sections and cards full width */
+	.trends-section,
+	.trends-section .grid {
+		max-width: 100%;
+		width: 100%;
+	}
+	#trends-visual-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.5rem;
+	}
+
+	/* Tools page: editor and PDF area full width */
+	main .flex.flex-col,
+	main .w-full {
+		width: 100%;
+		max-width: 100%;
+	}
+
+	/* Footer: same safe-area as main */
+	footer {
+		width: 100%;
+		max-width: 100%;
+		padding-left: max(1rem, env(safe-area-inset-left));
+		padding-right: max(1rem, env(safe-area-inset-right));
+	}
+	footer .max-w-5xl,
+	footer .max-w-6xl {
+		width: 100%;
+		max-width: 100%;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	/* Modals/overlays: full viewport on mobile */
+	[role="dialog"],
+	.resource-detail-modal,
+	.home-weather-modal-content,
+	.global-omdb-flyout,
+	#global-dict-flyout {
+		max-width: 100vw;
+		max-height: 100vh;
+		max-height: 100dvh;
 	}
 }
 
@@ -940,6 +1110,66 @@ body {
 	min-height: 0;
 }
 
+/* Home: mobile-first revamp — single column, standard flow, no one-sided layout */
+@media (max-width: 639px) {
+	.home-main-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		width: 100%;
+		max-width: 100%;
+	}
+	.home-main-grid > * {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+	}
+	/* On mobile: show Weather + Focus first (glanceable), then Tips+Clock + Quote */
+	.home-right-column {
+		order: -1;
+	}
+	.home-left-column {
+		order: 0;
+		min-height: 0;
+	}
+	.home-tips-calendar-wrap {
+		grid-template-columns: 1fr;
+		gap: 0.75rem;
+	}
+	.home-quote-panel {
+		min-height: 16rem;
+	}
+	.home-weather-section {
+		min-height: 14rem;
+	}
+	.home-focus-panel {
+		min-height: 0;
+	}
+	/* Consistent card padding and spacing on small screens */
+	.second-brain-card {
+		padding: 1rem 1.25rem;
+	}
+	.home-quote-panel .home-quote-inner {
+		padding: 1rem 1.25rem;
+	}
+	.notion-go-section .grid {
+		gap: 0.75rem;
+	}
+	.notion-go-card {
+		min-height: 5rem;
+		padding: 1rem 1.25rem;
+	}
+	/* Prevent any horizontal scroll */
+	.home-main-grid,
+	.home-left-column,
+	.home-right-column,
+	.home-quote-content-wrap,
+	.home-quote-panel,
+	.home-weather-section {
+		overflow-x: hidden;
+	}
+}
+
 /* Weather card: larger min-height; animated background by condition */
 .home-weather-section {
 	position: relative;
@@ -998,6 +1228,110 @@ body {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 0.25rem 1rem;
+}
+
+/* Day strip: past 2 + today + next 7, scrollable, tap to select */
+.home-weather-day-strip {
+	display: flex;
+	gap: 0.5rem;
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	-webkit-overflow-scrolling: touch;
+	padding: 0.5rem 0;
+	margin: 0.5rem 0 0;
+	min-height: 3.5rem;
+}
+.home-weather-day-strip::-webkit-scrollbar {
+	height: 4px;
+}
+.home-weather-day-strip::-webkit-scrollbar-thumb {
+	background: rgba(148, 163, 184, 0.4);
+	border-radius: 2px;
+}
+.home-weather-day-pill {
+	scroll-snap-align: start;
+	flex-shrink: 0;
+	min-width: 4.5rem;
+	padding: 0.4rem 0.5rem;
+	border-radius: 0.5rem;
+	border: 1px solid rgba(148, 163, 184, 0.3);
+	background: rgba(255, 255, 255, 0.6);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15rem;
+	font-size: 0.7rem;
+	color: rgb(71, 85, 105);
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+.dark .home-weather-day-pill {
+	background: rgba(30, 41, 59, 0.6);
+	border-color: rgba(71, 85, 105, 0.5);
+	color: rgb(148, 163, 184);
+}
+.home-weather-day-pill:hover {
+	background: rgba(255, 255, 255, 0.9);
+	border-color: rgba(99, 102, 241, 0.4);
+	transform: translateY(-1px);
+}
+.dark .home-weather-day-pill:hover {
+	background: rgba(51, 65, 85, 0.8);
+	border-color: rgba(99, 102, 241, 0.5);
+}
+.home-weather-day-pill.active {
+	background: var(--color-primary, #6366f1);
+	border-color: var(--color-primary, #6366f1);
+	color: #fff;
+}
+.dark .home-weather-day-pill.active {
+	background: var(--color-primary, #6366f1);
+	border-color: var(--color-primary, #6366f1);
+	color: #fff;
+}
+.home-weather-day-pill-label {
+	font-weight: 600;
+	text-transform: capitalize;
+}
+.home-weather-day-pill-icon {
+	font-size: 1rem;
+	line-height: 1;
+}
+.home-weather-day-pill-temp {
+	font-size: 0.65rem;
+	opacity: 0.9;
+}
+
+/* More details expandable */
+.home-weather-more-details {
+	border: none;
+}
+.home-weather-more-summary {
+	list-style: none;
+	user-select: none;
+}
+.home-weather-more-summary::-webkit-details-marker {
+	display: none;
+}
+.home-weather-more-summary::before {
+	content: "▸ ";
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+.home-weather-more-details[open] .home-weather-more-summary::before {
+	transform: rotate(90deg);
+}
+.home-weather-more-body {
+	line-height: 1.5;
+}
+
+/* Brief transition when changing selected day */
+.home-weather-transition {
+	transition: opacity 0.2s ease;
+}
+.home-weather-section.home-weather-brief-transition .home-weather-current,
+.home-weather-section.home-weather-brief-transition .home-weather-extra {
+	opacity: 0.6;
 }
 
 /* Hourly forecast modal */
