@@ -1239,6 +1239,47 @@ body {
 	}
 }
 
+/* Jobs page: fluid typography across device widths */
+.page-jobs h1 {
+	font-size: clamp(1.6rem, 1.4rem + 1.2vw, 2.1rem);
+	line-height: 1.2;
+}
+.page-jobs h2 {
+	font-size: clamp(1.15rem, 1.0rem + 0.8vw, 1.6rem);
+	line-height: 1.3;
+}
+.page-jobs p {
+	font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1rem);
+}
+
+/* Other main pages: fluid typography similar to design libraries */
+.page-home h1,
+.page-playground h1,
+.page-tools h1,
+.page-trends h1,
+.page-resources h1,
+.page-docs h1 {
+	font-size: clamp(1.5rem, 1.3rem + 1.2vw, 2.2rem);
+	line-height: 1.2;
+}
+.page-home h2,
+.page-playground h2,
+.page-tools h2,
+.page-trends h2,
+.page-resources h2,
+.page-docs h2 {
+	font-size: clamp(1.1rem, 1.0rem + 0.7vw, 1.5rem);
+	line-height: 1.3;
+}
+.page-home p,
+.page-playground p,
+.page-tools p,
+.page-trends p,
+.page-resources p,
+.page-docs p {
+	font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
+}
+
 /* Weather card: larger min-height; animated background by condition */
 .home-weather-section {
 	position: relative;
@@ -2162,6 +2203,57 @@ body:has(#global-music-bar) {
 	}
 	#assistant-btn {
 		bottom: 4.5rem;
+	}
+}
+
+/* Assistant: mobile full width, touch targets 44px */
+@media (max-width: 639px) {
+	#assistant-panel {
+		width: 100% !important;
+		max-width: none;
+		left: 0;
+		right: 0;
+		padding-left: env(safe-area-inset-left);
+		padding-right: env(safe-area-inset-right);
+	}
+	#assistant-close,
+	#assistant-send {
+		min-width: 44px;
+		min-height: 44px;
+		padding: 0.5rem 0.75rem;
+	}
+	#assistant-input {
+		min-height: 44px;
+		font-size: 16px;
+	}
+	#assistant-enable-model,
+	#assistant-clear {
+		min-height: 44px;
+		padding: 0.5rem 0.75rem;
+	}
+	.assistant-suggested-prompts button {
+		min-height: 44px;
+		padding: 0.5rem 0.75rem;
+	}
+	/* Jobs page: make quick filters and search config more compact on mobile */
+	#job-search-config-section {
+		padding: 1rem;
+	}
+	#job-search-config-section input,
+	#job-search-config-section select,
+	#job-search-config-section button {
+		min-height: 44px;
+	}
+	.quick-filters-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.quick-filters-row > span {
+		margin-bottom: 0.25rem;
+	}
+	.quick-filters-row select,
+	.quick-filters-row button {
+		width: 100%;
 	}
 }
 

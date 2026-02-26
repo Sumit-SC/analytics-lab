@@ -85,6 +85,16 @@
 		} catch (e) {}
 	}
 
+	function isMobileViewport() {
+		try {
+			return typeof window !== 'undefined' &&
+				window.matchMedia &&
+				window.matchMedia('(max-width: 767px)').matches;
+		} catch (e) {
+			return false;
+		}
+	}
+
 	// Initialize
 	function init() {
 		loadApplications();
@@ -94,12 +104,41 @@
 		setupVercelSearchSection();
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
+		setupAdvancedFiltersToggle();
 		setupEventListeners();
-		fetchAllJobs();
+		if (!isMobileViewport()) {
+			fetchAllJobs();
+		} else {
+			var totalEl = document.getElementById('job-stats-total');
+			if (totalEl) totalEl.textContent = 'Ready. Tap “Search Jobs” to load results.';
+			var loadingEl = document.getElementById('job-loading');
+			if (loadingEl) loadingEl.style.display = 'none';
+		}
 		setupPlannerEventListeners();
 		renderPlanner();
 	}
-	
+
+	function setupAdvancedFiltersToggle() {
+		var toggle = document.getElementById('job-advanced-toggle');
+		var body = document.getElementById('job-search-advanced-body');
+		if (!toggle || !body) return;
+		var collapsed = isMobileViewport();
+		function apply() {
+			if (collapsed) {
+				body.classList.add('hidden');
+				toggle.textContent = 'Show advanced filters';
+			} else {
+				body.classList.remove('hidden');
+				toggle.textContent = 'Hide advanced filters';
+			}
+		}
+		apply();
+		toggle.addEventListener('click', function () {
+			collapsed = !collapsed;
+			apply();
+		});
+	}
+
 	// Setup Enhanced Form (JobSpy-style inputs)
 	function setupEnhancedForm() {
 		// Job sites list (from JobSpy)
@@ -302,8 +341,8 @@
 		}
 	}
 
-	// Railway UI embed at top: collapsible; on expand load iframe; detect block (extensions) and show fallback + banner
-	var RAILWAY_UI_EMBED_URL = 'https://job-search-api-production-5d5d.up.railway.app/ui/';
+	// Railway UI embed at top: collapsible; derived from the same base URL as Railway API
+	var RAILWAY_UI_EMBED_URL = RAILWAY_API_URL + '/ui/';
 	var EMBED_LOAD_TIMEOUT_MS = 8000;
 	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
 	function setupRailwayUiEmbedToggle() {
@@ -1398,6 +1437,7 @@
 		var modal = document.getElementById('job-detail-modal');
 		if (!modal || !job) return;
 		currentDetailJob = job;
+		var previousActive = document.activeElement;
 
 		var titleEl = document.getElementById('job-detail-title');
 		var sourceEl = document.getElementById('job-detail-source');
@@ -1467,13 +1507,60 @@
 
 		modal.classList.remove('hidden');
 		modal.setAttribute('aria-hidden', 'false');
+
+		// Focus trap and a11y: focus first focusable, trap Tab, Escape to close
+		function getModalFocusable() {
+			var sel = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+			return modal.querySelectorAll(sel);
+		}
+		function handleModalKey(e) {
+			if (e.key === 'Escape') {
+				closeJobDetails();
+				return;
+			}
+			if (e.key !== 'Tab') return;
+			var focusable = getModalFocusable();
+			focusable = Array.prototype.filter.call(focusable, function (el) {
+				return el.offsetParent !== null && !el.disabled;
+			});
+			if (!focusable.length) return;
+			var first = focusable[0];
+			var last = focusable[focusable.length - 1];
+			if (e.shiftKey) {
+				if (document.activeElement === first) {
+					e.preventDefault();
+					last.focus();
+				}
+			} else {
+				if (document.activeElement === last) {
+					e.preventDefault();
+					first.focus();
+				}
+			}
+		}
+		modal._jobDetailPreviousActive = previousActive;
+		document.addEventListener('keydown', handleModalKey);
+		modal._jobDetailKeyHandler = handleModalKey;
+		var closeBtn = document.getElementById('job-detail-close');
+		if (closeBtn && typeof closeBtn.focus === 'function') {
+			setTimeout(function () { closeBtn.focus(); }, 50);
+		}
 	}
 
 	function closeJobDetails() {
 		var modal = document.getElementById('job-detail-modal');
 		if (!modal) return;
+		if (modal._jobDetailKeyHandler) {
+			document.removeEventListener('keydown', modal._jobDetailKeyHandler);
+			modal._jobDetailKeyHandler = null;
+		}
+		var previousActive = modal._jobDetailPreviousActive;
+		modal._jobDetailPreviousActive = null;
 		modal.classList.add('hidden');
 		modal.setAttribute('aria-hidden', 'true');
+		if (previousActive && typeof previousActive.focus === 'function') {
+			setTimeout(function () { previousActive.focus(); }, 50);
+		}
 	}
 
 	// Legacy fallback: individual fetchers (if jobs-snapshot API is unavailable)

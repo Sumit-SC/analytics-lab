@@ -1187,6 +1187,14 @@
         "id": "PL9ooVrP1hQOHY6YVfQ8Q8eE2vN1G2kFqF",
         "title": "Data Science Course Playlist (edureka!)",
         "playlist": true
+      },
+      {
+        "id": "GwIo3gDZCVQ",
+        "title": "Machine Learning for Everybody (freeCodeCamp)"
+      },
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Data Analytics + Excel for Beginners (freeCodeCamp)"
       }
     ],
     "channels": [
@@ -1290,6 +1298,14 @@
         "id": "PLrAXtmErZgOeiKm4sgNOknGvNjby9efdfg",
         "title": "Data Engineering Playlist (DataTalksClub / Zoomcamp)",
         "playlist": true
+      },
+      {
+        "id": "U9e6Yr6v8vQ",
+        "title": "Apache Spark Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "3hLmDS179rg",
+        "title": "AWS Data Analytics (freeCodeCamp)"
       }
     ],
     "roadmapUrl": "https://roadmap.sh/data-engineer",
@@ -1396,6 +1412,14 @@
         "id": "PLQVvvaa0QuDfKTOs3Keq_kaG2P55YRn5v",
         "title": "Machine Learning with Python Playlist (sentdex)",
         "playlist": true
+      },
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Data Science Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "L7z4QnJzV4c",
+        "title": "Data Science Tutorial (edureka!)"
       }
     ],
     "channels": [
@@ -1506,6 +1530,14 @@
         "id": "PL5-TkQAf4F9Rmd6d5y5j6cY2f3G1jJm3x",
         "title": "CS231n Playlist (Stanford)",
         "playlist": true
+      },
+      {
+        "id": "GwIo3gDZCVQ",
+        "title": "Machine Learning for Everybody (freeCodeCamp)"
+      },
+      {
+        "id": "PPLop4L2eGk",
+        "title": "Machine Learning Course (StatQuest)"
       }
     ],
     "github": [
@@ -1600,6 +1632,14 @@
         "id": "PLo2Dd0dNq2JxqA1sL1L2L3L4L5L6L7L8",
         "title": "LLM Tutorials Playlist",
         "playlist": true
+      },
+      {
+        "id": "8rXD5-xhemo",
+        "title": "NLP Course (freeCodeCamp)"
+      },
+      {
+        "id": "aircAruvnKk",
+        "title": "Neural Networks from Scratch (3Blue1Brown)"
       }
     ],
     "github": [
@@ -1690,6 +1730,14 @@
         "id": "PLoROMvodv4rOhcuXMZkNm7j3fVwBBY42z",
         "title": "CS224n Playlist (Stanford)",
         "playlist": true
+      },
+      {
+        "id": "zizonToFXDs",
+        "title": "Build LLM Apps (freeCodeCamp + HF)"
+      },
+      {
+        "id": "x7X9w_GIm1s",
+        "title": "LLM Full Course (freeCodeCamp)"
       }
     ],
     "github": [
@@ -1783,6 +1831,14 @@
       {
         "id": "L7z4QnJzV4c",
         "title": "Data Analytics Course (edureka!, 400K+ views)"
+      },
+      {
+        "id": "p3qvj9hO_Bo",
+        "title": "SQL Full Database Course (freeCodeCamp)"
+      },
+      {
+        "id": "VL0H-qTclOg",
+        "title": "Excel for Beginners (freeCodeCamp)"
       }
     ],
     "github": [
@@ -1833,6 +1889,14 @@
       {
         "name": "Information is Beautiful",
         "url": "https://informationisbeautiful.net/"
+      },
+      {
+        "name": "Visual Capitalist",
+        "url": "https://www.visualcapitalist.com/"
+      },
+      {
+        "name": "Data Visualization Society",
+        "url": "https://www.datavisualizationsociety.org/blog"
       }
     ],
     "youtube": [
@@ -1840,6 +1904,24 @@
         "id": "UO98lJQedQc",
         "title": "Data Visualization Tutorial (Corey Schafer)",
         "embed": true
+      },
+      {
+        "id": "PLGquJ_T_JBMQ0-LhE_TvVX0z_Os0k5H8f",
+        "title": "Storytelling with Data Talks & Webinars",
+        "playlist": true
+      },
+      {
+        "id": "PLZo2FfoMkJeE_q-XLfr6S4qCxUq5g2uIj",
+        "title": "Design & Visualization Playlist (TDS / YouTube)",
+        "playlist": true
+      },
+      {
+        "id": "Vl0H-qTclOg",
+        "title": "Excel for Data Visualization (freeCodeCamp)"
+      },
+      {
+        "id": "6xv6Y0rRES0",
+        "title": "Tableau Full Course (freeCodeCamp)"
       }
     ],
     "paths": [
@@ -1959,6 +2041,14 @@
       {
         "name": "MLOps Zoomcamp",
         "url": "https://github.com/DataTalksClub/mlops-zoomcamp"
+      },
+      {
+        "name": "Coursera · MLOps Specialization",
+        "url": "https://www.coursera.org/specializations/mlops-machine-learning-production"
+      },
+      {
+        "name": "DeepLearning.AI · Machine Learning in Production",
+        "url": "https://www.deeplearning.ai/short-courses/machine-learning-in-production/"
       }
     ],
     "books": [
@@ -1969,6 +2059,14 @@
       {
         "name": "Building Machine Learning Powered Applications",
         "url": "https://www.oreilly.com/library/view/building-machine-learning/9781492045106/"
+      },
+      {
+        "name": "Reliable Machine Learning",
+        "url": "https://www.oreilly.com/library/view/reliable-machine-learning/9781098106220/"
+      },
+      {
+        "name": "Introducing MLOps",
+        "url": "https://www.oreilly.com/library/view/introducing-mlops/9781492083283/"
       }
     ],
     "blogs": [
@@ -1979,6 +2077,22 @@
       {
         "name": "Towards Data Science · MLOps",
         "url": "https://towardsdatascience.com/tagged/mlops"
+      },
+      {
+        "name": "MLflow Blog",
+        "url": "https://mlflow.org/blog/"
+      },
+      {
+        "name": "Kubeflow Blog",
+        "url": "https://blog.kubeflow.org/"
+      },
+      {
+        "name": "Netflix Tech Blog · ML Platform",
+        "url": "https://netflixtechblog.com/tagged/machine-learning"
+      },
+      {
+        "name": "Spotify Engineering · ML & Data",
+        "url": "https://engineering.atspotify.com/tag/machine-learning/"
       }
     ],
     "youtube": [
@@ -1986,6 +2100,14 @@
         "id": "86nEoG6y0-k",
         "title": "MLOps Course (freeCodeCamp)",
         "embed": true
+      },
+      {
+        "id": "06-AZXmwHjo",
+        "title": "End-to-End MLOps Pipeline (Made With ML)"
+      },
+      {
+        "id": "06-AZXmwHjo",
+        "title": "MLOps Fundamentals (DataTalksClub)"
       }
     ],
     "paths": [
@@ -1993,6 +2115,48 @@
       "Master model versioning → experiment tracking → model registry → deployment → A/B testing.",
       "Study containerization → orchestration (Kubernetes) → model monitoring → retraining pipelines.",
       "Build projects: deploy model → set up monitoring → automate retraining → scale infrastructure."
+    ],
+    "github": [
+      {
+        "name": "mlflow",
+        "url": "https://github.com/mlflow/mlflow"
+      },
+      {
+        "name": "kubeflow",
+        "url": "https://github.com/kubeflow/kubeflow"
+      },
+      {
+        "name": "kserve (serverless model serving)",
+        "url": "https://github.com/kserve/kserve"
+      },
+      {
+        "name": "Seldon Core",
+        "url": "https://github.com/SeldonIO/seldon-core"
+      },
+      {
+        "name": "BentoML",
+        "url": "https://github.com/bentoml/BentoML"
+      },
+      {
+        "name": "Metaflow",
+        "url": "https://github.com/Netflix/metaflow"
+      },
+      {
+        "name": "Feast (feature store)",
+        "url": "https://github.com/feast-dev/feast"
+      },
+      {
+        "name": "TFX (TensorFlow Extended)",
+        "url": "https://github.com/tensorflow/tfx"
+      },
+      {
+        "name": "MLRun (Iguazio)",
+        "url": "https://github.com/mlrun/mlrun"
+      },
+      {
+        "name": "awesome-mlops",
+        "url": "https://github.com/visenger/awesome-mlops"
+      }
     ]
   },
   "devops": {

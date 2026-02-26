@@ -28,14 +28,11 @@ Use with [ROADMAP.md](./ROADMAP.md) for full backlog; this file focuses on struc
 
 ## 2. HTML refactoring
 
-- [ ] **Single nav source**  
-  Nav is duplicated in every HTML (`index.html`, `playground.html`, `resources.html`, `tools.html`, `trends.html`, `jobs.html`, `docs.html`).  
-  **Options:** (a) JS that injects nav from one template/fragment, or (b) small build step (e.g. Eleventy) that includes a shared partial.  
-  Define nav once; add/rename pages in one place.
+- [x] **Single nav source**  
+  Done: `nav-data.js` + `nav-inject.js` inject nav into pages with `data-nav-inject` (see TODO-TOMORROW.md, ROADMAP.md). Nav defined once; add/rename pages in one place.
 
-- [ ] **Document script load order**  
-  Add a “Script order” section in README and a comment block at the top of each HTML listing required order (e.g. Tailwind → main.css → analytics → page script).  
-  Prevents breakage when reordering or lazy-loading.
+- [x] **Document script load order**  
+  Done: “Script order” section in README and comment block at top of each main HTML (Tailwind → main.css → analytics → page script). See ROADMAP.md.
 
 - [ ] **Consistent layout and semantics**  
   Same wrapper/landmark structure across pages (e.g. `<main>`, nav, footer if any); shared class names for app bar and drawer so CSS stays predictable.

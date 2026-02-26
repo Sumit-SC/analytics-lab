@@ -1,12 +1,8 @@
 /**
  * Assistant panel (shared): persists chat locally (localStorage).
  * - Stores last 50 messages
- * - Optional full offline chatbot (~80MB) via transformers.js
- *
- * Future: jobs-page context (see SITE-AND-JOB-PREP-TODO.md)
- * - When opened on jobs page (body data-page="jobs" or pathname includes "jobs"): show job-prep-focused welcome and suggested prompts.
- * - Optional: read current role/company from page (e.g. from a job card or global "target role" field) and pass into first prompt or suggestions.
- * - Add job-prep FAQ entries to light mode (STAR, common technical/behavioral questions) so value without downloading 80MB model.
+ * - Optional full offline chatbot (~80MB) via transformers.js (lazy-loaded on "Enable full chatbot")
+ * - Jobs page: job-prep welcome, suggested prompts, one-click mock question, job-prep FAQ in light mode (STAR, common questions)
  */
 
 (function () {
@@ -92,6 +88,69 @@
 		} catch (e) { return false; }
 	}
 
+	var JOB_PREP_SUGGESTED_PROMPTS = [
+		'Give me one mock behavioral interview question for a data analyst.',
+		'Ask me a technical question for a data analyst role.',
+		'How do I tailor my 1-minute pitch for a product analyst role?',
+		'Explain the STAR method with a short example.',
+		'What are common technical interview questions for data analysts?',
+		'How do I explain a project gap or career change in an interview?',
+	];
+	var MOCK_QUESTIONS = [
+		'Tell me about a time when you had to explain a complex analysis to a non-technical stakeholder. What was the situation and how did you approach it?',
+		'Describe a project where you used data to drive a business decision. What was the outcome?',
+		'How do you prioritize when multiple stakeholders have conflicting requests for analysis?',
+		'Tell me about a time you found an error in a dataset or report. How did you handle it?',
+		'Give an example of when you had to learn a new tool or skill quickly to complete a project.',
+		'Describe a situation where you had to work with incomplete or messy data. What did you do?',
+		'How would you explain A/B testing and statistical significance to a marketing manager?',
+		'Tell me about a time you disagreed with a colleague about the interpretation of data. How did you resolve it?',
+	];
+
+	function addSuggestedPromptsAndMockButton() {
+		if (!messagesEl || !isJobsPage()) return;
+		var wrap = document.createElement('div');
+		wrap.className = 'assistant-suggested-prompts mt-3 space-y-2';
+		wrap.setAttribute('aria-label', 'Suggested prompts');
+		var label = document.createElement('p');
+		label.className = 'text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2';
+		label.textContent = 'Suggested:';
+		wrap.appendChild(label);
+		var chipsRow = document.createElement('div');
+		chipsRow.className = 'flex flex-wrap gap-2';
+		JOB_PREP_SUGGESTED_PROMPTS.forEach(function (promptText) {
+			var btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
+			btn.textContent = promptText.length > 45 ? promptText.slice(0, 42) + '…' : promptText;
+			btn.title = promptText;
+			btn.addEventListener('click', function () {
+				inputEl.value = promptText;
+				inputEl.focus();
+			});
+			chipsRow.appendChild(btn);
+		});
+		wrap.appendChild(chipsRow);
+		var mockRow = document.createElement('div');
+		mockRow.className = 'pt-2 border-t border-gray-200 dark:border-gray-700';
+		var mockBtn = document.createElement('button');
+		mockBtn.type = 'button';
+		mockBtn.className = 'px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-400/40 transition-colors';
+		mockBtn.textContent = '🎤 Ask me one mock question';
+		mockBtn.addEventListener('click', function () {
+			var q = MOCK_QUESTIONS[Math.floor(Math.random() * MOCK_QUESTIONS.length)];
+			add('assistant', q, null);
+			push({ role: 'assistant', text: q });
+			var hint = 'Practice answering above. Type your answer and send; enable full chatbot for feedback.';
+			add('assistant', hint, null);
+			push({ role: 'assistant', text: hint });
+		});
+		mockRow.appendChild(mockBtn);
+		wrap.appendChild(mockRow);
+		messagesEl.appendChild(wrap);
+		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
 	function openPanel() {
 		panel.classList.add('open');
 		if (overlay) overlay.classList.add('show');
@@ -99,14 +158,39 @@
 		panel.setAttribute('aria-hidden', 'false');
 		if (overlay) overlay.setAttribute('aria-hidden', 'false');
 		if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
+		// Focus trap: keep Tab inside panel when open
+		function handleKey(e) {
+			if (e.key !== 'Tab' || !panel.classList.contains('open')) return;
+			var focusable = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+			focusable = Array.prototype.filter.call(focusable, function (el) {
+				return el.offsetParent !== null && !el.disabled && el.getAttribute('aria-hidden') !== 'true';
+			});
+			if (!focusable.length) return;
+			var first = focusable[0];
+			var last = focusable[focusable.length - 1];
+			if (e.shiftKey) {
+				if (document.activeElement === first) {
+					e.preventDefault();
+					last.focus();
+				}
+			} else {
+				if (document.activeElement === last) {
+					e.preventDefault();
+					first.focus();
+				}
+			}
+		}
+		document.addEventListener('keydown', handleKey);
+		panel._assistantFocusTrap = handleKey;
 		if (messagesEl.children.length === 0) {
 			var onJobs = isJobsPage();
 			var welcome = onJobs
-				? 'You\'re on the jobs page. I can help with interview prep, mock questions, or explaining your experience. Ask anything or enable the full chatbot (~80MB) below. Chat is saved in your browser.'
+				? 'You\'re on the jobs page. I can help with interview prep, mock questions, or explaining your experience. Use the suggestions below or enable the full chatbot (~80MB). Chat is saved in your browser.'
 				: 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).';
 			var searchQuery = onJobs ? 'STAR method interview answer' : 'what is flan t5 small model size';
 			add('assistant', welcome, searchQuery);
 			push({ role: 'assistant', text: welcome, searchQuery: searchQuery });
+			if (onJobs) addSuggestedPromptsAndMockButton();
 		}
 	}
 	function closePanel() {
@@ -115,6 +199,10 @@
 		btn.setAttribute('aria-expanded', 'false');
 		panel.setAttribute('aria-hidden', 'true');
 		if (overlay) overlay.setAttribute('aria-hidden', 'true');
+		if (panel._assistantFocusTrap) {
+			document.removeEventListener('keydown', panel._assistantFocusTrap);
+			panel._assistantFocusTrap = null;
+		}
 		if (btn && typeof btn.focus === 'function') btn.focus();
 	}
 
@@ -223,6 +311,7 @@
 			messagesEl.innerHTML = '';
 			add('assistant', 'Chat cleared. Ask a question any time.', null);
 			push({ role: 'assistant', text: 'Chat cleared. Ask a question any time.' });
+			if (isJobsPage()) addSuggestedPromptsAndMockButton();
 		});
 	}
 
@@ -264,6 +353,22 @@
 						});
 					});
 				});
+			return;
+		}
+
+		// Job-prep FAQ in light mode (no model needed)
+		var qLower = text.toLowerCase();
+		var faqAnswer = null;
+		if (qLower.indexOf('star') !== -1 && (qLower.indexOf('method') !== -1 || qLower.indexOf('interview') !== -1)) {
+			faqAnswer = 'STAR method: Situation (set the scene), Task (your responsibility), Action (what you did, steps you took), Result (outcome, what you learned). Example: "In my previous role (S), I had to improve report accuracy (T). I built validation checks and trained the team (A), which cut errors by 40% (R)." Use it for behavioral questions.';
+		} else if (qLower.indexOf('common') !== -1 && (qLower.indexOf('data analyst') !== -1 || qLower.indexOf('analyst') !== -1) && (qLower.indexOf('question') !== -1 || qLower.indexOf('interview') !== -1)) {
+			faqAnswer = 'Common data analyst interview questions: 1) Tell me about a project where you used data to drive a decision. 2) How do you handle missing or messy data? 3) Explain a time you had to present to non-technical stakeholders. 4) SQL: joins, aggregations, window functions. 5) How do you prioritize when multiple teams need reports? 6) Describe your experience with A/B testing or experimentation. 7) How do you ensure data quality? Prepare 1–2 concrete examples per theme.';
+		} else if (qLower.indexOf('behavioral') !== -1 || qLower.indexOf('behavioural') !== -1) {
+			faqAnswer = 'Behavioral questions ask for past examples. Use STAR: Situation, Task, Action, Result. Prepare 3–5 stories (e.g. conflict, leadership, failure, tight deadline) that you can adapt. Keep answers under 2 minutes; offer to go deeper if they ask.';
+		}
+		if (faqAnswer) {
+			add('assistant', faqAnswer, text, 'Search Google for more →');
+			push({ role: 'assistant', text: faqAnswer, searchQuery: text });
 			return;
 		}
 
