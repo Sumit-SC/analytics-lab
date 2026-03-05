@@ -51,4 +51,20 @@
 			hideRoadmap();
 		}
 	});
+
+	// Track checkboxes: persist in localStorage (key: resources_roadmap_track_{slug})
+	var STORAGE_PREFIX = 'resources_roadmap_track_';
+	document.querySelectorAll('.roadmap-track-cb').forEach(function (cb) {
+		var slug = cb.getAttribute('data-slug');
+		if (!slug) return;
+		try {
+			var stored = localStorage.getItem(STORAGE_PREFIX + slug);
+			cb.checked = stored === 'true';
+		} catch (err) { /* ignore */ }
+		cb.addEventListener('change', function () {
+			try {
+				localStorage.setItem(STORAGE_PREFIX + slug, cb.checked ? 'true' : 'false');
+			} catch (err) { /* ignore */ }
+		});
+	});
 })();

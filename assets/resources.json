@@ -3113,5 +3113,329 @@
       "Study statistical tests → regression → time series → build R packages → share code.",
       "Practice on datasets → create visualizations → build dashboards → publish analyses."
     ]
+  },
+  "editors-ides": {
+    "title": "Editors, IDEs & Dev Tools",
+    "summary": "Complete developer tooling stack: editors, terminals, notebooks, AI pair-programming, package managers, and productivity setup for analytics workflows.",
+    "roadmapUrl": "https://roadmap.sh/devops",
+    "courses": [
+      {
+        "name": "Visual Studio Code Docs",
+        "url": "https://code.visualstudio.com/docs"
+      },
+      {
+        "name": "JetBrains Academy · IDE productivity",
+        "url": "https://www.jetbrains.com/academy/"
+      },
+      {
+        "name": "Jupyter Docs",
+        "url": "https://docs.jupyter.org/en/latest/"
+      },
+      {
+        "name": "Cursor IDE · AI-first editor",
+        "url": "https://cursor.com"
+      },
+      {
+        "name": "Marimo · Reactive Python notebooks",
+        "url": "https://marimo.io"
+      },
+      {
+        "name": "Neovim · Getting started",
+        "url": "https://neovim.io/doc/user/"
+      }
+    ],
+    "books": [
+      {
+        "name": "The Missing Semester (Shell + editor productivity)",
+        "url": "https://missing.csail.mit.edu/"
+      },
+      {
+        "name": "VS Code Tips and Tricks",
+        "url": "https://code.visualstudio.com/docs/getstarted/tips-and-tricks"
+      },
+      {
+        "name": "Pro Git (free book)",
+        "url": "https://git-scm.com/book/en/v2"
+      },
+      {
+        "name": "Practical Vim (Drew Neil)",
+        "url": "https://pragprog.com/titles/dnvim2/practical-vim-second-edition/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "VS Code Blog (official)",
+        "url": "https://code.visualstudio.com/blogs"
+      },
+      {
+        "name": "JetBrains Blog",
+        "url": "https://blog.jetbrains.com/"
+      },
+      {
+        "name": "Oh My Zsh · Terminal customisation",
+        "url": "https://ohmyz.sh/"
+      },
+      {
+        "name": "Warp Terminal · Modern dev terminal",
+        "url": "https://www.warp.dev/"
+      },
+      {
+        "name": "Cursor Blog · AI pair programming",
+        "url": "https://cursor.com/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ifTF3ags0XI",
+        "title": "VS Code Crash Course (Traversy Media)",
+        "embed": true
+      },
+      {
+        "id": "fJEbVCrEMSE",
+        "title": "Jupyter Notebook Tutorial (freeCodeCamp)"
+      },
+      {
+        "id": "stqUbv-5u2s",
+        "title": "Neovim from Scratch"
+      },
+      {
+        "id": "GznmPACXBlY",
+        "title": "Docker in 100 Seconds (Fireship)"
+      },
+      {
+        "id": "gAkwW2tuIqE",
+        "title": "Terminal Tips Every Dev Should Know"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-vscode",
+        "url": "https://github.com/viatsko/awesome-vscode"
+      },
+      {
+        "name": "vscode-python",
+        "url": "https://github.com/microsoft/vscode-python"
+      },
+      {
+        "name": "awesome-devenv",
+        "url": "https://github.com/jondot/awesome-devenv"
+      },
+      {
+        "name": "awesome-shell",
+        "url": "https://github.com/alebcay/awesome-shell"
+      },
+      {
+        "name": "dotfiles collection",
+        "url": "https://github.com/mathiasbynens/dotfiles"
+      }
+    ],
+    "paths": [
+      "Set up VS Code profile → Python/Jupyter extensions → formatter/linter/debugger workflow.",
+      "Learn terminal basics + git integration → snippets → keyboard shortcuts for faster delivery.",
+      "Build a clean notebook + script workflow: prototype in Jupyter, productionize in IDE.",
+      "Try AI-assisted coding with Cursor/Copilot → measure productivity uplift on real tasks.",
+      "Configure Docker + devcontainers for reproducible environments across machines."
+    ]
+  },
+  "productivity-tools": {
+    "title": "Productivity & Workflow Tools",
+    "summary": "Non-technical and cross-functional tools for managing projects, tracking work, note-taking, and staying productive as a data professional.",
+    "courses": [
+      {
+        "name": "Notion Academy",
+        "url": "https://www.notion.so/help/guides"
+      },
+      {
+        "name": "Todoist Productivity Guide",
+        "url": "https://todoist.com/productivity-methods"
+      },
+      {
+        "name": "Google Project Management Certificate",
+        "url": "https://www.coursera.org/professional-certificates/google-project-management"
+      },
+      {
+        "name": "Obsidian · Getting started",
+        "url": "https://help.obsidian.md/Getting+started"
+      }
+    ],
+    "books": [
+      {
+        "name": "Atomic Habits (James Clear)",
+        "url": "https://jamesclear.com/atomic-habits"
+      },
+      {
+        "name": "Deep Work (Cal Newport)",
+        "url": "https://www.calnewport.com/books/deep-work/"
+      },
+      {
+        "name": "The Pragmatic Programmer",
+        "url": "https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Notion Blog",
+        "url": "https://www.notion.so/blog"
+      },
+      {
+        "name": "Obsidian Community Hub",
+        "url": "https://publish.obsidian.md/hub"
+      },
+      {
+        "name": "Linear Blog · Product-building insights",
+        "url": "https://linear.app/blog"
+      },
+      {
+        "name": "Figma Blog · Design and collaboration",
+        "url": "https://www.figma.com/blog/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ONG26-2mIHo",
+        "title": "Notion Tour for Beginners",
+        "embed": true
+      },
+      {
+        "id": "DbsAQSIKQXk",
+        "title": "Obsidian for Beginners"
+      },
+      {
+        "id": "sUKpt3w0CjA",
+        "title": "GTD Method Explained (Thomas Frank)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-productivity",
+        "url": "https://github.com/jyguyomarch/awesome-productivity"
+      },
+      {
+        "name": "awesome-selfhosted",
+        "url": "https://github.com/awesome-selfhosted/awesome-selfhosted"
+      }
+    ],
+    "paths": [
+      "Set up a personal knowledge base (Notion or Obsidian) → capture learnings daily.",
+      "Use a project board (Linear, Trello, or GitHub Projects) to track portfolio tasks.",
+      "Establish a weekly review habit: reflect on what shipped, what's blocked, what's next."
+    ]
+  },
+  "communication": {
+    "title": "Communication & Stakeholder Skills",
+    "summary": "Non-technical skills for analysts and data professionals: business communication, storytelling, and influence.",
+    "courses": [
+      {
+        "name": "Coursera · Improving Communication Skills",
+        "url": "https://www.coursera.org/learn/wharton-communication-skills"
+      },
+      {
+        "name": "Google Project Management · Communication module",
+        "url": "https://www.coursera.org/professional-certificates/google-project-management"
+      }
+    ],
+    "books": [
+      {
+        "name": "Storytelling with Data",
+        "url": "https://www.storytellingwithdata.com/books"
+      },
+      {
+        "name": "The Pyramid Principle",
+        "url": "https://www.mheducation.com/highered/product/pyramid-principle-logical-writing-thinking-problem-solving-minto/M9780273710516.html"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Harvard Business Review · Communication",
+        "url": "https://hbr.org/topic/subject/communication"
+      },
+      {
+        "name": "Atlassian Teamwork Blog",
+        "url": "https://www.atlassian.com/blog/teamwork"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "Unzc731iCUY",
+        "title": "Talk Nerdy to Me: Public speaking tips (TEDx)",
+        "embed": true
+      },
+      {
+        "id": "M_eV5qEBh4I",
+        "title": "How to Present Data Clearly"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-public-speaking",
+        "url": "https://github.com/matteofigus/awesome-speaking"
+      }
+    ],
+    "paths": [
+      "Practice concise updates (context, insight, recommendation) for every analysis task.",
+      "Learn data storytelling frameworks and present one dashboard insight weekly.",
+      "Improve stakeholder communication by documenting assumptions, risks, and decisions."
+    ]
+  },
+  "resume-interview": {
+    "title": "Resume, Portfolio & Interview Prep",
+    "summary": "Career toolkit for both tech and non-tech roles: resumes, portfolio narratives, and interview readiness.",
+    "roadmapUrl": "https://roadmap.sh/ai-data-scientist",
+    "courses": [
+      {
+        "name": "Google · Interview Warmup",
+        "url": "https://grow.google/certificates/interview-warmup/"
+      },
+      {
+        "name": "freeCodeCamp · Build a Developer Portfolio",
+        "url": "https://www.freecodecamp.org/news/how-to-build-a-developer-portfolio/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Decode and Conquer",
+        "url": "https://www.amazon.com/Decode-Conquer-Answers-Management-Interviews/dp/0615930417"
+      },
+      {
+        "name": "The Tech Resume Inside Out",
+        "url": "https://thetechresume.com/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "The Muse · Resume and interview guides",
+        "url": "https://www.themuse.com/advice"
+      },
+      {
+        "name": "Interview Query Blog",
+        "url": "https://www.interviewquery.com/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "1mHjMNZZvFo",
+        "title": "How to build a strong portfolio",
+        "embed": true
+      },
+      {
+        "id": "HAnw168huqA",
+        "title": "Behavioral interview framework (STAR method)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-resume",
+        "url": "https://github.com/posquit0/Awesome-CV"
+      },
+      {
+        "name": "data-science-interviews",
+        "url": "https://github.com/alexeygrigorev/data-science-interviews"
+      }
+    ],
+    "paths": [
+      "Build one resume + one portfolio story for each target role (analyst, scientist, engineer).",
+      "Prepare STAR stories for impact, ownership, conflict, and learning.",
+      "Practice role-specific mock interviews weekly and refine project narratives."
+    ]
   }
 }

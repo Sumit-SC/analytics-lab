@@ -1464,14 +1464,15 @@
 		}
 		var forecastLink = document.getElementById('home-weather-forecast-link');
 		if (forecastLink && lastWeatherLat != null && lastWeatherLon != null) {
-			// User-facing full forecast: generic weather search (no account / API required)
-			var q = locationName || (lastWeatherLat + ',' + lastWeatherLon);
-			forecastLink.href = 'https://www.google.com/search?q=' + encodeURIComponent('weather ' + q);
+			// Full forecast: Weather.com with current location (lat,lon) for accurate local forecast
+			forecastLink.href = 'https://weather.com/weather/today/l/' + lastWeatherLat + ',' + lastWeatherLon;
+			forecastLink.title = 'Full forecast at Weather.com for this location';
 		}
 		var mapLink = document.getElementById('home-weather-map-link');
 		if (mapLink && lastWeatherLat != null && lastWeatherLon != null) {
-			// Map search for this location
+			// Map: Google Maps centered on this location
 			mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + lastWeatherLat + ',' + lastWeatherLon;
+			mapLink.title = 'Open map for this location';
 		}
 		var card = document.getElementById('home-weather-card');
 		if (card) {
@@ -1560,7 +1561,78 @@
 
 	if (weatherSetBtn && weatherSearch) {
 		weatherSetBtn.addEventListener('click', function () { searchCityAndSet(weatherSearch.value); });
-		weatherSearch.addEventListener('keydown', function (e) { if (e.key === 'Enter') searchCityAndSet(weatherSearch.value); });
+		weatherSearch.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter') {
+				hideWeatherAutocomplete();
+				searchCityAndSet(weatherSearch.value);
+			} else if (e.key === 'Escape') {
+				hideWeatherAutocomplete();
+			}
+		});
+		// Search-as-you-type: show matching cities (Open-Meteo geocoding, min 2 chars)
+		var weatherAutocompleteEl = document.getElementById('home-weather-autocomplete');
+		var weatherAutocompleteTimer = null;
+		function hideWeatherAutocomplete() {
+			if (weatherAutocompleteEl) {
+				weatherAutocompleteEl.classList.add('hidden');
+				weatherAutocompleteEl.innerHTML = '';
+				weatherAutocompleteEl.setAttribute('aria-hidden', 'true');
+			}
+			if (weatherSearch) weatherSearch.setAttribute('aria-expanded', 'false');
+		}
+		function showWeatherAutocomplete(results) {
+			if (!weatherAutocompleteEl || !weatherSearch) return;
+			if (!results || !results.length) { hideWeatherAutocomplete(); return; }
+			weatherAutocompleteEl.innerHTML = '';
+			results.forEach(function (r) {
+				var name = r.name || '';
+				var admin = r.admin1 ? ', ' + r.admin1 : '';
+				var country = r.country_code ? ' ' + r.country_code.toUpperCase() : '';
+				var label = name + admin + country;
+				var item = document.createElement('div');
+				item.setAttribute('role', 'option');
+				item.className = 'home-weather-autocomplete-item px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0';
+				item.textContent = label;
+				item.addEventListener('click', function () {
+					var displayName = (r.name || '') + (r.country_code ? ', ' + r.country_code.toUpperCase() : '');
+					weatherSearch.value = label.trim();
+					hideWeatherAutocomplete();
+					setWeatherByCoords(r.latitude, r.longitude, displayName);
+				});
+				weatherAutocompleteEl.appendChild(item);
+			});
+			weatherAutocompleteEl.classList.remove('hidden');
+			weatherAutocompleteEl.setAttribute('aria-hidden', 'false');
+			weatherSearch.setAttribute('aria-expanded', 'true');
+		}
+		function fetchWeatherSuggestions(query) {
+			query = (query || '').trim();
+			if (query.length < 2) { hideWeatherAutocomplete(); return; }
+			var url = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(query) + '&count=8&language=en';
+			fetch(url)
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					var list = (data.results || []).slice(0, 8);
+					showWeatherAutocomplete(list);
+				})
+				.catch(function () { hideWeatherAutocomplete(); });
+		}
+		if (weatherSearch) {
+			weatherSearch.addEventListener('input', function () {
+				clearTimeout(weatherAutocompleteTimer);
+				var q = weatherSearch.value;
+				if (q.length < 2) { hideWeatherAutocomplete(); return; }
+				weatherAutocompleteTimer = setTimeout(function () { fetchWeatherSuggestions(q); }, 280);
+			});
+			weatherSearch.addEventListener('blur', function () {
+				setTimeout(hideWeatherAutocomplete, 180);
+			});
+		}
+		document.addEventListener('click', function (e) {
+			if (weatherAutocompleteEl && weatherSearch && !weatherAutocompleteEl.contains(e.target) && e.target !== weatherSearch) {
+				hideWeatherAutocomplete();
+			}
+		});
 	}
 	if (weatherMyLocBtn) {
 		weatherMyLocBtn.addEventListener('click', function () {

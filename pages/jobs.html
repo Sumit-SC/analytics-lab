@@ -318,6 +318,15 @@
 							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
 						</ul>
 					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Tools & Career</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=editors-ides" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Editors & IDEs</a></li>
+							<li><a href="./resources.html?topic=productivity-tools" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Productivity Tools</a></li>
+							<li><a href="./resources.html?topic=communication" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Communication</a></li>
+							<li><a href="./resources.html?topic=resume-interview" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Resume & Interview</a></li>
+						</ul>
+					</div>
 				</nav>
 			</div>
 		</aside>
@@ -360,7 +369,7 @@
 						<div id="railway-ui-embed-fallback" class="hidden absolute inset-0 rounded-lg border-2 border-dashed border-amber-400 dark:border-amber-600 bg-amber-50/95 dark:bg-amber-900/20 flex flex-col items-center justify-center p-6 text-center">
 							<p class="text-amber-800 dark:text-amber-200 font-medium mb-2">Embed may be blocked by an extension</p>
 							<p class="text-sm text-gray-700 dark:text-gray-300 mb-4">The panel above didn’t load. Use the button below to open the app in a new tab.</p>
-							<a href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open Railway Job Search UI in new tab</a>
+							<a id="railway-ui-embed-fallback-link" href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open Railway Job Search UI in new tab</a>
 						</div>
 					</div>
 				</div>
@@ -406,20 +415,20 @@
 		</section>
 
 		<header class="mb-6">
-			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Tracker</h1>
+			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Intelligence Workspace</h1>
 			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-3xl mb-4">
-				Aggregate and track data science jobs from multiple sources. Jobs are automatically matched with your skillset.
+				Portfolio-ready workspace to source, score, and track data and analytics roles from multiple boards in one view.
 			</p>
 			
 			<!-- API Backend: Railway (default) | Vercel -->
 			<div class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
 				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="railway" id="api-backend-railway" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
+					<input type="radio" name="api-backend" value="railway" id="api-backend-railway" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
 					<span class="text-sm text-gray-800 dark:text-gray-200">Railway</span>
 				</label>
 				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
 					<span class="text-sm text-gray-800 dark:text-gray-200">Vercel</span>
 				</label>
 				<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
@@ -538,7 +547,8 @@
 				
 				<!-- Job Sites Multi-Select -->
 				<div class="mb-4">
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🌐 Job Sites (Select Multiple)</label>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🌐 Active data sources</label>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Select at least one source to focus your results. These selections now apply directly to the job list.</p>
 					<div id="job-sites-multiselect" class="max-h-64 overflow-y-auto p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
 						<!-- Will be populated by JavaScript -->
 					</div>

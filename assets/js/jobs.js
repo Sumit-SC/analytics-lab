@@ -33,6 +33,25 @@
 		{ label: 'Remote – US', value: 'remote us' },
 		{ label: 'Remote – EU', value: 'remote eu' }
 	];
+	var JOB_SITE_OPTIONS = [
+		{ id: 'remoteok', name: 'RemoteOK', default: true, aliases: ['remoteok'] },
+		{ id: 'remotive', name: 'Remotive', default: true, aliases: ['remotive'] },
+		{ id: 'weworkremotely', name: 'WeWorkRemotely', default: true, aliases: ['weworkremotely'] },
+		{ id: 'jobscollider', name: 'Jobscollider', default: true, aliases: ['jobscollider'] },
+		{ id: 'wellfound', name: 'Wellfound', default: true, aliases: ['wellfound'] },
+		{ id: 'indeed', name: 'Indeed', default: true, aliases: ['indeed'] },
+		{ id: 'linkedin', name: 'LinkedIn', default: true, aliases: ['linkedin'] },
+		{ id: 'naukri', name: 'Naukri', default: false, aliases: ['naukri'] },
+		{ id: 'himalayas', name: 'Himalayas', default: false, aliases: ['himalayas'] },
+		{ id: 'workingnomads', name: 'Working Nomads', default: false, aliases: ['workingnomads'] },
+		{ id: 'remote.co', name: 'Remote.co', default: false, aliases: ['remote.co', 'remoteco'] },
+		{ id: 'jobspresso', name: 'Jobspresso', default: false, aliases: ['jobspresso'] },
+		{ id: 'authenticjobs', name: 'Authentic Jobs', default: false, aliases: ['authenticjobs', 'authentic_jobs'] },
+		{ id: 'stackoverflow', name: 'Stack Overflow', default: false, aliases: ['stackoverflow', 'stack_overflow'] },
+		{ id: 'greenhouse', name: 'Greenhouse', default: false, aliases: ['greenhouse'] },
+		{ id: 'lever', name: 'Lever', default: false, aliases: ['lever'] },
+		{ id: 'hn_jobs', name: 'HN Jobs', default: false, aliases: ['hn_jobs', 'hnjobs'] }
+	];
 
 	// Skillset keywords for matching (data science domain)
 	var SKILLS_KEYWORDS = [
@@ -83,6 +102,50 @@
 		try {
 			localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ ts: Date.now(), data: data }));
 		} catch (e) {}
+	}
+
+	// Fetch with timeout so we don't hang forever when API is unreachable
+	var FETCH_TIMEOUT_MS = 22000;
+	function fetchWithTimeout(url, options, timeoutMs) {
+		timeoutMs = timeoutMs || FETCH_TIMEOUT_MS;
+		var controller = new AbortController();
+		var timeoutId = setTimeout(function () { controller.abort(); }, timeoutMs);
+		var opts = Object.assign({}, options || {});
+		opts.signal = controller.signal;
+		return fetch(url, opts).then(
+			function (r) {
+				clearTimeout(timeoutId);
+				return r;
+			},
+			function (err) {
+				clearTimeout(timeoutId);
+				if (err && err.name === 'AbortError') {
+					var e = new Error('Request timed out');
+					e.isTimeout = true;
+					throw e;
+				}
+				throw err;
+			}
+		);
+	}
+
+	// Normalize a job from API (Railway uses snake_case; Vercel uses camelCase)
+	function normalizeJobFromApi(item) {
+		if (!item || !item.title || !item.url) return null;
+		return {
+			id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+			title: item.title,
+			company: item.company || 'Unknown',
+			location: item.location || 'Remote',
+			url: item.url,
+			description: item.description || '',
+			tags: Array.isArray(item.tags) ? item.tags : [],
+			source: item.source || 'unknown',
+			date: item.date || new Date().toISOString(),
+			dateFormatted: item.dateFormatted || item.date_formatted || '',
+			postedAgo: item.postedAgo || item.posted_ago || '',
+			matchScore: item.matchScore != null ? item.matchScore : (item.match_score != null ? item.match_score : 0)
+		};
 	}
 
 	function isMobileViewport() {
@@ -141,35 +204,11 @@
 
 	// Setup Enhanced Form (JobSpy-style inputs)
 	function setupEnhancedForm() {
-		// Job sites list (from JobSpy)
-		var jobSites = [
-			{ id: 'linkedin', name: 'LinkedIn', default: true },
-			{ id: 'indeed', name: 'Indeed', default: true },
-			{ id: 'glassdoor', name: 'Glassdoor', default: true },
-			{ id: 'zip_recruiter', name: 'ZipRecruiter', default: true },
-			{ id: 'google', name: 'Google Jobs', default: true },
-			{ id: 'monster', name: 'Monster', default: false },
-			{ id: 'dice', name: 'Dice', default: false },
-			{ id: 'simplyhired', name: 'SimplyHired', default: false },
-			{ id: 'careerbuilder', name: 'CareerBuilder', default: false },
-			{ id: 'remoteok', name: 'RemoteOK', default: true },
-			{ id: 'remotive', name: 'Remotive', default: true },
-			{ id: 'weworkremotely', name: 'WeWorkRemotely', default: true },
-			{ id: 'jobscollider', name: 'Jobscollider', default: true },
-			{ id: 'wellfound', name: 'Wellfound', default: true },
-			{ id: 'stackoverflow', name: 'Stack Overflow', default: true },
-			{ id: 'naukri', name: 'Naukri', default: false },
-			{ id: 'hirist', name: 'Hirist', default: false },
-			{ id: 'workingnomads', name: 'Working Nomads', default: false },
-			{ id: 'himalayas', name: 'Himalayas', default: false },
-			{ id: 'authentic_jobs', name: 'Authentic Jobs', default: false }
-		];
-		
 		// Populate job sites multi-select
 		var multiselect = document.getElementById('job-sites-multiselect');
 		if (multiselect) {
 			multiselect.innerHTML = '';
-			jobSites.forEach(function(site) {
+			JOB_SITE_OPTIONS.forEach(function(site) {
 				var label = document.createElement('label');
 				label.className = 'flex items-center';
 				var checkbox = document.createElement('input');
@@ -183,6 +222,7 @@
 				span.textContent = site.name;
 				label.appendChild(span);
 				multiselect.appendChild(label);
+				checkbox.addEventListener('change', applyFilters);
 			});
 		}
 		
@@ -218,10 +258,11 @@
 				if (daysSlider) daysSlider.value = 3;
 				if (daysDisplay) daysDisplay.textContent = '3';
 				// Reset job sites to defaults
-				jobSites.forEach(function(site) {
+				JOB_SITE_OPTIONS.forEach(function(site) {
 					var checkbox = document.getElementById('site-' + site.id);
 					if (checkbox) checkbox.checked = site.default;
 				});
+				applyFilters();
 			});
 		}
 		
@@ -242,7 +283,7 @@
 		var railwayRadio = document.getElementById('api-backend-railway');
 		var vercelRadio = document.getElementById('api-backend-vercel');
 		var statusEl = document.getElementById('api-status');
-		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'railway';
+		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'vercel';
 		if (savedBackend === 'vercel' && vercelRadio) vercelRadio.checked = true;
 		else if (railwayRadio) railwayRadio.checked = true;
 
@@ -257,7 +298,8 @@
 			localStorage.setItem('job_tracker_api_backend', backend);
 			applyBackendVisibility(backend);
 			applyBackendFormState(backend);
-			fetchAllJobs(backend === 'railway');
+			// Initial load: use cached/snapshot (no force refresh) so both backends load quickly
+			fetchAllJobs(false);
 		}
 
 		if (railwayRadio) railwayRadio.addEventListener('change', function () { if (railwayRadio.checked) updateApiBackend('railway'); });
@@ -341,11 +383,17 @@
 		}
 	}
 
-	// Railway UI embed at top: collapsible; derived from the same base URL as Railway API
-	var RAILWAY_UI_EMBED_URL = RAILWAY_API_URL + '/ui/';
+	// Railway UI embed at top: collapsible; URL from current JOB_PROXY_URL when Railway, else default
 	var EMBED_LOAD_TIMEOUT_MS = 8000;
 	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
+	function getRailwayEmbedUrl() {
+		var proxy = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
+		if (proxy && (proxy.indexOf('railway') !== -1 || proxy.indexOf('up.railway.app') !== -1)) return proxy + '/ui/';
+		return RAILWAY_API_URL + '/ui/';
+	}
 	function setupRailwayUiEmbedToggle() {
+		var fallbackLink = document.getElementById('railway-ui-embed-fallback-link');
+		if (fallbackLink) fallbackLink.href = getRailwayEmbedUrl();
 		var toggleBtn = document.getElementById('railway-ui-embed-toggle');
 		var contentDiv = document.getElementById('railway-ui-embed-content');
 		var iframe = document.getElementById('railway-ui-embed-iframe');
@@ -404,7 +452,7 @@
 				if (!src || src === 'about:blank' || src === '') {
 					hideFallback();
 					if (bannerEl) bannerEl.classList.add('hidden');
-					iframe.setAttribute('src', RAILWAY_UI_EMBED_URL);
+					iframe.setAttribute('src', getRailwayEmbedUrl());
 					loadTimeoutId = setTimeout(function () {
 						loadTimeoutId = null;
 						showFallback();
@@ -867,29 +915,16 @@
 				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
 				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
 				
-				fetch(refreshUrl, { method: 'POST' })
+				fetchWithTimeout(refreshUrl, { method: 'POST' }, 85000)
 					.then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }).catch(function () { return { ok: false, body: null }; }); })
 					.then(function (res) {
 						var refreshData = res.ok ? res.body : null;
 						if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs)) {
-							// Railway /refresh returns jobs directly, use them
+							// Railway /refresh returns jobs directly (snake_case from FastAPI)
 							allJobs = [];
 							refreshData.jobs.forEach(function (item) {
-								if (!item || !item.title || !item.url) return;
-								allJobs.push({
-									id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-									title: item.title,
-									company: item.company || 'Unknown',
-									location: item.location || 'Remote',
-									url: item.url,
-									description: item.description || '',
-									tags: Array.isArray(item.tags) ? item.tags : [],
-									source: item.source || 'unknown',
-									date: item.date || new Date().toISOString(),
-									dateFormatted: item.dateFormatted || '',
-									postedAgo: item.postedAgo || '',
-									matchScore: item.match_score || 0
-								});
+								var job = normalizeJobFromApi(item);
+								if (job) allJobs.push(job);
 							});
 							sourceCounts = refreshData.sourceCounts || {};
 							apiSources = Array.isArray(refreshData.sources) ? refreshData.sources : [];
@@ -919,28 +954,15 @@
 				? (proxyUrl + '/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location))
 				: ('/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location));
 
-			fetch(refreshUrl)
+			fetchWithTimeout(refreshUrl, {}, 25000)
 				.then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }).catch(function () { return { ok: false, body: null }; }); })
 				.then(function (res) {
 					var refreshData = res.ok ? res.body : null;
 					if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs) && refreshData.jobs.length > 0) {
 						allJobs = [];
 						refreshData.jobs.forEach(function (item) {
-							if (!item || !item.title || !item.url) return;
-							allJobs.push({
-								id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-								title: item.title,
-								company: item.company || 'Unknown',
-								location: item.location || 'Remote',
-								url: item.url,
-								description: item.description || '',
-								tags: Array.isArray(item.tags) ? item.tags : [],
-								source: item.source || 'unknown',
-								date: item.date || new Date().toISOString(),
-								dateFormatted: item.dateFormatted || '',
-								postedAgo: item.postedAgo || '',
-								matchScore: 0
-							});
+							var job = normalizeJobFromApi(item);
+							if (job) allJobs.push(job);
 						});
 						processJobsData(refreshData);
 						saveJobsToBrowserCache({
@@ -1011,21 +1033,12 @@
 					
 					allJobs = [];
 					data.jobs.forEach(function (item) {
-						if (!item || !item.title || !item.url) return;
-						allJobs.push({
-							id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-							title: item.title,
-							company: item.company || 'Unknown',
-							location: item.location || loc,
-							url: item.url,
-							description: item.description || '',
-							tags: Array.isArray(item.tags) ? item.tags : ['rssjobs'],
-							source: item.source || 'rssjobs.app',
-							date: item.date || new Date().toISOString(),
-							dateFormatted: item.dateFormatted || '',
-							postedAgo: item.postedAgo || '',
-							matchScore: 0
-						});
+						var job = normalizeJobFromApi(item);
+						if (job) {
+							job.source = job.source || 'rssjobs.app';
+							job.tags = (job.tags && job.tags.length) ? job.tags : ['rssjobs'];
+							allJobs.push(job);
+						}
 					});
 					
 					sourceCounts = { 'rssjobs.app': allJobs.length };
@@ -1094,7 +1107,7 @@
 		if (loadingEl) loadingEl.style.display = 'none';
 		if (errorEl) {
 			errorEl.classList.remove('hidden');
-			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Click Refresh to try again.';
+			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Try switching between Railway and Vercel above, then click Refresh.';
 			var retryBtn = document.getElementById('job-error-retry');
 			if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
 		}
@@ -1106,7 +1119,7 @@
 			? (proxyUrl + '/api/jobs-cached?q=' + encodeURIComponent(query))
 			: ('/api/jobs-cached?q=' + encodeURIComponent(query));
 		
-		fetch(cachedUrl)
+		fetchWithTimeout(cachedUrl, {}, 18000)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				var loadingEl = document.getElementById('job-loading');
@@ -1118,21 +1131,8 @@
 				}
 				
 				data.jobs.forEach(function (item) {
-					if (!item || !item.title || !item.url) return;
-					allJobs.push({
-						id: item.id || (item.source + '_' + Math.random().toString(36).slice(2)),
-						title: item.title,
-						company: item.company || 'Unknown',
-						location: item.location || 'Remote',
-						url: item.url,
-						description: item.description || '',
-						tags: Array.isArray(item.tags) ? item.tags : [],
-						source: item.source || 'unknown',
-						date: item.date || item.postedDate || new Date().toISOString(),
-						dateFormatted: item.dateFormatted || '',
-						postedAgo: item.postedAgo || '',
-						matchScore: 0
-					});
+					var job = normalizeJobFromApi(item);
+					if (job) allJobs.push(job);
 				});
 				processJobsData(data);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
@@ -1156,7 +1156,7 @@
 			apiUrl += '&limit=' + requestLimit;
 		}
 		
-		fetch(apiUrl)
+		fetchWithTimeout(apiUrl, {}, 22000)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				var loadingEl = document.getElementById('job-loading');
@@ -1171,21 +1171,8 @@
 				
 				allJobs = [];
 				data.jobs.forEach(function (item) {
-					if (!item || !item.title || !item.url) return;
-					allJobs.push({
-						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-						title: item.title,
-						company: item.company || 'Unknown',
-						location: item.location || 'Remote',
-						url: item.url,
-						description: item.description || '',
-						tags: Array.isArray(item.tags) ? item.tags : [],
-						source: item.source || 'unknown',
-						date: item.date || new Date().toISOString(),
-						dateFormatted: item.dateFormatted || '',
-						postedAgo: item.postedAgo || '',
-						matchScore: item.match_score || 0
-					});
+					var job = normalizeJobFromApi(item);
+					if (job) allJobs.push(job);
 				});
 				
 				sourceCounts = data.sourceCounts || {};
@@ -1218,22 +1205,8 @@
 								.then(function (pageData) {
 									if (pageData && pageData.ok && Array.isArray(pageData.jobs)) {
 										pageData.jobs.forEach(function (item) {
-											if (!item || !item.title || !item.url) return;
-											if (allJobs.length >= targetLimit) return;
-											allJobs.push({
-												id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-												title: item.title,
-												company: item.company || 'Unknown',
-												location: item.location || 'Remote',
-												url: item.url,
-												description: item.description || '',
-												tags: Array.isArray(item.tags) ? item.tags : [],
-												source: item.source || 'unknown',
-												date: item.date || new Date().toISOString(),
-												dateFormatted: item.dateFormatted || '',
-												postedAgo: item.postedAgo || '',
-												matchScore: item.match_score || 0
-											});
+											var job = normalizeJobFromApi(item);
+											if (job && allJobs.length < targetLimit) allJobs.push(job);
 										});
 										pagesFetched++;
 										fetchNextPage(pageNum + 1);
@@ -1269,7 +1242,7 @@
 	function fetchRailwayRefresh(proxyUrl, query, days, limit) {
 		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
 		
-		fetch(refreshUrl, { method: 'POST' })
+		fetchWithTimeout(refreshUrl, { method: 'POST' }, 85000)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				var loadingEl = document.getElementById('job-loading');
@@ -1282,21 +1255,8 @@
 				
 				allJobs = [];
 				data.jobs.forEach(function (item) {
-					if (!item || !item.title || !item.url) return;
-					allJobs.push({
-						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-						title: item.title,
-						company: item.company || 'Unknown',
-						location: item.location || 'Remote',
-						url: item.url,
-						description: item.description || '',
-						tags: Array.isArray(item.tags) ? item.tags : [],
-						source: item.source || 'unknown',
-						date: item.date || new Date().toISOString(),
-						dateFormatted: item.dateFormatted || '',
-						postedAgo: item.postedAgo || '',
-						matchScore: item.match_score || 0
-					});
+					var job = normalizeJobFromApi(item);
+					if (job) allJobs.push(job);
 				});
 				
 				sourceCounts = data.sourceCounts || {};
@@ -1320,7 +1280,7 @@
 			apiUrl += '&rssjobs=' + encodeURIComponent(rssjobsFeedUrl.trim());
 		}
 		
-		fetch(apiUrl)
+		fetchWithTimeout(apiUrl, {}, 22000)
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
@@ -1330,21 +1290,8 @@
 				}
 				
 				data.jobs.forEach(function (item) {
-					if (!item || !item.title || !item.url) return;
-					allJobs.push({
-						id: item.id || ('job_' + Math.random().toString(36).slice(2)),
-						title: item.title,
-						company: item.company || 'Unknown',
-						location: item.location || 'Remote',
-						url: item.url,
-						description: item.description || '',
-						tags: Array.isArray(item.tags) ? item.tags : [],
-						source: item.source || 'unknown',
-						date: item.date || new Date().toISOString(),
-						dateFormatted: item.dateFormatted || '',
-						postedAgo: item.postedAgo || '',
-						matchScore: 0
-					});
+					var job = normalizeJobFromApi(item);
+					if (job) allJobs.push(job);
 				});
 				
 				processJobsData(data);
@@ -2373,6 +2320,29 @@
 		return 'low';
 	}
 
+	function normalizeSourceName(source) {
+		return String(source || '').toLowerCase().replace(/[\s\-_]/g, '');
+	}
+
+	function getSelectedSiteAliases() {
+		var selectedAliases = {};
+		JOB_SITE_OPTIONS.forEach(function (site) {
+			var cb = document.getElementById('site-' + site.id);
+			if (!cb || !cb.checked) return;
+			(site.aliases || [site.id]).forEach(function (alias) {
+				selectedAliases[normalizeSourceName(alias)] = true;
+			});
+		});
+		return selectedAliases;
+	}
+
+	function hasAnySiteSelection() {
+		return JOB_SITE_OPTIONS.some(function (site) {
+			var cb = document.getElementById('site-' + site.id);
+			return !!(cb && cb.checked);
+		});
+	}
+
 	// Apply filters
 	function applyFilters() {
 		var searchInput = document.getElementById('job-search-input');
@@ -2388,6 +2358,8 @@
 		var statusFilter = filterStatus ? filterStatus.value : 'all';
 		var ageFilter = filterAge ? filterAge.value : 'all';
 		var roleFilter = filterRole ? filterRole.value : 'all';
+		var selectedSiteAliases = getSelectedSiteAliases();
+		var useSiteFilter = hasAnySiteSelection();
 
 		var now = new Date();
 		var ageDays = ageFilter === 'all' ? null : parseInt(ageFilter, 10) || null;
@@ -2401,6 +2373,10 @@
 
 			// Source filter
 			if (sourceFilter !== 'all' && job.source !== sourceFilter) return false;
+			if (useSiteFilter) {
+				var jobSourceNorm = normalizeSourceName(job.source);
+				if (!selectedSiteAliases[jobSourceNorm]) return false;
+			}
 
 			// Match filter
 			if (matchFilter !== 'all') {

@@ -63,6 +63,7 @@
 			</div>
 			<div class="resource-detail-iframe-wrap">
 				<iframe id="resource-detail-iframe" title="Resource preview"></iframe>
+				<p id="resource-detail-embed-hint" class="resource-detail-embed-hint text-xs text-gray-500 dark:text-gray-400 mt-2 px-2">If the preview is blank, the site may block embedding. Use <strong>Open in new tab</strong> above.</p>
 			</div>
 		</div>
 	</div>
@@ -82,7 +83,7 @@
 			<div>
 				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Roadmaps</h3>
 				<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-					Opens on <span class="font-semibold">roadmap.sh</span> in a new tab. Your progress and checkmarks are stored on their site.
+					Opens on <span class="font-semibold">roadmap.sh</span> in a new tab. Tick <strong>Track</strong> to mark progress (saved in this browser).
 				</p>
 			</div>
 			<button type="button" id="roadmap-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close Roadmap">&#10005;</button>
@@ -93,43 +94,63 @@
 					Pick a roadmap to open it on <span class="font-semibold">roadmap.sh</span>. Keep that tab pinned while you work through the learning paths here.
 				</p>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-					<a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>Data Analyst roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>AI / Data Scientist roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh/data-engineer" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>Data Engineer roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh/machine-learning-engineer" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>ML Engineer roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh/devops" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>DevOps roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh/python" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>Python roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh/sql" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
-						<span>SQL roadmap</span>
-						<span class="text-xs text-gray-400">&#8599;</span>
-					</a>
-					<a href="https://roadmap.sh" target="_blank" rel="noopener"
-						class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="data-analyst" aria-label="Track Data Analyst roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">Data Analyst roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="ai-data-scientist" aria-label="Track AI Data Scientist roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">AI / Data Scientist roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="data-engineer" aria-label="Track Data Engineer roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/data-engineer" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">Data Engineer roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="machine-learning-engineer" aria-label="Track ML Engineer roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/machine-learning-engineer" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">ML Engineer roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="devops" aria-label="Track DevOps roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/devops" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">DevOps roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="python" aria-label="Track Python roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/python" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">Python roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<div class="roadmap-track-row flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100">
+						<label class="flex items-center gap-2 shrink-0 cursor-pointer">
+							<input type="checkbox" class="roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-slug="sql" aria-label="Track SQL roadmap">
+							<span class="text-gray-600 dark:text-gray-400">Track</span>
+						</label>
+						<a href="https://roadmap.sh/sql" target="_blank" rel="noopener" class="flex-1 hover:text-primary truncate">SQL roadmap</a>
+						<span class="text-xs text-gray-400 shrink-0">&#8599;</span>
+					</div>
+					<a href="https://roadmap.sh" target="_blank" rel="noopener" class="material-button flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800">
 						<span>Browse all roadmaps</span>
 						<span class="text-xs text-gray-400">&#8599;</span>
 					</a>

@@ -15,7 +15,8 @@
 	var topics = [
 		{ label: 'Programming', items: [
 			{ topic: 'python', label: 'Python' }, { topic: 'sql', label: 'SQL' }, { topic: 'git', label: 'Git' },
-			{ topic: 'stats', label: 'Statistics' }, { topic: 'math', label: 'Mathematics' }, { topic: 'oops', label: 'OOP' }, { topic: 'prompting', label: 'Prompting' }
+			{ topic: 'stats', label: 'Statistics' }, { topic: 'math', label: 'Mathematics' }, { topic: 'oops', label: 'OOP' }, { topic: 'prompting', label: 'Prompting' },
+			{ topic: 'editors-ides', label: 'Editors & IDEs' }
 		]},
 		{ label: 'Data Analytics', items: [
 			{ topic: 'data-analytics', label: 'Data Analytics' }, { topic: 'pandas', label: 'Pandas' }, { topic: 'numpy', label: 'NumPy' },
@@ -37,6 +38,9 @@
 		]},
 		{ label: 'Business Intelligence', items: [
 			{ topic: 'business-analytics', label: 'Business Analytics' }, { topic: 'excel', label: 'Excel' }, { topic: 'power-bi', label: 'Power BI' }, { topic: 'tableau', label: 'Tableau' }
+		]},
+		{ label: 'Career & Non-Tech', items: [
+			{ topic: 'communication', label: 'Communication Skills' }, { topic: 'resume-interview', label: 'Resume & Interview Prep' }
 		]}
 	];
 

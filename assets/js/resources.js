@@ -110,6 +110,11 @@
 		} catch (e) {}
 
 		var topicKeys = Object.keys(topics);
+		var booksCount = (t.books && t.books.length) || 0;
+		var blogsCount = (t.blogs && t.blogs.length) || 0;
+		var coursesCount = (t.courses && t.courses.length) || 0;
+		var githubCount = (t.github && t.github.length) || 0;
+		var videosCount = (t.youtube && t.youtube.length) || 0;
 
 		var html = '';
 		html += '<div class="mb-4 flex flex-wrap items-center justify-between gap-3">';
@@ -126,10 +131,16 @@
 		html += '  </div>';
 		html += '</div>';
 
-		html += '<h1 class="text-3xl font-bold mb-2">Learn ' + (t.title || '') + '</h1>';
+		html += '<h1 class="text-3xl font-bold mb-2">Learning Studio: ' + (t.title || '') + '</h1>';
 		if (t.summary) {
 			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">' + t.summary + '</p>';
 		}
+		html += '<div class="mb-6 flex flex-wrap gap-2 text-xs">';
+		html += '<span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">Videos: <strong>' + videosCount + '</strong></span>';
+		html += '<span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">Courses: <strong>' + coursesCount + '</strong></span>';
+		html += '<span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">Books/Blogs: <strong>' + (booksCount + blogsCount) + '</strong></span>';
+		html += '<span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">GitHub Repos: <strong>' + githubCount + '</strong></span>';
+		html += '</div>';
 		// Help users learn properly: suggested order (Notion-style callout)
 		html += '<div class="mb-6 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">';
 		html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">How to use this page</p>';
@@ -152,10 +163,21 @@
 		html += '</div></div>';
 		var roadmapUrl = (t.roadmapUrl || '').trim();
 		if (roadmapUrl) {
-			html += '<div class="mb-6 p-4 rounded-xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10">';
-			html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">What should I learn next?</p>';
-			html += '<p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Follow a step-by-step roadmap and tick off skills as you go.</p>';
-			html += '<a href="' + roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary text-white px-4 py-2 text-sm font-semibold hover:opacity-90">Open roadmap on roadmap.sh →</a>';
+			html += '<div class="mb-6 rounded-xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10 overflow-hidden" data-topic-roadmap="' + escapeHtml(topicKey) + '">';
+			html += '<div class="p-4">';
+			html += '<p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">Study Roadmap</p>';
+			html += '<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Interactive skill checklist from roadmap.sh. Expand the preview below or open it in a new tab to track your progress.</p>';
+			html += '<div class="flex flex-wrap items-center gap-3 mb-3">';
+			html += '<a href="' + roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary text-white px-4 py-2 text-sm font-semibold hover:opacity-90">Open full roadmap →</a>';
+			html += '<label class="inline-flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">';
+			html += '<input type="checkbox" class="topic-roadmap-track-cb rounded border-gray-300 dark:border-gray-600 text-primary" data-topic-key="' + escapeHtml(topicKey) + '" aria-label="I\'m following this roadmap">';
+			html += '<span>I\'m following this roadmap</span></label>';
+			html += '<button type="button" class="roadmap-embed-toggle text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" data-roadmap-url="' + escapeHtml(roadmapUrl) + '">Show preview</button>';
+			html += '</div></div>';
+			html += '<div class="roadmap-embed-container hidden border-t border-primary/20" style="height:0;overflow:hidden;transition:height 0.3s ease">';
+			html += '<iframe class="roadmap-embed-iframe" src="about:blank" style="width:100%;height:500px;border:none" loading="lazy" title="Roadmap preview"></iframe>';
+			html += '<p class="text-[11px] text-gray-500 dark:text-gray-400 p-2 text-center">If the preview is blank, the site may restrict embedding. Use <strong>Open full roadmap</strong> above.</p>';
+			html += '</div>';
 			html += '</div>';
 		}
 
@@ -259,7 +281,7 @@
 		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">⭐ Best playlists & must‑read lists</h2></div><div class="p-4 space-y-4 text-sm">';
 		html += '<p class="text-xs text-gray-500 dark:text-gray-400">Curated GitHub repos, Reddit communities, and learning lists. Use the <strong>Roadmap</strong> button in the nav to see step-by-step paths.</p>';
 		if (t.roadmapUrl) {
-			html += '<div><h3 class="font-semibold mb-1">Suggested roadmap for this topic</h3><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Follow a structured path on roadmap.sh (opens in new tab).</p><a href="' + t.roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary/90 text-white px-3 py-1.5 text-sm font-semibold hover:opacity-90">Open roadmap →</a></div>';
+			html += '<div><h3 class="font-semibold mb-1">Suggested roadmap for this topic</h3><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Follow a structured path on roadmap.sh (opens in new tab). Tick <strong>Track</strong> in the main callout above to mark that you\'re following it.</p><a href="' + t.roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary/90 text-white px-3 py-1.5 text-sm font-semibold hover:opacity-90">Open roadmap →</a></div>';
 		}
 		if (t.github && t.github.length) {
 			html += '<div><h3 class="font-semibold mb-1">Topic-specific GitHub repos</h3><ul class="space-y-1">';
@@ -359,6 +381,45 @@
 			btn.addEventListener('click', function () {
 				var view = btn.getAttribute('data-view');
 				if (view) applyViewMode(view);
+			});
+		});
+
+		// Per-topic roadmap "I'm following" checkbox — persisted in localStorage
+		var topicTrackPrefix = 'resources_topic_roadmap_';
+		root.querySelectorAll('.topic-roadmap-track-cb').forEach(function (cb) {
+			var key = cb.getAttribute('data-topic-key');
+			if (!key) return;
+			try {
+				var stored = localStorage.getItem(topicTrackPrefix + key);
+				cb.checked = stored === 'true';
+			} catch (err) { /* ignore */ }
+			cb.addEventListener('change', function () {
+				try {
+					localStorage.setItem(topicTrackPrefix + key, cb.checked ? 'true' : 'false');
+				} catch (err) { /* ignore */ }
+			});
+		});
+
+		// Roadmap embed toggle
+		root.querySelectorAll('.roadmap-embed-toggle').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var container = btn.closest('[data-topic-roadmap]').querySelector('.roadmap-embed-container');
+				var iframe = container ? container.querySelector('.roadmap-embed-iframe') : null;
+				if (!container) return;
+				var isOpen = !container.classList.contains('hidden');
+				if (isOpen) {
+					container.style.height = '0';
+					setTimeout(function () { container.classList.add('hidden'); }, 300);
+					btn.textContent = 'Show preview';
+					if (iframe) iframe.src = 'about:blank';
+				} else {
+					container.classList.remove('hidden');
+					container.style.height = '520px';
+					btn.textContent = 'Hide preview';
+					if (iframe && iframe.src === 'about:blank') {
+						iframe.src = btn.getAttribute('data-roadmap-url');
+					}
+				}
 			});
 		});
 
