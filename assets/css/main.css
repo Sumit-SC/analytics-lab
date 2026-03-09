@@ -2187,6 +2187,23 @@ body:has(#global-music-bar) {
 	font-size: 0.7rem;
 	color: #94a3b8;
 }
+/* Spotify embed in right panel */
+.global-spotify-embed {
+	padding: 0.5rem;
+	overflow-y: auto;
+	flex: 1;
+}
+.global-spotify-embed iframe {
+	border-radius: 0.75rem;
+	width: 100%;
+}
+.global-spotify-hint {
+	font-size: 0.75rem;
+	color: #94a3b8;
+	text-align: center;
+	padding: 1.5rem 0.75rem;
+	line-height: 1.5;
+}
 .global-saavn-empty {
 	color: #94a3b8;
 	cursor: default;

@@ -1,0 +1,18 @@
+feat: fix weather widget, add Spotify/Piped music support, add Interview Prep button on job cards
+
+Weather:
+- Fix API fetching only 3 days of data (duplicate forecast_days param)
+- Fix "More details" showing empty for non-today days
+- Fix hourly modal always showing first 24 raw hours instead of selected day
+- Fix "Next 7 days" panel showing wrong range (start from tomorrow, fetch 10 days)
+
+Music bar:
+- Fix loadSaavnState() ReferenceError that crashed the music bar on load
+- Fix Piped checkbox: embedVideoUrl() now respects toggle with 3 fallback instances
+- Add Spotify source tab with embed support (track/album/playlist)
+- Add universal URL auto-detection (Spotify, YT playlist, YT video) from any input
+- Add 4 more radio streams (SomaFM DEF CON/Drone Zone/Deep Space One, KEXP)
+- Spotify state persists across page navigation via localStorage
+
+Jobs:
+- Add "Interview Prep" button on job cards that sends JD to assistant panel

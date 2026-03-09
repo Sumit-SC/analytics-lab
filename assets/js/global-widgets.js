@@ -8,7 +8,7 @@
 	var QUEUE_KEY = 'standalone_music_queue';
 	var CURRENT_KEY = 'standalone_music_current';
 	var PANEL_OPEN_KEY = 'standalone_yt_panel_open';
-	var MUSIC_SOURCE_KEY = 'standalone_music_source'; // 'yt' | 'saavn' | 'radio'
+	var MUSIC_SOURCE_KEY = 'standalone_music_source'; // 'yt' | 'saavn' | 'radio' | 'spotify'
 	var SAAVN_QUEUE_KEY = 'standalone_saavn_queue';
 	var SAAVN_INDEX_KEY = 'standalone_saavn_index';
 	var YT_API_LOADED = false;
@@ -22,13 +22,26 @@
 	var saavnCurrentIndex = 0;
 	var radioAudio = null;
 	var radioIndex = 0;
-	// Open-source / free streams that work without API keys (direct MP3/AAC; no Spotify/Apple/JioSaavn API)
+	// Open-source / free streams that work without API keys
 	var RADIO_STREAMS = [
 		{ name: 'Radio Paradise (main)', url: 'https://stream.radioparadise.com/mp3-128', type: 'stream' },
 		{ name: 'SomaFM Groove Salad', url: 'https://ice2.somafm.com/groovesalad-128-mp3', type: 'stream' },
 		{ name: 'SomaFM Space Station', url: 'https://ice2.somafm.com/spacestation-128-mp3', type: 'stream' },
-		{ name: 'Chillhop', url: 'https://stream.chillhop.com/stream', type: 'stream' }
+		{ name: 'SomaFM DEF CON', url: 'https://ice2.somafm.com/defcon-128-mp3', type: 'stream' },
+		{ name: 'SomaFM Drone Zone', url: 'https://ice2.somafm.com/dronezone-128-mp3', type: 'stream' },
+		{ name: 'SomaFM Deep Space One', url: 'https://ice2.somafm.com/deepspaceone-128-mp3', type: 'stream' },
+		{ name: 'Chillhop', url: 'https://stream.chillhop.com/stream', type: 'stream' },
+		{ name: 'KEXP (Seattle)', url: 'https://kexp-mp3-128.streamguys1.com/kexp128.mp3', type: 'stream' }
 	];
+
+	// Spotify state
+	var SPOTIFY_STATE_KEY = 'standalone_spotify_state';
+	function getSpotifyState() {
+		try { var s = localStorage.getItem(SPOTIFY_STATE_KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+	}
+	function setSpotifyState(kind, id) {
+		try { localStorage.setItem(SPOTIFY_STATE_KEY, JSON.stringify({ kind: kind, id: id })); } catch (e) {}
+	}
 
 	// Must be on window before the YouTube script loads (API calls it when ready)
 	window.onYouTubeIframeAPIReady = function () {
@@ -86,6 +99,36 @@
 		var m = s.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
 		var id = m ? m[1] : (s.length === 11 ? s : '');
 		return isValidYouTubeVideoId(id) ? id : '';
+	}
+
+	function loadSaavnState() {
+		saavnQueue = getSaavnQueue();
+		saavnCurrentIndex = getSaavnIndex();
+	}
+
+	// Detect URL type: returns { type, id/url } for auto-routing
+	function detectUrlType(input) {
+		if (!input || !input.trim()) return null;
+		var s = input.trim();
+		// Spotify: track, album, playlist, episode, show
+		var sp = s.match(/open\.spotify\.com\/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/);
+		if (sp) return { type: 'spotify', kind: sp[1], id: sp[2], url: s };
+		if (/spotify:/.test(s)) {
+			var parts = s.split(':');
+			if (parts.length >= 3) return { type: 'spotify', kind: parts[1], id: parts[2], url: s };
+		}
+		// YouTube playlist
+		var plm = s.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+		if (plm) return { type: 'yt_playlist', id: plm[1], url: s };
+		// YouTube video
+		var vid = parseVideoId(s);
+		if (vid) return { type: 'yt', id: vid, url: s };
+		return null;
+	}
+
+	// Spotify embed URL generator
+	function spotifyEmbedUrl(kind, id) {
+		return 'https://open.spotify.com/embed/' + kind + '/' + id + '?utm_source=generator&theme=0';
 	}
 
 	// --- Music bar ---
@@ -287,22 +330,28 @@
 
 	function updateBarTitle() {
 		if (!barTitle) return;
-		if (getMusicSource() === 'radio') {
+		var src = getMusicSource();
+		if (src === 'radio') {
 			var s = RADIO_STREAMS[radioIndex];
-			barTitle.textContent = (s && s.name) ? s.name : (RADIO_STREAMS.length ? 'Radio' : 'Radio');
+			barTitle.textContent = (s && s.name) ? s.name : 'Radio';
 			return;
 		}
-		if (getMusicSource() === 'saavn') {
+		if (src === 'saavn') {
 			var q = getSaavnQueue();
 			var idx = getSaavnIndex();
 			var s = q[idx];
 			barTitle.textContent = (s && (s.name || s.title)) ? (s.name || s.title) : (q.length ? 'JioSaavn' : 'Search JioSaavn');
 			return;
 		}
+		if (src === 'spotify') {
+			var sp = getSpotifyState();
+			barTitle.textContent = sp ? 'Spotify ' + sp.kind : 'Paste a Spotify URL';
+			return;
+		}
 		var cur = getCurrent();
 		var q = getQueue();
 		var item = q.find(function (x) { return (x.id || x) === cur; });
-		var t = (item && item.title) ? item.title : (cur ? 'Playing' : 'Paste YouTube URL or ID');
+		var t = (item && item.title) ? item.title : (cur ? 'Playing' : 'Paste YouTube / Spotify URL');
 		barTitle.textContent = t;
 	}
 
@@ -330,46 +379,95 @@
 	function setSourceUI(src) {
 		var isSaavn = src === 'saavn';
 		var isRadio = src === 'radio';
+		var isSpotify = src === 'spotify';
+		var placeholders = {
+			yt: 'Paste YouTube / Spotify URL or video ID',
+			saavn: 'Search JioSaavn…',
+			spotify: 'Paste Spotify URL (track, album, playlist)…',
+			radio: 'Click Play or Next for stations'
+		};
 		if (barInput) {
-			barInput.placeholder = isRadio ? 'Click Play or Next for stations' : (isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or video ID');
+			barInput.placeholder = placeholders[src] || placeholders.yt;
 			barInput.style.display = isRadio ? 'none' : '';
 		}
 		var panelInput = document.getElementById('global-yt-panel-input');
-		if (panelInput) panelInput.placeholder = isSaavn ? 'Search JioSaavn…' : 'Paste YouTube URL or type search…';
+		if (panelInput) panelInput.placeholder = isSaavn ? 'Search JioSaavn…' : (isSpotify ? 'Paste Spotify URL…' : 'Paste YouTube / Spotify URL or search…');
 		var pipedLabel = document.querySelector('.global-yt-panel-piped-label');
-		if (pipedLabel) pipedLabel.style.display = isSaavn || isRadio ? 'none' : '';
+		if (pipedLabel) pipedLabel.style.display = (src === 'yt') ? '' : 'none';
 		var focusBtn = document.getElementById('global-music-focus');
-		if (focusBtn) focusBtn.style.display = isSaavn || isRadio ? 'none' : '';
+		if (focusBtn) focusBtn.style.display = (src === 'yt') ? '' : 'none';
 		var panelIframe = document.getElementById('global-yt-panel-iframe');
 		var saavnResults = document.getElementById('global-saavn-results');
-		if (panelIframe && saavnResults) {
-			panelIframe.style.display = isSaavn || isRadio ? 'none' : 'block';
-			saavnResults.style.display = isSaavn ? 'block' : 'none';
-		}
+		var spotifyEmbed = document.getElementById('global-spotify-embed');
+		if (panelIframe) panelIframe.style.display = (src === 'yt') ? 'block' : 'none';
+		if (saavnResults) saavnResults.style.display = isSaavn ? 'block' : 'none';
+		if (spotifyEmbed) spotifyEmbed.style.display = isSpotify ? 'block' : 'none';
 		var addBtn = document.getElementById('global-music-add');
-		if (addBtn) addBtn.style.display = isRadio ? 'none' : '';
+		if (addBtn) {
+			addBtn.style.display = isRadio ? 'none' : '';
+			addBtn.textContent = isSaavn ? 'Search' : (isSpotify ? 'Load' : 'Add');
+		}
 		updateBarTitle();
 	}
 	function switchSource(src) {
 		setMusicSource(src);
-		var btnYt = document.getElementById('global-music-source-yt');
-		var btnSaavn = document.getElementById('global-music-source-saavn');
-		var btnRadio = document.getElementById('global-music-source-radio');
-		if (btnYt) { btnYt.classList.toggle('active', src === 'yt'); btnYt.setAttribute('aria-pressed', src === 'yt'); }
-		if (btnSaavn) { btnSaavn.classList.toggle('active', src === 'saavn'); btnSaavn.setAttribute('aria-pressed', src === 'saavn'); }
-		if (btnRadio) { btnRadio.classList.toggle('active', src === 'radio'); btnRadio.setAttribute('aria-pressed', src === 'radio'); }
+		var sources = ['yt', 'saavn', 'radio', 'spotify'];
+		sources.forEach(function (s) {
+			var btn = document.getElementById('global-music-source-' + s);
+			if (btn) { btn.classList.toggle('active', s === src); btn.setAttribute('aria-pressed', s === src); }
+		});
 		setSourceUI(src);
+	}
+
+	function loadSpotifyEmbed(kind, id) {
+		var embed = document.getElementById('global-spotify-embed');
+		if (!embed) return;
+		setSpotifyState(kind, id);
+		embed.innerHTML = '<iframe src="' + spotifyEmbedUrl(kind, id) + '" width="100%" height="' + (kind === 'track' ? 80 : 380) + '" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Spotify player"></iframe>';
+		embed.style.display = 'block';
+		updateBarTitle();
+	}
+
+	function handleUniversalInput(raw) {
+		if (!raw || !raw.trim()) return false;
+		raw = raw.trim();
+		var detected = detectUrlType(raw);
+		if (!detected) return false;
+		if (detected.type === 'spotify') {
+			switchSource('spotify');
+			loadSpotifyEmbed(detected.kind, detected.id);
+			if (panel) { panel.classList.add('global-yt-panel-open'); setPanelOpen(true); }
+			return true;
+		}
+		if (detected.type === 'yt_playlist') {
+			switchSource('yt');
+			var panelFrame = document.getElementById('global-yt-panel-iframe');
+			if (panelFrame) {
+				panelFrame.src = 'https://www.youtube-nocookie.com/embed/videoseries?list=' + detected.id + '&autoplay=1';
+			}
+			if (panel) { panel.classList.add('global-yt-panel-open'); setPanelOpen(true); }
+			return true;
+		}
+		if (detected.type === 'yt') {
+			if (getMusicSource() !== 'yt') switchSource('yt');
+			var q = getQueue();
+			q.push({ id: detected.id, title: '' });
+			setQueue(q);
+			loadVideo(detected.id);
+			return true;
+		}
+		return false;
 	}
 
 	if (bar) {
 		loadSaavnState();
 		switchSource(getMusicSource());
 
-		document.getElementById('global-music-source-yt') && document.getElementById('global-music-source-yt').addEventListener('click', function () { switchSource('yt'); });
-		document.getElementById('global-music-source-saavn') && document.getElementById('global-music-source-saavn').addEventListener('click', function () { switchSource('saavn'); });
-		document.getElementById('global-music-source-radio') && document.getElementById('global-music-source-radio').addEventListener('click', function () { switchSource('radio'); });
+		['yt', 'saavn', 'radio', 'spotify'].forEach(function (s) {
+			var btn = document.getElementById('global-music-source-' + s);
+			if (btn) btn.addEventListener('click', function () { switchSource(s); });
+		});
 
-		// Player div must exist before YT.Player() runs (API injects iframe into it)
 		if (playerDiv && !document.getElementById('global-yt-player-iframe')) {
 			var el = document.createElement('div');
 			el.id = 'global-yt-player-iframe';
@@ -379,11 +477,18 @@
 
 		if (barAdd && barInput) {
 			barAdd.addEventListener('click', function () {
+				var raw = barInput.value.trim();
+				if (!raw) return;
+
+				// Universal URL detection first (auto-switches source)
+				if (handleUniversalInput(raw)) {
+					barInput.value = '';
+					return;
+				}
+
 				if (getMusicSource() === 'saavn') {
-					var q = barInput.value.trim();
-					if (!q) return;
 					barAdd.disabled = true;
-					searchSaavn(q, function (list) {
+					searchSaavn(raw, function (list) {
 						barAdd.disabled = false;
 						setSaavnQueue(list);
 						renderSaavnResults(list);
@@ -391,7 +496,11 @@
 					});
 					return;
 				}
-				var raw = barInput.value.trim();
+				if (getMusicSource() === 'spotify') {
+					if (barTitle) barTitle.textContent = 'Paste a Spotify URL (track, album, or playlist)';
+					setTimeout(function () { updateBarTitle(); }, 3000);
+					return;
+				}
 				var id = parseVideoId(raw);
 				if (id) {
 					var q = getQueue();
@@ -399,7 +508,7 @@
 					setQueue(q);
 					barInput.value = '';
 					loadVideo(id);
-				} else if (raw && /youtube|youtu\.be/i.test(raw)) {
+				} else if (/youtube|youtu\.be/i.test(raw)) {
 					if (barTitle) barTitle.textContent = 'Invalid YouTube URL — check the link and try again';
 					setTimeout(function () { updateBarTitle(); }, 3000);
 				}
@@ -416,15 +525,14 @@
 		});
 
 		if (barPlay) barPlay.addEventListener('click', function () {
-			if (getMusicSource() === 'radio') {
-				playRadio(radioIndex);
-				return;
-			}
-			if (getMusicSource() === 'saavn') {
+			var src = getMusicSource();
+			if (src === 'radio') { playRadio(radioIndex); return; }
+			if (src === 'saavn') {
 				if (saavnAudio && saavnQueue.length > 0) saavnAudio.play().catch(function () {});
 				else if (saavnQueue.length > 0) playSaavnAt(getSaavnIndex());
 				return;
 			}
+			if (src === 'spotify') return; // Spotify embed handles its own playback
 			if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
 				try { ytPlayer.playVideo(); } catch (e) {}
 			} else {
@@ -435,27 +543,19 @@
 			}
 		});
 		if (barPause) barPause.addEventListener('click', function () {
-			if (getMusicSource() === 'radio') {
-				pauseRadio();
-				return;
-			}
-			if (getMusicSource() === 'saavn') {
-				if (saavnAudio) saavnAudio.pause();
-				return;
-			}
+			var src = getMusicSource();
+			if (src === 'radio') { pauseRadio(); return; }
+			if (src === 'saavn') { if (saavnAudio) saavnAudio.pause(); return; }
+			if (src === 'spotify') return;
 			if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
 				try { ytPlayer.pauseVideo(); } catch (e) {}
 			}
 		});
 		if (barNext) barNext.addEventListener('click', function () {
-			if (getMusicSource() === 'radio') {
-				nextRadio();
-				return;
-			}
-			if (getMusicSource() === 'saavn') {
-				playNextSaavn();
-				return;
-			}
+			var src = getMusicSource();
+			if (src === 'radio') { nextRadio(); return; }
+			if (src === 'saavn') { playNextSaavn(); return; }
+			if (src === 'spotify') return;
 			playNext();
 		});
 
@@ -484,52 +584,72 @@
 		try { localStorage.setItem(PIPED_PANEL_KEY, on ? '1' : '0'); } catch (e) {}
 	}
 
+	var PIPED_INSTANCES = [
+		'https://piped.video',
+		'https://piped.kavin.rocks',
+		'https://piped.mint.lgbt'
+	];
+	var currentPipedIdx = 0;
+
 	function embedVideoUrl(id) {
-		// Prefer privacy-enhanced domain (works when main YT embed is blocked in some regions)
+		if (getPiped()) {
+			var base = PIPED_INSTANCES[currentPipedIdx % PIPED_INSTANCES.length];
+			return base + '/embed/' + id + '?autoplay=1';
+		}
 		return 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&modestbranding=1&rel=0';
 	}
 
 	function openSearch(q) {
 		var trimmed = (q || '').trim();
-		// When source is Saavn, panel input is for JioSaavn search
-		if (getMusicSource() === 'saavn') {
-			if (!trimmed) return;
+		if (!trimmed) {
+			if (panelFrame && !panelFrame.src && DEFAULT_EMBED_ID && isValidYouTubeVideoId(DEFAULT_EMBED_ID)) {
+				panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
+			}
+			return;
+		}
+
+		// Universal URL detection (auto-switch source from panel too)
+		if (handleUniversalInput(trimmed)) {
+			if (panelInput) panelInput.value = '';
+			return;
+		}
+
+		// Source-specific handling
+		var src = getMusicSource();
+		if (src === 'saavn') {
 			searchSaavn(trimmed, function (list) {
 				setSaavnQueue(list);
 				renderSaavnResults(list);
 				if (list.length > 0) playSaavnAt(0);
 			});
-			if (panel) {
-				panel.classList.add('global-yt-panel-open');
-				setPanelOpen(true);
-			}
+			if (panel) { panel.classList.add('global-yt-panel-open'); setPanelOpen(true); }
+			return;
+		}
+		if (src === 'spotify') {
+			if (barTitle) barTitle.textContent = 'Paste a full Spotify URL (open.spotify.com/...)';
+			setTimeout(function () { updateBarTitle(); }, 3000);
 			return;
 		}
 		if (!panelFrame) return;
-		if (!trimmed) {
-			if (!panelFrame.src && DEFAULT_EMBED_ID && isValidYouTubeVideoId(DEFAULT_EMBED_ID)) {
-				panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
-			}
-			return;
-		}
 		var id = parseVideoId(trimmed);
 		if (id) {
 			panelFrame.src = embedVideoUrl(id);
 			return;
 		}
-		// Looks like a URL but invalid — don't set iframe, show feedback
 		if (/youtube|youtu\.be/i.test(trimmed)) {
 			panelFrame.removeAttribute('src');
-			var oldPlaceholder = panelInput.placeholder;
-			panelInput.placeholder = 'Invalid YouTube URL — check the link or try a video ID';
-			panelInput.value = '';
-			setTimeout(function () { panelInput.placeholder = oldPlaceholder; }, 4000);
+			var oldPlaceholder = panelInput ? panelInput.placeholder : '';
+			if (panelInput) {
+				panelInput.placeholder = 'Invalid YouTube URL — check the link or try a video ID';
+				panelInput.value = '';
+				setTimeout(function () { panelInput.placeholder = oldPlaceholder; }, 4000);
+			}
 			return;
 		}
 		try {
 			window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(trimmed), '_blank', 'noopener');
 		} catch (e) {}
-		if (!panelFrame.src && DEFAULT_EMBED_ID && isValidYouTubeVideoId(DEFAULT_EMBED_ID)) {
+		if (panelFrame && !panelFrame.src && DEFAULT_EMBED_ID && isValidYouTubeVideoId(DEFAULT_EMBED_ID)) {
 			panelFrame.src = embedVideoUrl(DEFAULT_EMBED_ID);
 		}
 	}
@@ -561,17 +681,35 @@
 				if (e.key === 'Enter') openSearch(panelInput.value.trim());
 			});
 		}
-		// Piped toggle in panel header (optional)
 		var pipedToggle = document.getElementById('global-yt-panel-piped');
 		if (pipedToggle) {
 			pipedToggle.checked = getPiped();
 			pipedToggle.addEventListener('change', function () {
 				setPiped(pipedToggle.checked);
-				if (panelFrame.src && getMusicSource() !== 'saavn') {
+				if (panelFrame && panelFrame.src && getMusicSource() === 'yt') {
 					var m = panelFrame.src.match(/(?:embed\/|v=)([a-zA-Z0-9_-]{11})/);
 					if (m) panelFrame.src = embedVideoUrl(m[1]);
 				}
 			});
+		}
+
+		// Piped iframe error: auto-try next instance
+		if (panelFrame) {
+			panelFrame.addEventListener('error', function () {
+				if (getPiped() && panelFrame.src && panelFrame.src.indexOf('piped') !== -1) {
+					currentPipedIdx++;
+					var m = panelFrame.src.match(/embed\/([a-zA-Z0-9_-]{11})/);
+					if (m && currentPipedIdx < PIPED_INSTANCES.length) {
+						panelFrame.src = embedVideoUrl(m[1]);
+					}
+				}
+			});
+		}
+
+		// Restore Spotify state on page load
+		if (getMusicSource() === 'spotify') {
+			var sp = getSpotifyState();
+			if (sp && sp.kind && sp.id) loadSpotifyEmbed(sp.kind, sp.id);
 		}
 	}
 })();

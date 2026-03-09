@@ -2649,6 +2649,7 @@
 			html += '<div class="flex items-center gap-2">';
 			html += '<button type="button" class="job-details-btn text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" data-job-id="' + job.id + '" title="Quick view">Details</button>';
 			html += '<button type="button" class="job-prep-chatgpt-btn text-xs px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Copy JD + prompt and open ChatGPT/Gemini">Prepare</button>';
+			html += '<button type="button" class="job-send-to-prep-btn text-xs px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Send JD to Interview Prep assistant for mock questions and tips">Interview Prep</button>';
 			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
 			html += '</div>';
@@ -2682,6 +2683,23 @@
 				}).catch(function () {
 					window.prompt('Copy this prompt and paste into ChatGPT or Gemini:', prompt);
 				});
+			});
+		});
+
+		// "Interview Prep" buttons → send JD to assistant panel
+		jobListEl.querySelectorAll('.job-send-to-prep-btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var jobId = this.getAttribute('data-job-id');
+				var job = filteredJobs.find(function (j) { return j.id === jobId; });
+				if (!job) return;
+				var desc = String(job.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+				if (desc.length > 1200) desc = desc.slice(0, 1200) + '...';
+				var prepMessage = 'Help me prepare for an interview for this role:\n\nRole: ' + (job.title || '') + '\nCompany: ' + (job.company || '') + '\nLocation: ' + (job.location || '') + '\n\nJob description:\n' + desc + '\n\nPlease suggest: 1) 5–8 likely interview questions for this role, 2) how to answer them using the STAR method, 3) key skills and points to emphasize from my experience.';
+				if (typeof window.openAssistantWithMessage === 'function') {
+					window.openAssistantWithMessage(prepMessage);
+				} else {
+					window.alert('Interview Prep assistant is loading. Try again in a moment.');
+				}
 			});
 		});
 

@@ -1342,7 +1342,7 @@
 		var codes = daily.weathercode || [];
 		var maxT = daily.temperature_2m_max || [];
 		var minT = daily.temperature_2m_min || [];
-		var start = Math.max(0, 2); // from today onward
+		var start = 3; // skip 2 past days + today → start at tomorrow
 		var html = '<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Next 7 days</p><div class="grid grid-cols-4 sm:grid-cols-7 gap-1 text-center">';
 		for (var i = start; i < Math.min(start + 7, times.length); i++) {
 			var d = new Date(times[i]);
@@ -1360,6 +1360,26 @@
 		html += '</div>';
 		panel.innerHTML = html;
 	}
+	function getHourlyIndexForDay(hourly, dayIndex) {
+		if (!hourly || !hourly.time || !hourly.time.length) return -1;
+		var daily = lastWeatherData && lastWeatherData.daily;
+		if (!daily || !daily.time || !daily.time[dayIndex]) return -1;
+		var dayStr = daily.time[dayIndex];
+		var isToday = dayIndex === 2;
+		var times = hourly.time;
+		if (isToday) {
+			var now = new Date();
+			for (var h = 0; h < times.length; h++) {
+				if (new Date(times[h]) > now) return h > 0 ? h - 1 : 0;
+			}
+			return times.length - 1;
+		}
+		for (var h = 0; h < times.length; h++) {
+			if (times[h].startsWith(dayStr + 'T12')) return h;
+			if (times[h].startsWith(dayStr)) return h;
+		}
+		return -1;
+	}
 	function renderMoreDetailsBody(dayIndex) {
 		var body = document.getElementById('home-weather-more-body');
 		if (!body || !lastWeatherData) return;
@@ -1369,31 +1389,30 @@
 		var current = Object.assign({}, data.current_weather || {}, data.current || {});
 		var parts = [];
 		var idx = dayIndex;
-		if (idx === 2) {
-			if (current.relative_humidity_2m != null) parts.push('Humidity: ' + current.relative_humidity_2m + '%');
-			if (current.visibility != null) parts.push('Visibility: ' + (current.visibility >= 1000 ? (current.visibility / 1000) + ' km' : current.visibility + ' m'));
-		}
-		var times = hourly.time || [];
-		var now = new Date();
-		var hourIdx = -1;
-		for (var h = 0; h < times.length; h++) {
-			if (new Date(times[h]) > now) { hourIdx = h > 0 ? h - 1 : 0; break; }
-		}
-		if (hourIdx < 0 && times.length) hourIdx = times.length - 1;
-		if (idx === 2 && current.relative_humidity_2m == null && hourly.relative_humidity_2m && hourIdx >= 0 && hourly.relative_humidity_2m[hourIdx] != null)
+		var isToday = idx === 2;
+		var hourIdx = getHourlyIndexForDay(hourly, idx);
+
+		if (isToday && current.relative_humidity_2m != null) {
+			parts.push('Humidity: ' + current.relative_humidity_2m + '%');
+		} else if (hourly.relative_humidity_2m && hourIdx >= 0 && hourly.relative_humidity_2m[hourIdx] != null) {
 			parts.push('Humidity: ' + hourly.relative_humidity_2m[hourIdx] + '%');
-		if (hourly.precipitation_probability && hourIdx >= 0 && hourly.precipitation_probability[hourIdx] != null)
-			parts.push('Precip chance: ' + hourly.precipitation_probability[hourIdx] + '%');
-		if (idx === 2 && current.visibility == null && hourly.visibility && hourIdx >= 0 && hourly.visibility[hourIdx] != null) {
+		}
+		if (isToday && current.visibility != null) {
+			parts.push('Visibility: ' + (current.visibility >= 1000 ? (current.visibility / 1000) + ' km' : current.visibility + ' m'));
+		} else if (hourly.visibility && hourIdx >= 0 && hourly.visibility[hourIdx] != null) {
 			var v = hourly.visibility[hourIdx];
 			parts.push('Visibility: ' + (v >= 1000 ? (v / 1000) + ' km' : v + ' m'));
 		}
+		if (hourly.precipitation_probability && hourIdx >= 0 && hourly.precipitation_probability[hourIdx] != null)
+			parts.push('Precip chance: ' + hourly.precipitation_probability[hourIdx] + '%');
 		if (hourly.sunshine_duration && hourIdx >= 0 && hourly.sunshine_duration[hourIdx] != null) {
 			var sec = hourly.sunshine_duration[hourIdx];
 			parts.push('Sun: ' + (sec / 60).toFixed(0) + ' min');
 		}
 		if (hourly.dew_point_2m && hourIdx >= 0 && hourly.dew_point_2m[hourIdx] != null)
 			parts.push('Dew point: ' + Math.round(hourly.dew_point_2m[hourIdx]) + '°C');
+		if (daily.sunrise && daily.sunrise[idx]) parts.push('Sunrise: ' + formatTime(daily.sunrise[idx]));
+		if (daily.sunset && daily.sunset[idx]) parts.push('Sunset: ' + formatTime(daily.sunset[idx]));
 		body.innerHTML = parts.length ? parts.join(' · ') : '—';
 	}
 	function renderWeatherForSelectedDay() {
@@ -1491,8 +1510,8 @@
 	function fetchWeather(lat, lon, locationName) {
 		var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
 			'&current_weather=true&current=temperature_2m,relative_humidity_2m,weathercode,windspeed_10m,precipitation,visibility&past_days=2' +
-			'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=8' +
-			'&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,showers,weathercode,visibility,windspeed_10m,sunshine_duration,dew_point_2m&forecast_days=3';
+			'&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&timezone=auto&forecast_days=10' +
+			'&hourly=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,showers,weathercode,visibility,windspeed_10m,sunshine_duration,dew_point_2m';
 		var aqiUrl = 'https://air-quality.api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lon + '&current=us_aqi';
 		Promise.all([
 			fetch(url).then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('API error')); }),
@@ -1677,17 +1696,46 @@
 			var codes = h.weathercode || [];
 			var precip = h.precipitation || [];
 			var wind = h.windspeed_10m || [];
-			var html = '<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">' + (lastLocationName || 'Current location') + '</p>';
-			html += '<div class="grid grid-cols-4 gap-x-2 gap-y-1 text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">';
-			html += '<span>Time</span><span>Temp</span><span>Rain</span><span>Wind</span></div>';
-			for (var i = 0; i < Math.min(24, times.length); i++) {
+			var humidity = h.relative_humidity_2m || [];
+			var precipProb = h.precipitation_probability || [];
+
+			var daily = lastWeatherData && lastWeatherData.daily;
+			var dayStr = (daily && daily.time && daily.time[weatherSelectedDayIndex]) || '';
+			var isToday = weatherSelectedDayIndex === 2;
+			var dayLabel = isToday ? 'Today' : (dayStr ? new Date(dayStr).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' }) : '');
+
+			var startIdx = 0;
+			var endIdx = Math.min(24, times.length);
+			if (dayStr) {
+				for (var s = 0; s < times.length; s++) {
+					if (times[s].startsWith(dayStr)) { startIdx = s; break; }
+				}
+				endIdx = Math.min(startIdx + 24, times.length);
+				if (isToday) {
+					var now = new Date();
+					for (var n = startIdx; n < endIdx; n++) {
+						if (new Date(times[n]) >= now) { startIdx = n; break; }
+					}
+				}
+			}
+
+			var html = '<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">' + (lastLocationName || 'Current location') + (dayLabel ? ' — ' + dayLabel : '') + '</p>';
+			html += '<div class="grid grid-cols-6 gap-x-2 gap-y-1 text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">';
+			html += '<span>Time</span><span>Temp</span><span>Rain</span><span>Prob</span><span>Humid</span><span>Wind</span></div>';
+			var count = 0;
+			for (var i = startIdx; i < endIdx && count < 24; i++, count++) {
 				var t = new Date(times[i]);
 				var timeStr = t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 				var tempStr = temps[i] != null ? Math.round(temps[i]) + '°' : '—';
 				var precipStr = precip[i] != null && precip[i] > 0 ? precip[i] + ' mm' : '—';
+				var probStr = precipProb[i] != null ? precipProb[i] + '%' : '—';
+				var humidStr = humidity[i] != null ? humidity[i] + '%' : '—';
 				var windStr = wind[i] != null ? wind[i] + ' km/h' : '—';
-				html += '<div class="grid grid-cols-4 gap-x-2 gap-y-1 py-1 border-b border-gray-100 dark:border-gray-700 text-sm">';
-				html += '<span>' + timeStr + '</span><span>' + tempStr + '</span><span>' + precipStr + '</span><span>' + windStr + '</span></div>';
+				html += '<div class="grid grid-cols-6 gap-x-2 gap-y-1 py-1 border-b border-gray-100 dark:border-gray-700 text-sm">';
+				html += '<span>' + timeStr + '</span><span>' + tempStr + '</span><span>' + precipStr + '</span><span>' + probStr + '</span><span>' + humidStr + '</span><span>' + windStr + '</span></div>';
+			}
+			if (count === 0) {
+				html += '<p class="text-gray-500 dark:text-gray-400 mt-2">No hourly data for this day.</p>';
 			}
 			body.innerHTML = html;
 		}
