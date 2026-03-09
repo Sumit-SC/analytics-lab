@@ -1483,15 +1483,13 @@
 		}
 		var forecastLink = document.getElementById('home-weather-forecast-link');
 		if (forecastLink && lastWeatherLat != null && lastWeatherLon != null) {
-			// Full forecast: Weather.com with current location (lat,lon) for accurate local forecast
-			forecastLink.href = 'https://weather.com/weather/today/l/' + lastWeatherLat + ',' + lastWeatherLon;
-			forecastLink.title = 'Full forecast at Weather.com for this location';
+			forecastLink.href = 'https://weather.com/weather/tenday/l/' + lastWeatherLat + ',' + lastWeatherLon;
+			forecastLink.title = '10-day forecast at Weather.com';
 		}
 		var mapLink = document.getElementById('home-weather-map-link');
 		if (mapLink && lastWeatherLat != null && lastWeatherLon != null) {
-			// Map: Google Maps centered on this location
-			mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + lastWeatherLat + ',' + lastWeatherLon;
-			mapLink.title = 'Open map for this location';
+			mapLink.href = 'https://www.windy.com/' + lastWeatherLat + '/' + lastWeatherLon + '?temp,' + lastWeatherLat + ',' + lastWeatherLon + ',8';
+			mapLink.title = 'Interactive weather map at Windy.com';
 		}
 		var card = document.getElementById('home-weather-card');
 		if (card) {
