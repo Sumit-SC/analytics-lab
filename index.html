@@ -1,0 +1,407 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<!-- Script order: tailwind-loader.js → main.css → (OMDB_PROXY_URL) → analytics → homepage.js. Do not reorder. -->
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+	<title>Home — Standalone Playground</title>
+	<meta name="description" content="Notion-like second brain: JS libraries and free APIs only. View, search, edit on the fly; export code, notes, Word-style docs. No backend." />
+	<meta property="og:title" content="Home — Standalone Playground" />
+	<meta property="og:description" content="Focus, weather, quotes. One place for code, resources &amp; tools." />
+	<script>
+		// OMDb proxy base (no /api/omdb at the end)
+		// Your Vercel proxy URL: https://playground-serveless.vercel.app
+		window.OMDB_PROXY_URL = 'https://playground-serveless.vercel.app';
+	</script>
+	<script src="./assets/js/tailwind-loader.js" defer></script>
+	<!-- No Google Fonts: use system font stack to avoid external trackers. See main.css body font-family. -->
+	<link rel="preconnect" href="https://api.quotable.io">
+	<link rel="preconnect" href="https://animechan.xyz">
+	<link rel="preconnect" href="https://api.open-meteo.com">
+	<link rel="preconnect" href="https://air-quality.api.open-meteo.com">
+	<link rel="preconnect" href="https://picsum.photos">
+	<link rel="preconnect" href="https://api.dictionaryapi.dev">
+	<link rel="preconnect" href="https://api.duckduckgo.com">
+	<link rel="preconnect" href="https://api.github.com">
+	<link rel="preconnect" href="https://en.wikipedia.org">
+	<link rel="preconnect" href="https://api.stackexchange.com">
+	<link rel="stylesheet" href="./assets/css/main.css">
+	<script src="./assets/js/nav-data.js" defer></script>
+	<script src="./assets/js/nav-inject.js" defer></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased page-home" data-current-page="index">
+	<noscript>
+		<div style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);color:#fff;display:flex;align-items:center;justify-content:center;padding:1.5rem;text-align:center;font-family:system-ui,sans-serif;">
+			<div style="max-width:420px;">
+				<p style="font-size:1.125rem;font-weight:600;margin-bottom:0.75rem;">JavaScript is disabled or blocked</p>
+				<p style="font-size:0.9375rem;line-height:1.5;color:#e2e8f0;">This site needs JavaScript for quotes, weather, clock, and layout. Please enable scripts for this site or allow them in your browser/extensions. If you use an ad blocker or privacy extension, try adding this site to the allow list or open it in a private/incognito window.</p>
+			</div>
+		</div>
+	</noscript>
+	<div id="js-required-banner" class="js-required-banner" role="alert" aria-live="polite" style="display:none;position:sticky;top:0;z-index:9998;background:#1e293b;color:#e2e8f0;padding:0.75rem 1rem;font-size:0.875rem;font-family:system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+		<div class="js-required-banner-inner" style="max-width:56rem;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+			<p style="margin:0;line-height:1.4;">If quotes, weather, or layout look broken, scripts may be blocked. Allow JavaScript for this site or try a private/incognito window.</p>
+			<button type="button" id="js-required-dismiss" style="flex-shrink:0;padding:0.35rem 0.75rem;border:1px solid #64748b;border-radius:0.375rem;background:#334155;color:#e2e8f0;cursor:pointer;font-size:0.8125rem;">Dismiss</button>
+		</div>
+	</div>
+	<script>
+		(function() {
+			var banner = document.getElementById('js-required-banner');
+			if (!banner) return;
+			document.getElementById('js-required-dismiss')?.addEventListener('click', function() { banner.style.display = 'none'; });
+			// If app loads, hide banner when it signals ready
+			var check = setInterval(function() {
+				if (window.__standalonePlaygroundReady) {
+					banner.style.display = 'none';
+					clearInterval(check);
+				}
+			}, 400);
+			setTimeout(function() {
+				clearInterval(check);
+				// After 2.5s, if app still didn't load, show banner (scripts may be blocked)
+				if (!window.__standalonePlaygroundReady) banner.style.display = 'block';
+			}, 2500);
+		})();
+	</script>
+	<nav class="app-bar bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
+		<div class="max-w-5xl mx-auto px-4 sm:px-6">
+			<div class="flex items-center justify-between py-3">
+				<a href="./index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<div class="flex items-center gap-2">
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
+					<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
+	</div>
+
+	<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+		<header class="mb-6 sm:mb-8">
+			<p class="home-section-title mb-1">Second brain</p>
+			<h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Notion-like hub, minimal code</h1>
+			<p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">Built on JS libraries and free APIs — view, search, edit on the fly, then export. No backend; pre-made services only.</p>
+		</header>
+
+		<!-- Go to — main stars at top -->
+		<section class="notion-go-section mb-10 sm:mb-12">
+			<p class="home-section-title mb-3">Go to</p>
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+			<a href="pages/playground.html" class="notion-go-card group">
+				<span class="notion-go-icon">&#128187;</span>
+				<h3 class="notion-go-title">Playground</h3>
+				<p class="notion-go-desc">Code (Python/JS/SQL), docs search, notebooks</p>
+				<span class="notion-go-arrow">→</span>
+			</a>
+			<a href="pages/resources.html" class="notion-go-card group">
+				<span class="notion-go-icon">&#128218;</span>
+				<h3 class="notion-go-title">Resources</h3>
+				<p class="notion-go-desc">Courses, books, YouTube, learning paths</p>
+				<span class="notion-go-arrow">→</span>
+			</a>
+			<a href="pages/tools.html" class="notion-go-card group">
+				<span class="notion-go-icon">&#128203;</span>
+				<h3 class="notion-go-title">Tools</h3>
+				<p class="notion-go-desc">Word-style notes, PDF viewer</p>
+				<span class="notion-go-arrow">→</span>
+			</a>
+			<a href="pages/jobs.html" class="notion-go-card group">
+				<span class="notion-go-icon">&#128188;</span>
+				<h3 class="notion-go-title">Jobs</h3>
+				<p class="notion-go-desc">Multi-source job search, tracking, planner</p>
+				<span class="notion-go-arrow">→</span>
+			</a>
+			<a href="pages/trends.html" class="notion-go-card group">
+				<span class="notion-go-icon">&#128200;</span>
+				<h3 class="notion-go-title">Trends</h3>
+				<p class="notion-go-desc">Tech trends, salary data, market insights</p>
+				<span class="notion-go-arrow">→</span>
+			</a>
+			<a href="pages/docs.html" class="notion-go-card group">
+				<span class="notion-go-icon">&#128196;</span>
+				<h3 class="notion-go-title">Docs</h3>
+				<p class="notion-go-desc">Project documentation, API references</p>
+				<span class="notion-go-arrow">→</span>
+			</a>
+		</div>
+			<div id="home-continue-learning-card" class="mt-4 hidden">
+				<a href="pages/resources.html" id="home-continue-learning-link" class="second-brain-card flex items-center justify-between gap-2 px-4 py-3">
+					<div>
+						<p class="home-section-title mb-0.5 text-xs">Continue learning</p>
+						<p id="home-continue-learning-text" class="text-sm text-gray-700 dark:text-gray-300">Pick a topic to get started.</p>
+					</div>
+					<span class="text-xs font-semibold text-primary whitespace-nowrap">Open resources →</span>
+				</a>
+			</div>
+		</section>
+
+		<!-- Two columns: Left = Tips + Clock (small) then Quote card (fills rest). Right = Weather then Focus timer -->
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 home-main-grid">
+			<div class="flex flex-col gap-3 sm:gap-4 min-h-0 home-left-column">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 home-tips-calendar-wrap">
+					<section class="second-brain-card home-tips-card">
+						<p class="home-section-title mb-0.5 text-xs">Refresh</p>
+						<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-1">Take a breath. Stretch.</p>
+						<button type="button" id="home-refresh-btn" class="text-xs font-semibold text-primary hover:underline">New tip</button>
+					</section>
+					<section class="second-brain-card home-clock-section">
+						<p class="home-section-title mb-0.5 text-xs">Clock &amp; calendar</p>
+						<p id="home-clock-time" class="home-clock-time text-lg font-mono font-semibold text-gray-800 dark:text-gray-100 tabular-nums">--:--:--</p>
+						<p id="home-clock-date" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">—</p>
+					</section>
+				</div>
+				<section class="second-brain-card home-focus-panel home-quote-panel relative overflow-hidden p-0 flex-1 min-h-0 flex flex-col">
+				<div class="home-quote-content-wrap flex-1 min-w-0 relative flex flex-col">
+					<div id="home-quote-bg" class="home-quote-bg-image absolute inset-0 w-full h-full" aria-hidden="true" style="background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Plutarch_engraving.jpg/800px-Plutarch_engraving.jpg);"></div>
+					<div class="absolute inset-0 home-quote-bg-overlay" aria-hidden="true"></div>
+					<div class="relative home-quote-inner flex flex-col min-h-0 flex-1">
+					<p class="home-section-title mb-1">Quote</p>
+					<div class="home-quote-controls-single">
+						<span class="home-quote-controls-emoji" aria-hidden="true">🏷️</span>
+						<select id="home-quote-category" class="home-quote-select rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs font-medium" aria-label="Quote category">
+							<option value="kdrama" selected>K-drama</option>
+							<option value="all">All</option>
+							<option value="random">Random</option>
+							<option value="anime">Anime</option>
+							<option value="movies">Movies</option>
+							<option value="books">Books</option>
+							<option value="tv_show">TV shows</option>
+							<option value="leaders">Leaders</option>
+							<option value="meme">Meme</option>
+							<option value="bollywood">Bollywood</option>
+							<option value="life">Life</option>
+						</select>
+						<!-- Live posters toggle temporarily disabled; image mode is always 'live' in JS -->
+						<!--
+						<label class="home-quote-live-wrap">
+							<input type="checkbox" id="home-quote-image-live" class="rounded border-gray-300 dark:border-gray-600">
+							<span class="text-xs text-gray-500 dark:text-gray-400">Use live posters</span>
+						</label>
+						-->
+						<button type="button" id="home-quote-refresh" class="home-quote-btn-icon" title="New quote" aria-label="New quote">↻</button>
+						<button type="button" id="home-quote-bg-refresh" class="home-quote-btn-icon" title="Change wallpaper" aria-label="Change wallpaper">🖼</button>
+						<button type="button" id="home-quote-pinterest" class="home-quote-btn-icon home-quote-pinterest-btn" title="Open Pinterest search" aria-label="Pinterest">
+							<svg class="w-4 h-4 dark:invert" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.214 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+						</button>
+					</div>
+					<div class="home-quote-block flex-1 flex flex-col justify-center mt-2">
+						<p id="home-quote-text" class="home-quote">The mind is not a vessel to be filled but a fire to be kindled.</p>
+						<p id="home-quote-attr" class="home-quote-attr">— Plutarch</p>
+						<p id="home-quote-meta" class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 hidden"></p>
+						<span id="home-quote-imdbid" class="hidden"></span>
+					</div>
+					</div>
+				</div>
+			</section>
+			</div>
+
+			<div class="flex flex-col gap-4 sm:gap-5 min-h-0 home-right-column">
+				<section class="second-brain-card p-4 sm:p-5 home-weather-section" id="home-weather-card">
+					<div class="home-weather-card-bg" aria-hidden="true"></div>
+					<div class="relative z-10">
+						<p class="home-section-title mb-1 text-xs">Weather</p>
+						<p id="home-weather-city" class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1.5">—</p>
+						<div class="flex flex-wrap items-center gap-1.5 mb-2">
+							<div class="flex-1 min-w-0 relative">
+								<input type="text" id="home-weather-search" placeholder="City…" class="w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-sm text-gray-800 dark:text-gray-200" maxlength="80" aria-label="City name" autocomplete="off" aria-autocomplete="list" aria-controls="home-weather-autocomplete" aria-expanded="false" role="combobox">
+								<div id="home-weather-autocomplete" class="home-weather-autocomplete absolute left-0 right-0 top-full mt-0.5 z-50 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 shadow-lg max-h-48 overflow-y-auto hidden" role="listbox" aria-label="City suggestions"></div>
+							</div>
+							<button type="button" id="home-weather-set" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Set</button>
+							<button type="button" id="home-weather-mylocation" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">My location</button>
+						</div>
+						<div id="home-weather" class="text-sm text-gray-800 dark:text-gray-200 home-weather-current home-weather-transition">…</div>
+						<div id="home-weather-extra" class="home-weather-extra mt-2 text-xs text-gray-600 dark:text-gray-400 space-y-0.5 home-weather-transition"></div>
+						<div id="home-weather-day-strip" class="home-weather-day-strip" aria-label="Select day" role="tablist"></div>
+						<details id="home-weather-more-details" class="home-weather-more-details mt-2">
+							<summary class="home-weather-more-summary text-xs font-semibold text-gray-600 dark:text-gray-400 cursor-pointer hover:text-primary">More details</summary>
+							<div id="home-weather-more-body" class="home-weather-more-body mt-1.5 text-xs text-gray-600 dark:text-gray-400 space-y-0.5"></div>
+						</details>
+						<div class="flex flex-wrap gap-2 mt-2">
+							<button type="button" id="home-weather-hourly-btn" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Hourly</button>
+							<a id="home-weather-map-link" href="https://www.windy.com" target="_blank" rel="noopener" class="text-xs font-semibold text-primary hover:underline self-center" title="Interactive weather map at Windy.com">Map →</a>
+							<a id="home-weather-forecast-link" href="https://weather.com" target="_blank" rel="noopener" class="text-xs font-semibold text-primary hover:underline self-center" title="10-day forecast at Weather.com">Forecast →</a>
+						</div>
+						<div id="home-weather-forecast-panel" class="home-weather-forecast-panel hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-700" aria-hidden="true"></div>
+					</div>
+				</section>
+				<div id="home-weather-hourly-modal" class="home-weather-modal" role="dialog" aria-label="Hourly forecast" aria-modal="true" aria-hidden="true" hidden>
+					<div class="home-weather-modal-overlay"></div>
+					<div class="home-weather-modal-content">
+						<div class="flex items-center justify-between mb-3">
+							<h3 class="text-base font-semibold text-gray-800 dark:text-gray-100">Hourly forecast</h3>
+							<button type="button" id="home-weather-hourly-close" class="home-weather-modal-close" aria-label="Close">×</button>
+						</div>
+						<div id="home-weather-hourly-body" class="home-weather-hourly-body text-sm text-gray-700 dark:text-gray-300"></div>
+					</div>
+				</div>
+				<section class="second-brain-card home-focus-panel p-5 sm:p-6">
+				<p class="home-section-title mb-2">Focus timer</p>
+				<!-- Presets and rounds -->
+				<div class="flex flex-wrap items-center gap-2 mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+					<span class="uppercase tracking-wide font-semibold">Presets:</span>
+					<button type="button" class="tool-sec-btn home-timer-preset" data-work="20" data-break="5">20 / 5</button>
+					<button type="button" class="tool-sec-btn home-timer-preset" data-work="40" data-break="10">40 / 10</button>
+					<button type="button" class="tool-sec-btn home-timer-preset" data-work="50" data-break="10">50 / 10</button>
+					<span class="inline-flex items-center gap-1 ml-1">
+						<span>Rounds</span>
+						<input type="number" id="home-timer-rounds" min="1" max="12" value="1" class="w-14 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-1 py-0.5 text-center text-[11px] text-gray-800 dark:text-gray-200" aria-label="Number of pomodoro rounds">
+					</span>
+				</div>
+				<div class="flex flex-wrap items-center gap-3 mb-2 text-[11px] text-gray-500 dark:text-gray-400">
+					<label class="flex items-center gap-1">
+						<input type="checkbox" id="home-timer-auto" class="rounded border-gray-300 dark:border-gray-600">
+						<span>Auto repeat schedule</span>
+					</label>
+					<span id="home-timer-status" class="text-[11px] text-gray-500 dark:text-gray-400"></span>
+				</div>
+				<!-- Time spans: work & break (saved in browser) -->
+				<div class="flex flex-wrap items-center gap-3 mb-3 text-sm">
+					<label class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+						<span class="text-xs font-medium">Work</span>
+						<input type="number" id="home-timer-work-min" min="1" max="120" value="25" class="w-14 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-center text-gray-800 dark:text-gray-200" aria-label="Work minutes">
+						<span class="text-xs text-gray-500">min</span>
+					</label>
+					<label class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+						<span class="text-xs font-medium">Break</span>
+						<input type="number" id="home-timer-break-min" min="0" max="30" value="5" class="w-14 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-center text-gray-800 dark:text-gray-200" aria-label="Break minutes">
+						<span class="text-xs text-gray-500">min</span>
+					</label>
+					<button type="button" id="home-timer-apply" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Apply</button>
+				</div>
+				<p id="home-timer-display" class="text-2xl font-mono font-semibold text-gray-800 dark:text-gray-100">25:00</p>
+				<p id="home-timer-phase" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Work</p>
+				<p id="home-timer-penalty-grace" class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Grace: 0m · Penalty: 0m</p>
+				<div class="flex flex-wrap gap-2 mt-3">
+					<button type="button" id="home-timer-btn" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90">Start</button>
+					<button type="button" id="home-timer-next" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800" title="End phase early (adds grace) or continue (after timer hit 0)">Next</button>
+					<button type="button" id="home-timer-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Reset</button>
+					<button type="button" id="home-timer-log" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Log session</button>
+				</div>
+				<div class="mt-2 flex items-center gap-2">
+					<label class="text-[11px] text-gray-500 dark:text-gray-400">Session label (optional):</label>
+					<input type="text" id="home-timer-session-label" placeholder="e.g. Chapter 3" class="flex-1 max-w-[140px] rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200" maxlength="40">
+				</div>
+				<div id="home-timer-log-list" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+					<p class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Session log (saved in browser)</p>
+					<ul id="home-timer-log-entries" class="text-xs text-gray-600 dark:text-gray-400 space-y-0.5 max-h-24 overflow-y-auto"></ul>
+				</div>
+			</section>
+			</div>
+		</div>
+
+		<!-- Row 3: Notes / To-do (full width) -->
+		<section class="second-brain-card p-5 sm:p-6">
+				<p class="home-section-title mb-2">Notes &amp; to-do</p>
+				<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Temp use — stored in browser only. Optional: Tools → Backup to download a copy.</p>
+				<div class="flex flex-wrap items-center gap-2 mb-3">
+					<input id="home-todo-input" type="text" class="flex-1 min-w-0 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Add a task…">
+					<button type="button" id="home-todo-add" class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90">Add</button>
+					<label class="text-[11px] text-gray-500 dark:text-gray-400">Export as:</label>
+					<select id="home-todo-export-format" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1.5 text-xs" aria-label="Export format">
+						<option value="md">.md</option>
+						<option value="txt">.txt</option>
+						<option value="pdf">PDF (print)</option>
+					</select>
+					<button type="button" id="home-todo-export-btn" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export</button>
+				</div>
+				<ul id="home-todo-list" class="space-y-1.5 text-sm text-gray-700 dark:text-gray-300 max-h-40 overflow-y-auto"></ul>
+		</section>
+
+		<!-- Powered by: JS libs + free APIs, pre-made only -->
+		<section class="mt-14 pt-10 border-t border-gray-200 dark:border-gray-700 notion-powered">
+			<p class="home-section-title mb-3">Powered by</p>
+			<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Notion-like second brain — built from <strong>JS libraries</strong> and <strong>free on-the-fly APIs</strong>. No custom backend; pre-made, compiled services only.</p>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+				<div class="second-brain-card p-4">
+					<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1.5">JS libraries & runtimes</p>
+					<p class="text-gray-600 dark:text-gray-400"><a href="https://pyodide.org/" target="_blank" rel="noopener noreferrer">Pyodide</a>, <a href="https://sql.js.org/" target="_blank" rel="noopener noreferrer">sql.js</a>, <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer">Tailwind</a> (CDN), vanilla JS. <a href="https://jupyterlite.readthedocs.io/" target="_blank" rel="noopener noreferrer">JupyterLite</a>, <a href="https://developers.google.com/youtube/iframe_api_reference" target="_blank" rel="noopener noreferrer">YouTube IFrame API</a>.</p>
+				</div>
+				<div class="second-brain-card p-4">
+					<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1.5">Free APIs & services</p>
+					<p class="text-gray-600 dark:text-gray-400"><a href="https://api.quotable.io/" target="_blank" rel="noopener noreferrer">Quotable</a>, <a href="https://animechan.xyz/" target="_blank" rel="noopener noreferrer">Animechan</a>, <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>, <a href="https://picsum.photos/" target="_blank" rel="noopener noreferrer">Picsum</a>, <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">Dictionary API</a>, <a href="https://devdocs.io/" target="_blank" rel="noopener noreferrer">DevDocs</a>, YouTube. All no-key or public.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-16 py-6">
+		<div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-600 dark:text-gray-400">
+			<p>Standalone Playground · Home · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
+			<p class="text-xs mt-1">© 2021–Present</p>
+			<p class="text-[11px] mt-2">Credits: Pyodide, sql.js, Tailwind, JupyterLite, Quotable, Animechan, Open-Meteo, Picsum, Dictionary API, DevDocs (see Powered by above). <a href="pages/docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a> · Repo &amp; deploy: see README.</p>
+			<p class="text-[11px] mt-3 text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 max-w-xl mx-auto">If the site feels sluggish, try clearing this site’s cache/storage (browser settings). You’ll lose saved data (timer log, to-dos, notes, theme) but the site may run faster.</p>
+		</div>
+	</footer>
+
+	<!-- Global music bar (YouTube, Spotify-style alternative) + right-side video panel -->
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-spotify" class="global-music-source-btn" aria-pressed="false" data-source="spotify" title="Paste Spotify track/album/playlist URLs">Spotify</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+			<button type="button" id="global-music-source-radio" class="global-music-source-btn" aria-pressed="false" data-source="radio" title="Free internet radio (no API)">Radio</button>
+		</div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
+	<div id="global-resources-flyout">
+		<div class="global-resources-header">
+			<span>Resources</span>
+			<button type="button" id="global-resources-close" class="global-resources-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-resources-body"></div>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<label class="global-yt-panel-piped-label"><input type="checkbox" id="global-yt-panel-piped" aria-label="Use Piped for video"> Piped</label>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above, or open this panel and use the search below.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
+		<div id="global-spotify-embed" class="global-spotify-embed" style="display:none;">
+			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
+	</div>
+
+	<!-- If OMDb API is on another host (e.g. you deploy API to Vercel and site to GitHub Pages), set: window.OMDB_PROXY_URL = 'https://your-api.vercel.app'; -->
+	<script src="./assets/js/nav-mobile.js" defer></script>
+	<script src="./assets/js/color-theme.js" defer></script>
+	<script src="./assets/js/theme.js" defer></script>
+	<script src="./assets/js/analytics.js" defer></script>
+	<script src="./assets/js/lazy-panels.js" defer></script>
+	<script src="./assets/js/homepage.js" defer></script>
+	<script src="./assets/js/register-sw.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<!-- Script order: tailwind-loader.js → main.css → (OMDB_PROXY_URL) → analytics → playground.js. Do not reorder. -->
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+	<title>Playground | Standalone Playground</title>
+	<meta name="description" content="Run Python, JS, and SQL in the browser. DevDocs, GitHub search. Toggle Tech (IDE, docs) or Non-tech (notes, web search)." />
+	<meta property="og:title" content="Playground — Code, Docs &amp; Tools" />
+	<meta property="og:description" content="Tech: IDE + DevDocs + GitHub. Non-tech: Word/PDF + Google, Wikipedia, Stack Overflow." />
+	<script>
+		// OMDb proxy base (no /api/omdb at the end)
+		// Your Vercel proxy URL: https://playground-serveless.vercel.app
+		window.OMDB_PROXY_URL = 'https://playground-serveless.vercel.app';
+	</script>
+	<script src="../assets/js/tailwind-loader.js" defer></script>
+	<!-- No Google Fonts: system font stack only (no external trackers) -->
+	<link rel="preconnect" href="https://devdocs.io">
+	<link rel="preconnect" href="https://api.github.com">
+	<link rel="preconnect" href="https://api.duckduckgo.com">
+	<link rel="preconnect" href="https://en.wikipedia.org">
+	<link rel="preconnect" href="https://api.stackexchange.com">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script src="../assets/js/nav-data.js" defer></script>
+	<script src="../assets/js/nav-inject.js" defer></script>
+</head>
+<body class="page-playground bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="playground">
+	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
+			<div class="flex items-center justify-between py-3">
+				<a href="../index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<div class="flex items-center gap-2">
+					<button type="button" id="sidebar-mobile-toggle" class="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Open Resources menu">&#9776; Resources</button>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer"><span aria-hidden="true">&#9776;</span><span class="ml-1 text-sm font-medium">Menu</span></button>
+				<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
+				<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs material-elevation-1">🌙</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links" data-nav-inject="drawer">
+		</nav>
+		<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle Roadmap">Roadmap</button>
+	</div>
+
+	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
+	<div class="flex relative">
+		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
+			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources sidebar">
+				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
+				<span class="sidebar-toggle-vertical">Resources</span>
+			</button>
+			<div class="sidebar-content p-3">
+				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
+				<nav class="space-y-1 text-sm">
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
+							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
+							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
+							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
+							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
+							<li><a href="./resources.html?topic=oops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OOP</a></li>
+							<li><a href="./resources.html?topic=prompting" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Prompting</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
+							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
+							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
+							<li><a href="./resources.html?topic=data-visualization" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Visualization</a></li>
+							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization (Python)</a></li>
+							<li><a href="./resources.html?topic=product-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Product Analytics</a></li>
+							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
+							<li><a href="./resources.html?topic=time-series" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Time Series</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
+							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
+							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
+							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
+							<li><a href="./resources.html?topic=nlp" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NLP</a></li>
+							<li><a href="./resources.html?topic=computer-vision" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Computer Vision</a></li>
+							<li><a href="./resources.html?topic=opencv" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OpenCV</a></li>
+							<li><a href="./resources.html?topic=reinforcement-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Reinforcement Learning</a></li>
+							<li><a href="./resources.html?topic=feature-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Feature Engineering</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
+							<li><a href="./resources.html?topic=spark" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Apache Spark</a></li>
+							<li><a href="./resources.html?topic=streaming" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Streaming Data</a></li>
+							<li><a href="./resources.html?topic=data-warehousing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Warehousing</a></li>
+							<li><a href="./resources.html?topic=databases" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Databases</a></li>
+							<li><a href="./resources.html?topic=cloud-data" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Cloud Platforms</a></li>
+							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
+							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
+							<li><a href="./resources.html?topic=mlops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">MLOps</a></li>
+							<li><a href="./resources.html?topic=devops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">DevOps</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming Languages</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=r" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">R Programming</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=business-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Business Analytics</a></li>
+							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
+							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
+							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</aside>
+
+		<main class="flex-1 min-w-0 max-w-6xl mx-auto px-4 sm:px-6 py-8">
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+				<div>
+					<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-1">Playground</h1>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">On-the-fly: run code, search docs, edit — then copy or export. Tech: IDE + DevDocs + GitHub. Non-tech: notes, PDF, web search.</p>
+				</div>
+				<div class="flex items-center gap-2">
+					<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Mode:</span>
+					<button type="button" id="playground-mode-tech" class="playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all" data-mode="tech">Tech</button>
+					<button type="button" id="playground-mode-nontech" class="playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all" data-mode="nontech">Non-tech</button>
+				</div>
+			</div>
+
+			<!-- Search hub: one input, two button groups by mode (visible in both Tech and Non-tech) -->
+			<section class="mb-8 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 sm:p-5 material-elevation-2">
+				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Search hub</h2>
+				<div class="flex flex-col sm:flex-row gap-2 mb-2">
+					<input id="hub-query" type="text" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Search…" />
+					<div id="hub-buttons-tech" class="flex flex-wrap gap-2 justify-end sm:justify-start">
+						<button type="button" id="hub-devdocs" class="hub-btn px-3 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:opacity-90">DevDocs</button>
+						<button type="button" id="hub-github" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">GitHub</button>
+					</div>
+					<div id="hub-buttons-nontech" class="hidden flex flex-wrap gap-2 justify-end sm:justify-start">
+						<button type="button" id="hub-duckduckgo" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">DuckDuckGo</button>
+						<button type="button" id="hub-wikipedia" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Wikipedia</button>
+						<button type="button" id="hub-stackoverflow" class="hub-btn px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700">Stack Overflow</button>
+					</div>
+				</div>
+				<!-- Previous searches (tech side only) -->
+				<div id="hub-search-history" class="hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+					<div class="flex items-center justify-between mb-1.5">
+						<p class="text-xs font-semibold text-gray-600 dark:text-gray-400">Previous searches</p>
+						<button type="button" id="hub-search-history-clear" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Clear</button>
+					</div>
+					<div id="hub-search-history-list" class="flex flex-wrap gap-1.5 text-xs"></div>
+				</div>
+			</section>
+
+			<!-- Tech mode: DevDocs panel (visible) + GitHub results panel + code runner, JupyterLite, quick launch -->
+			<div id="playground-content-tech">
+				<!-- DevDocs panel: always visible on tech side (no longer hidden) -->
+				<div id="docs-frame-wrap" class="mb-8 mt-0 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+						<span>DevDocs · Enable Python / SQL / Pandas in DevDocs for best results.</span>
+						<button type="button" id="docs-frame-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+					</div>
+					<div id="docs-frame-content">
+						<iframe id="docs-frame" title="DevDocs" class="w-full h-[420px] bg-white dark:bg-gray-900" loading="lazy" src="https://devdocs.io/"></iframe>
+					</div>
+				</div>
+				<!-- GitHub results panel (shows when GitHub search is used) -->
+				<div id="github-results-wrap" class="hidden mb-8 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+						<span>GitHub search results</span>
+						<div class="flex items-center gap-2">
+							<button type="button" id="github-results-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+							<button type="button" id="github-results-close" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Close">✕</button>
+						</div>
+					</div>
+					<div id="github-results-content">
+						<div id="github-results-body" class="p-4 max-h-[420px] overflow-y-auto">
+							<p class="text-sm text-gray-500 dark:text-gray-400">Search GitHub repositories above.</p>
+						</div>
+					</div>
+				</div>
+				<!-- Wikipedia results panel (shows when Wikipedia search is used) -->
+				<div id="wikipedia-results-wrap" class="hidden mb-8 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+						<span>Wikipedia search results</span>
+						<div class="flex items-center gap-2">
+							<button type="button" id="wikipedia-results-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+							<button type="button" id="wikipedia-results-close" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Close">✕</button>
+						</div>
+					</div>
+					<div id="wikipedia-results-content">
+						<div id="wikipedia-results-body" class="p-4 max-h-[420px] overflow-y-auto">
+							<p class="text-sm text-gray-500 dark:text-gray-400">Search Wikipedia above.</p>
+						</div>
+					</div>
+				</div>
+				<!-- Stack Overflow results panel (shows when Stack Overflow search is used) -->
+				<div id="stackoverflow-results-wrap" class="hidden mb-8 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+						<span>Stack Overflow search results</span>
+						<div class="flex items-center gap-2">
+							<button type="button" id="stackoverflow-results-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+							<button type="button" id="stackoverflow-results-close" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Close">✕</button>
+						</div>
+					</div>
+					<div id="stackoverflow-results-content">
+						<div id="stackoverflow-results-body" class="p-4 max-h-[420px] overflow-y-auto">
+							<p class="text-sm text-gray-500 dark:text-gray-400">Search Stack Overflow above.</p>
+						</div>
+					</div>
+				</div>
+				<!-- DuckDuckGo results panel (shows when DuckDuckGo search is used) -->
+				<div id="duckduckgo-results-wrap" class="hidden mb-8 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+						<span>DuckDuckGo search results</span>
+						<div class="flex items-center gap-2">
+							<button type="button" id="duckduckgo-results-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+							<button type="button" id="duckduckgo-results-close" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Close">✕</button>
+						</div>
+					</div>
+					<div id="duckduckgo-results-content">
+						<div id="duckduckgo-results-body" class="p-4 max-h-[420px] overflow-y-auto">
+							<p class="text-sm text-gray-500 dark:text-gray-400">Search DuckDuckGo above.</p>
+						</div>
+					</div>
+				</div>
+
+				<section class="mb-10 material-card rounded-xl border-2 border-gray-200 dark:border-gray-600 p-4 sm:p-6 material-elevation-2">
+					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Run code in the browser</h2>
+					<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Python (Pyodide), JavaScript, SQL (sql.js).</p>
+					<div class="flex flex-wrap items-center gap-3 mb-2">
+						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Language:</label>
+						<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 py-1.5 text-sm font-medium">
+							<option value="python">Python</option>
+							<option value="javascript">JavaScript</option>
+							<option value="sql">SQL (SQLite)</option>
+						</select>
+					</div>
+					<div class="code-editor-wrap dark:border-gray-700 dark:bg-gray-900">
+						<div id="line-nums" class="code-line-nums" aria-hidden="true">1</div>
+						<textarea id="code" class="text-gray-800 dark:text-gray-200" spellcheck="false" placeholder="print('Hello')"></textarea>
+					</div>
+					<div class="flex items-center gap-2 mt-2">
+						<button type="button" id="run" class="material-button px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium material-elevation-2">Run</button>
+						<span id="status" class="text-xs text-gray-500 dark:text-gray-400"></span>
+					</div>
+					<div id="sql-actions" class="hidden mt-3 flex flex-wrap items-center gap-2">
+						<button type="button" id="sql-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold">Reset DB</button>
+						<button type="button" id="sql-sample" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold">Load sample data</button>
+						<span class="text-xs text-gray-500 dark:text-gray-400">SQLite in-browser.</span>
+					</div>
+					<pre id="out" class="mt-2 p-3 rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-sm font-mono overflow-x-auto min-h-[2rem] hidden"></pre>
+				</section>
+
+				<section class="mt-6 material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6 material-elevation-1">
+					<div class="flex items-center justify-between mb-2">
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">JupyterLite</h2>
+						<button type="button" id="jlite-toggle" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-xs font-semibold">Show notebook</button>
+					</div>
+					<div id="jlite-wrap" class="mt-3 hidden">
+						<iframe id="jlite-frame" class="w-full h-[600px] rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900" title="JupyterLite"></iframe>
+					</div>
+				</section>
+
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 mb-6">
+					<a href="https://colab.new" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary transition-all text-left">
+						<span class="text-2xl">&#128211;</span><h3 class="text-lg font-semibold mt-2">Google Colab</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Open &#8594;</p>
+					</a>
+					<a href="https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/main?urlpath=lab" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary transition-all text-left">
+						<span class="text-2xl">&#128187;</span><h3 class="text-lg font-semibold mt-2">Jupyter (Binder)</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Open &#8594;</p>
+					</a>
+					<a href="https://jupyterlite.github.io/demo/lab/" target="_blank" rel="noopener" class="block p-6 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-primary transition-all text-left">
+						<span class="text-2xl">&#128218;</span><h3 class="text-lg font-semibold mt-2">JupyterLite</h3>
+						<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Open &#8594;</p>
+					</a>
+				</div>
+
+				<section class="mt-6 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 sm:p-6">
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Quick launch</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+						<div>
+							<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Awesome lists</h3>
+							<ul class="space-y-1 text-gray-700 dark:text-gray-300">
+								<li><a href="https://github.com/vinta/awesome-python" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-python</a></li>
+								<li><a href="https://github.com/josephmisiti/awesome-machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-machine-learning</a></li>
+								<li><a href="https://github.com/awesomedata/awesome-public-datasets" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-public-datasets</a></li>
+							</ul>
+						</div>
+						<div>
+							<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Free books & repos</h3>
+							<ul class="space-y-1 text-gray-700 dark:text-gray-300">
+								<li><a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener" class="underline hover:text-primary">free-programming-books</a></li>
+								<li><a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener" class="underline hover:text-primary">Hands-On ML</a></li>
+								<li><a href="https://github.com/fastai/fastbook" target="_blank" rel="noopener" class="underline hover:text-primary">fastbook</a></li>
+							</ul>
+						</div>
+					</div>
+				</section>
+			</div>
+
+			<!-- Non-tech mode: open Word/Docs in new tab (no iframe) -->
+			<div id="playground-content-nontech" class="hidden">
+				<section class="rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-6 sm:p-8">
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Word processor</h2>
+					<p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Use a full online document editor in a new tab. No window‑in‑window; your browser opens the service directly.</p>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+						<a href="https://www.office.com/launch/word" target="_blank" rel="noopener" class="flex items-center gap-4 p-5 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-left">
+							<span class="text-3xl">📄</span>
+							<div>
+								<h3 class="font-semibold text-gray-800 dark:text-gray-100">Microsoft Word Online</h3>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Full Word in the browser (Microsoft account)</p>
+							</div>
+						</a>
+						<a href="https://docs.google.com/document/create" target="_blank" rel="noopener" class="flex items-center gap-4 p-5 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-left">
+							<span class="text-3xl">📝</span>
+							<div>
+								<h3 class="font-semibold text-gray-800 dark:text-gray-100">Google Docs</h3>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Create a new document (Google account)</p>
+							</div>
+						</a>
+					</div>
+					<p class="text-xs text-gray-500 dark:text-gray-400">For quick in‑browser notes and PDF viewer, <a href="./tools.html" class="text-primary font-semibold hover:underline">open Tools</a>.</p>
+				</section>
+			</div>
+		</main>
+
+		<div id="roadmap-overlay" class="hidden fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
+		<div id="roadmap-panel" class="hidden fixed top-[57px] right-0 bottom-0 w-full lg:w-1/2 bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col border-l border-gray-200 dark:border-gray-700" role="dialog" aria-label="Roadmap">
+			<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Roadmaps</h3>
+				<button type="button" id="roadmap-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close">&#10005;</button>
+			</div>
+			<div class="flex-1 overflow-y-auto p-4 space-y-2 text-sm">
+				<a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="block px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">Data Analyst</a>
+				<a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener" class="block px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">AI / Data Scientist</a>
+				<a href="https://roadmap.sh/data-engineer" target="_blank" rel="noopener" class="block px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">Data Engineer</a>
+				<a href="https://roadmap.sh" target="_blank" rel="noopener" class="block px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">Browse all</a>
+			</div>
+		</div>
+	</div>
+
+	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl flex items-center justify-center" aria-label="Assistant">
+		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+	</button>
+	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
+	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant" aria-hidden="true" aria-modal="true">
+		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+			<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
+			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">&#10005;</button>
+		</div>
+		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"></div>
+		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+			<div class="flex gap-2">
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm" placeholder="Ask anything…">
+				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium">Send</button>
+			</div>
+			<div class="flex flex-wrap gap-2 mt-3">
+				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold">Enable chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs">Clear</button>
+				<span id="assistant-mode-status" class="text-xs text-gray-500"></span>
+			</div>
+		</div>
+	</div>
+
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
+		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200">
+			<p>Standalone Playground · Playground · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
+			<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">© 2021–Present</p>
+			<p class="text-[11px] mt-2">Credits: Pyodide, sql.js, DevDocs, GitHub API, Wikipedia, Stack Overflow. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
+			<p class="text-[11px] mt-2 text-amber-700 dark:text-amber-400/90">Sluggish? Clear site cache/storage — saved data will be lost but site may run faster.</p>
+		</div>
+	</footer>
+
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-spotify" class="global-music-source-btn" aria-pressed="false" data-source="spotify" title="Paste Spotify track/album/playlist URLs">Spotify</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+			<button type="button" id="global-music-source-radio" class="global-music-source-btn" aria-pressed="false" data-source="radio" title="Free internet radio (no API)">Radio</button>
+		</div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-omdb-toggle" class="global-omdb-toggle" aria-label="Open IMDb search">IMDb</button>
+	<div id="global-omdb-flyout" class="global-omdb-flyout">
+		<div class="global-omdb-header">
+			<input id="global-omdb-input" type="text" placeholder="Search movie or series…" aria-label="IMDb search" autocomplete="off">
+			<span id="global-omdb-usage" class="global-omdb-usage text-[11px] text-gray-500 dark:text-gray-400" title="Daily OMDb API hits (resets midnight UTC)">—/1000 today</span>
+			<button type="button" id="global-omdb-stats-btn" class="global-omdb-stats-btn px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-[11px] font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" title="API usage stats">Stats</button>
+			<button type="button" id="global-omdb-close" class="global-omdb-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-omdb-body" class="global-omdb-body">
+			<p class="global-omdb-hint text-sm text-gray-500 dark:text-gray-400 p-3">Type to search. Results show thumbnail, title, year.</p>
+		</div>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<label class="global-yt-panel-piped-label"><input type="checkbox" id="global-yt-panel-piped" aria-label="Use Piped for video"> Piped</label>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above, or open this panel and use the search below.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
+		<div id="global-spotify-embed" class="global-spotify-embed" style="display:none;">
+			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
+	</div>
+
+	<script src="../assets/js/nav-mobile.js" defer></script>
+	<script src="../assets/js/color-theme.js" defer></script>
+	<script src="../assets/js/theme.js" defer></script>
+	<script src="../assets/js/analytics.js" defer></script>
+	<script src="../assets/js/roadmap.js" defer></script>
+	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/omdb-widget.js" defer></script>
+	<script src="../assets/js/sidebar.js" defer></script>
+	<script src="../assets/js/playground.js" defer></script>
+	<script src="../assets/js/register-sw.js" defer></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var btn = document.getElementById('nav-drawer-roadmap');
+			if (btn) btn.addEventListener('click', function () {
+				var o = document.getElementById('nav-drawer-overlay');
+				if (o) o.click();
+				var r = document.getElementById('roadmap-toggle');
+				if (r) r.click();
+			});
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,3441 @@
+{
+  "python": {
+    "title": "Python",
+    "summary": "Core language for analytics, scripting, and machine learning. Start here if you are new to programming.",
+    "roadmapUrl": "https://roadmap.sh/python",
+    "reddit": [
+      { "name": "r/Python", "subreddit": "Python" },
+      { "name": "r/learnpython", "subreddit": "learnpython" },
+      { "name": "r/learnprogramming", "subreddit": "learnprogramming" }
+    ],
+    "courses": [
+      {
+        "name": "Kaggle Learn · Python",
+        "url": "https://www.kaggle.com/learn/python"
+      },
+      {
+        "name": "freeCodeCamp · Scientific Computing with Python",
+        "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/"
+      },
+      {
+        "name": "Python for Everybody (Coursera)",
+        "url": "https://www.coursera.org/specializations/python"
+      },
+      {
+        "name": "edX · Introduction to Python",
+        "url": "https://www.edx.org/learn/python"
+      },
+      {
+        "name": "Microsoft Learn · Python for beginners",
+        "url": "https://learn.microsoft.com/en-us/training/paths/beginner-python/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Automate the Boring Stuff (free book)",
+        "url": "https://automatetheboringstuff.com"
+      },
+      {
+        "name": "Python Tutorial (official docs)",
+        "url": "https://docs.python.org/3/tutorial/"
+      },
+      {
+        "name": "Fluent Python (O'Reilly)",
+        "url": "https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/"
+      },
+      {
+        "name": "Effective Python (free preview)",
+        "url": "https://effectivepython.com/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Real Python",
+        "url": "https://realpython.com/"
+      },
+      {
+        "name": "Towards Data Science · Python",
+        "url": "https://towardsdatascience.com/tagged/python"
+      },
+      {
+        "name": "Analytics Vidhya · Python",
+        "url": "https://www.analyticsvidhya.com/blog/category/python/"
+      },
+      {
+        "name": "Medium · Python",
+        "url": "https://medium.com/tag/python"
+      },
+      {
+        "name": "freeCodeCamp Python articles",
+        "url": "https://www.freecodecamp.org/news/tag/python/"
+      },
+      {
+        "name": "Full Stack Python",
+        "url": "https://www.fullstackpython.com/"
+      },
+      {
+        "name": "Python Weekly (newsletter archive)",
+        "url": "https://www.pythonweekly.com/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "rfscVS0vtbw",
+        "title": "Learn Python - Full Course (freeCodeCamp, 4.5M+ views)",
+        "embed": true
+      },
+      {
+        "id": "kqtD5dpn9C8",
+        "title": "Python for Beginners (Programming with Mosh, 3M+ views)"
+      },
+      {
+        "id": "t8pPd5powoc",
+        "title": "Python Tutorial for Beginners (Corey Schafer, 2M+ views)"
+      },
+      {
+        "id": "eWRfhZUzrAc",
+        "title": "Python OOP Tutorial (Corey Schafer)"
+      },
+      {
+        "id": "xwKo0MBPWEI",
+        "title": "Python Project - Build a Real-World App (freeCodeCamp)"
+      },
+      {
+        "id": "8DvywoWv6fI",
+        "title": "Python for Everybody (Dr. Chuck full course)"
+      },
+      {
+        "id": "WGJJIrtnfpk",
+        "title": "12 Beginner Python Projects (freeCodeCamp)"
+      },
+      {
+        "id": "LHBE6Q9XlzI",
+        "title": "Python for Data Science - Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "nLRL_NcnK-4",
+        "title": "Python for Programmers (Mosh)"
+      },
+      {
+        "id": "rfscVS0vtbw",
+        "title": "Python for Beginners in 4 Hours (duplicate hero kept for queue demo)"
+      },
+      {
+        "id": "PL-osiE80TeTt2d9bfVyTiXJA-UTHn6WwU",
+        "title": "Python Tutorials Playlist (Corey Schafer)",
+        "playlist": true
+      },
+      {
+        "id": "PLWKjhJtqVAbnupwRFOq9zHd8iqb_b0At9",
+        "title": "Python Tutorials Playlist (freeCodeCamp)",
+        "playlist": true
+      }
+    ],
+    "channels": [
+      { "name": "Corey Schafer", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Python & dev tutorials" },
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Free courses & projects" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, ML, data science" }
+    ],
+    "github": [
+      {
+        "name": "awesome-python",
+        "url": "https://github.com/vinta/awesome-python"
+      },
+      {
+        "name": "python-patterns",
+        "url": "https://github.com/faif/python-patterns"
+      },
+      {
+        "name": "30-seconds-of-python",
+        "url": "https://github.com/30-seconds/30-seconds-of-python"
+      }
+    ],
+    "paths": [
+      "Start with freeCodeCamp Python course → Kaggle Learn Python → build 3-5 automation scripts.",
+      "Follow Corey Schafer's Python playlist → read Automate the Boring Stuff → practice daily.",
+      "Study Real Python tutorials → implement projects → contribute to open source Python repos.",
+      "Master basics → OOP → decorators → async → build portfolio → follow roadmap.sh Python path."
+    ]
+  },
+  "stats": {
+    "title": "Statistics",
+    "summary": "Foundational statistics for data analysis: descriptive stats, probability, hypothesis testing, and regression.",
+    "courses": [
+      {
+        "name": "Khan Academy · Statistics and Probability",
+        "url": "https://www.khanacademy.org/math/statistics-probability"
+      },
+      {
+        "name": "Coursera · Statistics with Python",
+        "url": "https://www.coursera.org/specializations/statistics-with-python"
+      },
+      {
+        "name": "edX · Introduction to Statistics",
+        "url": "https://www.edx.org/learn/statistics"
+      }
+    ],
+    "books": [
+      {
+        "name": "Think Stats (free book)",
+        "url": "https://greenteapress.com/thinkstats2/"
+      },
+      {
+        "name": "Introduction to Statistical Learning (free)",
+        "url": "https://www.statlearning.com/"
+      },
+      {
+        "name": "Practical Statistics for Data Scientists (O'Reilly)",
+        "url": "https://www.oreilly.com/library/view/practical-statistics-for/9781491952955/"
+      },
+      {
+        "name": "Naked Statistics (popular book)",
+        "url": "https://www.amazon.com/Naked-Statistics-Stripping-Dread-Data/dp/039334777X"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Statistics",
+        "url": "https://towardsdatascience.com/tagged/statistics"
+      },
+      {
+        "name": "Analytics Vidhya · Statistics",
+        "url": "https://www.analyticsvidhya.com/blog/category/statistics/"
+      },
+      {
+        "name": "Medium · Statistics",
+        "url": "https://medium.com/tag/statistics"
+      },
+      {
+        "name": "freeCodeCamp · Statistics articles",
+        "url": "https://www.freecodecamp.org/news/tag/statistics/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "uhxtUt_-GyM",
+        "title": "Statistics Course (freeCodeCamp, 1M+ views)",
+        "embed": true
+      },
+      {
+        "id": "uhxtUt_-GyM",
+        "title": "Statistics for Data Science (edureka!, 500K+ views)"
+      },
+      {
+        "id": "PPLop4L2eGk",
+        "title": "Statistics Fundamentals (StatQuest)"
+      }
+    ],
+    "github": [
+      {
+        "name": "thinkstats2",
+        "url": "https://github.com/AllenDowney/ThinkStats2"
+      },
+      {
+        "name": "statistical-thinking",
+        "url": "https://github.com/AllenDowney/StatisticalThinking"
+      }
+    ],
+    "paths": [
+      "Complete Khan Academy Statistics → read Think Stats → practice with Python scipy.stats → apply to datasets.",
+      "Study descriptive stats → probability → distributions → hypothesis testing → regression → A/B testing.",
+      "Follow Analytics Vidhya statistics tutorials → Towards Data Science articles → practice on Kaggle datasets.",
+      "Master statistical concepts → implement tests → interpret results → communicate findings effectively."
+    ]
+  },
+  "math": {
+    "title": "Mathematics for Data Science",
+    "summary": "Linear algebra, calculus, and discrete math needed for machine learning and data analysis.",
+    "courses": [
+      {
+        "name": "Khan Academy · Linear Algebra",
+        "url": "https://www.khanacademy.org/math/linear-algebra"
+      },
+      {
+        "name": "3Blue1Brown · Essence of Linear Algebra",
+        "url": "https://www.3blue1brown.com/topics/linear-algebra"
+      }
+    ],
+    "books": [
+      {
+        "name": "Mathematics for Machine Learning (free)",
+        "url": "https://mml-book.github.io/"
+      },
+      {
+        "name": "Linear Algebra Done Right",
+        "url": "https://linear.axler.net/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Mathematics",
+        "url": "https://towardsdatascience.com/tagged/mathematics"
+      },
+      {
+        "name": "3Blue1Brown blog",
+        "url": "https://www.3blue1brown.com/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "fNk_zzaMoSs",
+        "title": "Essence of Linear Algebra (3Blue1Brown)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Watch 3Blue1Brown Linear Algebra series → practice with NumPy → understand matrix operations.",
+      "Study calculus basics → gradient descent → optimization for ML.",
+      "Learn linear algebra → matrix operations → eigenvalues → SVD for dimensionality reduction.",
+      "Apply math concepts by implementing ML algorithms from scratch."
+    ]
+  },
+  "oops": {
+    "title": "Object-Oriented Programming",
+    "summary": "OOP principles: classes, inheritance, polymorphism, and encapsulation. Essential for scalable code.",
+    "courses": [
+      {
+        "name": "freeCodeCamp · OOP in Python",
+        "url": "https://www.freecodecamp.org/news/object-oriented-programming-in-python/"
+      },
+      {
+        "name": "Real Python · OOP",
+        "url": "https://realpython.com/python3-object-oriented-programming/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Python OOP Tutorial",
+        "url": "https://docs.python.org/3/tutorial/classes.html"
+      },
+      {
+        "name": "Clean Code (OOP principles)",
+        "url": "https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Real Python · OOP articles",
+        "url": "https://realpython.com/tag/object-oriented-programming/"
+      },
+      {
+        "name": "freeCodeCamp · OOP articles",
+        "url": "https://www.freecodecamp.org/news/tag/object-oriented-programming/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "Ej_02ICOIgs",
+        "title": "Object-Oriented Programming in Python (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Learn classes and objects → inheritance → polymorphism → design patterns.",
+      "Build a project using OOP: game, library system, or data processing pipeline.",
+      "Practice SOLID principles → refactor code → write maintainable classes.",
+      "Study design patterns: Factory, Singleton, Observer → apply in projects."
+    ]
+  },
+  "prompting": {
+    "title": "Prompt Engineering",
+    "summary": "Crafting effective prompts for LLMs: few-shot learning, chain-of-thought, and prompt optimization.",
+    "courses": [
+      {
+        "name": "DeepLearning.AI · ChatGPT Prompt Engineering",
+        "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/"
+      },
+      {
+        "name": "Learn Prompting",
+        "url": "https://learnprompting.org/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Prompt Engineering Guide",
+        "url": "https://www.promptingguide.ai/"
+      },
+      {
+        "name": "LangChain Prompt Templates",
+        "url": "https://python.langchain.com/docs/modules/model_io/prompts/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Prompt Engineering",
+        "url": "https://towardsdatascience.com/tagged/prompt-engineering"
+      },
+      {
+        "name": "Learn Prompting blog",
+        "url": "https://learnprompting.org/docs/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "jC8wJN7aF8k",
+        "title": "Prompt Engineering Tutorial (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Complete DeepLearning.AI prompt engineering course → practice with ChatGPT → build prompt library.",
+      "Learn few-shot prompting → chain-of-thought → role-based prompts → test and iterate.",
+      "Master basic prompts → advanced techniques → prompt optimization → build LLM applications.",
+      "Practice on real tasks: summarization, code generation, data extraction → refine prompts."
+    ]
+  },
+  "sql": {
+    "title": "SQL",
+    "summary": "Query and aggregate data directly in databases. Essential for analytics work.",
+    "roadmapUrl": "https://roadmap.sh/sql",
+    "reddit": [
+      { "name": "r/SQL", "subreddit": "SQL" },
+      { "name": "r/datascience", "subreddit": "datascience" }
+    ],
+    "courses": [
+      {
+        "name": "Kaggle · Intro to SQL",
+        "url": "https://www.kaggle.com/learn/intro-to-sql"
+      },
+      {
+        "name": "Mode Analytics · SQL Tutorial",
+        "url": "https://mode.com/sql-tutorial/"
+      },
+      {
+        "name": "CS50's Introduction to Databases with SQL",
+        "url": "https://cs50.harvard.edu/x/2024/weeks/7/"
+      },
+      {
+        "name": "SQLBolt · Interactive SQL Tutorial",
+        "url": "https://sqlbolt.com/"
+      }
+    ],
+    "books": [
+      {
+        "name": "SQL Tutorial (w3schools)",
+        "url": "https://www.w3schools.com/sql/"
+      },
+      {
+        "name": "SQL for Data Analysis (O'Reilly)",
+        "url": "https://www.oreilly.com/library/view/sql-for-data/9781492088776/"
+      },
+      {
+        "name": "Learning SQL (free preview)",
+        "url": "https://www.oreilly.com/library/view/learning-sql-3rd/9781492057604/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Mode SQL blog",
+        "url": "https://mode.com/blog/sql/"
+      },
+      {
+        "name": "Towards Data Science · SQL",
+        "url": "https://towardsdatascience.com/tagged/sql"
+      },
+      {
+        "name": "Analytics Vidhya · SQL",
+        "url": "https://www.analyticsvidhya.com/blog/category/sql/"
+      },
+      {
+        "name": "Medium · SQL",
+        "url": "https://medium.com/tag/sql"
+      },
+      {
+        "name": "freeCodeCamp SQL articles",
+        "url": "https://www.freecodecamp.org/news/tag/sql/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "p3qvj9hO_Bo",
+        "title": "SQL Tutorial - Full Database Course (freeCodeCamp, 2M+ views)",
+        "embed": true
+      },
+      {
+        "id": "HXV3zeQKqGY",
+        "title": "SQL Full Course (freeCodeCamp, 1.5M+ views)"
+      },
+      {
+        "id": "PLhQjrBD2T382v1MBjNOhPu9SiJ1fsD4C0",
+        "title": "CS50's Introduction to Databases with SQL (Harvard)",
+        "playlist": true
+      },
+      {
+        "id": "PLXDaaNmzYOAKY6hIOoL3RG4duErSAumvw",
+        "title": "Danny Ma's 8-Week SQL Challenge",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "sql-practice",
+        "url": "https://github.com/XD-DENG/SQL-exercise"
+      },
+      {
+        "name": "leetcode-sql",
+        "url": "https://github.com/qiuwei/leetcode-sql"
+      },
+      {
+        "name": "sql-style-guide",
+        "url": "https://github.com/mattm/sql-style-guide"
+      }
+    ],
+    "paths": [
+      "Complete Kaggle Intro to SQL → Mode Analytics tutorial → practice on LeetCode SQL problems.",
+      "Follow CS50 SQL course → Danny Ma's 8-week challenge → build portfolio with real datasets.",
+      "Master SELECT/JOINs → window functions → CTEs → optimize queries → follow roadmap.sh SQL path.",
+      "Practice daily on HackerRank/LeetCode → read Mode blog → contribute SQL solutions to GitHub."
+    ]
+  },
+  "git": {
+    "title": "Git & GitHub",
+    "summary": "Version control and collaboration for code and analytics notebooks.",
+    "courses": [
+      {
+        "name": "freeCodeCamp · Git & GitHub for Beginners",
+        "url": "https://www.freecodecamp.org/news/git-and-github-for-beginners/"
+      },
+      {
+        "name": "Atlassian · Git tutorials",
+        "url": "https://www.atlassian.com/git/tutorials"
+      },
+      {
+        "name": "GitHub Skills",
+        "url": "https://skills.github.com/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Pro Git (free book)",
+        "url": "https://git-scm.com/book/en/v2"
+      },
+      {
+        "name": "GitHub Docs",
+        "url": "https://docs.github.com/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "GitHub Blog",
+        "url": "https://github.blog/"
+      },
+      {
+        "name": "GitHub Docs · Guides",
+        "url": "https://docs.github.com/en/get-started/quickstart"
+      },
+      {
+        "name": "freeCodeCamp · Git articles",
+        "url": "https://www.freecodecamp.org/news/tag/git/"
+      },
+      {
+        "name": "Medium · Git",
+        "url": "https://medium.com/tag/git"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "RGOj5yH7evk",
+        "title": "Git & GitHub Crash Course (Traversy Media, 2M+ views)",
+        "embed": true
+      },
+      {
+        "id": "apGV9Kg7ics",
+        "title": "Git Tutorial for Beginners (freeCodeCamp, 1M+ views)"
+      },
+      {
+        "id": "PL4cUxeGkcCzgoKro6z4o6k3gB9k9qZ9y9",
+        "title": "Git & GitHub Playlist (Net Ninja)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "git-tips",
+        "url": "https://github.com/git-tips/tips"
+      },
+      {
+        "name": "awesome-git",
+        "url": "https://github.com/dictcp/awesome-git"
+      }
+    ],
+    "paths": [
+      "Learn Git basics → commits → branches → merges → GitHub → collaboration.",
+      "Master advanced Git → rebase → cherry-pick → hooks → resolve conflicts → optimize workflow.",
+      "Study GitHub features → issues → PRs → actions → pages → build portfolio.",
+      "Practice daily → contribute to open source → build GitHub profile → share projects."
+    ]
+  },
+  "pandas": {
+    "title": "Pandas",
+    "summary": "Primary Python library for data wrangling, joins, and feature engineering.",
+    "courses": [
+      {
+        "name": "Kaggle · Pandas",
+        "url": "https://www.kaggle.com/learn/pandas"
+      },
+      {
+        "name": "freeCodeCamp · Data Analysis with Python",
+        "url": "https://www.freecodecamp.org/learn/data-analysis-with-python/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Pandas docs (User Guide)",
+        "url": "https://pandas.pydata.org/docs/user_guide/index.html"
+      },
+      {
+        "name": "Python Data Science Handbook (free)",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/"
+      },
+      {
+        "name": "Effective Pandas (O'Reilly)",
+        "url": "https://www.oreilly.com/library/view/effective-pandas/9781098103127/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Pandas",
+        "url": "https://towardsdatascience.com/tagged/pandas"
+      },
+      {
+        "name": "Analytics Vidhya · Pandas",
+        "url": "https://www.analyticsvidhya.com/blog/tag/pandas/"
+      },
+      {
+        "name": "Medium · Pandas",
+        "url": "https://medium.com/tag/pandas"
+      },
+      {
+        "name": "Real Python · Pandas",
+        "url": "https://realpython.com/pandas-python-explore-dataset/"
+      },
+      {
+        "name": "freeCodeCamp · Pandas articles",
+        "url": "https://www.freecodecamp.org/news/tag/pandas/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "vmEHCJofslg",
+        "title": "Pandas Tutorial (Corey Schafer, 1M+ views)",
+        "embed": true
+      },
+      {
+        "id": "ZyYVkYVg2Xk",
+        "title": "Pandas Full Course (freeCodeCamp, 500K+ views)"
+      },
+      {
+        "id": "PL-osiE80TeTsWmV9i9c58mdDCSskIFdDS",
+        "title": "Pandas Tutorials Playlist (Corey Schafer)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "pandas-cookbook",
+        "url": "https://github.com/jvns/pandas-cookbook"
+      },
+      {
+        "name": "PythonDataScienceHandbook",
+        "url": "https://github.com/jakevdp/PythonDataScienceHandbook"
+      },
+      {
+        "name": "pandas-exercises",
+        "url": "https://github.com/guipsamora/pandas_exercises"
+      }
+    ],
+    "paths": [
+      "Complete Kaggle Pandas course → watch Corey Schafer's playlist → practice on real datasets.",
+      "Read Python Data Science Handbook → Analytics Vidhya tutorials → build data cleaning projects.",
+      "Master dataframes → filtering → grouping → merging → time series → optimize performance.",
+      "Practice daily on Kaggle datasets → contribute pandas solutions → follow best practices."
+    ]
+  },
+  "numpy": {
+    "title": "NumPy",
+    "summary": "Fast arrays and math under the hood of most scientific Python libraries.",
+    "courses": [
+      {
+        "name": "NumPy practice notebooks on Kaggle",
+        "url": "https://www.kaggle.com/code"
+      },
+      {
+        "name": "freeCodeCamp · NumPy Course",
+        "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/"
+      }
+    ],
+    "books": [
+      {
+        "name": "NumPy docs",
+        "url": "https://numpy.org/doc/"
+      },
+      {
+        "name": "Python Data Science Handbook · NumPy (free)",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/02.00-introduction-to-numpy.html"
+      },
+      {
+        "name": "From Python to NumPy (free)",
+        "url": "https://www.labri.fr/perso/nrougier/from-python-to-numpy/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · NumPy",
+        "url": "https://towardsdatascience.com/tagged/numpy"
+      },
+      {
+        "name": "Analytics Vidhya · NumPy",
+        "url": "https://www.analyticsvidhya.com/blog/tag/numpy/"
+      },
+      {
+        "name": "Medium · NumPy",
+        "url": "https://medium.com/tag/numpy"
+      },
+      {
+        "name": "freeCodeCamp · NumPy articles",
+        "url": "https://www.freecodecamp.org/news/tag/numpy/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "QUT1VHIxAN4",
+        "title": "NumPy Tutorial (Corey Schafer, 500K+ views)",
+        "embed": true
+      },
+      {
+        "id": "ZB7BZMhfPgk",
+        "title": "NumPy Full Course (freeCodeCamp, 300K+ views)"
+      },
+      {
+        "id": "PLWKjhJtqVAbnqBxcdjVGgT3uOC10MDwRj",
+        "title": "NumPy Tutorials Playlist (Corey Schafer)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "numpy-tutorial",
+        "url": "https://github.com/numpy/numpy-tutorials"
+      },
+      {
+        "name": "100-numpy-exercises",
+        "url": "https://github.com/rougier/numpy-100"
+      }
+    ],
+    "paths": [
+      "Learn NumPy arrays → indexing → broadcasting → universal functions → optimize performance.",
+      "Master array operations → linear algebra → random numbers → file I/O → build numerical applications.",
+      "Study vectorization → memory management → performance tips → integrate with pandas/scipy.",
+      "Practice on Kaggle → solve 100 NumPy exercises → contribute to NumPy → build projects."
+    ]
+  },
+  "matplotlib": {
+    "title": "Visualization",
+    "summary": "Matplotlib/Seaborn fundamentals for static plots in Python.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Visualization",
+        "url": "https://www.kaggle.com/learn/data-visualization"
+      },
+      {
+        "name": "freeCodeCamp · Data Visualization",
+        "url": "https://www.freecodecamp.org/learn/data-analysis-with-python/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Matplotlib docs",
+        "url": "https://matplotlib.org/stable/"
+      },
+      {
+        "name": "Seaborn docs",
+        "url": "https://seaborn.pydata.org/"
+      },
+      {
+        "name": "Python Data Science Handbook · Visualization (free)",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/04.00-introduction-to-matplotlib.html"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Visualization",
+        "url": "https://towardsdatascience.com/tagged/data-visualization"
+      },
+      {
+        "name": "Analytics Vidhya · Visualization",
+        "url": "https://www.analyticsvidhya.com/blog/tag/data-visualization/"
+      },
+      {
+        "name": "Storytelling with Data blog",
+        "url": "https://www.storytellingwithdata.com/blog"
+      },
+      {
+        "name": "Medium · Data Visualization",
+        "url": "https://medium.com/tag/data-visualization"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "UO98lJQedQc",
+        "title": "Matplotlib Tutorial (Corey Schafer, 600K+ views)",
+        "embed": true
+      },
+      {
+        "id": "DAQNygfxUcM",
+        "title": "Seaborn Tutorial (Corey Schafer, 400K+ views)"
+      },
+      {
+        "id": "PL-osiE80TeTvipOqOMVEKTtJGqZfG2Ezs",
+        "title": "Matplotlib Tutorials Playlist (Corey Schafer)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "matplotlib-examples",
+        "url": "https://github.com/matplotlib/matplotlib"
+      },
+      {
+        "name": "seaborn-examples",
+        "url": "https://github.com/mwaskom/seaborn"
+      }
+    ],
+    "paths": [
+      "Learn matplotlib basics → plots → customization → subplots → save figures.",
+      "Master Seaborn → statistical plots → styling → build publication-ready visualizations.",
+      "Study plot types → color schemes → annotations → interactive plots → create dashboards.",
+      "Practice on datasets → create 20+ visualizations → build portfolio → share on GitHub."
+    ]
+  },
+  "excel": {
+    "title": "Excel",
+    "summary": "Spreadsheet skills for analysts: formulas, pivots, and dashboards.",
+    "courses": [
+      {
+        "name": "Excel Easy (step-by-step)",
+        "url": "https://www.excel-easy.com"
+      },
+      {
+        "name": "freeCodeCamp · Excel for Data Analysis",
+        "url": "https://www.freecodecamp.org/news/tag/excel/"
+      },
+      {
+        "name": "Microsoft Excel Training",
+        "url": "https://support.microsoft.com/en-us/excel"
+      }
+    ],
+    "books": [
+      {
+        "name": "Excel Formulas and Functions",
+        "url": "https://www.excel-easy.com/functions.html"
+      },
+      {
+        "name": "Chandoo.org · Excel blog",
+        "url": "https://chandoo.org"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "ExcelJet blog",
+        "url": "https://exceljet.net/blog"
+      },
+      {
+        "name": "Chandoo.org",
+        "url": "https://chandoo.org"
+      },
+      {
+        "name": "Analytics Vidhya · Excel",
+        "url": "https://www.analyticsvidhya.com/blog/tag/excel/"
+      },
+      {
+        "name": "Medium · Excel",
+        "url": "https://medium.com/tag/excel"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "Vl0H-qTclOg",
+        "title": "Excel for Beginners (freeCodeCamp, 1M+ views)",
+        "embed": true
+      },
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Excel + Analytics (freeCodeCamp, 500K+ views)"
+      },
+      {
+        "id": "PLrAXtmRdnEQy6nuLMHXo3b3-D7jZx0Z4r",
+        "title": "Excel Tutorials Playlist (ExcelIsFun)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "excel-formula-examples",
+        "url": "https://github.com/exceljs/exceljs"
+      }
+    ],
+    "paths": [
+      "Learn Excel basics → formulas → pivot tables → charts → build dashboards → automate tasks.",
+      "Master VLOOKUP → INDEX/MATCH → array formulas → Power Query → Power Pivot → advanced analytics.",
+      "Study ExcelJet tutorials → Chandoo.org → Analytics Vidhya → practice on real datasets.",
+      "Build projects: financial models → dashboards → automation → share templates → optimize workflows."
+    ]
+  },
+  "power-bi": {
+    "title": "Power BI",
+    "summary": "Microsoft BI stack: self-service dashboards on top of data models.",
+    "courses": [
+      {
+        "name": "Microsoft Learn · Power BI",
+        "url": "https://learn.microsoft.com/en-us/training/powerplatform/power-bi"
+      },
+      {
+        "name": "freeCodeCamp · Power BI full course (video)",
+        "url": "https://www.youtube.com/watch?v=1c01f6T1_2E"
+      },
+      {
+        "name": "Guy in a Cube · Power BI Training",
+        "url": "https://www.guyinacube.com/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Power BI docs",
+        "url": "https://learn.microsoft.com/en-us/power-bi"
+      },
+      {
+        "name": "The Definitive Guide to DAX",
+        "url": "https://www.sqlbi.com/books/the-definitive-guide-to-dax-2nd-edition/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "RADACAD Power BI blog",
+        "url": "https://radacad.com/blog"
+      },
+      {
+        "name": "SQLBI Blog",
+        "url": "https://www.sqlbi.com/blog/"
+      },
+      {
+        "name": "Guy in a Cube",
+        "url": "https://www.guyinacube.com/"
+      },
+      {
+        "name": "Analytics Vidhya · Power BI",
+        "url": "https://www.analyticsvidhya.com/blog/tag/power-bi/"
+      },
+      {
+        "name": "Medium · Power BI",
+        "url": "https://medium.com/tag/power-bi"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "1c01f6T1_2E",
+        "title": "Power BI Full Course (freeCodeCamp, 800K+ views)",
+        "embed": true
+      },
+      {
+        "id": "AGrlEh87Sew",
+        "title": "Power BI Tutorial (Guy in a Cube, 500K+ views)"
+      },
+      {
+        "id": "PLUaB-1hjhk8HqnmK0gQhfmIdCbwo7APG2",
+        "title": "Power BI Tutorials Playlist (Guy in a Cube)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "powerbi-visuals",
+        "url": "https://github.com/Microsoft/PowerBI-visuals"
+      }
+    ],
+    "paths": [
+      "Complete Microsoft Learn Power BI → watch Guy in a Cube tutorials → build 5-10 dashboards.",
+      "Master data modeling → DAX → Power Query → visuals → publish reports → share insights.",
+      "Study RADACAD blog → SQLBI → Analytics Vidhya → practice on real datasets → optimize performance.",
+      "Build portfolio: dashboards → data models → DAX formulas → publish to Power BI Service."
+    ]
+  },
+  "tableau": {
+    "title": "Tableau",
+    "summary": "Drag-and-drop BI with strong visual defaults and a huge community gallery.",
+    "courses": [
+      {
+        "name": "Tableau official training videos",
+        "url": "https://www.tableau.com/learn/training"
+      },
+      {
+        "name": "Tableau Public (practice)",
+        "url": "https://public.tableau.com"
+      },
+      {
+        "name": "freeCodeCamp · Tableau Course",
+        "url": "https://www.freecodecamp.org/news/tag/tableau/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Tableau Help",
+        "url": "https://help.tableau.com"
+      },
+      {
+        "name": "Practical Tableau",
+        "url": "https://www.amazon.com/Practical-Tableau-Ryan-Sleeper/dp/1491977310"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Tableau blog",
+        "url": "https://www.tableau.com/about/blog"
+      },
+      {
+        "name": "Tableau Public Gallery",
+        "url": "https://public.tableau.com/app/discover"
+      },
+      {
+        "name": "Analytics Vidhya · Tableau",
+        "url": "https://www.analyticsvidhya.com/blog/tag/tableau/"
+      },
+      {
+        "name": "Medium · Tableau",
+        "url": "https://medium.com/tag/tableau"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "6xv6Y0rRES0",
+        "title": "Tableau Full Course (freeCodeCamp, 600K+ views)",
+        "embed": true
+      },
+      {
+        "id": "6xv6Y0rRES0",
+        "title": "Tableau Tutorial (Alex The Analyst, 400K+ views)"
+      },
+      {
+        "id": "PLUaB-1hjhk8HqnmK0gQhfmIdCbwo7APG2",
+        "title": "Tableau Tutorials Playlist",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "tableau-api-samples",
+        "url": "https://github.com/tableau/rest-api-samples"
+      }
+    ],
+    "paths": [
+      "Complete Tableau training → practice on Tableau Public → build 10+ visualizations → publish gallery.",
+      "Master data connections → calculations → LOD expressions → dashboards → storytelling → share work.",
+      "Study Tableau blog → Analytics Vidhya → explore Public Gallery → practice daily → optimize designs.",
+      "Build portfolio: dashboards → data stories → calculations → publish to Tableau Public → get feedback."
+    ]
+  },
+  "business-analytics": {
+    "title": "Business Analytics",
+    "summary": "Translating business questions into metrics, dashboards, and data stories. Mix of Excel, BI tools, and SQL.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Visualization & Data Cleaning",
+        "url": "https://www.kaggle.com/learn"
+      },
+      {
+        "name": "Google Data Analytics Professional Certificate",
+        "url": "https://www.coursera.org/professional-certificates/google-data-analytics"
+      },
+      {
+        "name": "roadmap.sh · Data Analyst roadmap",
+        "url": "https://roadmap.sh/data-analyst"
+      }
+    ],
+    "books": [
+      {
+        "name": "Storytelling with Data",
+        "url": "https://www.storytellingwithdata.com/books"
+      },
+      {
+        "name": "Lean Analytics",
+        "url": "https://www.oreilly.com/library/view/lean-analytics/9781449364356/"
+      },
+      {
+        "name": "Data Analytics Made Accessible",
+        "url": "https://www.amazon.com/Data-Analytics-Made-Accessible-Anyone/dp/0615678838"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Data Analyst roadmap",
+        "url": "https://roadmap.sh/data-analyst"
+      },
+      {
+        "name": "Towards Data Science · Business Analytics",
+        "url": "https://towardsdatascience.com/tagged/business-analytics"
+      },
+      {
+        "name": "Analytics Vidhya · Business Analytics",
+        "url": "https://www.analyticsvidhya.com/blog/tag/business-analytics/"
+      },
+      {
+        "name": "Medium · Business Analytics",
+        "url": "https://medium.com/tag/business-analytics"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Excel + Analytics for Beginners (freeCodeCamp, 500K+ views)",
+        "embed": true
+      },
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Business Analytics Course (freeCodeCamp)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-business-intelligence",
+        "url": "https://github.com/topics/business-intelligence"
+      }
+    ],
+    "paths": [
+      "Get comfortable with Excel → learn basic SQL → build 3–4 dashboards in Power BI or Tableau from public datasets.",
+      "Follow roadmap.sh Data Analyst roadmap → master metrics → storytelling → build portfolio → present insights.",
+      "Study Analytics Vidhya tutorials → Towards Data Science articles → practice on business cases → optimize dashboards.",
+      "Learn business metrics → KPIs → dashboard design → data storytelling → share work → get feedback."
+    ]
+  },
+  "data-science": {
+    "title": "Data Science",
+    "roadmapUrl": "https://roadmap.sh/ai-data-scientist",
+    "reddit": [
+      { "name": "r/datascience", "subreddit": "datascience" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" },
+      { "name": "r/learnmachinelearning", "subreddit": "learnmachinelearning" }
+    ],
+    "summary": "End‑to‑end analytics and ML: cleaning data, modeling, evaluation, and communication.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Science micro-courses",
+        "url": "https://www.kaggle.com/learn"
+      },
+      {
+        "name": "IBM Data Science Professional Certificate",
+        "url": "https://www.coursera.org/professional-certificates/ibm-data-science"
+      },
+      {
+        "name": "Google Data Analytics Professional Certificate",
+        "url": "https://www.coursera.org/professional-certificates/google-data-analytics"
+      }
+    ],
+    "books": [
+      {
+        "name": "Python Data Science Handbook (free)",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/"
+      },
+      {
+        "name": "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow",
+        "url": "https://github.com/ageron/handson-ml3"
+      },
+      {
+        "name": "Data Science from Scratch (O'Reilly)",
+        "url": "https://www.oreilly.com/library/view/data-science-from/9781492041122/"
+      },
+      {
+        "name": "The Data Science Handbook",
+        "url": "https://www.thedatasciencehandbook.com/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · AI & Data Scientist roadmap",
+        "url": "https://roadmap.sh/ai-data-scientist"
+      },
+      {
+        "name": "Towards Data Science",
+        "url": "https://towardsdatascience.com/"
+      },
+      {
+        "name": "Analytics Vidhya",
+        "url": "https://www.analyticsvidhya.com/blog/"
+      },
+      {
+        "name": "Analytics India Magazine (AIM)",
+        "url": "https://analyticsindiamag.com/"
+      },
+      {
+        "name": "Medium · Data Science",
+        "url": "https://medium.com/tag/data-science"
+      },
+      {
+        "name": "KDnuggets",
+        "url": "https://www.kdnuggets.com/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Data Science Full Course (freeCodeCamp, 1M+ views)",
+        "embed": true
+      },
+      {
+        "id": "L7z4QnJzV4c",
+        "title": "Data Science Tutorial (edureka!, 500K+ views)"
+      },
+      {
+        "id": "PL9ooVrP1hQOHY6YVfQ8Q8eE2vN1G2kFqF",
+        "title": "Data Science Course Playlist (edureka!)",
+        "playlist": true
+      },
+      {
+        "id": "GwIo3gDZCVQ",
+        "title": "Machine Learning for Everybody (freeCodeCamp)"
+      },
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Data Analytics + Excel for Beginners (freeCodeCamp)"
+      }
+    ],
+    "channels": [
+      { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "Statistics & ML explained simply" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, data science, ML" },
+      { "name": "Ken Jee", "id": "UCiT9RITQ9PW6BXRV0l3dzHg", "description": "Data science career & projects" }
+    ],
+    "github": [
+      {
+        "name": "awesome-datascience",
+        "url": "https://github.com/academic/awesome-datascience"
+      },
+      {
+        "name": "data-science-ipython-notebooks",
+        "url": "https://github.com/donnemartin/data-science-ipython-notebooks"
+      },
+      {
+        "name": "handson-ml3",
+        "url": "https://github.com/ageron/handson-ml3"
+      },
+      {
+        "name": "PythonDataScienceHandbook",
+        "url": "https://github.com/jakevdp/PythonDataScienceHandbook"
+      }
+    ],
+    "paths": [
+      "Follow roadmap.sh AI & Data Scientist roadmap → master Python + pandas + SQL → do 5–10 Kaggle projects.",
+      "Complete IBM/Google Data Science certificate → read Hands-On ML → re‑implement notebooks → build portfolio.",
+      "Study Analytics Vidhya tutorials → Towards Data Science articles → practice on real datasets → publish insights.",
+      "Learn EDA → feature engineering → modeling → evaluation → deployment → follow MLOps practices."
+    ]
+  },
+  "data-engineering": {
+    "title": "Data Engineering",
+    "summary": "Pipelines, warehouses, and tooling that make analytics and ML possible at scale.",
+    "courses": [
+      {
+        "name": "Data Engineering Zoomcamp",
+        "url": "https://github.com/DataTalksClub/data-engineering-zoomcamp"
+      },
+      {
+        "name": "Google Cloud · Data Engineer learning path",
+        "url": "https://cloud.google.com/learn/path-data-engineer"
+      },
+      {
+        "name": "AWS Data Engineering",
+        "url": "https://aws.amazon.com/training/learning-paths/data-analytics/"
+      },
+      {
+        "name": "roadmap.sh · Data Engineer roadmap",
+        "url": "https://roadmap.sh/data-engineer"
+      }
+    ],
+    "books": [
+      {
+        "name": "Designing Data-Intensive Applications",
+        "url": "https://dataintensive.net/"
+      },
+      {
+        "name": "Fundamentals of Data Engineering",
+        "url": "https://www.oreilly.com/library/view/fundamentals-of-data/9781098108298/"
+      },
+      {
+        "name": "Data Engineering Cookbook",
+        "url": "https://www.oreilly.com/library/view/data-engineering-cookbook/9781804613456/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Data Engineer roadmap",
+        "url": "https://roadmap.sh/data-engineer"
+      },
+      {
+        "name": "Towards Data Science · Data Engineering",
+        "url": "https://towardsdatascience.com/tagged/data-engineering"
+      },
+      {
+        "name": "Analytics Vidhya · Data Engineering",
+        "url": "https://www.analyticsvidhya.com/blog/tag/data-engineering/"
+      },
+      {
+        "name": "Medium · Data Engineering",
+        "url": "https://medium.com/tag/data-engineering"
+      },
+      {
+        "name": "Seattle Data Guy",
+        "url": "https://www.seattledataguy.com/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "pE4I5ysGEi8",
+        "title": "Data Engineering Crash Course (freeCodeCamp, 400K+ views)",
+        "embed": true
+      },
+      {
+        "id": "aReis5DXutM",
+        "title": "Data Engineering Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "PLrAXtmErZgOeiKm4sgNOknGvNjby9efdfg",
+        "title": "Data Engineering Playlist (DataTalksClub / Zoomcamp)",
+        "playlist": true
+      },
+      {
+        "id": "U9e6Yr6v8vQ",
+        "title": "Apache Spark Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "3hLmDS179rg",
+        "title": "AWS Data Analytics (freeCodeCamp)"
+      }
+    ],
+    "roadmapUrl": "https://roadmap.sh/data-engineer",
+    "reddit": [
+      { "name": "r/dataengineering", "subreddit": "dataengineering" },
+      { "name": "r/ETL", "subreddit": "ETL" },
+      { "name": "r/bigdata", "subreddit": "bigdata" }
+    ],
+    "github": [
+      {
+        "name": "awesome-data-engineering",
+        "url": "https://github.com/igorbarinov/awesome-data-engineering"
+      },
+      {
+        "name": "data-engineering-zoomcamp",
+        "url": "https://github.com/DataTalksClub/data-engineering-zoomcamp"
+      },
+      {
+        "name": "Data Engineering Cookbook (Andrej Kretinsky)",
+        "url": "https://github.com/andkret/Cookbook"
+      }
+    ],
+    "paths": [
+      "Follow roadmap.sh Data Engineer roadmap → strengthen SQL + Python → learn cloud → complete Zoomcamp.",
+      "Master ETL/ELT → data lakes → warehouses → orchestration → streaming → build end-to-end pipelines.",
+      "Study Analytics Vidhya tutorials → Towards Data Science articles → practice on real projects.",
+      "Build projects: data pipelines → orchestrate workflows → optimize performance → deploy to production."
+    ]
+  },
+  "machine-learning": {
+    "title": "Machine Learning",
+    "summary": "Classical ML: regression, trees, ensembles, model evaluation, and feature engineering.",
+    "roadmapUrl": "https://roadmap.sh/machine-learning-engineer",
+    "reddit": [
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" },
+      { "name": "r/learnmachinelearning", "subreddit": "learnmachinelearning" },
+      { "name": "r/MLquestions", "subreddit": "MLquestions" }
+    ],
+    "courses": [
+      {
+        "name": "Kaggle · Intro to Machine Learning",
+        "url": "https://www.kaggle.com/learn/intro-to-machine-learning"
+      },
+      {
+        "name": "Andrew Ng · Machine Learning (Coursera)",
+        "url": "https://www.coursera.org/learn/machine-learning"
+      },
+      {
+        "name": "fast.ai · Practical Deep Learning",
+        "url": "https://course.fast.ai/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow",
+        "url": "https://github.com/ageron/handson-ml3"
+      },
+      {
+        "name": "Introduction to Statistical Learning (free)",
+        "url": "https://www.statlearning.com/"
+      },
+      {
+        "name": "Pattern Recognition and Machine Learning",
+        "url": "https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Machine Learning roadmap",
+        "url": "https://roadmap.sh/machine-learning"
+      },
+      {
+        "name": "Towards Data Science · Machine Learning",
+        "url": "https://towardsdatascience.com/tagged/machine-learning"
+      },
+      {
+        "name": "Analytics Vidhya · Machine Learning",
+        "url": "https://www.analyticsvidhya.com/blog/category/machine-learning/"
+      },
+      {
+        "name": "Analytics India Magazine · ML",
+        "url": "https://analyticsindiamag.com/category/machine-learning/"
+      },
+      {
+        "name": "Medium · Machine Learning",
+        "url": "https://medium.com/tag/machine-learning"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "GwIo3gDZCVQ",
+        "title": "Machine Learning for Everybody (freeCodeCamp, 2M+ views)",
+        "embed": true
+      },
+      {
+        "id": "PPLop4L2eGk",
+        "title": "Machine Learning Course (StatQuest, 1M+ views)"
+      },
+      {
+        "id": "aircAruvnKk",
+        "title": "Neural Networks from Scratch (3Blue1Brown)"
+      },
+      {
+        "id": "PLQVvvaa0QuDfKTOs3Keq_kaG2P55YRn5v",
+        "title": "Machine Learning with Python Playlist (sentdex)",
+        "playlist": true
+      },
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Data Science Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "L7z4QnJzV4c",
+        "title": "Data Science Tutorial (edureka!)"
+      }
+    ],
+    "channels": [
+      { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "ML & statistics explained" },
+      { "name": "3Blue1Brown", "id": "UCYO_jab_esuFRV4b17AJtAw", "description": "Math & neural networks" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "ML with Python" }
+    ],
+    "github": [
+      {
+        "name": "handson-ml3",
+        "url": "https://github.com/ageron/handson-ml3"
+      },
+      {
+        "name": "awesome-machine-learning",
+        "url": "https://github.com/josephmisiti/awesome-machine-learning"
+      },
+      {
+        "name": "ML-From-Scratch",
+        "url": "https://github.com/eriklindernoren/ML-From-Scratch"
+      },
+      {
+        "name": "interpretable-ml-book",
+        "url": "https://github.com/christophM/interpretable-ml-book"
+      }
+    ],
+    "paths": [
+      "Follow roadmap.sh ML roadmap → complete Andrew Ng's course → Kaggle Intro + Intermediate ML → build projects.",
+      "Read Hands-On ML → re‑implement models with scikit‑learn → improve 2–3 Kaggle solutions → publish on GitHub.",
+      "Study Analytics Vidhya ML tutorials → Towards Data Science articles → practice on real datasets → deploy models.",
+      "Master supervised learning → unsupervised learning → ensemble methods → model evaluation → MLOps."
+    ]
+  },
+  "deep-learning": {
+    "title": "Deep Learning",
+    "summary": "Neural networks, CNNs, RNNs, transformers, and training tricks.",
+    "roadmapUrl": "https://roadmap.sh/machine-learning-engineer",
+    "reddit": [
+      { "name": "r/deeplearning", "subreddit": "deeplearning" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" },
+      { "name": "r/LanguageTechnology", "subreddit": "LanguageTechnology" }
+    ],
+    "courses": [
+      {
+        "name": "fast.ai · Practical Deep Learning for Coders",
+        "url": "https://course.fast.ai/"
+      },
+      {
+        "name": "DeepLearning.AI · Deep Learning Specialization",
+        "url": "https://www.coursera.org/specializations/deep-learning"
+      },
+      {
+        "name": "CS231n · Convolutional Neural Networks",
+        "url": "http://cs231n.stanford.edu/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Deep Learning (Goodfellow, Bengio, Courville, free)",
+        "url": "https://www.deeplearningbook.org/"
+      },
+      {
+        "name": "Neural Networks and Deep Learning (free)",
+        "url": "http://neuralnetworksanddeeplearning.com/"
+      },
+      {
+        "name": "Dive into Deep Learning (free)",
+        "url": "https://d2l.ai/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "fast.ai blog",
+        "url": "https://www.fast.ai/"
+      },
+      {
+        "name": "Towards Data Science · Deep Learning",
+        "url": "https://towardsdatascience.com/tagged/deep-learning"
+      },
+      {
+        "name": "Analytics Vidhya · Deep Learning",
+        "url": "https://www.analyticsvidhya.com/blog/category/deep-learning/"
+      },
+      {
+        "name": "Analytics India Magazine · Deep Learning",
+        "url": "https://analyticsindiamag.com/category/deep-learning/"
+      },
+      {
+        "name": "Medium · Deep Learning",
+        "url": "https://medium.com/tag/deep-learning"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "aircAruvnKk",
+        "title": "Neural Networks from Scratch (3Blue1Brown, 5M+ views)",
+        "embed": true
+      },
+      {
+        "id": "vT1JzLTH4G4",
+        "title": "Deep Learning Full Course (freeCodeCamp, 1M+ views)"
+      },
+      {
+        "id": "PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi",
+        "title": "Neural Networks Playlist (3Blue1Brown)",
+        "playlist": true
+      },
+      {
+        "id": "PL5-TkQAf4F9Rmd6d5y5j6cY2f3G1jJm3x",
+        "title": "CS231n Playlist (Stanford)",
+        "playlist": true
+      },
+      {
+        "id": "GwIo3gDZCVQ",
+        "title": "Machine Learning for Everybody (freeCodeCamp)"
+      },
+      {
+        "id": "PPLop4L2eGk",
+        "title": "Machine Learning Course (StatQuest)"
+      }
+    ],
+    "github": [
+      {
+        "name": "d2l-ai",
+        "url": "https://github.com/d2l-ai/d2l-en"
+      },
+      {
+        "name": "deep-learning-papers",
+        "url": "https://github.com/terryum/awesome-deep-learning-papers"
+      },
+      {
+        "name": "pytorch-tutorial",
+        "url": "https://github.com/yunjey/pytorch-tutorial"
+      }
+    ],
+    "paths": [
+      "Do fast.ai Practical DL → build 2–3 image or tabular DL projects → read Deep Learning book chapters.",
+      "Complete DeepLearning.AI specialization → watch CS231n → implement CNNs/RNNs → build portfolio.",
+      "Study Analytics Vidhya tutorials → Towards Data Science articles → practice on Kaggle/Hugging Face.",
+      "Master neural networks → CNNs → RNNs → transformers → optimize training → deploy models."
+    ]
+  },
+  "llms": {
+    "title": "LLMs & Generative AI",
+    "summary": "Working with large language models: prompting, fine‑tuning, retrieval, and evaluation.",
+    "courses": [
+      {
+        "name": "DeepLearning.AI · ChatGPT Prompt Engineering",
+        "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/"
+      },
+      {
+        "name": "DeepLearning.AI · LLM Applications",
+        "url": "https://www.deeplearning.ai/"
+      },
+      {
+        "name": "Hugging Face · NLP Course (LLM-focused)",
+        "url": "https://huggingface.co/learn/nlp-course/"
+      },
+      {
+        "name": "roadmap.sh · AI Engineer roadmap",
+        "url": "https://roadmap.sh/ai-engineer"
+      }
+    ],
+    "books": [
+      {
+        "name": "Hugging Face · NLP Course (LLM-focused parts)",
+        "url": "https://huggingface.co/learn/nlp-course/"
+      },
+      {
+        "name": "Build a Large Language Model (free)",
+        "url": "https://www.oreilly.com/library/view/build-a-large/9781098150952/"
+      },
+      {
+        "name": "Generative AI with Large Language Models",
+        "url": "https://www.coursera.org/learn/generative-ai-with-llms"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · AI Engineer roadmap",
+        "url": "https://roadmap.sh/ai-engineer"
+      },
+      {
+        "name": "Towards Data Science · LLMs",
+        "url": "https://towardsdatascience.com/tagged/large-language-models"
+      },
+      {
+        "name": "Analytics Vidhya · LLMs",
+        "url": "https://www.analyticsvidhya.com/blog/tag/llm/"
+      },
+      {
+        "name": "Analytics India Magazine · LLM",
+        "url": "https://analyticsindiamag.com/category/llm/"
+      },
+      {
+        "name": "Medium · Large Language Models",
+        "url": "https://medium.com/tag/large-language-models"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "zizonToFXDs",
+        "title": "Build LLM Apps (freeCodeCamp + HF, 300K+ views)",
+        "embed": true
+      },
+      {
+        "id": "x7X9w_GIm1s",
+        "title": "LLM Full Course (freeCodeCamp)"
+      },
+      {
+        "id": "PLo2Dd0dNq2JxqA1sL1L2L3L4L5L6L7L8",
+        "title": "LLM Tutorials Playlist",
+        "playlist": true
+      },
+      {
+        "id": "8rXD5-xhemo",
+        "title": "NLP Course (freeCodeCamp)"
+      },
+      {
+        "id": "aircAruvnKk",
+        "title": "Neural Networks from Scratch (3Blue1Brown)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-llm",
+        "url": "https://github.com/Hannibal046/Awesome-LLM"
+      },
+      {
+        "name": "transformers",
+        "url": "https://github.com/huggingface/transformers"
+      },
+      {
+        "name": "langchain",
+        "url": "https://github.com/langchain-ai/langchain"
+      }
+    ],
+    "paths": [
+      "Learn basic prompting → build tools with LLM APIs → explore RAG → fine-tuning → evaluation.",
+      "Follow roadmap.sh AI Engineer roadmap → deployment → vector DBs → observability → production.",
+      "Study Analytics Vidhya LLM tutorials → Towards Data Science articles → build applications.",
+      "Master prompting → RAG → fine-tuning → evaluation → deploy LLM apps → share on GitHub."
+    ]
+  },
+  "nlp": {
+    "title": "NLP (Natural Language Processing)",
+    "summary": "Text preprocessing, embeddings, sequence models, and modern transformer-based NLP.",
+    "courses": [
+      {
+        "name": "CS224n · Natural Language Processing with Deep Learning",
+        "url": "https://web.stanford.edu/class/cs224n/"
+      },
+      {
+        "name": "Hugging Face · NLP Course",
+        "url": "https://huggingface.co/learn/nlp-course/"
+      },
+      {
+        "name": "fast.ai · NLP",
+        "url": "https://www.fast.ai/2019/07/08/fastai-nlp/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Speech and Language Processing (Jurafsky & Martin, free)",
+        "url": "https://web.stanford.edu/~jurafsky/slp3/"
+      },
+      {
+        "name": "Natural Language Processing with Python (free)",
+        "url": "https://www.nltk.org/book/"
+      },
+      {
+        "name": "Transformers for Natural Language Processing",
+        "url": "https://www.packtpub.com/product/transformers-for-natural-language-processing/9781801813192"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "The Gradient · NLP articles",
+        "url": "https://thegradient.pub/"
+      },
+      {
+        "name": "Towards Data Science · NLP",
+        "url": "https://towardsdatascience.com/tagged/natural-language-processing"
+      },
+      {
+        "name": "Analytics Vidhya · NLP",
+        "url": "https://www.analyticsvidhya.com/blog/category/nlp/"
+      },
+      {
+        "name": "Analytics India Magazine · NLP",
+        "url": "https://analyticsindiamag.com/category/nlp/"
+      },
+      {
+        "name": "Medium · NLP",
+        "url": "https://medium.com/tag/natural-language-processing"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "8rXD5-xhemo",
+        "title": "NLP Course (freeCodeCamp, 500K+ views)",
+        "embed": true
+      },
+      {
+        "id": "5_oA0e0u2cQ",
+        "title": "NLP with Deep Learning (Stanford CS224n)"
+      },
+      {
+        "id": "PLoROMvodv4rOhcuXMZkNm7j3fVwBBY42z",
+        "title": "CS224n Playlist (Stanford)",
+        "playlist": true
+      },
+      {
+        "id": "zizonToFXDs",
+        "title": "Build LLM Apps (freeCodeCamp + HF)"
+      },
+      {
+        "id": "x7X9w_GIm1s",
+        "title": "LLM Full Course (freeCodeCamp)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-nlp",
+        "url": "https://github.com/keon/awesome-nlp"
+      },
+      {
+        "name": "transformers",
+        "url": "https://github.com/huggingface/transformers"
+      },
+      {
+        "name": "spaCy",
+        "url": "https://github.com/explosion/spaCy"
+      }
+    ],
+    "paths": [
+      "Complete Hugging Face NLP course → implement text classification → QA model → build applications.",
+      "Watch CS224n lectures → read Jurafsky & Martin → study transformers → fine-tune models.",
+      "Study Analytics Vidhya NLP tutorials → Towards Data Science articles → practice on datasets.",
+      "Master text preprocessing → embeddings → sequence models → transformers → deploy NLP apps."
+    ]
+  },
+  "data-analytics": {
+    "title": "Data Analytics",
+    "summary": "Analyzing data to extract insights: SQL queries, dashboards, and business metrics.",
+    "courses": [
+      {
+        "name": "Google Data Analytics Professional Certificate",
+        "url": "https://www.coursera.org/professional-certificates/google-data-analytics"
+      },
+      {
+        "name": "Kaggle · Data Analysis",
+        "url": "https://www.kaggle.com/learn/data-analysis"
+      },
+      {
+        "name": "roadmap.sh · Data Analyst roadmap",
+        "url": "https://roadmap.sh/data-analyst"
+      }
+    ],
+    "books": [
+      {
+        "name": "Storytelling with Data",
+        "url": "https://www.storytellingwithdata.com/books"
+      },
+      {
+        "name": "Python Data Science Handbook (free)",
+        "url": "https://jakevdp.github.io/PythonDataScienceHandbook/"
+      },
+      {
+        "name": "Data Analytics Made Accessible",
+        "url": "https://www.amazon.com/Data-Analytics-Made-Accessible-Anyone/dp/0615678838"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "roadmap.sh · Data Analyst roadmap",
+        "url": "https://roadmap.sh/data-analyst"
+      },
+      {
+        "name": "Mode Analytics blog",
+        "url": "https://mode.com/blog/"
+      },
+      {
+        "name": "Towards Data Science · Analytics",
+        "url": "https://towardsdatascience.com/tagged/data-analytics"
+      },
+      {
+        "name": "Analytics Vidhya",
+        "url": "https://www.analyticsvidhya.com/blog/"
+      },
+      {
+        "name": "Analytics India Magazine",
+        "url": "https://analyticsindiamag.com/"
+      },
+      {
+        "name": "Medium · Data Analytics",
+        "url": "https://medium.com/tag/data-analytics"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Data Analytics Full Course (freeCodeCamp, 1M+ views)",
+        "embed": true
+      },
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Data Science Crash Course (freeCodeCamp, 500K+ views)"
+      },
+      {
+        "id": "L7z4QnJzV4c",
+        "title": "Data Analytics Course (edureka!, 400K+ views)"
+      },
+      {
+        "id": "p3qvj9hO_Bo",
+        "title": "SQL Full Database Course (freeCodeCamp)"
+      },
+      {
+        "id": "VL0H-qTclOg",
+        "title": "Excel for Beginners (freeCodeCamp)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-public-datasets",
+        "url": "https://github.com/awesomedata/awesome-public-datasets"
+      },
+      {
+        "name": "data-science-ipython-notebooks",
+        "url": "https://github.com/donnemartin/data-science-ipython-notebooks"
+      }
+    ],
+    "paths": [
+      "Follow roadmap.sh Data Analyst roadmap → master SQL → learn Excel/Power BI → build 5-10 dashboards.",
+      "Complete Google Data Analytics certificate → practice on real business questions → present findings → build portfolio.",
+      "Study Analytics Vidhya tutorials → Towards Data Science articles → Analytics India Magazine → practice daily.",
+      "Learn data cleaning → EDA → visualization → storytelling → dashboard creation → share insights on GitHub."
+    ]
+  },
+  "data-visualization": {
+    "title": "Data Visualization",
+    "summary": "Creating compelling visualizations: charts, dashboards, and interactive graphics.",
+    "courses": [
+      {
+        "name": "Kaggle · Data Visualization",
+        "url": "https://www.kaggle.com/learn/data-visualization"
+      },
+      {
+        "name": "Data Visualization Society",
+        "url": "https://www.datavisualizationsociety.org/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Storytelling with Data",
+        "url": "https://www.storytellingwithdata.com/books"
+      },
+      {
+        "name": "The Visual Display of Quantitative Information",
+        "url": "https://www.edwardtufte.com/tufte/books_vdqi"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "FlowingData",
+        "url": "https://flowingdata.com/"
+      },
+      {
+        "name": "Information is Beautiful",
+        "url": "https://informationisbeautiful.net/"
+      },
+      {
+        "name": "Visual Capitalist",
+        "url": "https://www.visualcapitalist.com/"
+      },
+      {
+        "name": "Data Visualization Society",
+        "url": "https://www.datavisualizationsociety.org/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "UO98lJQedQc",
+        "title": "Data Visualization Tutorial (Corey Schafer)",
+        "embed": true
+      },
+      {
+        "id": "PLGquJ_T_JBMQ0-LhE_TvVX0z_Os0k5H8f",
+        "title": "Storytelling with Data Talks & Webinars",
+        "playlist": true
+      },
+      {
+        "id": "PLZo2FfoMkJeE_q-XLfr6S4qCxUq5g2uIj",
+        "title": "Design & Visualization Playlist (TDS / YouTube)",
+        "playlist": true
+      },
+      {
+        "id": "Vl0H-qTclOg",
+        "title": "Excel for Data Visualization (freeCodeCamp)"
+      },
+      {
+        "id": "6xv6Y0rRES0",
+        "title": "Tableau Full Course (freeCodeCamp)"
+      }
+    ],
+    "paths": [
+      "Learn matplotlib/seaborn → Tableau/Power BI → D3.js for interactivity → build portfolio.",
+      "Study design principles → color theory → chart selection → create 10+ visualizations.",
+      "Master static charts → interactive dashboards → storytelling → publish on Tableau Public.",
+      "Practice with real datasets → experiment with different chart types → get feedback → iterate."
+    ]
+  },
+  "product-analytics": {
+    "title": "Product Analytics",
+    "summary": "Analyzing user behavior, product metrics, A/B testing, and feature adoption.",
+    "courses": [
+      {
+        "name": "Google Analytics Academy",
+        "url": "https://analytics.google.com/analytics/academy/"
+      },
+      {
+        "name": "Mixpanel · Product Analytics",
+        "url": "https://mixpanel.com/blog/product-analytics/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Lean Analytics",
+        "url": "https://www.oreilly.com/library/view/lean-analytics/9781449364356/"
+      },
+      {
+        "name": "Hooked: How to Build Habit-Forming Products",
+        "url": "https://www.nirandfar.com/hooked/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Amplitude · Product Analytics blog",
+        "url": "https://amplitude.com/blog"
+      },
+      {
+        "name": "Mixpanel blog",
+        "url": "https://mixpanel.com/blog/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "rZv5eLqJ5qY",
+        "title": "Product Analytics Tutorial",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Learn Google Analytics → Mixpanel/Amplitude → SQL for custom queries → build dashboards.",
+      "Master funnel analysis → cohort analysis → retention metrics → A/B testing → present insights.",
+      "Study product metrics (DAU, MAU, retention) → event tracking → user segmentation → recommendations.",
+      "Practice on real products → analyze user journeys → identify drop-offs → suggest improvements."
+    ]
+  },
+  "opencv": {
+    "title": "OpenCV & Computer Vision",
+    "summary": "Image processing, object detection, face recognition, and computer vision applications.",
+    "courses": [
+      {
+        "name": "OpenCV Official Tutorials",
+        "url": "https://docs.opencv.org/4.x/d9/df8/tutorial_root.html"
+      },
+      {
+        "name": "freeCodeCamp · OpenCV Course",
+        "url": "https://www.freecodecamp.org/news/tag/opencv/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Learning OpenCV 4",
+        "url": "https://www.oreilly.com/library/view/learning-opencv-4/9781491937983/"
+      },
+      {
+        "name": "OpenCV Python Tutorials",
+        "url": "https://opencv-python-tutroals.readthedocs.io/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "PyImageSearch",
+        "url": "https://pyimagesearch.com/"
+      },
+      {
+        "name": "Towards Data Science · Computer Vision",
+        "url": "https://towardsdatascience.com/tagged/computer-vision"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "oXlwWbU8l2o",
+        "title": "OpenCV Course (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Learn image basics → filtering → edge detection → object detection → build projects.",
+      "Master OpenCV basics → face detection → image segmentation → deep learning with OpenCV.",
+      "Study image processing → feature extraction → template matching → real-time applications.",
+      "Build projects: face recognition, object tracking, image filters → deploy with Flask/FastAPI."
+    ]
+  },
+  "mlops": {
+    "title": "MLOps",
+    "roadmapUrl": "https://roadmap.sh/ai-engineer",
+    "reddit": [
+      { "name": "r/mlops", "subreddit": "mlops" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" }
+    ],
+    "summary": "Deploying, monitoring, and maintaining ML models in production: CI/CD, model versioning, and monitoring.",
+    "courses": [
+      {
+        "name": "Made With ML · MLOps",
+        "url": "https://madewithml.com/topics/mlops/"
+      },
+      {
+        "name": "MLOps Zoomcamp",
+        "url": "https://github.com/DataTalksClub/mlops-zoomcamp"
+      },
+      {
+        "name": "Coursera · MLOps Specialization",
+        "url": "https://www.coursera.org/specializations/mlops-machine-learning-production"
+      },
+      {
+        "name": "DeepLearning.AI · Machine Learning in Production",
+        "url": "https://www.deeplearning.ai/short-courses/machine-learning-in-production/"
+      }
+    ],
+    "books": [
+      {
+        "name": "MLOps: Continuous delivery and automation pipelines",
+        "url": "https://www.oreilly.com/library/view/mlops-engineering/9781098138979/"
+      },
+      {
+        "name": "Building Machine Learning Powered Applications",
+        "url": "https://www.oreilly.com/library/view/building-machine-learning/9781492045106/"
+      },
+      {
+        "name": "Reliable Machine Learning",
+        "url": "https://www.oreilly.com/library/view/reliable-machine-learning/9781098106220/"
+      },
+      {
+        "name": "Introducing MLOps",
+        "url": "https://www.oreilly.com/library/view/introducing-mlops/9781492083283/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "MLOps Community",
+        "url": "https://mlops.community/"
+      },
+      {
+        "name": "Towards Data Science · MLOps",
+        "url": "https://towardsdatascience.com/tagged/mlops"
+      },
+      {
+        "name": "MLflow Blog",
+        "url": "https://mlflow.org/blog/"
+      },
+      {
+        "name": "Kubeflow Blog",
+        "url": "https://blog.kubeflow.org/"
+      },
+      {
+        "name": "Netflix Tech Blog · ML Platform",
+        "url": "https://netflixtechblog.com/tagged/machine-learning"
+      },
+      {
+        "name": "Spotify Engineering · ML & Data",
+        "url": "https://engineering.atspotify.com/tag/machine-learning/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "86nEoG6y0-k",
+        "title": "MLOps Course (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "06-AZXmwHjo",
+        "title": "End-to-End MLOps Pipeline (Made With ML)"
+      },
+      {
+        "id": "06-AZXmwHjo",
+        "title": "MLOps Fundamentals (DataTalksClub)"
+      }
+    ],
+    "paths": [
+      "Learn Docker → MLflow → model serving → CI/CD → monitoring → build end-to-end pipeline.",
+      "Master model versioning → experiment tracking → model registry → deployment → A/B testing.",
+      "Study containerization → orchestration (Kubernetes) → model monitoring → retraining pipelines.",
+      "Build projects: deploy model → set up monitoring → automate retraining → scale infrastructure."
+    ],
+    "github": [
+      {
+        "name": "mlflow",
+        "url": "https://github.com/mlflow/mlflow"
+      },
+      {
+        "name": "kubeflow",
+        "url": "https://github.com/kubeflow/kubeflow"
+      },
+      {
+        "name": "kserve (serverless model serving)",
+        "url": "https://github.com/kserve/kserve"
+      },
+      {
+        "name": "Seldon Core",
+        "url": "https://github.com/SeldonIO/seldon-core"
+      },
+      {
+        "name": "BentoML",
+        "url": "https://github.com/bentoml/BentoML"
+      },
+      {
+        "name": "Metaflow",
+        "url": "https://github.com/Netflix/metaflow"
+      },
+      {
+        "name": "Feast (feature store)",
+        "url": "https://github.com/feast-dev/feast"
+      },
+      {
+        "name": "TFX (TensorFlow Extended)",
+        "url": "https://github.com/tensorflow/tfx"
+      },
+      {
+        "name": "MLRun (Iguazio)",
+        "url": "https://github.com/mlrun/mlrun"
+      },
+      {
+        "name": "awesome-mlops",
+        "url": "https://github.com/visenger/awesome-mlops"
+      }
+    ]
+  },
+  "devops": {
+    "title": "DevOps",
+    "summary": "CI/CD, containerization, cloud infrastructure, and automation for data/ML pipelines.",
+    "courses": [
+      {
+        "name": "freeCodeCamp · DevOps",
+        "url": "https://www.freecodecamp.org/news/tag/devops/"
+      },
+      {
+        "name": "AWS DevOps Engineer Learning Path",
+        "url": "https://aws.amazon.com/training/learning-paths/devops-engineer/"
+      }
+    ],
+    "books": [
+      {
+        "name": "The DevOps Handbook",
+        "url": "https://www.amazon.com/DevOps-Handbook-World-Class-Reliability-Organizations/dp/1942788002"
+      },
+      {
+        "name": "Docker Deep Dive",
+        "url": "https://www.amazon.com/Docker-Deep-Dive-Nigel-Poulton/dp/1521822808"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "DevOps.com",
+        "url": "https://www.devops.com/"
+      },
+      {
+        "name": "freeCodeCamp · DevOps articles",
+        "url": "https://www.freecodecamp.org/news/tag/devops/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "9zUHg7xjIqQ",
+        "title": "DevOps Full Course (freeCodeCamp)",
+        "embed": true
+      }
+    ],
+    "paths": [
+      "Learn Linux basics → Git → Docker → Kubernetes → CI/CD → cloud (AWS/GCP) → monitoring.",
+      "Master version control → containerization → orchestration → infrastructure as code → automation.",
+      "Study CI/CD pipelines → container registries → cloud services → monitoring/logging → security.",
+      "Build projects: containerize app → set up CI/CD → deploy to cloud → monitor and scale."
+    ]
+  },
+  "spark": {
+    "title": "Apache Spark",
+    "summary": "Big Data processing engine for large-scale data analytics: Spark SQL, Streaming, MLlib.",
+    "courses": [
+      {
+        "name": "Databricks · Spark Tutorials",
+        "url": "https://www.databricks.com/learn"
+      },
+      {
+        "name": "freeCodeCamp · Spark Course",
+        "url": "https://www.freecodecamp.org/news/tag/apache-spark/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Learning Spark (free)",
+        "url": "https://www.oreilly.com/library/view/learning-spark-2nd/9781492050032/"
+      },
+      {
+        "name": "High Performance Spark",
+        "url": "https://www.oreilly.com/library/view/high-performance-spark/9781491943199/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Spark",
+        "url": "https://towardsdatascience.com/tagged/apache-spark"
+      },
+      {
+        "name": "Analytics Vidhya · Spark",
+        "url": "https://www.analyticsvidhya.com/blog/tag/apache-spark/"
+      },
+      {
+        "name": "Medium · Apache Spark",
+        "url": "https://medium.com/tag/apache-spark"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "U9e6Yr6v8vQ",
+        "title": "Apache Spark Full Course (freeCodeCamp, 500K+ views)",
+        "embed": true
+      },
+      {
+        "id": "PLlMO9D7DL8jzKBhJqJ7m2gSD8fL1x8xJp",
+        "title": "Spark Tutorial Playlist (edureka!)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-spark",
+        "url": "https://github.com/awesome-spark/awesome-spark"
+      },
+      {
+        "name": "spark-examples",
+        "url": "https://github.com/spark-examples/spark-scala-examples"
+      }
+    ],
+    "paths": [
+      "Learn Spark basics → Spark SQL → Spark Streaming → MLlib → build end-to-end pipelines.",
+      "Master RDDs → DataFrames → Catalyst optimizer → performance tuning → deploy on clusters.",
+      "Study Databricks tutorials → Analytics Vidhya articles → practice on large datasets → optimize jobs.",
+      "Build projects: ETL pipelines → real-time processing → ML workflows → scale to production."
+    ]
+  },
+  "cloud-data": {
+    "title": "Cloud Data Platforms",
+    "summary": "AWS, GCP, Azure data services: data lakes, warehouses, and analytics platforms.",
+    "courses": [
+      {
+        "name": "AWS Data Analytics Learning Path",
+        "url": "https://aws.amazon.com/training/learning-paths/data-analytics/"
+      },
+      {
+        "name": "Google Cloud Data Engineer",
+        "url": "https://cloud.google.com/learn/path-data-engineer"
+      },
+      {
+        "name": "Microsoft Azure Data Fundamentals",
+        "url": "https://learn.microsoft.com/en-us/certifications/azure-data-fundamentals/"
+      }
+    ],
+    "books": [
+      {
+        "name": "AWS Well-Architected Framework",
+        "url": "https://aws.amazon.com/architecture/well-architected/"
+      },
+      {
+        "name": "Google Cloud Platform in Action",
+        "url": "https://www.manning.com/books/google-cloud-platform-in-action"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "AWS Big Data Blog",
+        "url": "https://aws.amazon.com/blogs/big-data/"
+      },
+      {
+        "name": "Google Cloud Blog",
+        "url": "https://cloud.google.com/blog/products/data-analytics"
+      },
+      {
+        "name": "Towards Data Science · Cloud",
+        "url": "https://towardsdatascience.com/tagged/cloud-computing"
+      },
+      {
+        "name": "Analytics Vidhya · Cloud",
+        "url": "https://www.analyticsvidhya.com/blog/tag/cloud-computing/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "3hLmDS179rg",
+        "title": "AWS Data Analytics (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "PLIivdWyY5sqIijZLcnlD2pR6iw6L1bwXZ",
+        "title": "Google Cloud Data Engineering Playlist",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-aws",
+        "url": "https://github.com/donnemartin/awesome-aws"
+      },
+      {
+        "name": "gcp-examples",
+        "url": "https://github.com/GoogleCloudPlatform/python-docs-samples"
+      }
+    ],
+    "paths": [
+      "Choose one cloud (AWS/GCP/Azure) → learn data services → build data pipelines → deploy analytics.",
+      "Master S3/Data Lake → Redshift/BigQuery → Glue/Dataflow → build end-to-end data platform.",
+      "Study cloud data architecture → cost optimization → security → monitoring → scale solutions.",
+      "Build projects: data ingestion → transformation → warehousing → analytics → share on GitHub."
+    ]
+  },
+  "databases": {
+    "title": "Databases",
+    "summary": "PostgreSQL, MongoDB, Redis: relational and NoSQL databases for data storage and retrieval.",
+    "courses": [
+      {
+        "name": "PostgreSQL Tutorial",
+        "url": "https://www.postgresqltutorial.com/"
+      },
+      {
+        "name": "MongoDB University",
+        "url": "https://university.mongodb.com/"
+      },
+      {
+        "name": "Redis University",
+        "url": "https://university.redis.com/"
+      }
+    ],
+    "books": [
+      {
+        "name": "PostgreSQL Documentation",
+        "url": "https://www.postgresql.org/docs/"
+      },
+      {
+        "name": "MongoDB: The Definitive Guide",
+        "url": "https://www.oreilly.com/library/view/mongodb-the-definitive/9781491954454/"
+      },
+      {
+        "name": "Redis in Action",
+        "url": "https://www.manning.com/books/redis-in-action"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "PostgreSQL Blog",
+        "url": "https://www.postgresql.org/about/newsarchive/"
+      },
+      {
+        "name": "MongoDB Blog",
+        "url": "https://www.mongodb.com/blog"
+      },
+      {
+        "name": "Towards Data Science · Databases",
+        "url": "https://towardsdatascience.com/tagged/database"
+      },
+      {
+        "name": "Medium · PostgreSQL",
+        "url": "https://medium.com/tag/postgresql"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "qw--VYLpxG4",
+        "title": "PostgreSQL Full Course (freeCodeCamp, 1M+ views)",
+        "embed": true
+      },
+      {
+        "id": "ofme2FD29Us",
+        "title": "MongoDB Full Course (freeCodeCamp, 500K+ views)"
+      },
+      {
+        "id": "PL4cUxeGkcCzhg9lVqjYnT5bg5dqn_p2Xj",
+        "title": "MongoDB Tutorial Playlist (Net Ninja)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "postgresql-exercises",
+        "url": "https://github.com/pgexercises/pgexercises"
+      },
+      {
+        "name": "awesome-mongodb",
+        "url": "https://github.com/ramnes/awesome-mongodb"
+      }
+    ],
+    "paths": [
+      "Learn PostgreSQL basics → advanced queries → indexing → performance tuning → replication.",
+      "Master MongoDB → document modeling → aggregation → sharding → build NoSQL applications.",
+      "Study Redis → caching patterns → pub/sub → data structures → optimize application performance.",
+      "Build projects: design schemas → optimize queries → implement caching → deploy databases."
+    ]
+  },
+  "data-warehousing": {
+    "title": "Data Warehousing",
+    "summary": "Snowflake, BigQuery, Redshift: cloud data warehouses for analytics at scale.",
+    "courses": [
+      {
+        "name": "Snowflake Hands-On Essentials",
+        "url": "https://www.snowflake.com/en/learn/training/"
+      },
+      {
+        "name": "Google BigQuery Tutorial",
+        "url": "https://cloud.google.com/bigquery/docs/introduction"
+      },
+      {
+        "name": "AWS Redshift Getting Started",
+        "url": "https://aws.amazon.com/redshift/getting-started/"
+      }
+    ],
+    "books": [
+      {
+        "name": "The Data Warehouse Toolkit",
+        "url": "https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/books/"
+      },
+      {
+        "name": "Building the Data Warehouse",
+        "url": "https://www.amazon.com/Building-Data-Warehouse-W-Inmon/dp/0764599445"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Snowflake Blog",
+        "url": "https://www.snowflake.com/blog/"
+      },
+      {
+        "name": "Google Cloud BigQuery Blog",
+        "url": "https://cloud.google.com/blog/products/data-analytics"
+      },
+      {
+        "name": "Towards Data Science · Data Warehousing",
+        "url": "https://towardsdatascience.com/tagged/data-warehouse"
+      },
+      {
+        "name": "Analytics Vidhya · Data Warehousing",
+        "url": "https://www.analyticsvidhya.com/blog/tag/data-warehouse/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "MfL2t0xefcs",
+        "title": "Snowflake Tutorial (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "di2bWu6XhYc",
+        "title": "BigQuery Tutorial (Google Cloud)",
+        "embed": true
+      }
+    ],
+    "github": [
+      {
+        "name": "snowflake-samples",
+        "url": "https://github.com/Snowflake-Labs/snowflake-samples"
+      },
+      {
+        "name": "bigquery-examples",
+        "url": "https://github.com/GoogleCloudPlatform/bigquery-examples"
+      }
+    ],
+    "paths": [
+      "Learn data warehousing concepts → choose platform (Snowflake/BigQuery/Redshift) → build warehouse.",
+      "Master dimensional modeling → ETL/ELT → data quality → performance optimization → cost management.",
+      "Study Kimball methodology → modern data stack → dbt for transformations → build analytics layer.",
+      "Build projects: design schema → load data → create views → optimize queries → build dashboards."
+    ]
+  },
+  "streaming": {
+    "title": "Streaming Data",
+    "summary": "Kafka, Spark Streaming, Flink: real-time data processing and event streaming.",
+    "courses": [
+      {
+        "name": "Confluent · Kafka Fundamentals",
+        "url": "https://www.confluent.io/learn/kafka-fundamentals/"
+      },
+      {
+        "name": "Apache Kafka Tutorial",
+        "url": "https://kafka.apache.org/documentation/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Kafka: The Definitive Guide",
+        "url": "https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/"
+      },
+      {
+        "name": "Streaming Systems (free)",
+        "url": "https://www.oreilly.com/library/view/streaming-systems/9781491983867/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Confluent Blog",
+        "url": "https://www.confluent.io/blog/"
+      },
+      {
+        "name": "Towards Data Science · Streaming",
+        "url": "https://towardsdatascience.com/tagged/streaming"
+      },
+      {
+        "name": "Analytics Vidhya · Kafka",
+        "url": "https://www.analyticsvidhya.com/blog/tag/kafka/"
+      },
+      {
+        "name": "Medium · Apache Kafka",
+        "url": "https://medium.com/tag/apache-kafka"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "R873BlNVUB4",
+        "title": "Apache Kafka Tutorial (freeCodeCamp, 400K+ views)",
+        "embed": true
+      },
+      {
+        "id": "PLkz1SCf5iB4enAR00I4yqjCfXM7wB216R",
+        "title": "Kafka Tutorial Playlist (Confluent)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-kafka",
+        "url": "https://github.com/infoslack/awesome-kafka"
+      },
+      {
+        "name": "kafka-examples",
+        "url": "https://github.com/confluentinc/examples"
+      }
+    ],
+    "paths": [
+      "Learn Kafka basics → producers/consumers → topics/partitions → streaming applications.",
+      "Master event streaming → Kafka Streams → Spark Streaming → Flink → real-time analytics.",
+      "Study streaming patterns → exactly-once semantics → fault tolerance → scale streaming pipelines.",
+      "Build projects: event-driven architecture → real-time ETL → stream processing → monitoring."
+    ]
+  },
+  "time-series": {
+    "title": "Time Series Analysis",
+    "summary": "Forecasting, trend analysis, and temporal data modeling for time-dependent datasets.",
+    "courses": [
+      {
+        "name": "Kaggle · Time Series",
+        "url": "https://www.kaggle.com/learn/time-series"
+      },
+      {
+        "name": "Coursera · Time Series Analysis",
+        "url": "https://www.coursera.org/learn/time-series-analysis"
+      }
+    ],
+    "books": [
+      {
+        "name": "Forecasting: Principles and Practice (free)",
+        "url": "https://otexts.com/fpp3/"
+      },
+      {
+        "name": "Time Series Analysis (Hamilton)",
+        "url": "https://press.princeton.edu/books/hardcover/9780691042893/time-series-analysis"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Time Series",
+        "url": "https://towardsdatascience.com/tagged/time-series"
+      },
+      {
+        "name": "Analytics Vidhya · Time Series",
+        "url": "https://www.analyticsvidhya.com/blog/category/time-series/"
+      },
+      {
+        "name": "Medium · Time Series",
+        "url": "https://medium.com/tag/time-series"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "JntA9XaTebs",
+        "title": "Time Series Analysis Tutorial (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "vV12dGe4ph8",
+        "title": "Time Series Forecasting (StatQuest)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-time-series",
+        "url": "https://github.com/MaxBenChrist/awesome-time-series"
+      },
+      {
+        "name": "prophet",
+        "url": "https://github.com/facebook/prophet"
+      }
+    ],
+    "paths": [
+      "Learn time series basics → decomposition → ARIMA → forecasting → evaluate models.",
+      "Master Prophet → LSTM → Transformer models → build forecasting pipelines → deploy predictions.",
+      "Study seasonality → trend analysis → anomaly detection → build time series dashboards.",
+      "Practice on real datasets: sales forecasting → stock prediction → demand planning → share insights."
+    ]
+  },
+  "feature-engineering": {
+    "title": "Feature Engineering",
+    "summary": "Creating, selecting, and transforming features to improve ML model performance.",
+    "courses": [
+      {
+        "name": "Kaggle · Feature Engineering",
+        "url": "https://www.kaggle.com/learn/feature-engineering"
+      },
+      {
+        "name": "Coursera · Feature Engineering",
+        "url": "https://www.coursera.org/learn/feature-engineering"
+      }
+    ],
+    "books": [
+      {
+        "name": "Feature Engineering for Machine Learning (free preview)",
+        "url": "https://www.oreilly.com/library/view/feature-engineering-for/9781491953235/"
+      },
+      {
+        "name": "Hands-On Feature Engineering",
+        "url": "https://www.packtpub.com/product/hands-on-feature-engineering/9781788629097"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Feature Engineering",
+        "url": "https://towardsdatascience.com/tagged/feature-engineering"
+      },
+      {
+        "name": "Analytics Vidhya · Feature Engineering",
+        "url": "https://www.analyticsvidhya.com/blog/category/feature-engineering/"
+      },
+      {
+        "name": "Medium · Feature Engineering",
+        "url": "https://medium.com/tag/feature-engineering"
+      },
+      {
+        "name": "KDnuggets · Feature Engineering",
+        "url": "https://www.kdnuggets.com/tag/feature-engineering"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "Z8vE9OVqjWY",
+        "title": "Feature Engineering Tutorial (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF",
+        "title": "Feature Engineering Playlist (StatQuest)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "featuretools",
+        "url": "https://github.com/Featuretools/featuretools"
+      },
+      {
+        "name": "feature-engine",
+        "url": "https://github.com/feature-engine/feature-engine"
+      }
+    ],
+    "paths": [
+      "Learn feature creation → transformation → selection → build feature pipelines → improve models.",
+      "Master encoding → scaling → imputation → feature selection → dimensionality reduction.",
+      "Study domain-specific features → automated feature engineering → feature stores → production.",
+      "Practice on Kaggle competitions → build feature libraries → share techniques → optimize models."
+    ]
+  },
+  "computer-vision": {
+    "title": "Computer Vision",
+    "summary": "Image classification, object detection, segmentation, and vision-based ML applications.",
+    "courses": [
+      {
+        "name": "fast.ai · Practical Deep Learning (Vision)",
+        "url": "https://course.fast.ai/"
+      },
+      {
+        "name": "CS231n · Convolutional Neural Networks",
+        "url": "http://cs231n.stanford.edu/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Computer Vision: Algorithms and Applications (free)",
+        "url": "https://szeliski.org/Book/"
+      },
+      {
+        "name": "Deep Learning for Computer Vision",
+        "url": "https://www.oreilly.com/library/view/deep-learning-for/9781491924570/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Computer Vision",
+        "url": "https://towardsdatascience.com/tagged/computer-vision"
+      },
+      {
+        "name": "Analytics Vidhya · Computer Vision",
+        "url": "https://www.analyticsvidhya.com/blog/category/computer-vision/"
+      },
+      {
+        "name": "PyImageSearch",
+        "url": "https://pyimagesearch.com/"
+      },
+      {
+        "name": "Medium · Computer Vision",
+        "url": "https://medium.com/tag/computer-vision"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "aircAruvnKk",
+        "title": "Neural Networks (3Blue1Brown)",
+        "embed": true
+      },
+      {
+        "id": "vT1JzLTH4G4",
+        "title": "Computer Vision Course (freeCodeCamp)"
+      },
+      {
+        "id": "PL5-TkQAf4F9Rmd6d5y5j6cY2f3G1jJm3x",
+        "title": "CS231n Playlist (Stanford)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-computer-vision",
+        "url": "https://github.com/jbhuang0604/awesome-computer-vision"
+      },
+      {
+        "name": "vision",
+        "url": "https://github.com/pytorch/vision"
+      }
+    ],
+    "paths": [
+      "Learn image basics → CNNs → transfer learning → object detection → build vision models.",
+      "Master OpenCV → PyTorch/TensorFlow → YOLO → segmentation → deploy vision applications.",
+      "Study image preprocessing → data augmentation → model architectures → optimize performance.",
+      "Build projects: image classification → object detection → face recognition → share on GitHub."
+    ]
+  },
+  "reinforcement-learning": {
+    "title": "Reinforcement Learning",
+    "summary": "RL algorithms: Q-learning, policy gradients, and deep RL for decision-making systems.",
+    "courses": [
+      {
+        "name": "CS234 · Reinforcement Learning (Stanford)",
+        "url": "http://web.stanford.edu/class/cs234/"
+      },
+      {
+        "name": "DeepMind · Reinforcement Learning Course",
+        "url": "https://www.deepmind.com/learning-resources/introduction-to-reinforcement-learning-with-david-silver"
+      }
+    ],
+    "books": [
+      {
+        "name": "Reinforcement Learning: An Introduction (free)",
+        "url": "http://incompleteideas.net/book/"
+      },
+      {
+        "name": "Deep Reinforcement Learning",
+        "url": "https://www.manning.com/books/deep-reinforcement-learning-in-action"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · Reinforcement Learning",
+        "url": "https://towardsdatascience.com/tagged/reinforcement-learning"
+      },
+      {
+        "name": "Analytics Vidhya · RL",
+        "url": "https://www.analyticsvidhya.com/blog/tag/reinforcement-learning/"
+      },
+      {
+        "name": "Medium · Reinforcement Learning",
+        "url": "https://medium.com/tag/reinforcement-learning"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "2pWv7GOvuf0",
+        "title": "Reinforcement Learning Course (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "PLqYmG7hTraZDM-OYHWgPebj2MfCFzFObQ",
+        "title": "DeepMind RL Course Playlist",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-reinforcement-learning",
+        "url": "https://github.com/aikorea/awesome-rl"
+      },
+      {
+        "name": "gym",
+        "url": "https://github.com/openai/gym"
+      }
+    ],
+    "paths": [
+      "Learn RL basics → Q-learning → policy gradients → deep RL → build agents.",
+      "Master OpenAI Gym → stable-baselines3 → train agents → evaluate performance → deploy.",
+      "Study multi-armed bandits → MDPs → value functions → explore-exploit → optimize policies.",
+      "Build projects: game agents → robotics → recommendation systems → share implementations."
+    ]
+  },
+  "ab-testing": {
+    "title": "A/B Testing & Experimentation",
+    "summary": "Designing experiments, statistical testing, and analyzing results for data-driven decisions.",
+    "courses": [
+      {
+        "name": "Udacity · A/B Testing",
+        "url": "https://www.udacity.com/course/ab-testing--ud257"
+      },
+      {
+        "name": "Coursera · Design and Analyze Experiments",
+        "url": "https://www.coursera.org/learn/designexperiments"
+      }
+    ],
+    "books": [
+      {
+        "name": "Trustworthy Online Controlled Experiments (free)",
+        "url": "https://www.exp-platform.com/Pages/default.aspx"
+      },
+      {
+        "name": "Experimentation Works",
+        "url": "https://www.hbs.edu/faculty/Pages/item.aspx?num=57689"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Towards Data Science · A/B Testing",
+        "url": "https://towardsdatascience.com/tagged/ab-testing"
+      },
+      {
+        "name": "Analytics Vidhya · A/B Testing",
+        "url": "https://www.analyticsvidhya.com/blog/tag/ab-testing/"
+      },
+      {
+        "name": "Medium · A/B Testing",
+        "url": "https://medium.com/tag/ab-testing"
+      },
+      {
+        "name": "Netflix Tech Blog",
+        "url": "https://netflixtechblog.com/tagged/experimentation"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "8LN6Z5QyT0Y",
+        "title": "A/B Testing Tutorial (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "PPLop4L2eGk",
+        "title": "Statistical Tests (StatQuest)"
+      }
+    ],
+    "github": [
+      {
+        "name": "ab-testing",
+        "url": "https://github.com/udacity/AB-Testing"
+      }
+    ],
+    "paths": [
+      "Learn experiment design → hypothesis testing → sample size → analyze results → make decisions.",
+      "Master statistical tests → confidence intervals → p-values → multiple comparisons → interpret findings.",
+      "Study randomization → control groups → metrics selection → build experimentation platform.",
+      "Practice on real experiments → design tests → analyze data → present insights → optimize products."
+    ]
+  },
+  "airflow": {
+    "title": "Apache Airflow",
+    "summary": "Workflow orchestration for data pipelines: scheduling, monitoring, and managing ETL jobs.",
+    "courses": [
+      {
+        "name": "Astronomer · Airflow Fundamentals",
+        "url": "https://www.astronomer.io/learn/"
+      },
+      {
+        "name": "freeCodeCamp · Airflow Course",
+        "url": "https://www.freecodecamp.org/news/tag/airflow/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Data Pipelines with Apache Airflow",
+        "url": "https://www.manning.com/books/data-pipelines-with-apache-airflow"
+      },
+      {
+        "name": "Airflow Documentation",
+        "url": "https://airflow.apache.org/docs/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Astronomer Blog",
+        "url": "https://www.astronomer.io/blog/"
+      },
+      {
+        "name": "Towards Data Science · Airflow",
+        "url": "https://towardsdatascience.com/tagged/airflow"
+      },
+      {
+        "name": "Analytics Vidhya · Airflow",
+        "url": "https://www.analyticsvidhya.com/blog/tag/airflow/"
+      },
+      {
+        "name": "Medium · Apache Airflow",
+        "url": "https://medium.com/tag/apache-airflow"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ahJpE8T5roE",
+        "title": "Apache Airflow Tutorial (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "PLYizq3dRx1RdQYTO8aXvqLq9z5vL7j1Hh",
+        "title": "Airflow Tutorial Playlist",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-airflow",
+        "url": "https://github.com/jghoman/awesome-apache-airflow"
+      },
+      {
+        "name": "airflow-examples",
+        "url": "https://github.com/airflow-plugins/airflow-examples"
+      }
+    ],
+    "paths": [
+      "Learn Airflow basics → DAGs → operators → scheduling → monitoring → build pipelines.",
+      "Master task dependencies → XComs → sensors → hooks → custom operators → production deployment.",
+      "Study workflow patterns → error handling → retries → SLA → optimize DAG performance.",
+      "Build projects: ETL pipelines → data quality checks → orchestrate workflows → monitor jobs."
+    ]
+  },
+  "dbt": {
+    "title": "dbt (Data Build Tool)",
+    "summary": "Transforming data in warehouses: SQL-based transformations, testing, and documentation.",
+    "courses": [
+      {
+        "name": "dbt Learn",
+        "url": "https://courses.getdbt.com/"
+      },
+      {
+        "name": "dbt Documentation",
+        "url": "https://docs.getdbt.com/docs/introduction"
+      }
+    ],
+    "books": [
+      {
+        "name": "The dbt Book",
+        "url": "https://www.getdbt.com/learn"
+      },
+      {
+        "name": "Analytics Engineering (free)",
+        "url": "https://www.getdbt.com/analytics-engineering-handbook"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "dbt Blog",
+        "url": "https://www.getdbt.com/blog/"
+      },
+      {
+        "name": "Towards Data Science · dbt",
+        "url": "https://towardsdatascience.com/tagged/dbt"
+      },
+      {
+        "name": "Medium · dbt",
+        "url": "https://medium.com/tag/dbt"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "4eCouv7nQ7g",
+        "title": "dbt Tutorial (freeCodeCamp)",
+        "embed": true
+      },
+      {
+        "id": "PLy4gF-kTfQnP8YzYjP8j4bP5Y5Y5Y5Y5Y",
+        "title": "dbt Learn Playlist",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "dbt-core",
+        "url": "https://github.com/dbt-labs/dbt-core"
+      },
+      {
+        "name": "dbt-examples",
+        "url": "https://github.com/dbt-labs/jaffle-shop"
+      }
+    ],
+    "paths": [
+      "Learn dbt basics → models → tests → documentation → build transformation layer.",
+      "Master SQL transformations → Jinja templating → macros → incremental models → production.",
+      "Study analytics engineering → data modeling → testing strategies → CI/CD → optimize queries.",
+      "Build projects: transform raw data → create marts → document models → share transformations."
+    ]
+  },
+  "r": {
+    "title": "R Programming",
+    "summary": "Statistical computing language: data analysis, visualization, and statistical modeling.",
+    "courses": [
+      {
+        "name": "Kaggle Learn · R",
+        "url": "https://www.kaggle.com/learn/r"
+      },
+      {
+        "name": "Coursera · R Programming",
+        "url": "https://www.coursera.org/learn/r-programming"
+      }
+    ],
+    "books": [
+      {
+        "name": "R for Data Science (free)",
+        "url": "https://r4ds.had.co.nz/"
+      },
+      {
+        "name": "Advanced R (free)",
+        "url": "https://adv-r.hadley.nz/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "R-bloggers",
+        "url": "https://www.r-bloggers.com/"
+      },
+      {
+        "name": "Towards Data Science · R",
+        "url": "https://towardsdatascience.com/tagged/r"
+      },
+      {
+        "name": "Analytics Vidhya · R",
+        "url": "https://www.analyticsvidhya.com/blog/category/r/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "_V8eKsto3Ug",
+        "title": "R Programming Full Course (freeCodeCamp, 500K+ views)",
+        "embed": true
+      },
+      {
+        "id": "PLjgj6kdf_snYBkfW1Z0XW1yQ4sKDXzskF",
+        "title": "R Tutorial Playlist (StatQuest)",
+        "playlist": true
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-r",
+        "url": "https://github.com/qinwf/awesome-R"
+      },
+      {
+        "name": "r4ds",
+        "url": "https://github.com/hadley/r4ds"
+      }
+    ],
+    "paths": [
+      "Learn R basics → tidyverse → data visualization → statistical modeling → build analyses.",
+      "Master dplyr → ggplot2 → Shiny → R Markdown → create reproducible research.",
+      "Study statistical tests → regression → time series → build R packages → share code.",
+      "Practice on datasets → create visualizations → build dashboards → publish analyses."
+    ]
+  },
+  "editors-ides": {
+    "title": "Editors, IDEs & Dev Tools",
+    "summary": "Complete developer tooling stack: editors, terminals, notebooks, AI pair-programming, package managers, and productivity setup for analytics workflows.",
+    "roadmapUrl": "https://roadmap.sh/devops",
+    "courses": [
+      {
+        "name": "Visual Studio Code Docs",
+        "url": "https://code.visualstudio.com/docs"
+      },
+      {
+        "name": "JetBrains Academy · IDE productivity",
+        "url": "https://www.jetbrains.com/academy/"
+      },
+      {
+        "name": "Jupyter Docs",
+        "url": "https://docs.jupyter.org/en/latest/"
+      },
+      {
+        "name": "Cursor IDE · AI-first editor",
+        "url": "https://cursor.com"
+      },
+      {
+        "name": "Marimo · Reactive Python notebooks",
+        "url": "https://marimo.io"
+      },
+      {
+        "name": "Neovim · Getting started",
+        "url": "https://neovim.io/doc/user/"
+      }
+    ],
+    "books": [
+      {
+        "name": "The Missing Semester (Shell + editor productivity)",
+        "url": "https://missing.csail.mit.edu/"
+      },
+      {
+        "name": "VS Code Tips and Tricks",
+        "url": "https://code.visualstudio.com/docs/getstarted/tips-and-tricks"
+      },
+      {
+        "name": "Pro Git (free book)",
+        "url": "https://git-scm.com/book/en/v2"
+      },
+      {
+        "name": "Practical Vim (Drew Neil)",
+        "url": "https://pragprog.com/titles/dnvim2/practical-vim-second-edition/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "VS Code Blog (official)",
+        "url": "https://code.visualstudio.com/blogs"
+      },
+      {
+        "name": "JetBrains Blog",
+        "url": "https://blog.jetbrains.com/"
+      },
+      {
+        "name": "Oh My Zsh · Terminal customisation",
+        "url": "https://ohmyz.sh/"
+      },
+      {
+        "name": "Warp Terminal · Modern dev terminal",
+        "url": "https://www.warp.dev/"
+      },
+      {
+        "name": "Cursor Blog · AI pair programming",
+        "url": "https://cursor.com/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ifTF3ags0XI",
+        "title": "VS Code Crash Course (Traversy Media)",
+        "embed": true
+      },
+      {
+        "id": "fJEbVCrEMSE",
+        "title": "Jupyter Notebook Tutorial (freeCodeCamp)"
+      },
+      {
+        "id": "stqUbv-5u2s",
+        "title": "Neovim from Scratch"
+      },
+      {
+        "id": "GznmPACXBlY",
+        "title": "Docker in 100 Seconds (Fireship)"
+      },
+      {
+        "id": "gAkwW2tuIqE",
+        "title": "Terminal Tips Every Dev Should Know"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-vscode",
+        "url": "https://github.com/viatsko/awesome-vscode"
+      },
+      {
+        "name": "vscode-python",
+        "url": "https://github.com/microsoft/vscode-python"
+      },
+      {
+        "name": "awesome-devenv",
+        "url": "https://github.com/jondot/awesome-devenv"
+      },
+      {
+        "name": "awesome-shell",
+        "url": "https://github.com/alebcay/awesome-shell"
+      },
+      {
+        "name": "dotfiles collection",
+        "url": "https://github.com/mathiasbynens/dotfiles"
+      }
+    ],
+    "paths": [
+      "Set up VS Code profile → Python/Jupyter extensions → formatter/linter/debugger workflow.",
+      "Learn terminal basics + git integration → snippets → keyboard shortcuts for faster delivery.",
+      "Build a clean notebook + script workflow: prototype in Jupyter, productionize in IDE.",
+      "Try AI-assisted coding with Cursor/Copilot → measure productivity uplift on real tasks.",
+      "Configure Docker + devcontainers for reproducible environments across machines."
+    ]
+  },
+  "productivity-tools": {
+    "title": "Productivity & Workflow Tools",
+    "summary": "Non-technical and cross-functional tools for managing projects, tracking work, note-taking, and staying productive as a data professional.",
+    "courses": [
+      {
+        "name": "Notion Academy",
+        "url": "https://www.notion.so/help/guides"
+      },
+      {
+        "name": "Todoist Productivity Guide",
+        "url": "https://todoist.com/productivity-methods"
+      },
+      {
+        "name": "Google Project Management Certificate",
+        "url": "https://www.coursera.org/professional-certificates/google-project-management"
+      },
+      {
+        "name": "Obsidian · Getting started",
+        "url": "https://help.obsidian.md/Getting+started"
+      }
+    ],
+    "books": [
+      {
+        "name": "Atomic Habits (James Clear)",
+        "url": "https://jamesclear.com/atomic-habits"
+      },
+      {
+        "name": "Deep Work (Cal Newport)",
+        "url": "https://www.calnewport.com/books/deep-work/"
+      },
+      {
+        "name": "The Pragmatic Programmer",
+        "url": "https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Notion Blog",
+        "url": "https://www.notion.so/blog"
+      },
+      {
+        "name": "Obsidian Community Hub",
+        "url": "https://publish.obsidian.md/hub"
+      },
+      {
+        "name": "Linear Blog · Product-building insights",
+        "url": "https://linear.app/blog"
+      },
+      {
+        "name": "Figma Blog · Design and collaboration",
+        "url": "https://www.figma.com/blog/"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "ONG26-2mIHo",
+        "title": "Notion Tour for Beginners",
+        "embed": true
+      },
+      {
+        "id": "DbsAQSIKQXk",
+        "title": "Obsidian for Beginners"
+      },
+      {
+        "id": "sUKpt3w0CjA",
+        "title": "GTD Method Explained (Thomas Frank)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-productivity",
+        "url": "https://github.com/jyguyomarch/awesome-productivity"
+      },
+      {
+        "name": "awesome-selfhosted",
+        "url": "https://github.com/awesome-selfhosted/awesome-selfhosted"
+      }
+    ],
+    "paths": [
+      "Set up a personal knowledge base (Notion or Obsidian) → capture learnings daily.",
+      "Use a project board (Linear, Trello, or GitHub Projects) to track portfolio tasks.",
+      "Establish a weekly review habit: reflect on what shipped, what's blocked, what's next."
+    ]
+  },
+  "communication": {
+    "title": "Communication & Stakeholder Skills",
+    "summary": "Non-technical skills for analysts and data professionals: business communication, storytelling, and influence.",
+    "courses": [
+      {
+        "name": "Coursera · Improving Communication Skills",
+        "url": "https://www.coursera.org/learn/wharton-communication-skills"
+      },
+      {
+        "name": "Google Project Management · Communication module",
+        "url": "https://www.coursera.org/professional-certificates/google-project-management"
+      }
+    ],
+    "books": [
+      {
+        "name": "Storytelling with Data",
+        "url": "https://www.storytellingwithdata.com/books"
+      },
+      {
+        "name": "The Pyramid Principle",
+        "url": "https://www.mheducation.com/highered/product/pyramid-principle-logical-writing-thinking-problem-solving-minto/M9780273710516.html"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Harvard Business Review · Communication",
+        "url": "https://hbr.org/topic/subject/communication"
+      },
+      {
+        "name": "Atlassian Teamwork Blog",
+        "url": "https://www.atlassian.com/blog/teamwork"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "Unzc731iCUY",
+        "title": "Talk Nerdy to Me: Public speaking tips (TEDx)",
+        "embed": true
+      },
+      {
+        "id": "M_eV5qEBh4I",
+        "title": "How to Present Data Clearly"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-public-speaking",
+        "url": "https://github.com/matteofigus/awesome-speaking"
+      }
+    ],
+    "paths": [
+      "Practice concise updates (context, insight, recommendation) for every analysis task.",
+      "Learn data storytelling frameworks and present one dashboard insight weekly.",
+      "Improve stakeholder communication by documenting assumptions, risks, and decisions."
+    ]
+  },
+  "resume-interview": {
+    "title": "Resume, Portfolio & Interview Prep",
+    "summary": "Career toolkit for both tech and non-tech roles: resumes, portfolio narratives, and interview readiness.",
+    "roadmapUrl": "https://roadmap.sh/ai-data-scientist",
+    "courses": [
+      {
+        "name": "Google · Interview Warmup",
+        "url": "https://grow.google/certificates/interview-warmup/"
+      },
+      {
+        "name": "freeCodeCamp · Build a Developer Portfolio",
+        "url": "https://www.freecodecamp.org/news/how-to-build-a-developer-portfolio/"
+      }
+    ],
+    "books": [
+      {
+        "name": "Decode and Conquer",
+        "url": "https://www.amazon.com/Decode-Conquer-Answers-Management-Interviews/dp/0615930417"
+      },
+      {
+        "name": "The Tech Resume Inside Out",
+        "url": "https://thetechresume.com/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "The Muse · Resume and interview guides",
+        "url": "https://www.themuse.com/advice"
+      },
+      {
+        "name": "Interview Query Blog",
+        "url": "https://www.interviewquery.com/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "1mHjMNZZvFo",
+        "title": "How to build a strong portfolio",
+        "embed": true
+      },
+      {
+        "id": "HAnw168huqA",
+        "title": "Behavioral interview framework (STAR method)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-resume",
+        "url": "https://github.com/posquit0/Awesome-CV"
+      },
+      {
+        "name": "data-science-interviews",
+        "url": "https://github.com/alexeygrigorev/data-science-interviews"
+      }
+    ],
+    "paths": [
+      "Build one resume + one portfolio story for each target role (analyst, scientist, engineer).",
+      "Prepare STAR stories for impact, ownership, conflict, and learning.",
+      "Practice role-specific mock interviews weekly and refine project narratives."
+    ]
+  }
+}

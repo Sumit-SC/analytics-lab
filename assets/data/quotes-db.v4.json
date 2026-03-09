@@ -1,0 +1,929 @@
+{
+  "meta": {
+    "version": 4,
+    "description": "Structured, API-enriched quote database with ISBN and IMDb support"
+  },
+  "categories": {
+    "anime": [
+      {
+        "text": "I'm the man who will become the Pirate King!",
+        "author": "Monkey D. Luffy",
+        "source": "One Piece",
+        "year": "1999",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0388629",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/6/6f/One_Piece,_Volume_61_Cover_(Japanese).png"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/2/29/Monkey_D._Luffy.png"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/0/09/One_Piece_logo.svg"
+          }
+        ]
+      },
+      {
+        "text": "I'll take a potato chip... and eat it!",
+        "author": "Light Yagami",
+        "source": "Death Note",
+        "year": "2006",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0877057",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6f/Death_Note_Vol_1.jpg/800px-Death_Note_Vol_1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/5/5e/Death_Note_anime_character_Light_Yagami.png" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/6/6a/Death_Note_Vol_1.jpg" }
+        ]
+      },
+      {
+        "text": "I'll never give up. I'll never go back on my word. That is my ninja way.",
+        "author": "Naruto Uzumaki",
+        "source": "Naruto",
+        "year": "2002",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0409591",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/9/94/NarutoCoverTankobon1.jpg/800px-NarutoCoverTankobon1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/NarutoUzumakiPart1.png/800px-NarutoUzumakiPart1.png" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/9/94/NarutoCoverTankobon1.jpg" }
+        ]
+      },
+      {
+        "text": "Power comes in response to a need, not a desire.",
+        "author": "Goku",
+        "source": "Dragon Ball Z",
+        "year": "1989",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0214341",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/Dragon_Ball_Z_Logo.svg/800px-Dragon_Ball_Z_Logo.svg.png" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Goku_Dragon_Ball_Z.png/800px-Goku_Dragon_Ball_Z.png" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/c/ca/Dragon_Ball_Z_Logo.svg" }
+        ]
+      },
+      {
+        "text": "Believe in the me that believes in you!",
+        "author": "Kamina",
+        "source": "Gurren Lagann",
+        "year": "2007",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0948103",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6a/Gurren_Lagann_DVD_1.jpg/800px-Gurren_Lagann_DVD_1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/6/6a/Gurren_Lagann_DVD_1.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/0/09/Tengen_Toppa_Gurren_Lagann_logo.svg" }
+        ]
+      },
+      {
+        "text": "The world isn't perfect. But it's there for us, doing the best it can.",
+        "author": "Roy Mustang",
+        "source": "Fullmetal Alchemist",
+        "year": "2003",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0421357",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Fullmetal_Alchemist_vol1.jpg/800px-Fullmetal_Alchemist_vol1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/5/5e/Fullmetal_Alchemist_vol1.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/26/Fullmetal_Alchemist_Logo.svg/800px-Fullmetal_Alchemist_Logo.svg.png" }
+        ]
+      }
+    ],
+    "kdrama": [
+      {
+        "text": "If you love someone, you have to say it.",
+        "author": "Yoon Se-ri",
+        "source": "Crash Landing on You",
+        "year": "2019",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt10850932",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/f/f0/Crash_Landing_on_You_main_poster.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/3/3f/Crash_Landing_on_You_cast.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/9/9c/Crash_Landing_on_You_logo.png"
+          }
+        ]
+      },
+      {
+        "text": "The past is the past. What matters is the present.",
+        "author": "Kim Shin",
+        "source": "Guardian: The Lonely and Great God",
+        "year": "2016",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt5994364",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg" }
+        ]
+      },
+      {
+        "text": "Every moment is a chance to turn things around.",
+        "author": "Park Sae-ro-yi",
+        "source": "Itaewon Class",
+        "year": "2020",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt11239552",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/4/4e/Itaewon_Class.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" }
+        ]
+      },
+      {
+        "text": "Don't run from your fate. Face it.",
+        "author": "Ji Eun-tak",
+        "source": "Guardian: The Lonely and Great God",
+        "year": "2016",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt5994364",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" }
+        ]
+      },
+      {
+        "text": "I'm not a genius. I'm just curious.",
+        "author": "Seong Gi-hun",
+        "source": "Squid Game",
+        "year": "2021",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt10919420",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/d/dd/Squid_Game.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg" }
+        ]
+      }
+    ],
+    "books": [
+      {
+        "text": "It is only with the heart that one can see rightly; what is essential is invisible to the eye.",
+        "author": "Antoine de Saint-Exupéry",
+        "source": "The Little Prince",
+        "year": "1943",
+        "isbn": "9780156012195",
+        "goodreads_id": "157993",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "cover",
+            "url": "https://upload.wikimedia.org/wikipedia/en/0/05/Littleprince.JPG"
+          },
+          {
+            "type": "alternate_cover",
+            "url": "https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg"
+          },
+          {
+            "type": "author_portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/75/Antoine_de_Saint-Exup%C3%A9ry.jpg"
+          }
+        ]
+      },
+      {
+        "text": "All we have to decide is what to do with the time that is given us.",
+        "author": "J.R.R. Tolkien",
+        "source": "The Fellowship of the Ring",
+        "year": "1954",
+        "isbn": "9780618260263",
+        "goodreads_id": "3263607",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "cover",
+            "url": "https://upload.wikimedia.org/wikipedia/en/8/8e/The_Fellowship_of_the_Ring_cover.gif"
+          },
+          {
+            "type": "alternate_cover",
+            "url": "https://covers.openlibrary.org/b/isbn/9780618260263-L.jpg"
+          },
+          {
+            "type": "author_portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/6/66/J._R._R._Tolkien%2C_ca._1925.jpg"
+          }
+        ]
+      },
+      {
+        "text": "It was the best of times, it was the worst of times.",
+        "author": "Charles Dickens",
+        "source": "A Tale of Two Cities",
+        "year": "1859",
+        "isbn": "9780553211061",
+        "goodreads_id": "748284",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "cover",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/39/Cover_for_A_Tale_of_Two_Cities%2C_by_Phiz.jpeg"
+          },
+          {
+            "type": "alternate_cover",
+            "url": "https://covers.openlibrary.org/b/isbn/9780553211061-L.jpg"
+          },
+          {
+            "type": "author_portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Charles_Dickens_by_Daniel_Maclise_1839.jpg"
+          }
+        ]
+      },
+      {
+        "text": "It does not do to dwell on dreams and forget to live.",
+        "author": "J.K. Rowling",
+        "source": "Harry Potter and the Philosopher's Stone",
+        "year": "1997",
+        "isbn": "9780747532699",
+        "goodreads_id": "3",
+        "imdb_id": "",
+        "images": [
+          { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Harry_Potter_Word_Bubble.svg/800px-Harry_Potter_Word_Bubble.svg.png" },
+          { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/isbn/9780747532699-L.jpg" },
+          { "type": "author_portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/J._K._Rowling_2010.jpg/800px-J._K._Rowling_2010.jpg" }
+        ]
+      },
+      {
+        "text": "It was a bright cold day in April, and the clocks were striking thirteen.",
+        "author": "George Orwell",
+        "source": "1984",
+        "year": "1949",
+        "isbn": "9780451524935",
+        "goodreads_id": "40961427",
+        "imdb_id": "",
+        "images": [
+          { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/1984first.jpg/800px-1984first.jpg" },
+          { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg" },
+          { "type": "author_portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/George_Orwell_press_photo.jpg/800px-George_Orwell_press_photo.jpg" }
+        ]
+      },
+      {
+        "text": "So we beat on, boats against the current.",
+        "author": "F. Scott Fitzgerald",
+        "source": "The Great Gatsby",
+        "year": "1925",
+        "isbn": "9780743273565",
+        "goodreads_id": "4671",
+        "imdb_id": "",
+        "images": [
+          { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/The_Great_Gatsby_Cover_1925_Retouched.jpg/800px-The_Great_Gatsby_Cover_1925_Retouched.jpg" },
+          { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg" },
+          { "type": "author_portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/F_Scott_Fitzgerald_1921.jpg/800px-F_Scott_Fitzgerald_1921.jpg" }
+        ]
+      }
+    ],
+    "leaders": [
+      {
+        "text": "Be the change you wish to see in the world.",
+        "author": "Mahatma Gandhi",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Portrait_Gandhi.jpg"
+          },
+          {
+            "type": "alternate_portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Mahatma-Gandhi%2C_studio%2C_1931.jpg"
+          },
+          {
+            "type": "historic",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Mahatma_Gandhi%2C_London_1931.jpg"
+          }
+        ]
+      },
+      {
+        "text": "It always seems impossible until it's done.",
+        "author": "Nelson Mandela",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/0/0a/Nelson_Mandela-2008_%28edit%29.jpg"
+          },
+          {
+            "type": "alternate_portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Nelson_Mandela_1994.jpg"
+          },
+          {
+            "type": "historic",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Nelson_Mandela_Tribute.jpg"
+          }
+        ]
+      }
+    ],
+    "tv_show": [
+      {
+        "text": "Winter is coming.",
+        "author": "Ned Stark",
+        "source": "Game of Thrones",
+        "year": "2011",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0944947",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/d/d8/Game_of_Thrones_title_card.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/5/52/Ned_Stark-Sean_Bean.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/a/a0/Game_of_Thrones_Season_1.jpg"
+          }
+        ]
+      },
+      {
+        "text": "I am the one who knocks.",
+        "author": "Walter White",
+        "source": "Breaking Bad",
+        "year": "2008",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0903747",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/6/61/Breaking_Bad_title_card.png"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/0/03/Walter_White_S5B.png"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/1/1c/Breaking_Bad_season_5_DVD.jpg"
+          }
+        ]
+      },
+      {
+        "text": "That's what she said.",
+        "author": "Michael Scott",
+        "source": "The Office",
+        "year": "2005",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0386676",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/The_Office_%28U.S._TV_series%29_logo.svg/800px-The_Office_%28U.S._TV_series%29_logo.svg.png" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/6/63/The_Office_%28U.S._TV_series%29.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/c/c4/The_Office_%28U.S._TV_series%29_logo.svg" }
+        ]
+      },
+      {
+        "text": "You know nothing, Jon Snow.",
+        "author": "Ygritte",
+        "source": "Game of Thrones",
+        "year": "2011",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0944947",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/d/d8/Game_of_Thrones_title_card.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/a/a0/Game_of_Thrones_Season_1.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/Game_of_Thrones_title_card.jpg/800px-Game_of_Thrones_title_card.jpg" }
+        ]
+      },
+      {
+        "text": "I am the danger.",
+        "author": "Walter White",
+        "source": "Breaking Bad",
+        "year": "2008",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0903747",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/6/61/Breaking_Bad_title_card.png" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/0/03/Walter_White_S5B.png" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/1/1c/Breaking_Bad_season_5_DVD.jpg" }
+        ]
+      }
+    ],
+    "movie": [
+      {
+        "text": "May the Force be with you.",
+        "author": "Han Solo",
+        "source": "Star Wars: Episode IV – A New Hope",
+        "year": "1977",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0076759",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/8/87/StarWarsMoviePoster1977.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/5/5c/Han_Solo_in_Carbonite_%2831649435213%29.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/3/30/Star_Wars_Logo.svg"
+          }
+        ]
+      },
+      {
+        "text": "Here's looking at you, kid.",
+        "author": "Rick Blaine",
+        "source": "Casablanca",
+        "year": "1942",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0034583",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/CasablancaPoster-Gold.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Humphrey_Bogart_in_Casablanca_trailer.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/1/1c/Casablanca,_U.S._theatrical_release_poster.jpg"
+          }
+        ]
+      },
+      {
+        "text": "I'm gonna make him an offer he can't refuse.",
+        "author": "Vito Corleone",
+        "source": "The Godfather",
+        "year": "1972",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0068646",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/1/1c/Godfather_ver1.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/it/2/26/Vito_Corleone.png"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/a/af/The_Godfather,_The_Game.jpg"
+          }
+        ]
+      },
+      {
+        "text": "Life is like a box of chocolates. You never know what you're gonna get.",
+        "author": "Forrest Gump",
+        "source": "Forrest Gump",
+        "year": "1994",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0109830",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/6/67/Forrest_Gump_poster.jpg/800px-Forrest_Gump_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/6/67/Forrest_Gump_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/6/67/Forrest_Gump_poster.jpg/800px-Forrest_Gump_poster.jpg" }
+        ]
+      },
+      {
+        "text": "You're gonna need a bigger boat.",
+        "author": "Martin Brody",
+        "source": "Jaws",
+        "year": "1975",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0073195",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/JAWS_Movie_poster.jpg/800px-JAWS_Movie_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/e/eb/JAWS_Movie_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/JAWS_Movie_poster.jpg/800px-JAWS_Movie_poster.jpg" }
+        ]
+      },
+      {
+        "text": "There's no place like home.",
+        "author": "Dorothy Gale",
+        "source": "The Wizard of Oz",
+        "year": "1939",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0032138",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/The_Wizard_of_Oz_Movie_Poster.jpg/800px-The_Wizard_of_Oz_Movie_Poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/commons/e/ef/The_Wizard_of_Oz_Movie_Poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/The_Wizard_of_Oz_Movie_Poster.jpg/800px-The_Wizard_of_Oz_Movie_Poster.jpg" }
+        ]
+      },
+      {
+        "text": "I'm the king of the world!",
+        "author": "Jack Dawson",
+        "source": "Titanic",
+        "year": "1997",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0120338",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/Titanic_poster.jpg/800px-Titanic_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/22/Titanic_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/Titanic_poster.jpg/800px-Titanic_poster.jpg" }
+        ]
+      }
+    ],
+    "bollywood": [
+      {
+        "text": "Kitne aadmi the?",
+        "author": "Gabbar Singh",
+        "source": "Sholay",
+        "year": "1975",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0073707",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/5/52/Sholay-poster.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/Gabbar_Singh_dialogue_from_Sholay_on_the_back_of_auto_rickshaw.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/3/35/Sholay_film_poster.jpg"
+          }
+        ]
+      }
+    ],
+    "hollywood": [
+      {
+        "text": "Why so serious?",
+        "author": "The Joker",
+        "source": "The Dark Knight",
+        "year": "2008",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0468569",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/8/8a/Dark_Knight.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/8/83/The_Joker_%28The_Dark_Knight%29.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/7/7a/The_Dark_Knight_%282008_film%29_theatrical_poster.jpg"
+          }
+        ]
+      },
+      {
+        "text": "You mustn't be afraid to dream a little bigger, darling.",
+        "author": "Eames",
+        "source": "Inception",
+        "year": "2010",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt1375666",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Inception_%282010%29_theatrical_poster.jpg/800px-Inception_%282010%29_theatrical_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Inception_%282010%29_theatrical_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Inception_%282010%29_theatrical_poster.jpg/800px-Inception_%282010%29_theatrical_poster.jpg" }
+        ]
+      },
+      {
+        "text": "I'll be back.",
+        "author": "The Terminator",
+        "source": "The Terminator",
+        "year": "1984",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0088247",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/7/76/Terminator1984movieposter.jpg/800px-Terminator1984movieposter.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/7/76/Terminator1984movieposter.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/7/76/Terminator1984movieposter.jpg/800px-Terminator1984movieposter.jpg" }
+        ]
+      },
+      {
+        "text": "You can't handle the truth!",
+        "author": "Colonel Nathan R. Jessep",
+        "source": "A Few Good Men",
+        "year": "1992",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0104257",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/A_Few_Good_Men_poster.jpg/800px-A_Few_Good_Men_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/4/4e/A_Few_Good_Men_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/A_Few_Good_Men_poster.jpg/800px-A_Few_Good_Men_poster.jpg" }
+        ]
+      }
+    ],
+    "international": [
+      {
+        "text": "Life is beautiful.",
+        "author": "Guido Orefice",
+        "source": "Life Is Beautiful",
+        "year": "1997",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0118799",
+        "images": [
+          {
+            "type": "poster",
+            "url": "https://upload.wikimedia.org/wikipedia/en/7/7c/Vitaebella.jpg"
+          },
+          {
+            "type": "still",
+            "url": "https://upload.wikimedia.org/wikipedia/en/1/1e/Roberto_Benigni_La_vita_%C3%A8_bella_1997.jpg"
+          },
+          {
+            "type": "alternate",
+            "url": "https://upload.wikimedia.org/wikipedia/en/3/3f/Life_is_Beautiful_poster.jpg"
+          }
+        ]
+      }
+    ],
+    "wisdom": [
+      {
+        "text": "The only way to do great work is to love what you do.",
+        "author": "Steve Jobs",
+        "source": "Stanford Commencement Address",
+        "year": "2005",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "portrait",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Steve_Jobs_Headshot_2010-CROP.jpg"
+          },
+          {
+            "type": "quote_graphic",
+            "url": "https://source.unsplash.com/featured/?innovation,technology"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?minimal,workspace"
+          }
+        ]
+      }
+    ],
+    "life": [
+      {
+        "text": "Life is what happens when you're busy making other plans.",
+        "author": "John Lennon",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "lifestyle",
+            "url": "https://source.unsplash.com/featured/?life,aesthetic"
+          },
+          {
+            "type": "landscape",
+            "url": "https://source.unsplash.com/featured/?sunset,city"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?street,people"
+          }
+        ]
+      }
+    ],
+    "love": [
+      {
+        "text": "We accept the love we think we deserve.",
+        "author": "Stephen Chbosky",
+        "source": "The Perks of Being a Wallflower",
+        "year": "1999",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "romantic",
+            "url": "https://source.unsplash.com/featured/?romance,couple"
+          },
+          {
+            "type": "portrait",
+            "url": "https://source.unsplash.com/featured/?love,portrait"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?relationship"
+          }
+        ]
+      }
+    ],
+    "friendship": [
+      {
+        "text": "A real friend is one who walks in when the rest of the world walks out.",
+        "author": "Walter Winchell",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "friends",
+            "url": "https://source.unsplash.com/featured/?friends"
+          },
+          {
+            "type": "group",
+            "url": "https://source.unsplash.com/featured/?friendship"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?laugh,friends"
+          }
+        ]
+      }
+    ],
+    "heartbreak": [
+      {
+        "text": "The heart was made to be broken.",
+        "author": "Oscar Wilde",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "sad",
+            "url": "https://source.unsplash.com/featured/?sad,alone"
+          },
+          {
+            "type": "moody",
+            "url": "https://source.unsplash.com/featured/?rain,window"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?lonely"
+          }
+        ]
+      }
+    ],
+    "future": [
+      {
+        "text": "The best way to predict the future is to invent it.",
+        "author": "Alan Kay",
+        "source": "",
+        "year": "1971",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "concept",
+            "url": "https://source.unsplash.com/featured/?future,technology"
+          },
+          {
+            "type": "cityscape",
+            "url": "https://source.unsplash.com/featured/?city,night"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?neon"
+          }
+        ]
+      }
+    ],
+    "past": [
+      {
+        "text": "The past is a place of reference, not a place of residence.",
+        "author": "Roy T. Bennett",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "historic",
+            "url": "https://source.unsplash.com/featured/?old,photo"
+          },
+          {
+            "type": "memory",
+            "url": "https://source.unsplash.com/featured/?nostalgia"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?vintage"
+          }
+        ]
+      }
+    ],
+    "inspiring": [
+      {
+        "text": "Believe you can and you're halfway there.",
+        "author": "Theodore Roosevelt",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "motivation",
+            "url": "https://source.unsplash.com/featured/?motivation"
+          },
+          {
+            "type": "achievement",
+            "url": "https://source.unsplash.com/featured/?success"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?mountain,climb"
+          }
+        ]
+      }
+    ],
+    "meme": [
+      {
+        "text": "This is fine.",
+        "author": "Dog in burning room",
+        "source": "Meme",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "meme",
+            "url": "https://knowyourmeme.com/memes/this-is-fine"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?fire,room"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?chaos"
+          }
+        ]
+      }
+    ],
+    "random": [
+      {
+        "text": "Sometimes you win, sometimes you learn.",
+        "author": "John C. Maxwell",
+        "source": "",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          {
+            "type": "abstract",
+            "url": "https://source.unsplash.com/featured/?abstract"
+          },
+          {
+            "type": "pattern",
+            "url": "https://source.unsplash.com/featured/?pattern"
+          },
+          {
+            "type": "alternate",
+            "url": "https://source.unsplash.com/featured/?colors"
+          }
+        ]
+      }
+    ]
+  }
+}

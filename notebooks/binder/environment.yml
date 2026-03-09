@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pip
+  - pip:
+    - python-jobspy>=1.1.79
+    - pandas>=2.0.0
+    - jupyter>=1.0.0
+    - ipython>=8.0.0

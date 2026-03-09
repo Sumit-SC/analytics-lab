@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+	<title>CineMaterial poster test</title>
+	<style>
+		body { font-family: system-ui, sans-serif; max-width: 560px; margin: 2rem auto; padding: 0 1rem; }
+		.quote { margin-bottom: 1rem; }
+		.poster-wrap { width: 100%; aspect-ratio: 2/3; max-height: 400px; background: #222; border-radius: 8px; overflow: hidden; margin: 1rem 0; }
+		.poster-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+		.controls { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+		button { padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; border: 1px solid #ccc; background: #f5f5f5; }
+		button:hover { background: #eee; }
+		#status { font-size: 0.875rem; color: #666; margin-top: 0.5rem; min-height: 1.25rem; }
+		#status.err { color: #c00; }
+	</style>
+	<script>
+		// Same proxy as main site — must expose /api/omdb and /api/cinematerial
+		window.OMDB_PROXY_URL = 'https://playground-serveless.vercel.app';
+	</script>
+</head>
+<body>
+	<h1>CineMaterial poster test</h1>
+	<p>Uses quote <strong>source</strong> (title) → OMDb to get <strong>imdbID</strong> → CineMaterial to get poster URLs. We pass title + imdbID + type to the API.</p>
+
+	<div class="quote">
+		<p id="quote-text"></p>
+		<p id="quote-meta" style="color:#666; font-size:0.9rem;"></p>
+	</div>
+
+	<div class="poster-wrap">
+		<img id="poster" src="" alt="Poster" />
+	</div>
+
+	<div class="controls">
+		<button type="button" id="btn-change">Change poster (CineMaterial)</button>
+		<button type="button" id="btn-next">Next quote</button>
+	</div>
+	<p id="status"></p>
+
+	<script>
+		// Mini "DB" like your quotes: we need source (title), type and (ideally) imdbId for the API
+		// provider: 'cinematerial' (default) or 'movieposterdb' for Bollywood / cases CineMaterial doesn't cover
+		var quotes = [
+			{ text: 'Mankind was born on Earth. It was never meant to die here.', author: 'Cooper', source: 'Interstellar', type: 'movie', imdbId: 'tt0816692', provider: 'cinematerial' },
+			{ text: 'Don\'t give up. There are no wrong answers.', author: '', source: 'Reply 1988 (2015)', type: 'series', imdbId: 'tt5182866', provider: 'cinematerial' },
+			{ text: 'All is well.', author: '', source: '3 Idiots', type: 'movie', imdbId: 'tt1187043', provider: 'movieposterdb' }
+		];
+
+		var currentIndex = 0;
+		var currentImdbID = null;
+		var currentTitle = null;
+		var currentType = 'movie';
+		var currentProvider = 'cinematerial';
+
+		function getProxyBase() {
+			var b = (typeof window !== 'undefined' && window.OMDB_PROXY_URL) ? String(window.OMDB_PROXY_URL).replace(/\/$/, '') : '';
+			return b;
+		}
+
+		function setStatus(msg, isError) {
+			var el = document.getElementById('status');
+			if (!el) return;
+			el.textContent = msg || '';
+			el.classList.toggle('err', !!isError);
+		}
+
+		function showQuote() {
+			var q = quotes[currentIndex];
+			document.getElementById('quote-text').textContent = q.text;
+			document.getElementById('quote-meta').textContent = 'From: ' + (q.source || '—');
+			// Use embedded imdbId when available (best: stored in your quotes DB) so we can skip OMDb when changing posters
+			currentImdbID = q.imdbId || null;
+			currentTitle = (q.source || '').trim();
+			currentType = (q.type === 'series') ? 'series' : 'movie';
+			currentProvider = q.provider || 'cinematerial';
+			setStatus('Quote: \"' + (q.source || '') + '\" (' + currentType + ', ' + currentProvider + '). Click \"Change poster\" to fetch by imdbID/title.');
+		}
+
+		function setPoster(url) {
+			var img = document.getElementById('poster');
+			if (!img) return;
+			if (url && url.indexOf('http') === 0) {
+				img.src = url;
+				img.style.display = 'block';
+			} else {
+				img.src = '';
+				img.style.display = 'none';
+			}
+		}
+
+		// Step 1: Get imdbID (and optional poster) from OMDb using title
+		function fetchOMDbByTitle(title, type, done) {
+			var base = getProxyBase();
+			if (!base) { done(null); return; }
+			var q = 't=' + encodeURIComponent((title || '').trim()) + (type === 'series' || type === 'movie' ? '&type=' + type : '');
+			fetch(base + '/api/omdb?' + q)
+				.then(function (r) { return r.ok ? r.json() : null; })
+				.then(function (data) {
+					if (!data) { done(null); return; }
+					var imdbID = (data.imdbID && /^tt\d+$/.test(String(data.imdbID).trim())) ? data.imdbID.trim() : null;
+					var poster = (data.poster && String(data.poster).indexOf('http') === 0) ? data.poster : null;
+					var titleOut = (typeof data.title === 'string') ? data.title.trim() : title;
+					var typeOut = data.type === 'series' ? 'series' : 'movie';
+					done({ imdbID: imdbID, poster: poster, title: titleOut, type: typeOut });
+				})
+				.catch(function () { done(null); });
+		}
+
+		// Step 2a: Get poster URLs from CineMaterial using imdbID + title + type
+		function fetchCineMaterial(imdbID, title, type, done) {
+			var base = getProxyBase();
+			if (!base || !imdbID || !/^tt\d+$/.test(String(imdbID).trim())) { done(null); return; }
+			var q = 'i=' + encodeURIComponent(imdbID.trim()) + '&title=' + encodeURIComponent((title || '').trim() || 'title') + '&type=' + (type === 'series' ? 'series' : 'movie');
+			fetch(base + '/api/cinematerial?' + q)
+				.then(function (r) {
+					if (!r.ok) return null;
+					return r.json().catch(function () { return null; });
+				})
+				.then(function (data) {
+					if (!data || !Array.isArray(data.posters)) { done(null); return; }
+					var urls = [];
+					for (var i = 0; i < data.posters.length; i++) {
+						var u = data.posters[i] && (data.posters[i].url || (typeof data.posters[i] === 'string' ? data.posters[i] : null));
+						if (u && typeof u === 'string' && u.indexOf('http') === 0) urls.push(u);
+					}
+					done(urls.length ? urls : null);
+				})
+				.catch(function () { done(null); });
+		}
+
+		// Step 2b: Get poster URLs from MoviePosterDB using imdbID + title
+		function fetchMoviePosterDb(imdbID, title, done) {
+			var base = getProxyBase();
+			if (!base || !imdbID || !/^tt\d+$/.test(String(imdbID).trim())) { done(null); return; }
+			var q = 'i=' + encodeURIComponent(imdbID.trim()) + '&title=' + encodeURIComponent((title || '').trim() || 'title');
+			fetch(base + '/api/movieposterdb?' + q)
+				.then(function (r) {
+					if (!r.ok) return null;
+					return r.json().catch(function () { return null; });
+				})
+				.then(function (data) {
+					if (!data || !Array.isArray(data.posters)) { done(null); return; }
+					var urls = [];
+					for (var i = 0; i < data.posters.length; i++) {
+						var u = data.posters[i] && (data.posters[i].url || (typeof data.posters[i] === 'string' ? data.posters[i] : null));
+						if (u && typeof u === 'string' && u.indexOf('http') === 0) urls.push(u);
+					}
+					done(urls.length ? urls : null);
+				})
+				.catch(function () { done(null); });
+		}
+
+		function onChangePoster() {
+			var title = currentTitle;
+			if (!title) {
+				setStatus('No title (source) for this quote.', true);
+				return;
+			}
+			setStatus('Fetching…');
+
+			function tryCineMaterial(imdbID, titleOut, typeOut) {
+				if (!imdbID) {
+					setStatus('No imdbID available for \"' + title + '\".', true);
+					return;
+				}
+				setStatus('Got imdbID: ' + imdbID + '. Fetching CineMaterial…');
+				fetchCineMaterial(imdbID, titleOut, typeOut, function (urls) {
+					if (urls && urls.length > 0) {
+						var pick = urls[Math.floor(Math.random() * urls.length)];
+						setPoster(pick);
+						setStatus('CineMaterial: ' + urls.length + ' poster(s). Showing one.');
+					} else {
+						setStatus('CineMaterial returned no posters for ' + imdbID + '.', true);
+					}
+				});
+			}
+
+			function tryMoviePosterDb(imdbID, titleOut) {
+				if (!imdbID) {
+					setStatus('No imdbID available for \"' + title + '\".', true);
+					return;
+				}
+				setStatus('Got imdbID: ' + imdbID + '. Fetching MoviePosterDB…');
+				fetchMoviePosterDb(imdbID, titleOut, function (urls) {
+					if (urls && urls.length > 0) {
+						var pick = urls[Math.floor(Math.random() * urls.length)];
+						setPoster(pick);
+						setStatus('MoviePosterDB: ' + urls.length + ' poster(s). Showing one.');
+					} else {
+						setStatus('MoviePosterDB returned no posters for ' + imdbID + '.', true);
+					}
+				});
+			}
+
+			// If we already have imdbID for this quote, skip OMDb and go straight to the right provider
+			if (currentImdbID && getProxyBase()) {
+				if (currentProvider === 'movieposterdb') {
+					tryMoviePosterDb(currentImdbID, currentTitle);
+				} else {
+					tryCineMaterial(currentImdbID, currentTitle, currentType);
+				}
+				return;
+			}
+
+			// Otherwise: OMDb by title → get imdbID → then provider (CineMaterial or MoviePosterDB)
+			fetchOMDbByTitle(title, currentType, function (result) {
+				if (!result) {
+					setStatus('OMDb request failed. Is OMDB_PROXY_URL set and proxy deployed?', true);
+					return;
+				}
+				currentImdbID = result.imdbID;
+				currentTitle = result.title || title;
+				currentType = result.type || currentType;
+				if (!currentImdbID && result.poster) {
+					setPoster(result.poster);
+					setStatus('OMDb poster only (no imdbID). Poster changed, but external providers need imdbID.');
+					return;
+				}
+				if (currentProvider === 'movieposterdb') {
+					tryMoviePosterDb(currentImdbID, currentTitle);
+				} else {
+					tryCineMaterial(currentImdbID, currentTitle, currentType);
+				}
+			});
+		}
+
+		function onNextQuote() {
+			currentIndex = (currentIndex + 1) % quotes.length;
+			showQuote();
+			setPoster('');
+		}
+
+		document.getElementById('btn-change').addEventListener('click', onChangePoster);
+		document.getElementById('btn-next').addEventListener('click', onNextQuote);
+
+		showQuote();
+	</script>
+</body>
+</html>

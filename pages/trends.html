@@ -1,0 +1,481 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<!-- Script order: tailwind-loader.js → main.css → trends.js. Do not reorder. -->
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+	<title>Trends | Standalone Playground</title>
+	<meta name="description" content="Fun second-brain page: tech/news trends, Wikipedia topics, and visual inspiration powered by free APIs." />
+	<meta property="og:title" content="Trends — Fun signals &amp; inspiration" />
+	<meta property="og:description" content="See what&apos;s moving in tech and the world with Hacker News, Wikipedia, and visual inspiration, all from free APIs." />
+	<script src="../assets/js/tailwind-loader.js" defer></script>
+	<!-- No Google Fonts: system font stack only (no external trackers) -->
+	<link rel="preconnect" href="https://hacker-news.firebaseio.com">
+	<link rel="preconnect" href="https://wikimedia.org">
+	<link rel="preconnect" href="https://inshorts.vercel.app">
+	<link rel="preconnect" href="https://api.rss2json.com">
+	<link rel="preconnect" href="https://dev.to">
+	<link rel="preconnect" href="https://www.reddit.com">
+	<link rel="preconnect" href="https://githubtrending.lessx.xyz">
+	<link rel="preconnect" href="https://torrentfreak.com">
+	<link rel="preconnect" href="https://www.xda-developers.com">
+	<link rel="preconnect" href="https://api.tvmaze.com">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script src="../assets/js/nav-data.js" defer></script>
+	<script src="../assets/js/nav-inject.js" defer></script>
+</head>
+<body class="page-trends bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="trends">
+	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
+			<div class="flex items-center justify-between py-3">
+				<a href="../index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<div class="flex items-center gap-2">
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
+					<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<div id="nav-drawer-overlay" class="nav-drawer-overlay" aria-hidden="true"></div>
+	<div id="nav-drawer" role="dialog" aria-label="Menu">
+		<div class="nav-drawer-header">
+			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
+			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
+		</div>
+		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
+	</div>
+
+	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
+	<div class="flex relative">
+		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
+			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources sidebar">
+				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
+				<span class="sidebar-toggle-vertical">Resources</span>
+			</button>
+			<div class="sidebar-content p-3">
+				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
+				<nav class="space-y-1 text-sm">
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
+							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
+							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
+							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
+							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
+							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
+							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
+							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
+							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
+							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
+							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
+							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
+							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
+							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
+							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</aside>
+
+	<main class="flex-1 min-w-0 max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+		<header class="mb-2">
+			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Trends</h1>
+			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mb-4">
+				A calm &ldquo;what&apos;s happening&rdquo; view built only from free APIs. Use the filter below to show only one category.
+			</p>
+			<div class="flex flex-wrap gap-2" id="trends-filter-bar" role="tablist" aria-label="Filter trends by category">
+				<button type="button" class="trends-filter-btn active px-4 py-2 rounded-full text-sm font-semibold border-2 border-primary bg-primary/10 text-primary transition-all min-h-[44px]" data-trend-filter="all" role="tab" aria-selected="true">All</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="tech" role="tab" aria-selected="false">Tech</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="news" role="tab" aria-selected="false">News</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="entertainment" role="tab" aria-selected="false">Entertainment</button>
+				<button type="button" class="trends-filter-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[44px]" data-trend-filter="anime" role="tab" aria-selected="false">Anime</button>
+			</div>
+			<div class="mt-3 flex flex-wrap items-center gap-3">
+				<button type="button" id="trends-customize-btn" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 transition-colors" aria-expanded="false" aria-controls="trends-customize-panel">⚙️ Customize sections</button>
+				<label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+					<input type="checkbox" id="trends-piracy-toggle" class="rounded border-gray-400 text-primary focus:ring-primary">
+					<span>Show piracy index &amp; tools</span>
+				</label>
+			</div>
+			<div id="trends-customize-panel" class="hidden mt-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60" aria-hidden="true">
+				<p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Toggle sections on or off. Choices are saved locally.</p>
+				<div id="trends-section-toggles" class="flex flex-wrap gap-3"></div>
+			</div>
+		</header>
+
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6" id="trends-sections-wrap">
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="hn">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Hacker News &middot; tech &amp; dev</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Top stories from <code>news.ycombinator.com</code> (latest snapshot).</p>
+					</div>
+					<a href="https://news.ycombinator.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open HN ↗</a>
+				</div>
+				<p id="trends-hn-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-hn-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news" data-trend-section-id="google-news">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Google News &middot; headlines</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Top stories from Google News (RSS).</p>
+					</div>
+					<a href="https://news.google.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Google News ↗</a>
+				</div>
+				<p id="trends-google-news-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-google-news-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news" data-trend-section-id="inshorts">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Inshorts &middot; news</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Short news from <a href="https://inshorts.vercel.app/" target="_blank" rel="noopener" class="text-primary hover:underline">Inshorts API</a> (unofficial).</p>
+					</div>
+					<a href="https://inshorts.vercel.app/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">API ↗</a>
+				</div>
+				<p id="trends-inshorts-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-inshorts-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="news" data-trend-section-id="wiki">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Wikipedia today</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Most-read English pages today (pageview snapshot).</p>
+					</div>
+					<a href="https://en.wikipedia.org/wiki/Main_Page" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Wikipedia ↗</a>
+				</div>
+				<p id="trends-wiki-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-wiki-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="medium">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Towards Data Science &middot; Medium</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Latest articles from <code>towardsdatascience.com</code> (RSS feed).</p>
+					</div>
+					<a href="https://towardsdatascience.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open TDS ↗</a>
+				</div>
+				<p id="trends-medium-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-medium-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="devto">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Dev.to &middot; trending</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Popular articles from <code>dev.to</code> (last 7 days).</p>
+					</div>
+					<a href="https://dev.to/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Dev.to ↗</a>
+				</div>
+				<p id="trends-devto-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-devto-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="reddit-ds">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Reddit &middot; r/datascience</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Hot posts from <code>r/datascience</code>.</p>
+					</div>
+					<a href="https://www.reddit.com/r/datascience/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Reddit ↗</a>
+				</div>
+				<p id="trends-reddit-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-reddit-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="reddit-ml">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Reddit &middot; r/MachineLearning</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Hot posts from <code>r/MachineLearning</code>.</p>
+					</div>
+					<a href="https://www.reddit.com/r/MachineLearning/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open Reddit ↗</a>
+				</div>
+				<p id="trends-reddit-ml-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-reddit-ml-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="github">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">GitHub &middot; trending repos</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Daily trending repositories (unofficial API).</p>
+					</div>
+					<a href="https://github.com/trending" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open GitHub ↗</a>
+				</div>
+				<p id="trends-github-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-github-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="torrentfreak">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">TorrentFreak</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Privacy, piracy &amp; copyright news (RSS).</p>
+					</div>
+					<a href="https://torrentfreak.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open ↗</a>
+				</div>
+				<p id="trends-torrentfreak-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-torrentfreak-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="xda">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">XDA Developers</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Android &amp; tech news (RSS).</p>
+					</div>
+					<a href="https://www.xda-developers.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open ↗</a>
+				</div>
+				<p id="trends-xda-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-xda-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+		</div>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 mt-6" data-trend-category="entertainment" data-trend-section-id="social">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Social &amp; visual &middot; IG · Pinterest · YouTube &amp; alternatives</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Quick jumps to feeds and alternatives (Unsplash, Pexels, Piped).</p>
+				</div>
+			</div>
+			<ul class="space-y-2 text-sm text-gray-800 dark:text-gray-100">
+				<li><a href="https://www.instagram.com/explore/tags/dataanalytics/" target="_blank" rel="noopener" class="text-primary hover:underline">Instagram · #dataanalytics / #datascience</a></li>
+				<li><a href="https://www.pinterest.com/search/pins/?q=data%20dashboard%20infographic" target="_blank" rel="noopener" class="text-primary hover:underline">Pinterest · data dashboards &amp; infographics</a></li>
+				<li><a href="https://www.youtube.com/results?search_query=data+analytics+career" target="_blank" rel="noopener" class="text-primary hover:underline">YouTube · data analytics / BI</a></li>
+				<li><a href="https://unsplash.com/s/photos/data-visualization" target="_blank" rel="noopener" class="text-primary hover:underline">Unsplash · data viz &amp; dashboards (free photos)</a></li>
+				<li><a href="https://www.pexels.com/search/data%20analytics/" target="_blank" rel="noopener" class="text-primary hover:underline">Pexels · data analytics (free stock)</a></li>
+				<li><a href="https://piped.video/" target="_blank" rel="noopener" class="text-primary hover:underline">Piped · YouTube front-end (privacy)</a></li>
+				<li><a href="https://odysee.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Odysee · video alternative</a></li>
+			</ul>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="drama">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Drama &amp; Asian media</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">K-drama, C-drama, movies — MyDramaList, AsianWiki (IMDB-like for Asian content).</p>
+				</div>
+			</div>
+			<ul class="space-y-2 text-sm text-gray-800 dark:text-gray-100">
+				<li><a href="https://mydramalist.com/" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · ratings, lists, recent</a></li>
+				<li><a href="https://mydramalist.com/rss/recent" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · RSS recent</a></li>
+				<li><a href="https://asianwiki.com/" target="_blank" rel="noopener" class="text-primary hover:underline">AsianWiki · drama &amp; movie wiki</a></li>
+			</ul>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="visual">
+			<div class="flex items-center justify-between mb-3">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Visual strip</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">A small, quiet strip of free photos for mood. Click any tile to open it.</p>
+				</div>
+				<button type="button" id="trends-visual-refresh" class="tool-sec-btn text-xs">Shuffle</button>
+			</div>
+			<div id="trends-visual-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="focus">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="learning">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="creative">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="calm">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="kdrama">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+				<div class="h-28 sm:h-32 rounded-xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative trends-visual-card" data-seed="anime">
+					<a href="#" class="absolute inset-0 block" target="_blank" rel="noopener" aria-label="Open image"></a>
+				</div>
+			</div>
+			<p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Images from <a href="https://picsum.photos/" target="_blank" rel="noopener" class="text-primary hover:underline">Picsum</a> (free placeholders).</p>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="tv-schedule">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">TV &amp; episode schedule</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Anime today (Jikan), TV episodes today (TVMaze), and drama trackers.</p>
+				</div>
+			</div>
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div>
+					<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Anime · today</h3>
+					<p id="trends-schedule-anime-status" class="text-xs text-gray-500 dark:text-gray-400 mb-1">Loading…</p>
+					<ul id="trends-schedule-anime-list" class="space-y-1.5 text-sm text-gray-800 dark:text-gray-100 max-h-64 overflow-y-auto"></ul>
+					<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Source: <a href="https://myanimelist.net/anime/season/schedule" target="_blank" rel="noopener" class="text-primary hover:underline">MAL schedule</a></p>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">TV series · today (US)</h3>
+					<p id="trends-schedule-tv-status" class="text-xs text-gray-500 dark:text-gray-400 mb-1">Loading…</p>
+					<ul id="trends-schedule-tv-list" class="space-y-1.5 text-sm text-gray-800 dark:text-gray-100 max-h-64 overflow-y-auto"></ul>
+					<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Source: <a href="https://www.tvmaze.com/schedule" target="_blank" rel="noopener" class="text-primary hover:underline">TVMaze</a></p>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">K-drama &amp; drama trackers</h3>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Episode calendars and “next episode” pages (open in new tab).</p>
+					<ul class="space-y-1.5 text-sm text-gray-800 dark:text-gray-100">
+						<li><a href="https://mydramalist.com/episode-calendar" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · episode calendar</a></li>
+						<li><a href="https://mydramalist.com/shows/airing" target="_blank" rel="noopener" class="text-primary hover:underline">MyDramaList · currently airing</a></li>
+						<li><a href="https://www.episodate.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Episodate · TV &amp; next episodes</a></li>
+						<li><a href="https://www.tvmaze.com/calendar" target="_blank" rel="noopener" class="text-primary hover:underline">TVMaze · calendar</a></li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="actor-search">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Actor search</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Look up TV/film actors (TVMaze). Results open on TVMaze for full cast &amp; credits.</p>
+				</div>
+				<a href="https://www.tvmaze.com/people" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Browse people ↗</a>
+			</div>
+			<div class="flex flex-wrap gap-2 mb-3">
+				<input type="text" id="trends-actor-search-input" class="flex-1 min-w-[140px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Tom Hanks, Song Joong-ki" aria-label="Actor name">
+				<button type="button" id="trends-actor-search-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm transition-colors">Search</button>
+			</div>
+			<p id="trends-actor-search-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2"></p>
+			<ul id="trends-actor-search-results" class="space-y-3 text-sm text-gray-800 dark:text-gray-100"></ul>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" id="trends-anime-section" data-trend-category="anime" data-trend-section-id="anime">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Anime (Jikan) &amp; hubs</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Top anime + MyAnimeList, AniList, Kitsu (IMDB-like for anime).</p>
+				</div>
+			</div>
+			<ul class="space-y-1 text-xs text-gray-600 dark:text-gray-400 mb-2">
+				<li><a href="https://myanimelist.net/" target="_blank" rel="noopener" class="text-primary hover:underline">MyAnimeList</a> &middot; <a href="https://anilist.co/" target="_blank" rel="noopener" class="text-primary hover:underline">AniList</a> &middot; <a href="https://kitsu.io/" target="_blank" rel="noopener" class="text-primary hover:underline">Kitsu</a></li>
+			</ul>
+			<p id="trends-anime-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+			<ul id="trends-anime-list" class="space-y-2 list-none pl-0"></ul>
+		</section>
+
+		<section id="trends-piracy-wrap" class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 trends-piracy-section hidden" data-trend-category="tech" data-trend-section-id="piracy">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Piracy index &amp; tools</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Community indexes and megathreads (use at your own risk).</p>
+				</div>
+			</div>
+			<ul class="space-y-2 text-sm text-gray-800 dark:text-gray-100">
+				<li><a href="https://www.reddit.com/r/FREEMEDIAHECKYEAH/wiki/index/" target="_blank" rel="noopener" class="text-primary hover:underline">r/FREEMEDIAHECKYEAH · wiki index (FMHY)</a></li>
+				<li><a href="https://www.reddit.com/r/piracy/wiki/megathread/" target="_blank" rel="noopener" class="text-primary hover:underline">r/piracy · megathread</a></li>
+				<li><a href="https://fmhy.pages.dev/" target="_blank" rel="noopener" class="text-primary hover:underline">FMHY · mirror (pages)</a></li>
+			</ul>
+		</section>
+	</main>
+	</div>
+
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
+		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
+			<p>Standalone Playground · Trends · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
+			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present</p>
+			<p class="text-[11px] mt-2">Credits: HN, Inshorts, Wikipedia, Jikan, TVMaze, Picsum, Reddit, Dev.to, GitHub trending. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
+			<p class="text-[11px] mt-2 text-amber-700 dark:text-amber-400/90">Sluggish? Clear site cache/storage — saved data will be lost but site may run faster.</p>
+		</div>
+	</footer>
+
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-spotify" class="global-music-source-btn" aria-pressed="false" data-source="spotify" title="Paste Spotify track/album/playlist URLs">Spotify</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+			<button type="button" id="global-music-source-radio" class="global-music-source-btn" aria-pressed="false" data-source="radio" title="Free internet radio (no API)">Radio</button>
+		</div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
+	<div id="global-resources-flyout">
+		<div class="global-resources-header">
+			<span>Resources</span>
+			<button type="button" id="global-resources-close" class="global-resources-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-resources-body"></div>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<label class="global-yt-panel-piped-label"><input type="checkbox" id="global-yt-panel-piped" aria-label="Use Piped for video"> Piped</label>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above, or open this panel and use the search below.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
+		<div id="global-spotify-embed" class="global-spotify-embed" style="display:none;">
+			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
+	</div>
+
+	<script src="../assets/js/nav-mobile.js" defer></script>
+	<script src="../assets/js/color-theme.js" defer></script>
+	<script src="../assets/js/theme.js" defer></script>
+	<script src="../assets/js/analytics.js" defer></script>
+	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/sidebar.js" defer></script>
+	<script src="../assets/js/trends.js" defer></script>
+	<script src="../assets/js/register-sw.js" defer></script>
+</body>
+</html>
+

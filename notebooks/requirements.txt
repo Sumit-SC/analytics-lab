@@ -1,0 +1,6 @@
+python-jobspy>=1.1.79
+pandas>=2.0.0
+jupyter>=1.0.0
+ipython>=8.0.0
+ipywidgets>=8.0.0
+marimo>=0.4.0
