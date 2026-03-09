@@ -468,6 +468,22 @@
 					</button>
 				</div>
 			</div>
+
+			<!-- Sources panel: visible for BOTH backends -->
+			<div id="job-sources-panel" class="mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/30">
+				<details>
+					<summary class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 select-none">🌐 Active data sources <span class="text-xs text-gray-400">(click to expand)</span></summary>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-2">Select sources to scrape. Unchecked sources are skipped by the API, reducing response time.</p>
+					<div id="job-sites-multiselect-global" class="max-h-48 overflow-y-auto p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-sm">
+						<!-- Populated by JS -->
+					</div>
+					<div class="flex gap-2 mt-2">
+						<button type="button" id="sources-select-all" class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Select All</button>
+						<button type="button" id="sources-select-defaults" class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Defaults</button>
+						<button type="button" id="sources-clear-all" class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Clear All</button>
+					</div>
+				</details>
+			</div>
 			
 			<div id="job-tracker-main">
 			<!-- Search Configuration: shown only when Backend = Railway -->
@@ -545,13 +561,9 @@
 					</div>
 				</div>
 				
-				<!-- Job Sites Multi-Select -->
-				<div class="mb-4">
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🌐 Active data sources</label>
-					<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Select at least one source to focus your results. These selections now apply directly to the job list.</p>
-					<div id="job-sites-multiselect" class="max-h-64 overflow-y-auto p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-						<!-- Will be populated by JavaScript -->
-					</div>
+				<!-- Job Sites Multi-Select (moved to global #job-sources-panel above) -->
+				<div class="mb-4 hidden">
+					<div id="job-sites-multiselect"></div>
 				</div>
 				
 				<!-- Checkboxes Row -->
@@ -942,63 +954,5 @@
 	<script src="../assets/js/assistant.js" defer></script>
 	<script src="../assets/js/jobs.js" defer></script>
 	<script src="../assets/js/register-sw.js" defer></script>
-	<script>
-		// JobSpy Notebook Toggle & Binder Loading
-		(function() {
-			'use strict';
-			
-			// Configure your Binder URL here
-			// Format: https://mybinder.org/v2/gh/USERNAME/REPO/BRANCH?urlpath=notebooks/jobspy-scraper-interactive.ipynb
-			// Binder URL for Sumit-SC/analytics-lab repository
-			// Using interactive version with ipywidgets for better interactivity
-			var BINDER_NOTEBOOK_URL = 'https://mybinder.org/v2/gh/Sumit-SC/analytics-lab/main?urlpath=notebooks/jobspy-scraper-interactive.ipynb';
-			
-			var toggleBtn = document.getElementById('jobspy-notebook-toggle');
-			var contentDiv = document.getElementById('jobspy-notebook-content');
-			var iframe = document.getElementById('jobspy-notebook-iframe');
-			var loadingDiv = document.getElementById('jobspy-notebook-loading');
-			var toggleText = document.getElementById('jobspy-notebook-toggle-text');
-			var toggleIcon = document.getElementById('jobspy-notebook-toggle-icon');
-			var isExpanded = false;
-			var notebookLoaded = false;
-			
-			if (!toggleBtn || !contentDiv) return;
-			
-			function updateUI() {
-				if (isExpanded) {
-					contentDiv.classList.remove('hidden');
-					toggleBtn.setAttribute('aria-expanded', 'true');
-					if (toggleText) toggleText.textContent = 'Click to collapse';
-					if (toggleIcon) toggleIcon.style.transform = 'rotate(180deg)';
-					
-					// Load notebook on first expand
-					if (!notebookLoaded && iframe && loadingDiv) {
-						if (BINDER_NOTEBOOK_URL) {
-							iframe.src = BINDER_NOTEBOOK_URL;
-							iframe.style.display = 'block';
-							loadingDiv.style.display = 'none';
-							notebookLoaded = true;
-						} else {
-							// Show instructions if Binder URL not configured
-							loadingDiv.innerHTML = '<div class="text-center py-8"><p class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Binder URL not configured</p><p class="text-xs text-gray-600 dark:text-gray-400 mb-4">To enable the interactive notebook:</p><ol class="text-xs text-gray-600 dark:text-gray-400 text-left max-w-md mx-auto space-y-2 list-decimal list-inside"><li>Push this repo to GitHub</li><li>Go to <a href="https://mybinder.org" target="_blank" rel="noopener" class="text-primary hover:underline">mybinder.org</a></li><li>Enter your repo URL: <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">github.com/USERNAME/REPO</code></li><li>Copy the Binder URL and update <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">BINDER_NOTEBOOK_URL</code> in jobs.html</li></ol><p class="text-xs text-gray-500 dark:text-gray-500 mt-4">Or <a href="./notebooks/jobspy-scraper.ipynb" target="_blank" rel="noopener" class="text-primary hover:underline">download the notebook</a> to run locally.</p></div>';
-						}
-					}
-				} else {
-					contentDiv.classList.add('hidden');
-					toggleBtn.setAttribute('aria-expanded', 'false');
-					if (toggleText) toggleText.textContent = 'Click to expand';
-					if (toggleIcon) toggleIcon.style.transform = 'rotate(0deg)';
-				}
-			}
-			
-			toggleBtn.addEventListener('click', function() {
-				isExpanded = !isExpanded;
-				updateUI();
-			});
-			
-			// Initialize UI
-			updateUI();
-		})();
-	</script>
 </body>
 </html>

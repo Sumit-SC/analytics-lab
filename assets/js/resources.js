@@ -1,6 +1,8 @@
 /**
- * Resources page: topic selector, tabs (YouTube / Read / Courses / Best), fetch resources.json.
+ * Resources page: topic selector, tabs (YouTube / Read / Courses / Best / Focus & Ambiance), fetch resources.json.
  * Notion-style gallery/list view; open links in same-page popup (Medium-style). Validates YouTube before embed.
+ * Focus tab: lo-fi radio streams (SomaFM, Chillhop, etc.) + ambient YouTube scenes (rain, cafe, fireplace) with Piped toggle.
+ * Live feed: Medium/TDS, Dev.to, Reddit, Hacker News, freeCodeCamp.
  */
 (function () {
 	var params = new URLSearchParams(window.location.search);
@@ -12,6 +14,35 @@
 	var RESOURCE_VIEW_KEY = 'resources_view_mode';
 	var LAST_TOPIC_KEY = 'resources_last_topic';
 	var LAST_TOPIC_TITLE_KEY = 'resources_last_topic_title';
+
+	var FOCUS_STATIONS = [
+		{ name: 'Groove Salad', url: 'https://ice2.somafm.com/groovesalad-128-mp3', icon: '\u{1F3B5}', desc: 'Downtempo ambient grooves' },
+		{ name: 'Drone Zone', url: 'https://ice2.somafm.com/dronezone-128-mp3', icon: '\u{1F30C}', desc: 'Atmospheric ambient textures' },
+		{ name: 'Deep Space One', url: 'https://ice2.somafm.com/deepspaceone-128-mp3', icon: '\u{1F680}', desc: 'Deep ambient space music' },
+		{ name: 'Lush', url: 'https://ice2.somafm.com/lush-128-mp3', icon: '\u{1F338}', desc: 'Sensuous mellow vocals' },
+		{ name: 'Fluid', url: 'https://ice2.somafm.com/fluid-128-mp3', icon: '\u{1F4A7}', desc: 'Instrumental hip-hop' },
+		{ name: 'Chillhop Radio', url: 'https://stream.chillhop.com/stream', icon: '\u2615', desc: 'Jazzy lo-fi beats' },
+		{ name: 'Radio Paradise', url: 'https://stream.radioparadise.com/mp3-128', icon: '\u{1F3DD}\uFE0F', desc: 'Eclectic listener-supported mix' },
+		{ name: 'Mission Control', url: 'https://ice2.somafm.com/missioncontrol-128-mp3', icon: '\u{1F6F8}', desc: 'Ambient + NASA audio' },
+		{ name: 'cliqhop idm', url: 'https://ice2.somafm.com/cliqhop-128-mp3', icon: '\u{1F50A}', desc: 'Beats, clicks & bleeps' },
+		{ name: 'DEF CON Radio', url: 'https://ice2.somafm.com/defcon-128-mp3', icon: '\u{1F4BB}', desc: 'Hacker conference vibes' },
+		{ name: 'Boot Liquor', url: 'https://ice2.somafm.com/bootliquor-128-mp3', icon: '\u{1F3B8}', desc: 'Americana roots & country' },
+		{ name: 'n5MD Radio', url: 'https://ice2.somafm.com/n5md-128-mp3', icon: '\u{1F3A7}', desc: 'Ambient, experimental' }
+	];
+	var AMBIENT_SCENES = [
+		{ name: 'Rain on Window', id: 'mPZkdNFkNps', icon: '\u{1F327}\uFE0F', desc: 'Gentle rain for deep focus' },
+		{ name: 'Coffee Shop', id: 'BOdLmxy06H0', icon: '\u2615', desc: 'Cafe ambiance & chatter' },
+		{ name: 'Fireplace', id: 'L_LUpnjgPso', icon: '\u{1F525}', desc: 'Warm crackling fire' },
+		{ name: 'Forest Birds', id: 'xNN7iTA57jM', icon: '\u{1F332}', desc: 'Birdsong & nature' },
+		{ name: 'Ocean Waves', id: 'WHPEKLQID4U', icon: '\u{1F30A}', desc: 'Calming sea waves' },
+		{ name: 'Thunderstorm', id: 'nDq6TstdEI8', icon: '\u26C8\uFE0F', desc: 'Distant thunder & rain' },
+		{ name: 'Library Quiet', id: 'GjKGWvdFBbA', icon: '\u{1F4DA}', desc: 'Soft page turns' },
+		{ name: 'Night Garden', id: 'sGkh1W5cbH4', icon: '\u{1F319}', desc: 'Crickets & gentle breeze' }
+	];
+	var focusAudio = null;
+	var focusPlayingIdx = -1;
+	var focusPiped = false;
+	try { focusPiped = localStorage.getItem('resources_focus_piped') === '1'; } catch (e) { /* ignore */ }
 
 	function escapeHtml(s) {
 		if (s == null) return '';
@@ -186,6 +217,7 @@
 		html += '<button type="button" data-tab="read" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Read / Blogs / Books</button>';
 		html += '<button type="button" data-tab="course" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Courses & paths</button>';
 		html += '<button type="button" data-tab="best" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Best playlists & lists</button>';
+		html += '<button type="button" data-tab="focus" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Focus & Ambiance</button>';
 		html += '</div>';
 
 		html += '<div id="tab-panels" class="space-y-6">';
@@ -322,16 +354,80 @@
 		html += '</ul></div>';
 		html += '</div></section>';
 
-		// Live topic feed (Medium/TDS, Dev.to, Reddit) — per-topic sidebar-style block
+		// Panel: Focus & Ambiance — lo-fi radio, ambient scenes, study zone
+		html += '<section data-tab-panel="focus" class="hidden rounded-2xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden material-elevation-1">';
+		html += '<div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">';
+		html += '<h2 class="text-lg font-bold flex items-center gap-2">\u{1F3A7} Focus & Ambiance</h2>';
+		html += '<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lo-fi radio, ambient scenes, and study vibes. Layer sounds together for your perfect focus setup.</p>';
+		html += '</div>';
+		html += '<div class="p-5 space-y-6">';
+
+		html += '<div>';
+		html += '<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Lo-fi & Ambient Radio</h3>';
+		html += '<p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Direct audio streams \u2014 no ads, no YouTube needed. Click to play, click again to stop.</p>';
+		html += '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2" id="focus-stations-grid">';
+		FOCUS_STATIONS.forEach(function (s, i) {
+			html += '<button type="button" class="focus-station-card text-left p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary/50 hover:shadow-md transition-all" data-station-idx="' + i + '">';
+			html += '<div class="text-2xl mb-1">' + s.icon + '</div>';
+			html += '<div class="text-sm font-semibold text-gray-800 dark:text-gray-100">' + escapeHtml(s.name) + '</div>';
+			html += '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + escapeHtml(s.desc) + '</div>';
+			html += '</button>';
+		});
+		html += '</div>';
+		html += '<div id="focus-radio-now" class="mt-3 flex items-center justify-between gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" style="display:none">';
+		html += '<div class="flex items-center gap-2 min-w-0">';
+		html += '<span class="focus-pulse-dot"></span>';
+		html += '<span id="focus-radio-name" class="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">\u2014</span>';
+		html += '</div>';
+		html += '<div class="flex items-center gap-2 flex-shrink-0">';
+		html += '<button type="button" id="focus-radio-toggle" class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm hover:opacity-90" aria-label="Pause radio">\u23F8</button>';
+		html += '<input type="range" id="focus-radio-vol" min="0" max="100" value="70" class="w-20 accent-primary" aria-label="Volume">';
+		html += '</div>';
+		html += '</div>';
+		html += '</div>';
+
+		html += '<div>';
+		html += '<h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1">Ambient Scenes</h3>';
+		html += '<p class="text-xs text-gray-500 dark:text-gray-400 mb-3">YouTube ambient loops \u2014 rain, cafe, fireplace. Layer with radio above for the perfect mix.</p>';
+		html += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="focus-scenes-grid">';
+		AMBIENT_SCENES.forEach(function (s, i) {
+			html += '<button type="button" class="focus-scene-card text-left p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-primary/50 hover:shadow-md transition-all" data-scene-idx="' + i + '">';
+			html += '<div class="text-2xl mb-1">' + s.icon + '</div>';
+			html += '<div class="text-sm font-semibold text-gray-800 dark:text-gray-100">' + escapeHtml(s.name) + '</div>';
+			html += '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + escapeHtml(s.desc) + '</div>';
+			html += '</button>';
+		});
+		html += '</div>';
+		html += '<div id="focus-scene-player" class="mt-3" style="display:none">';
+		html += '<div class="rounded-xl overflow-hidden bg-black" style="aspect-ratio:16/9;max-height:360px">';
+		html += '<iframe id="focus-scene-iframe" class="w-full h-full" src="about:blank" allow="autoplay" allowfullscreen title="Ambient scene"></iframe>';
+		html += '</div>';
+		html += '<div class="flex flex-wrap items-center justify-between gap-2 mt-2">';
+		html += '<span id="focus-scene-name" class="text-sm font-medium text-gray-800 dark:text-gray-100">\u2014</span>';
+		html += '<div class="flex items-center gap-3 text-xs">';
+		html += '<label class="flex items-center gap-1 text-gray-600 dark:text-gray-300 cursor-pointer"><input type="checkbox" id="focus-piped-toggle" class="rounded border-gray-300 accent-primary"' + (focusPiped ? ' checked' : '') + '> Use Piped</label>';
+		html += '<a id="focus-scene-yt-link" href="#" target="_blank" rel="noopener" class="text-primary hover:underline">Open on YouTube \u2192</a>';
+		html += '<button type="button" id="focus-scene-close" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">\u2715 Close</button>';
+		html += '</div>';
+		html += '</div>';
+		html += '</div>';
+		html += '</div>';
+
+		html += '<div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-200">';
+		html += '\u{1F4A1} <strong>Tip:</strong> Play a radio station AND an ambient scene at the same time \u2014 the radio uses device audio, the scene uses YouTube, so they layer naturally for the perfect study vibe.';
+		html += '</div>';
+		html += '</div></section>';
+
+		// Live topic feed (Medium/TDS, Dev.to, Reddit, HN, freeCodeCamp) — per-topic sidebar-style block
 		html += '<section id="resource-live-trends" class="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-5 space-y-4">';
 		html += '<div class="flex flex-wrap items-center justify-between gap-2">';
 		html += '<div>';
 		html += '<h2 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100">Live topic feed</h2>';
-		html += '<p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Latest articles and posts about ' + escapeHtml(t.title || topicKey) + ' from Medium/TDS, Dev.to, and Reddit.</p>';
+		html += '<p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Latest articles and posts about ' + escapeHtml(t.title || topicKey) + ' from across the web.</p>';
 		html += '</div>';
 		html += '<button type="button" id="resource-live-refresh" class="text-[11px] sm:text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Refresh</button>';
 		html += '</div>';
-		html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">';
+		html += '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-sm">';
 
 		html += '<div class="space-y-1">';
 		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Medium / TDS</p>';
@@ -349,6 +445,18 @@
 		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Reddit</p>';
 		html += '<ul id="resource-live-reddit-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
 		html += '<p id="resource-live-reddit-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
+		html += '</div>';
+
+		html += '<div class="space-y-1">';
+		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Hacker News</p>';
+		html += '<ul id="resource-live-hn-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
+		html += '<p id="resource-live-hn-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
+		html += '</div>';
+
+		html += '<div class="space-y-1">';
+		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">freeCodeCamp</p>';
+		html += '<ul id="resource-live-fcc-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
+		html += '<p id="resource-live-fcc-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
 		html += '</div>';
 
 		html += '</div></section>';
@@ -449,6 +557,141 @@
 				});
 			});
 		});
+
+		// Focus & Ambiance panel: radio stations + ambient scenes
+		(function setupFocusPanel() {
+			var stationsGrid = root.querySelector('#focus-stations-grid');
+			var radioNow = root.querySelector('#focus-radio-now');
+			var radioName = root.querySelector('#focus-radio-name');
+			var radioToggle = root.querySelector('#focus-radio-toggle');
+			var radioVol = root.querySelector('#focus-radio-vol');
+			var scenesGrid = root.querySelector('#focus-scenes-grid');
+			var scenePlayer = root.querySelector('#focus-scene-player');
+			var sceneIframe = root.querySelector('#focus-scene-iframe');
+			var sceneName = root.querySelector('#focus-scene-name');
+			var sceneLink = root.querySelector('#focus-scene-yt-link');
+			var sceneClose = root.querySelector('#focus-scene-close');
+			var pipedCb = root.querySelector('#focus-piped-toggle');
+
+			function stopFocusRadio() {
+				if (focusAudio) { focusAudio.pause(); focusAudio.src = ''; }
+				focusPlayingIdx = -1;
+				if (radioNow) radioNow.style.display = 'none';
+				if (stationsGrid) stationsGrid.querySelectorAll('.focus-station-card').forEach(function (c) { c.classList.remove('focus-station-active'); });
+			}
+
+			function playStation(idx) {
+				var s = FOCUS_STATIONS[idx];
+				if (!s) return;
+				if (focusPlayingIdx === idx && focusAudio && !focusAudio.paused) {
+					stopFocusRadio();
+					return;
+				}
+				if (!focusAudio) {
+					focusAudio = new Audio();
+					focusAudio.addEventListener('error', function () {
+						if (radioName) radioName.textContent = 'Stream unavailable \u2014 try another';
+					});
+				}
+				focusAudio.src = s.url;
+				focusAudio.volume = (radioVol ? radioVol.value : 70) / 100;
+				focusAudio.play().catch(function () {});
+				focusPlayingIdx = idx;
+				if (radioName) radioName.textContent = s.icon + ' ' + s.name;
+				if (radioNow) radioNow.style.display = 'flex';
+				if (radioToggle) radioToggle.textContent = '\u23F8';
+				if (stationsGrid) {
+					stationsGrid.querySelectorAll('.focus-station-card').forEach(function (c, ci) {
+						c.classList.toggle('focus-station-active', ci === idx);
+					});
+				}
+			}
+
+			if (stationsGrid) {
+				stationsGrid.addEventListener('click', function (e) {
+					var card = e.target.closest('.focus-station-card');
+					if (!card) return;
+					var idx = parseInt(card.getAttribute('data-station-idx'), 10);
+					if (!isNaN(idx)) playStation(idx);
+				});
+			}
+
+			if (radioToggle) {
+				radioToggle.addEventListener('click', function () {
+					if (!focusAudio) return;
+					if (focusAudio.paused) {
+						focusAudio.play().catch(function () {});
+						radioToggle.textContent = '\u23F8';
+					} else {
+						focusAudio.pause();
+						radioToggle.textContent = '\u25B6';
+					}
+				});
+			}
+
+			if (radioVol) {
+				radioVol.addEventListener('input', function () {
+					if (focusAudio) focusAudio.volume = radioVol.value / 100;
+				});
+			}
+
+			var currentSceneIdx = -1;
+			function getSceneEmbedUrl(id) {
+				var base = focusPiped ? 'https://piped.video/embed/' : 'https://www.youtube-nocookie.com/embed/';
+				return base + id + '?autoplay=1&loop=1';
+			}
+
+			function loadScene(idx) {
+				var s = AMBIENT_SCENES[idx];
+				if (!s) return;
+				if (currentSceneIdx === idx && scenePlayer && scenePlayer.style.display !== 'none') {
+					if (sceneIframe) sceneIframe.src = 'about:blank';
+					if (scenePlayer) scenePlayer.style.display = 'none';
+					currentSceneIdx = -1;
+					if (scenesGrid) scenesGrid.querySelectorAll('.focus-scene-card').forEach(function (c) { c.classList.remove('focus-scene-active'); });
+					return;
+				}
+				currentSceneIdx = idx;
+				if (sceneIframe) sceneIframe.src = getSceneEmbedUrl(s.id);
+				if (sceneName) sceneName.textContent = s.icon + ' ' + s.name;
+				if (sceneLink) {
+					sceneLink.href = (focusPiped ? 'https://piped.video/watch?v=' : 'https://www.youtube.com/watch?v=') + s.id;
+					sceneLink.textContent = focusPiped ? 'Open on Piped \u2192' : 'Open on YouTube \u2192';
+				}
+				if (scenePlayer) scenePlayer.style.display = 'block';
+				if (scenesGrid) {
+					scenesGrid.querySelectorAll('.focus-scene-card').forEach(function (c, ci) {
+						c.classList.toggle('focus-scene-active', ci === idx);
+					});
+				}
+			}
+
+			if (scenesGrid) {
+				scenesGrid.addEventListener('click', function (e) {
+					var card = e.target.closest('.focus-scene-card');
+					if (!card) return;
+					var idx = parseInt(card.getAttribute('data-scene-idx'), 10);
+					if (!isNaN(idx)) loadScene(idx);
+				});
+			}
+
+			if (pipedCb) {
+				pipedCb.addEventListener('change', function () {
+					focusPiped = pipedCb.checked;
+					try { localStorage.setItem('resources_focus_piped', focusPiped ? '1' : '0'); } catch (e) { /* ignore */ }
+					if (currentSceneIdx >= 0) loadScene(currentSceneIdx);
+				});
+			}
+
+			if (sceneClose) {
+				sceneClose.addEventListener('click', function () {
+					if (sceneIframe) sceneIframe.src = 'about:blank';
+					if (scenePlayer) scenePlayer.style.display = 'none';
+					currentSceneIdx = -1;
+					if (scenesGrid) scenesGrid.querySelectorAll('.focus-scene-card').forEach(function (c) { c.classList.remove('focus-scene-active'); });
+				});
+			}
+		})();
 
 		// YouTube hero + queue layout with Videos / Playlists toggle
 		(function setupYouTubePanel(topic) {
@@ -1000,10 +1243,100 @@
 					});
 			}
 
+			function loadHackerNews(forceRefresh) {
+				var listEl = document.getElementById('resource-live-hn-list');
+				var statusEl = document.getElementById('resource-live-hn-status');
+				if (!listEl || !statusEl) return;
+
+				var tag = deriveTag();
+				if (!tag) {
+					statusEl.textContent = 'No HN tag configured.';
+					listEl.innerHTML = '';
+					return;
+				}
+				var cacheKey = cachePrefix + 'hn_' + tag.toLowerCase();
+				if (!forceRefresh && applyCache(cacheKey, listEl, statusEl)) return;
+
+				statusEl.textContent = 'Loading Hacker News\u2026';
+				listEl.innerHTML = '';
+				var apiUrl = 'https://hn.algolia.com/api/v1/search?query=' + encodeURIComponent(tag) + '&tags=story&hitsPerPage=5';
+
+				fetch(apiUrl)
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) {
+						var hits = (data && Array.isArray(data.hits)) ? data.hits : [];
+						if (!hits.length) {
+							statusEl.textContent = 'No recent HN stories for this topic.';
+							listEl.innerHTML = '';
+							writeCache(cacheKey, '', statusEl.textContent);
+							return;
+						}
+						var html = '';
+						hits.slice(0, 5).forEach(function (item) {
+							if (!item) return;
+							var title = escapeHtml(item.title || 'Story');
+							var url = item.url || ('https://news.ycombinator.com/item?id=' + item.objectID);
+							var points = item.points || 0;
+							html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + title + '</a>';
+							if (points) {
+								html += ' <span class="text-[11px] text-gray-500 dark:text-gray-500">\u00B7 ' + points + ' pts</span>';
+							}
+							html += '</li>';
+						});
+						listEl.innerHTML = html;
+						statusEl.textContent = 'Updated from Hacker News.';
+						writeCache(cacheKey, html, statusEl.textContent);
+					})
+					.catch(function () {
+						statusEl.textContent = 'Could not load HN right now.';
+					});
+			}
+
+			function loadFreeCodeCamp(forceRefresh) {
+				var listEl = document.getElementById('resource-live-fcc-list');
+				var statusEl = document.getElementById('resource-live-fcc-status');
+				if (!listEl || !statusEl) return;
+
+				var cacheKey = cachePrefix + 'fcc';
+				if (!forceRefresh && applyCache(cacheKey, listEl, statusEl)) return;
+
+				statusEl.textContent = 'Loading freeCodeCamp\u2026';
+				listEl.innerHTML = '';
+				var feedUrl = encodeURIComponent('https://www.freecodecamp.org/news/rss/');
+				var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + feedUrl + '&api_key=public&count=5';
+
+				fetch(apiUrl)
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) {
+						var items = (data && data.items) || [];
+						if (!items.length) {
+							statusEl.textContent = 'No recent fCC articles.';
+							listEl.innerHTML = '';
+							writeCache(cacheKey, '', statusEl.textContent);
+							return;
+						}
+						var html = '';
+						items.slice(0, 5).forEach(function (item) {
+							if (!item) return;
+							var title = escapeHtml(item.title || 'Article');
+							var url = item.link || item.url || '#';
+							html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + title + '</a></li>';
+						});
+						listEl.innerHTML = html;
+						statusEl.textContent = 'Updated from freeCodeCamp.';
+						writeCache(cacheKey, html, statusEl.textContent);
+					})
+					.catch(function () {
+						statusEl.textContent = 'Could not load fCC right now.';
+					});
+			}
+
 			function loadAll(forceRefresh) {
 				loadMedium(!!forceRefresh);
 				loadDevto(!!forceRefresh);
 				loadReddit(!!forceRefresh);
+				loadHackerNews(!!forceRefresh);
+				loadFreeCodeCamp(!!forceRefresh);
 			}
 
 			var refreshBtn = document.getElementById('resource-live-refresh');

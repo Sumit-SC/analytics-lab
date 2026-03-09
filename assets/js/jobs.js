@@ -35,18 +35,21 @@
 	];
 	var JOB_SITE_OPTIONS = [
 		{ id: 'remoteok', name: 'RemoteOK', default: true, aliases: ['remoteok'] },
-		{ id: 'remotive', name: 'Remotive', default: true, aliases: ['remotive'] },
+		{ id: 'remotive', name: 'Remotive', default: true, aliases: ['remotive', 'remotive_rss', 'remotive_data', 'remotive_ai_ml'] },
 		{ id: 'weworkremotely', name: 'WeWorkRemotely', default: true, aliases: ['weworkremotely'] },
-		{ id: 'jobscollider', name: 'Jobscollider', default: true, aliases: ['jobscollider'] },
+		{ id: 'jobscollider', name: 'Jobscollider', default: true, aliases: ['jobscollider', 'jobscollider_data'] },
 		{ id: 'wellfound', name: 'Wellfound', default: true, aliases: ['wellfound'] },
-		{ id: 'indeed', name: 'Indeed', default: true, aliases: ['indeed'] },
+		{ id: 'indeed', name: 'Indeed', default: true, aliases: ['indeed', 'indeed_rss'] },
 		{ id: 'linkedin', name: 'LinkedIn', default: true, aliases: ['linkedin'] },
+		{ id: 'hiring_cafe', name: 'hiring.cafe', default: true, aliases: ['hiring_cafe', 'hiringcafe'] },
+		{ id: 'arbeitnow', name: 'Arbeitnow', default: true, aliases: ['arbeitnow'] },
+		{ id: 'jobicy', name: 'Jobicy', default: true, aliases: ['jobicy'] },
+		{ id: 'workingnomads', name: 'Working Nomads', default: true, aliases: ['workingnomads'] },
 		{ id: 'naukri', name: 'Naukri', default: false, aliases: ['naukri'] },
 		{ id: 'himalayas', name: 'Himalayas', default: false, aliases: ['himalayas'] },
-		{ id: 'workingnomads', name: 'Working Nomads', default: false, aliases: ['workingnomads'] },
-		{ id: 'remote.co', name: 'Remote.co', default: false, aliases: ['remote.co', 'remoteco'] },
+		{ id: 'remote_co', name: 'Remote.co', default: false, aliases: ['remote.co', 'remoteco', 'remote_co'] },
 		{ id: 'jobspresso', name: 'Jobspresso', default: false, aliases: ['jobspresso'] },
-		{ id: 'authenticjobs', name: 'Authentic Jobs', default: false, aliases: ['authenticjobs', 'authentic_jobs'] },
+		{ id: 'authentic_jobs', name: 'Authentic Jobs', default: false, aliases: ['authenticjobs', 'authentic_jobs'] },
 		{ id: 'stackoverflow', name: 'Stack Overflow', default: false, aliases: ['stackoverflow', 'stack_overflow'] },
 		{ id: 'greenhouse', name: 'Greenhouse', default: false, aliases: ['greenhouse'] },
 		{ id: 'lever', name: 'Lever', default: false, aliases: ['lever'] },
@@ -167,6 +170,7 @@
 		setupVercelSearchSection();
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
+		setupSourcesPanel();
 		setupAdvancedFiltersToggle();
 		setupEventListeners();
 		if (!isMobileViewport()) {
@@ -203,8 +207,45 @@
 	}
 
 	// Setup Enhanced Form (JobSpy-style inputs)
+	function setupSourcesPanel() {
+		var container = document.getElementById('job-sites-multiselect-global');
+		if (!container) return;
+		container.innerHTML = '';
+		JOB_SITE_OPTIONS.forEach(function(site) {
+			var label = document.createElement('label');
+			label.className = 'flex items-center gap-1 cursor-pointer px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700';
+			var cb = document.createElement('input');
+			cb.type = 'checkbox';
+			cb.value = site.id;
+			cb.id = 'site-' + site.id;
+			cb.checked = site.default;
+			cb.className = 'w-4 h-4 rounded accent-[var(--color-primary,#667eea)]';
+			cb.addEventListener('change', function() { applyFilters(); });
+			var span = document.createElement('span');
+			span.textContent = site.name;
+			label.appendChild(cb);
+			label.appendChild(span);
+			container.appendChild(label);
+		});
+		var selectAll = document.getElementById('sources-select-all');
+		var selectDefaults = document.getElementById('sources-select-defaults');
+		var clearAll = document.getElementById('sources-clear-all');
+		if (selectAll) selectAll.addEventListener('click', function() {
+			JOB_SITE_OPTIONS.forEach(function(s) { var c = document.getElementById('site-' + s.id); if (c) c.checked = true; });
+			applyFilters();
+		});
+		if (selectDefaults) selectDefaults.addEventListener('click', function() {
+			JOB_SITE_OPTIONS.forEach(function(s) { var c = document.getElementById('site-' + s.id); if (c) c.checked = s.default; });
+			applyFilters();
+		});
+		if (clearAll) clearAll.addEventListener('click', function() {
+			JOB_SITE_OPTIONS.forEach(function(s) { var c = document.getElementById('site-' + s.id); if (c) c.checked = false; });
+			applyFilters();
+		});
+	}
+
 	function setupEnhancedForm() {
-		// Populate job sites multi-select
+		// Populate job sites multi-select (legacy in Railway config section)
 		var multiselect = document.getElementById('job-sites-multiselect');
 		if (multiselect) {
 			multiselect.innerHTML = '';
@@ -214,7 +255,7 @@
 				var checkbox = document.createElement('input');
 				checkbox.type = 'checkbox';
 				checkbox.value = site.id;
-				checkbox.id = 'site-' + site.id;
+				checkbox.id = 'site-legacy-' + site.id;
 				checkbox.checked = site.default;
 				checkbox.className = 'mr-2';
 				label.appendChild(checkbox);
@@ -307,12 +348,14 @@
 		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'railway');
 	}
 
-	// Railway: show search config. Vercel: show vercel-search-section, hide search config.
+	// Railway: show full search config. Vercel: show vercel-search-section + sources panel.
 	function applyBackendVisibility(backend) {
 		var searchConfig = document.getElementById('job-search-config-section');
 		var vercelSearch = document.getElementById('vercel-search-section');
+		var sourcesPanel = document.getElementById('job-sources-panel');
 		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'railway');
 		if (vercelSearch) vercelSearch.classList.toggle('hidden', backend !== 'vercel');
+		if (sourcesPanel) sourcesPanel.classList.toggle('hidden', false);
 	}
 
 	// Railway: disable form controls it doesn't use (q, days, limit only); show hint
@@ -346,12 +389,11 @@
 		setDisabled(countrySelect, countryLabel, isRailway, 'Optional for Railway');
 		setDisabled(jobTypeSelect, jobTypeLabel, isRailway, 'Optional for Railway');
 		if (jobSitesContainer) {
-			jobSitesContainer.classList.toggle('opacity-60', isRailway);
-			jobSitesContainer.classList.toggle('pointer-events-none', isRailway);
-			jobSitesContainer.setAttribute('title', isRailway ? 'Optional for Railway' : '');
-			if (jobSitesLabel) jobSitesLabel.classList.toggle('opacity-60', isRailway);
+			jobSitesContainer.classList.remove('opacity-60', 'pointer-events-none');
+			jobSitesContainer.setAttribute('title', 'Select which sources to fetch from');
+			if (jobSitesLabel) jobSitesLabel.classList.remove('opacity-60');
 			var siteInputs = jobSitesContainer.querySelectorAll('input[type="checkbox"]');
-			for (var i = 0; i < siteInputs.length; i++) siteInputs[i].disabled = isRailway;
+			for (var i = 0; i < siteInputs.length; i++) siteInputs[i].disabled = false;
 		}
 	}
 
@@ -908,12 +950,15 @@
 			});
 		}
 		
+		var sourcesParam = buildSourcesParam();
+		
 		// Railway API: Use /refresh (POST) and /jobs (GET) endpoints
 		if (isRailway) {
 			if (forceRefresh) {
 				// Railway: POST /refresh
 				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
 				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
+				if (sourcesParam) refreshUrl += '&sources=' + encodeURIComponent(sourcesParam);
 				
 				fetchWithTimeout(refreshUrl, { method: 'POST' }, 85000)
 					.then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }).catch(function () { return { ok: false, body: null }; }); })
@@ -953,6 +998,7 @@
 			var refreshUrl = proxyUrl
 				? (proxyUrl + '/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location))
 				: ('/api/jobs-refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&location=' + encodeURIComponent(location));
+			if (sourcesParam) refreshUrl += '&sources=' + encodeURIComponent(sourcesParam);
 
 			fetchWithTimeout(refreshUrl, {}, 25000)
 				.then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }).catch(function () { return { ok: false, body: null }; }); })
@@ -1241,6 +1287,8 @@
 	// Railway API: Fetch jobs from /refresh endpoint (scrapes fresh)
 	function fetchRailwayRefresh(proxyUrl, query, days, limit) {
 		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+		var sp = buildSourcesParam();
+		if (sp) refreshUrl += '&sources=' + encodeURIComponent(sp);
 		
 		fetchWithTimeout(refreshUrl, { method: 'POST' }, 85000)
 			.then(function (r) { return r.ok ? r.json() : null; })
@@ -1279,6 +1327,8 @@
 		if (rssjobsFeedUrl && rssjobsFeedUrl.trim().length > 0) {
 			apiUrl += '&rssjobs=' + encodeURIComponent(rssjobsFeedUrl.trim());
 		}
+		var sp = buildSourcesParam();
+		if (sp) apiUrl += '&sources=' + encodeURIComponent(sp);
 		
 		fetchWithTimeout(apiUrl, {}, 22000)
 			.then(function (r) { return r.ok ? r.json() : null; })
@@ -2341,6 +2391,25 @@
 			var cb = document.getElementById('site-' + site.id);
 			return !!(cb && cb.checked);
 		});
+	}
+
+	function getSelectedSourceIds() {
+		var ids = [];
+		JOB_SITE_OPTIONS.forEach(function (site) {
+			var cb = document.getElementById('site-' + site.id);
+			if (cb && cb.checked) ids.push(site.id);
+		});
+		return ids;
+	}
+
+	function buildSourcesParam() {
+		if (!hasAnySiteSelection()) return '';
+		var allChecked = JOB_SITE_OPTIONS.every(function (site) {
+			var cb = document.getElementById('site-' + site.id);
+			return !!(cb && cb.checked);
+		});
+		if (allChecked) return '';
+		return getSelectedSourceIds().join(',');
 	}
 
 	// Apply filters

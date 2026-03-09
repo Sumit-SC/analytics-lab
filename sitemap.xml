@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/</loc>
+    <loc>https://sumit-sc.github.io/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/index.html</loc>
+    <loc>https://sumit-sc.github.io/index.html</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/pages/playground.html</loc>
+    <loc>https://sumit-sc.github.io/pages/playground.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/pages/trends.html</loc>
+    <loc>https://sumit-sc.github.io/pages/trends.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/pages/resources.html</loc>
+    <loc>https://sumit-sc.github.io/pages/resources.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/pages/tools.html</loc>
+    <loc>https://sumit-sc.github.io/pages/tools.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/pages/jobs.html</loc>
+    <loc>https://sumit-sc.github.io/pages/jobs.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://YOUR_DEPLOYMENT_URL/pages/docs.html</loc>
+    <loc>https://sumit-sc.github.io/pages/docs.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

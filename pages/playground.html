@@ -21,8 +21,10 @@
 	<link rel="preconnect" href="https://en.wikipedia.org">
 	<link rel="preconnect" href="https://api.stackexchange.com">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script src="../assets/js/nav-data.js" defer></script>
+	<script src="../assets/js/nav-inject.js" defer></script>
 </head>
-<body class="page-playground bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased">
+<body class="page-playground bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="playground">
 	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
 		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
@@ -30,15 +32,8 @@
 				<div class="flex items-center gap-2">
 					<button type="button" id="sidebar-mobile-toggle" class="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Open Resources menu">&#9776; Resources</button>
 					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer"><span aria-hidden="true">&#9776;</span><span class="ml-1 text-sm font-medium">Menu</span></button>
-					<div class="nav-links-inline flex items-center gap-2">
-						<a href="../index.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Home</a>
-						<a href="./playground.html" class="text-sm font-semibold text-primary border-b-2 border-primary pb-1">Playground</a>
-						<a href="./trends.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Trends</a>
-						<a href="./resources.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Resources</a>
-						<a href="./tools.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Tools</a>
-						<a href="./jobs.html" class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary">Jobs</a>
-						<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
-					</div>
+				<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
+				<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
 					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" style="background-color: var(--color-primary);"></button>
 					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs material-elevation-1">🌙</button>
 				</div>
@@ -51,15 +46,9 @@
 			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
 			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
 		</div>
-		<nav class="nav-drawer-links">
-			<a href="../index.html">Home</a>
-			<a href="./playground.html" class="text-primary border-primary">Playground</a>
-			<a href="./trends.html">Trends</a>
-			<a href="./resources.html">Resources</a>
-			<a href="./tools.html">Tools</a>
-			<a href="./jobs.html">Jobs</a>
-			<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle Roadmap">Roadmap</button>
+		<nav class="nav-drawer-links" data-nav-inject="drawer">
 		</nav>
+		<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle Roadmap">Roadmap</button>
 	</div>
 
 	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
