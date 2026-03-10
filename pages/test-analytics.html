@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>System & API Test — Analytics, Vercel, Railway, Project APIs</title>
+    <script>
+        // Same config as jobs.html — edit here and in jobs.html when switching to Railway
+        // Vercel (default): window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+        // Railway: window.JOB_PROXY_URL = 'https://YOUR-APP.up.railway.app';
+        window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
+        window.OMDB_PROXY_URL = window.OMDB_PROXY_URL || 'https://playground-serveless.vercel.app';
+    </script>
     <style>
         body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; line-height: 1.6; }
         h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }

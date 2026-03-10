@@ -1352,7 +1352,9 @@
 
 		initResourcePopup();
 
-	fetch('./assets/resources.json')
+	// NOTE: resources.html lives under /pages/, resources.json under /assets/.
+	// Use ../ so this works both locally and on static hosts.
+	fetch('../assets/resources.json')
 		.then(function (res) {
 			return res.json();
 		})
