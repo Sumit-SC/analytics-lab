@@ -1331,32 +1331,65 @@
 	var bgEl = document.getElementById('home-quote-bg');
 	if (bgEl) setQuoteImage(null, 'Plutarch');
 
-	// Load local quote DB then show initial quote (v5 preferred, fallback to v4)
+	function mergeCategoriesV5WithV4(v5Categories, v4Categories) {
+		var merged = {};
+		if (v5Categories && typeof v5Categories === 'object') {
+			Object.keys(v5Categories).forEach(function (k) {
+				if (Array.isArray(v5Categories[k])) merged[k] = v5Categories[k].slice();
+			});
+		}
+		if (v4Categories && typeof v4Categories === 'object') {
+			Object.keys(v4Categories).forEach(function (k) {
+				if (!Array.isArray(v4Categories[k]) || !v4Categories[k].length) return;
+				if (!merged[k]) merged[k] = [];
+				// Append v4 quotes so library is richer while v5 hosts shared metadata/images
+				for (var i = 0; i < v4Categories[k].length; i++) {
+					var entry = v4Categories[k][i];
+					if (!entry) continue;
+					var a = entry.author && String(entry.author).trim();
+					if (!a || a.toLowerCase() === 'unknown') continue;
+					merged[k].push(entry);
+				}
+			});
+		}
+		return merged;
+	}
+
+	// Load local quote DB then show initial quote (v5 preferred and enriched with v4, fallback to v4-only)
 	fetch('./assets/data/quotes-db.v5.json')
 		.then(function (r) { return r.ok ? r.json() : null; })
 		.then(function (data5) {
 			if (data5 && data5.meta && data5.meta.version === 5 && data5.categories && data5.works) {
-				quotesDb = data5.categories;
 				quotesWorks = data5.works;
-				loadQuote(getCategory());
-				return;
+				var v5Categories = data5.categories;
+				// Also load v4 to pull in the larger quote library (Naruto, DBZ, extra kdrama, etc.)
+				return fetch('./assets/data/quotes-db.v4.json')
+					.then(function (r2) { return r2.ok ? r2.json() : null; })
+					.then(function (data4) {
+						var v4Categories = (data4 && typeof data4 === 'object') ? (data4.categories || data4) : null;
+						quotesDb = mergeCategoriesV5WithV4(v5Categories, v4Categories);
+						loadQuote(getCategory());
+					})
+					.catch(function () {
+						quotesDb = mergeCategoriesV5WithV4(v5Categories, null);
+						loadQuote(getCategory());
+					});
 			}
+			// If v5 is missing/invalid, fall back to v4-only
 			return fetch('./assets/data/quotes-db.v4.json')
 				.then(function (r2) { return r2.ok ? r2.json() : null; })
 				.then(function (data4) {
 					if (data4 && typeof data4 === 'object') {
 						var categories = data4.categories || data4;
-						quotesDb = categories;
-						quotesWorks = null;
-						// Exclude entries with author "Unknown"
-						Object.keys(quotesDb).forEach(function (key) {
-							if (Array.isArray(quotesDb[key])) {
-								quotesDb[key] = quotesDb[key].filter(function (entry) {
-									var a = entry && entry.author && String(entry.author).trim();
-									return a && a.toLowerCase() !== 'unknown';
-								});
-							}
+						quotesDb = {};
+						Object.keys(categories).forEach(function (key) {
+							if (!Array.isArray(categories[key])) return;
+							quotesDb[key] = categories[key].filter(function (entry) {
+								var a = entry && entry.author && String(entry.author).trim();
+								return a && a.toLowerCase() !== 'unknown';
+							});
 						});
+						quotesWorks = null;
 					}
 					loadQuote(getCategory());
 				});
