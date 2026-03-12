@@ -168,39 +168,20 @@
 	}
 	function searchSaavn(query, cb) {
 		if (!query || !query.trim()) { if (cb) cb([]); return; }
-		var url = JIOSAAVN_API_BASE + '/api/search/songs?query=' + encodeURIComponent(query.trim()) + '&limit=15';
-		fetch(url)
-			.then(function (r) { return r.json(); })
-			.then(function (data) {
-				var list = (data && data.data && data.data.results) ? data.data.results : [];
-				if (cb) cb(list);
-			})
-			.catch(function () { if (cb) cb([]); });
+		// Fallback: open official JioSaavn search in a new tab instead of relying on a fragile unofficial API.
+		try {
+			var url = 'https://www.jiosaavn.com/search/' + encodeURIComponent(query.trim());
+			window.open(url, '_blank', 'noopener');
+		} catch (e) {}
+		if (cb) cb([]);
 	}
 	function renderSaavnResults(list) {
 		var el = document.getElementById('global-saavn-list');
 		var wrap = document.getElementById('global-saavn-results');
 		if (!el || !wrap) return;
 		wrap.style.display = 'block';
-		if (!list || list.length === 0) {
-			el.innerHTML = '<li class="global-saavn-item global-saavn-empty">No results. Try another search.</li>';
-			return;
-		}
-		el.innerHTML = list.map(function (s, i) {
-			var name = (s.name || s.title || 'Track').replace(/</g, '&lt;');
-			var artists = (s.primaryArtists || s.singers || (s.artists && s.artists.primary && s.artists.primary.map(function (a) { return a.name; }).join(', ')) || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
-			var sub = artists ? ' — ' + artists : '';
-			return '<li class="global-saavn-item" data-i="' + i + '" role="button" tabindex="0"><span class="global-saavn-item-title">' + name + '</span><span class="global-saavn-item-artist">' + sub + '</span></li>';
-		}).join('');
-		el.querySelectorAll('.global-saavn-item[data-i]').forEach(function (item) {
-			item.addEventListener('click', function () {
-				var i = parseInt(item.getAttribute('data-i'), 10);
-				playSaavnAt(i);
-			});
-			item.addEventListener('keydown', function (e) {
-				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.click(); }
-			});
-		});
+		// With the external JioSaavn search fallback, just show a hint instead of interactive results.
+		el.innerHTML = '<li class="global-saavn-item global-saavn-empty">Opened JioSaavn search in a new tab. Use their player for playback.</li>';
 	}
 	function playSaavnAt(index) {
 		saavnQueue = getSaavnQueue();
