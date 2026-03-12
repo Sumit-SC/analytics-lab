@@ -14,6 +14,11 @@
 	var RESOURCE_VIEW_KEY = 'resources_view_mode';
 	var LAST_TOPIC_KEY = 'resources_last_topic';
 	var LAST_TOPIC_TITLE_KEY = 'resources_last_topic_title';
+	var RES_FAVORITES_KEY = 'resources_favorites_v1'; // url -> { url, name, type, topicKey, ts }
+	var RES_RECENT_KEY = 'resources_recent_v1'; // array of { url, name, type, topicKey, ts } (max 25)
+	var resAllTopics = null;
+	var resCurrentTopicKey = initialTopic;
+	var resCurrentTopicMeta = null;
 
 	var FOCUS_STATIONS = [
 		{ name: 'Groove Salad', url: 'https://ice2.somafm.com/groovesalad-128-mp3', icon: '\u{1F3B5}', desc: 'Downtempo ambient grooves' },
@@ -72,6 +77,7 @@
 		iframe.src = url;
 		overlay.classList.add('resource-detail-open');
 		overlay.setAttribute('aria-hidden', 'false');
+		recordRecentOpen(url, name, null);
 	}
 	function closeResourcePopup() {
 		var overlay = document.getElementById('resource-detail-overlay');
@@ -94,6 +100,297 @@
 		document.addEventListener('keydown', function (e) {
 			if (e.key === 'Escape') closeResourcePopup();
 		});
+	}
+
+	function getFavorites() {
+		try {
+			var raw = localStorage.getItem(RES_FAVORITES_KEY);
+			return raw ? JSON.parse(raw) : {};
+		} catch (e) { return {}; }
+	}
+	function setFavorites(map) {
+		try { localStorage.setItem(RES_FAVORITES_KEY, JSON.stringify(map || {})); } catch (e) {}
+	}
+	function toggleFavorite(item) {
+		if (!item || !item.url) return;
+		var map = getFavorites();
+		if (map[item.url]) delete map[item.url];
+		else map[item.url] = {
+			url: item.url,
+			name: item.name || item.url,
+			type: item.type || '',
+			topicKey: item.topicKey || '',
+			ts: Date.now()
+		};
+		setFavorites(map);
+	}
+	function isFavorite(url) {
+		if (!url) return false;
+		var map = getFavorites();
+		return !!map[url];
+	}
+	function getRecent() {
+		try {
+			var raw = localStorage.getItem(RES_RECENT_KEY);
+			var arr = raw ? JSON.parse(raw) : [];
+			return Array.isArray(arr) ? arr : [];
+		} catch (e) { return []; }
+	}
+	function setRecent(arr) {
+		try { localStorage.setItem(RES_RECENT_KEY, JSON.stringify(arr || [])); } catch (e) {}
+	}
+	function recordRecentOpen(url, name, type) {
+		try {
+			if (!url) return;
+			var arr = getRecent();
+			arr = arr.filter(function (x) { return x && x.url !== url; });
+			arr.unshift({
+				url: url,
+				name: name || url,
+				type: type || '',
+				topicKey: resCurrentTopicKey || '',
+				ts: Date.now()
+			});
+			if (arr.length > 25) arr = arr.slice(0, 25);
+			setRecent(arr);
+		} catch (e) {}
+	}
+
+	function normalizeTopicResources(topicKey, topic) {
+		// Flatten a topic into a list of normalized items for search.
+		var out = [];
+		function add(kind, list) {
+			if (!Array.isArray(list)) return;
+			list.forEach(function (r) {
+				if (!r || !r.url) return;
+				out.push({
+					topicKey: topicKey,
+					topicTitle: (topic && topic.title) ? topic.title : topicKey,
+					type: kind,
+					name: r.name || r.subreddit || r.url,
+					url: r.url || ('https://www.reddit.com/r/' + (r.subreddit || '') + '/')
+				});
+			});
+		}
+		add('youtube', topic && topic.youtube);
+		add('course', topic && topic.courses);
+		add('book', topic && topic.books);
+		add('blog', topic && topic.blogs);
+		add('github', topic && topic.github);
+		add('reddit', topic && topic.reddit);
+		add('path', topic && (topic.paths || []).map(function (p) { return { name: p, url: '#path' }; }));
+		return out;
+	}
+
+	function buildGlobalIndex(topics) {
+		var keys = Object.keys(topics || {});
+		var items = [];
+		keys.forEach(function (k) {
+			var t = topics[k];
+			items = items.concat(normalizeTopicResources(k, t));
+		});
+		return items;
+	}
+
+	function typeLabel(t) {
+		if (t === 'youtube') return 'Video';
+		if (t === 'course') return 'Course';
+		if (t === 'book') return 'Book/Docs';
+		if (t === 'blog') return 'Blog';
+		if (t === 'github') return 'GitHub';
+		if (t === 'reddit') return 'Reddit';
+		return t || 'Resource';
+	}
+
+	function renderSearchAndInsights(topicKey, topics, topicMeta) {
+		var host = document.getElementById('resources-search-wrap');
+		if (!host) return;
+
+		var favoritesCount = Object.keys(getFavorites() || {}).length;
+		var recentCount = getRecent().length;
+
+		var rolePaths = {
+			'data-analyst': ['excel', 'sql', 'stats', 'data-analytics', 'power-bi', 'tableau', 'python', 'product-analytics', 'ab-testing'],
+			'data-scientist': ['python', 'stats', 'math', 'data-science', 'machine-learning', 'deep-learning', 'nlp', 'llms'],
+			'data-engineer': ['python', 'sql', 'data-engineering', 'databases', 'cloud-data', 'airflow', 'dbt', 'spark', 'streaming'],
+			'ml-engineer': ['python', 'machine-learning', 'mlops', 'deep-learning', 'llms', 'fastapi', 'docker', 'kubernetes']
+		};
+
+		function pill(topicId) {
+			var meta = topics && topics[topicId];
+			var label = meta && meta.title ? meta.title : topicId;
+			return '<button type="button" class="res-pill px-2 py-1 rounded-full border border-gray-300 dark:border-gray-600 text-xs hover:bg-gray-100 dark:hover:bg-gray-800" data-topic-jump="' + escapeHtml(topicId) + '">' + escapeHtml(label) + '</button>';
+		}
+
+		host.innerHTML =
+			'<div class="second-brain-card p-4 sm:p-5 mb-5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white/70 dark:bg-gray-900/30">' +
+			'<div class="flex flex-wrap items-start justify-between gap-3">' +
+			'<div class="min-w-0">' +
+			'<p class="home-section-title mb-1">Search</p>' +
+			'<p class="text-xs text-gray-500 dark:text-gray-400">Search this topic or all topics. Save favorites and revisit recently opened links.</p>' +
+			'</div>' +
+			'<div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">' +
+			'<span>★ ' + favoritesCount + ' saved</span>' +
+			'<span>·</span>' +
+			'<span>⏱ ' + recentCount + ' recent</span>' +
+			'</div>' +
+			'</div>' +
+			'<div class="mt-3 flex flex-wrap gap-2 items-center">' +
+			'<input id="resources-search-input" class="flex-1 min-w-[200px] rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-800 dark:text-gray-200" placeholder="Search resources… e.g. joins, window functions, pandas" aria-label="Search resources">' +
+			'<select id="resources-search-scope" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-2 text-sm text-gray-800 dark:text-gray-200" aria-label="Search scope">' +
+			'<option value="topic" selected>This topic</option>' +
+			'<option value="all">All topics</option>' +
+			'<option value="saved">Saved</option>' +
+			'<option value="recent">Recent</option>' +
+			'</select>' +
+			'<select id="resources-filter-type" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-2 text-sm text-gray-800 dark:text-gray-200" aria-label="Filter type">' +
+			'<option value="all" selected>All types</option>' +
+			'<option value="youtube">Videos</option>' +
+			'<option value="course">Courses</option>' +
+			'<option value="book">Books/Docs</option>' +
+			'<option value="blog">Blogs</option>' +
+			'<option value="github">GitHub</option>' +
+			'<option value="reddit">Reddit</option>' +
+			'</select>' +
+			'</div>' +
+			'<div id="resources-search-results" class="mt-3 hidden"></div>' +
+			'<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">' +
+			'<p class="home-section-title mb-2">Learning path (quick)</p>' +
+			'<div class="flex flex-wrap items-center gap-2">' +
+			'<select id="resources-role-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-2 text-sm text-gray-800 dark:text-gray-200" aria-label="Role">' +
+			'<option value="data-analyst">Data Analyst</option>' +
+			'<option value="data-scientist">Data Scientist</option>' +
+			'<option value="data-engineer">Data Engineer</option>' +
+			'<option value="ml-engineer">ML Engineer</option>' +
+			'</select>' +
+			'<div id="resources-role-path" class="flex flex-wrap gap-2"></div>' +
+			'</div>' +
+			'<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Tip: click a pill to jump topics. Your progress can be tracked via the Roadmap panel.</p>' +
+			'</div>' +
+			'</div>';
+
+		var roleSelect = document.getElementById('resources-role-select');
+		var rolePath = document.getElementById('resources-role-path');
+		function renderRole(roleKey) {
+			var seq = rolePaths[roleKey] || [];
+			if (!rolePath) return;
+			rolePath.innerHTML = seq.map(pill).join('');
+			// highlight current
+			rolePath.querySelectorAll('[data-topic-jump]').forEach(function (b) {
+				b.classList.toggle('border-primary', b.getAttribute('data-topic-jump') === topicKey);
+				b.classList.toggle('text-primary', b.getAttribute('data-topic-jump') === topicKey);
+			});
+		}
+		if (roleSelect) {
+			roleSelect.addEventListener('change', function () { renderRole(roleSelect.value); });
+			renderRole(roleSelect.value);
+		}
+		if (rolePath) {
+			rolePath.addEventListener('click', function (e) {
+				var b = e.target.closest('[data-topic-jump]');
+				if (!b) return;
+				var next = b.getAttribute('data-topic-jump');
+				if (!next) return;
+				try {
+					updateUrl(next);
+				} catch (err) {}
+				renderTopic(next, topics);
+			});
+		}
+
+		// --- Search behavior ---
+		var input = document.getElementById('resources-search-input');
+		var scope = document.getElementById('resources-search-scope');
+		var type = document.getElementById('resources-filter-type');
+		var results = document.getElementById('resources-search-results');
+		var globalIndex = buildGlobalIndex(topics);
+
+		function matches(item, q, typeFilter) {
+			if (typeFilter && typeFilter !== 'all' && item.type !== typeFilter) return false;
+			if (!q) return true;
+			var hay = (item.name + ' ' + item.url + ' ' + item.topicTitle + ' ' + item.topicKey).toLowerCase();
+			return hay.indexOf(q) !== -1;
+		}
+
+		function getScopeItems(scopeVal) {
+			if (scopeVal === 'all') return globalIndex;
+			if (scopeVal === 'topic') return normalizeTopicResources(topicKey, topicMeta);
+			if (scopeVal === 'saved') {
+				var map = getFavorites();
+				return Object.keys(map).map(function (k) { return map[k]; }).map(function (x) {
+					return { topicKey: x.topicKey || '', topicTitle: (topics[x.topicKey] && topics[x.topicKey].title) ? topics[x.topicKey].title : (x.topicKey || ''), type: x.type || '', name: x.name || '', url: x.url };
+				});
+			}
+			if (scopeVal === 'recent') {
+				return getRecent().map(function (x) {
+					return { topicKey: x.topicKey || '', topicTitle: (topics[x.topicKey] && topics[x.topicKey].title) ? topics[x.topicKey].title : (x.topicKey || ''), type: x.type || '', name: x.name || '', url: x.url };
+				});
+			}
+			return globalIndex;
+		}
+
+		function renderResults(list, q) {
+			if (!results) return;
+			if (!q && (scope.value === 'topic')) { results.classList.add('hidden'); results.innerHTML = ''; return; }
+			results.classList.remove('hidden');
+			if (!list.length) {
+				results.innerHTML = '<p class="text-xs text-gray-500 dark:text-gray-400">No matches.</p>';
+				return;
+			}
+			var html = '<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">' +
+				'<div class="px-3 py-2 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">' +
+				'Showing <strong>' + list.length + '</strong> result(s)</div><ul class="divide-y divide-gray-200 dark:divide-gray-800">';
+			list.slice(0, 30).forEach(function (it) {
+				var fav = isFavorite(it.url);
+				html += '<li class="p-3 flex items-start gap-3">' +
+					'<button type="button" class="res-open flex-1 min-w-0 text-left" data-url="' + escapeHtml(it.url) + '" data-name="' + escapeHtml(it.name || '') + '" data-type="' + escapeHtml(it.type || '') + '">' +
+					'<div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + escapeHtml(it.name || it.url) + '</div>' +
+					'<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">' + escapeHtml(typeLabel(it.type)) + (it.topicTitle ? (' · ' + escapeHtml(it.topicTitle)) : '') + '</div>' +
+					'</button>' +
+					'<button type="button" class="res-fav px-2 py-1 rounded border border-gray-300 dark:border-gray-700 text-xs font-semibold ' + (fav ? 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20' : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-900') + '" data-url="' + escapeHtml(it.url) + '" data-name="' + escapeHtml(it.name || '') + '" data-type="' + escapeHtml(it.type || '') + '" title="Save">' +
+					(fav ? '★' : '☆') + '</button>' +
+					'</li>';
+			});
+			html += '</ul></div>';
+			results.innerHTML = html;
+
+			results.querySelectorAll('.res-open').forEach(function (btn) {
+				btn.addEventListener('click', function () {
+					var url = btn.getAttribute('data-url');
+					var name = btn.getAttribute('data-name') || '';
+					var tp = btn.getAttribute('data-type') || '';
+					if (url) {
+						recordRecentOpen(url, name, tp);
+						openResourcePopup(url, name);
+					}
+				});
+			});
+			results.querySelectorAll('.res-fav').forEach(function (btn) {
+				btn.addEventListener('click', function (e) {
+					e.preventDefault();
+					var url = btn.getAttribute('data-url');
+					var name = btn.getAttribute('data-name') || '';
+					var tp = btn.getAttribute('data-type') || '';
+					toggleFavorite({ url: url, name: name, type: tp, topicKey: topicKey });
+					// re-render in place
+					runSearch();
+				});
+			});
+		}
+
+		function runSearch() {
+			var q = (input && input.value) ? input.value.trim().toLowerCase() : '';
+			var scopeVal = scope ? scope.value : 'topic';
+			var typeVal = type ? type.value : 'all';
+			var base = getScopeItems(scopeVal);
+			var filtered = base.filter(function (it) { return matches(it, q, typeVal); });
+			renderResults(filtered, q);
+		}
+
+		if (input) input.addEventListener('input', runSearch);
+		if (scope) scope.addEventListener('change', runSearch);
+		if (type) type.addEventListener('change', runSearch);
+		runSearch();
 	}
 
 	function isValidYouTubeVideoId(id) {
@@ -124,6 +421,8 @@
 
 	function renderTopic(topicKey, topics) {
 		var t = topics[topicKey];
+		resCurrentTopicKey = topicKey;
+		resCurrentTopicMeta = t;
 		if (!t) {
 			root.classList.add('hidden');
 			notFound.classList.remove('hidden');
@@ -148,6 +447,7 @@
 		var videosCount = (t.youtube && t.youtube.length) || 0;
 
 		var html = '';
+		html += '<div id="resources-search-wrap"></div>';
 		html += '<div class="mb-4 flex flex-wrap items-center justify-between gap-3">';
 		html += '  <a href="./playground.html" class="text-primary hover:underline text-sm">← Back to Playground</a>';
 		html += '  <div class="flex items-center gap-2 text-sm">';
@@ -463,6 +763,7 @@
 
 		html += '</div>';
 		root.innerHTML = html;
+		renderSearchAndInsights(topicKey, topics, t);
 
 		// Resource cards: open in same-page popup (Notion/Medium-style)
 		root.querySelectorAll('.resource-card-with-thumb[data-resource-url]').forEach(function (btn) {
@@ -1368,6 +1669,7 @@
 				if (!data || typeof data !== 'object') {
 					throw new Error('Invalid resources data');
 				}
+				resAllTopics = data;
 				var topicKey = initialTopic;
 				if (!data[topicKey]) {
 					var keys = Object.keys(data);
