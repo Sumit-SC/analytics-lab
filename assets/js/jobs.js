@@ -54,7 +54,9 @@
 		{ id: 'stackoverflow', name: 'Stack Overflow', default: false, aliases: ['stackoverflow', 'stack_overflow'] },
 		{ id: 'greenhouse', name: 'Greenhouse', default: false, aliases: ['greenhouse'] },
 		{ id: 'lever', name: 'Lever', default: false, aliases: ['lever'] },
-		{ id: 'hn_jobs', name: 'HN Jobs', default: false, aliases: ['hn_jobs', 'hnjobs'] }
+		{ id: 'hn_jobs', name: 'HN Jobs', default: false, aliases: ['hn_jobs', 'hnjobs'] },
+		// TrueUp doesn't expose a stable public API we can call from the browser; keep as an optional backend source name.
+		{ id: 'trueup', name: 'TrueUp', default: false, aliases: ['trueup'] }
 	];
 
 	// Skillset keywords for matching (data science domain)
@@ -174,6 +176,7 @@
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
 		setupSourcesPanel();
+		setupJobsDiffModal();
 		setupAdvancedFiltersToggle();
 		setupEventListeners();
 		if (!isMobileViewport()) {
@@ -906,6 +909,90 @@
 
 	// Browser-side temporary jobs DB (localStorage cache)
 	var BROWSER_JOBS_CACHE_KEY = 'analytics_lab_jobs_cache_v1';
+	// Snapshot diff cache (per query + selected sources, in this browser)
+	var JOBS_DIFF_KEY = 'analytics_lab_jobs_diff_v1';
+	var JOBS_LAST_SNAPSHOT_KEY = 'analytics_lab_jobs_last_snapshot_v1';
+
+	function safeLower(s) { return String(s || '').trim().toLowerCase(); }
+
+	function normalizeJobKey(job) {
+		if (!job) return '';
+		var url = String(job.url || '').trim();
+		if (url) return 'url:' + url;
+		return 'f:' + [job.source, job.title, job.company, job.location].map(safeLower).join('|');
+	}
+
+	function getSnapshotContext() {
+		try {
+			var urlParams = new URLSearchParams(window.location.search);
+			var q = (document.getElementById('job-search-input') && document.getElementById('job-search-input').value) || (urlParams.get('q') || '');
+			var backend = (document.getElementById('api-backend-railway') && document.getElementById('api-backend-railway').checked) ? 'railway' : 'vercel';
+			var sources = buildSourcesParam() || '';
+			return { backend: backend, query: String(q || '').trim(), sources: String(sources || '').trim() };
+		} catch (e) {
+			return { backend: 'unknown', query: '', sources: '' };
+		}
+	}
+
+	function writeLastSnapshot(ctx, jobs) {
+		try {
+			var payload = { ts: Date.now(), ctx: ctx || {}, keys: (jobs || []).map(normalizeJobKey).filter(Boolean) };
+			window.localStorage.setItem(JOBS_LAST_SNAPSHOT_KEY, JSON.stringify(payload));
+		} catch (e) {}
+	}
+
+	function readLastSnapshot() {
+		try {
+			var raw = window.localStorage.getItem(JOBS_LAST_SNAPSHOT_KEY);
+			if (!raw) return null;
+			var data = JSON.parse(raw);
+			if (!data || !Array.isArray(data.keys)) return null;
+			return data;
+		} catch (e) { return null; }
+	}
+
+	function computeAndRenderDiff(ctx, jobs) {
+		if (typeof window === 'undefined' || !window.localStorage) return;
+		var last = readLastSnapshot();
+		var curKeys = (jobs || []).map(normalizeJobKey).filter(Boolean);
+		var curSet = new Set(curKeys);
+		var lastKeys = (last && Array.isArray(last.keys)) ? last.keys : [];
+		var lastSet = new Set(lastKeys);
+
+		var sameCtx = !!(last && last.ctx &&
+			String(last.ctx.backend || '') === String(ctx.backend || '') &&
+			String(last.ctx.query || '') === String(ctx.query || '') &&
+			String(last.ctx.sources || '') === String(ctx.sources || ''));
+
+		var added = [];
+		var removed = [];
+		if (sameCtx) {
+			curKeys.forEach(function (k) { if (!lastSet.has(k)) added.push(k); });
+			lastKeys.forEach(function (k) { if (!curSet.has(k)) removed.push(k); });
+		}
+
+		var lookup = {};
+		(jobs || []).forEach(function (j) {
+			var k = normalizeJobKey(j);
+			if (k && !lookup[k]) lookup[k] = { title: j.title, company: j.company, source: j.source, url: j.url, location: j.location };
+		});
+		try {
+			window.localStorage.setItem(JOBS_DIFF_KEY, JSON.stringify({
+				ts: Date.now(),
+				ctx: ctx,
+				added: added.slice(0, 200),
+				removed: removed.slice(0, 200),
+				lookup: lookup
+			}));
+		} catch (e) {}
+
+		var addedEl = document.getElementById('job-diff-added');
+		var removedEl = document.getElementById('job-diff-removed');
+		if (addedEl) addedEl.textContent = String(added.length);
+		if (removedEl) removedEl.textContent = String(removed.length);
+		var btn = document.getElementById('job-diff-view-btn');
+		if (btn) btn.classList.toggle('hidden', !(sameCtx && (added.length || removed.length)));
+	}
 
 	function saveJobsToBrowserCache(payload) {
 		try {
@@ -1515,6 +1602,13 @@
 		});
 
 		updateSourceFilterDropdown();
+		
+		// Added/removed since last refresh (per query + selected sources)
+		try {
+			var ctx = getSnapshotContext();
+			computeAndRenderDiff(ctx, allJobs);
+			writeLastSnapshot(ctx, allJobs);
+		} catch (e) {}
 		
 		applyFilters();
 		var loadingEl = document.getElementById('job-loading');
@@ -3020,6 +3114,93 @@
 		var div = document.createElement('div');
 		div.textContent = text;
 		return div.innerHTML;
+	}
+
+	// Changes modal: added/removed since last refresh (local browser only)
+	function setupJobsDiffModal() {
+		var modal = document.getElementById('job-diff-modal');
+		var openBtn = document.getElementById('job-diff-view-btn');
+		var closeBtn = document.getElementById('job-diff-close');
+		var backdrop = document.getElementById('job-diff-backdrop');
+		var addedList = document.getElementById('job-diff-added-list');
+		var removedList = document.getElementById('job-diff-removed-list');
+		var metaEl = document.getElementById('job-diff-meta');
+		var clearBtn = document.getElementById('job-diff-clear');
+		if (!modal || !openBtn) return;
+
+		function readDiff() {
+			try {
+				var raw = window.localStorage.getItem(JOBS_DIFF_KEY);
+				return raw ? JSON.parse(raw) : null;
+			} catch (e) { return null; }
+		}
+
+		function renderList(keys, lookup) {
+			if (!keys || !keys.length) return '<li class="text-xs text-gray-500 dark:text-gray-400">None</li>';
+			return keys.slice(0, 100).map(function (k) {
+				var j = lookup && lookup[k] ? lookup[k] : null;
+				var title = j && j.title ? j.title : k;
+				var company = j && j.company ? j.company : '';
+				var source = j && j.source ? j.source : '';
+				var loc = j && j.location ? j.location : '';
+				var url = j && j.url ? j.url : '';
+				var meta = [company, loc, source].filter(Boolean).join(' · ');
+				var body = '<div class="min-w-0">' +
+					'<div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + escapeHtml(title) + '</div>' +
+					(meta ? '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">' + escapeHtml(meta) + '</div>' : '') +
+					'</div>';
+				if (url) {
+					return '<li class="border-b border-gray-200 dark:border-gray-800 pb-2 last:border-b-0">' +
+						'<a class="block hover:underline text-primary" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + body + '</a>' +
+					'</li>';
+				}
+				return '<li class="border-b border-gray-200 dark:border-gray-800 pb-2 last:border-b-0">' + body + '</li>';
+			}).join('');
+		}
+
+		function open() {
+			var d = readDiff();
+			var added = d && Array.isArray(d.added) ? d.added : [];
+			var removed = d && Array.isArray(d.removed) ? d.removed : [];
+			var lookup = d && d.lookup ? d.lookup : {};
+			if (addedList) addedList.innerHTML = renderList(added, lookup);
+			if (removedList) removedList.innerHTML = renderList(removed, lookup);
+			if (metaEl) {
+				var when = d && d.ts ? new Date(d.ts).toLocaleString() : '';
+				var ctx = d && d.ctx ? d.ctx : null;
+				var ctxText = ctx ? ('Query: ' + (ctx.query || '—') + ' · Sources: ' + (ctx.sources || 'defaults') + ' · Backend: ' + (ctx.backend || '—')) : '';
+				metaEl.textContent = (when ? ('Computed: ' + when) : '—') + (ctxText ? (' · ' + ctxText) : '');
+			}
+			modal.classList.remove('hidden');
+			modal.setAttribute('aria-hidden', 'false');
+		}
+
+		function close() {
+			modal.classList.add('hidden');
+			modal.setAttribute('aria-hidden', 'true');
+		}
+
+		openBtn.addEventListener('click', open);
+		if (closeBtn) closeBtn.addEventListener('click', close);
+		if (backdrop) backdrop.addEventListener('click', close);
+		document.addEventListener('keydown', function (e) {
+			if (modal.classList.contains('hidden')) return;
+			if (e.key === 'Escape') close();
+		});
+		if (clearBtn) {
+			clearBtn.addEventListener('click', function () {
+				try {
+					window.localStorage.removeItem(JOBS_LAST_SNAPSHOT_KEY);
+					window.localStorage.removeItem(JOBS_DIFF_KEY);
+				} catch (e) {}
+				close();
+				var a = document.getElementById('job-diff-added');
+				var r = document.getElementById('job-diff-removed');
+				if (a) a.textContent = '0';
+				if (r) r.textContent = '0';
+				openBtn.classList.add('hidden');
+			});
+		}
 	}
 
 	// Initialize on DOM ready
