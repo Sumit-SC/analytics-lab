@@ -20,10 +20,10 @@
 		// Jobs API: Supports both Vercel and Railway
 		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
 		// Railway: Uses /jobs (cached) and /refresh (POST, scrapes fresh)
-		// To use Railway, change to: window.JOB_PROXY_URL = 'https://job-search-api-production-5d5d.up.railway.app';
-		window.JOB_PROXY_URL = 'https://jobs.colab.indevs.in';
-		// Same-origin: if analytics-lab is served from same Vercel app with api/, use:
-		// window.JOB_PROXY_URL = '';
+		// Default (Vercel): window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+		// To use Railway: window.JOB_PROXY_URL = 'https://YOUR-APP.up.railway.app';
+		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
+		window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
 	</script>
 	<style>
 		.job-card {
@@ -457,8 +457,8 @@
 						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Days old (max)</label>
 						<select id="vercel-search-days" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
 							<option value="1">1</option>
-							<option value="3" selected>3</option>
-							<option value="7">7</option>
+							<option value="3">3</option>
+							<option value="7" selected>7</option>
 							<option value="14">14</option>
 							<option value="30">30</option>
 						</select>
@@ -503,13 +503,14 @@
 					<!-- Search Term -->
 					<div class="md:col-span-2 lg:col-span-1">
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🔎 Search Term</label>
-						<input type="text" id="job-search-input" value="data analyst" placeholder="e.g., data analyst, software engineer" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+						<input type="text" id="job-search-input" value="analyst" placeholder="e.g., analyst, data analyst, product analyst" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
 					</div>
 					
 					<!-- Location -->
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">📍 Location</label>
-						<input type="text" id="job-location-input" value="Remote" placeholder="e.g., Remote, San Francisco CA" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+						<input type="text" id="job-location-input" value="Remote" list="job-location-suggestions" placeholder="e.g., Remote, Pune, Mumbai" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+						<datalist id="job-location-suggestions"></datalist>
 					</div>
 					
 					<!-- Country -->
@@ -540,11 +541,24 @@
 					<!-- Days Old Slider -->
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-							⏰ Days old (max): <span class="text-primary font-semibold" id="days-old-display">3</span>
+							⏰ Days old (max): <span class="text-primary font-semibold" id="days-old-display">7</span>
 						</label>
 						<div class="flex items-center gap-3">
-							<input type="range" id="days-old-slider" min="1" max="30" step="1" value="3" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
+							<input type="range" id="days-old-slider" min="1" max="30" step="1" value="7" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
 							<span class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">1-30</span>
+						</div>
+					</div>
+
+					<!-- YOE filter (Railway supports server-side; Vercel ignores, UI filters locally where possible) -->
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+							🎯 Experience (YOE)
+						</label>
+						<div class="flex items-center gap-3">
+							<input type="number" id="job-yoe-min" min="0" max="20" value="1" class="w-20 px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" aria-label="Minimum years of experience">
+							<span class="text-xs text-gray-500 dark:text-gray-400">to</span>
+							<input type="number" id="job-yoe-max" min="0" max="20" value="3" class="w-20 px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" aria-label="Maximum years of experience">
+							<span class="text-xs text-gray-500 dark:text-gray-400 flex-1">Default: 1–3</span>
 						</div>
 					</div>
 					
@@ -571,6 +585,10 @@
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input type="checkbox" id="job-remote-only" checked class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
 						<span class="text-sm text-gray-700 dark:text-gray-300">🏠 Remote jobs only</span>
+					</label>
+					<label class="flex items-center gap-2 cursor-pointer" title="Enables slower Playwright-based sources like Naukri.">
+						<input type="checkbox" id="job-enable-headless" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+						<span class="text-sm text-gray-700 dark:text-gray-300">🧠 Headless scrapers (slow)</span>
 					</label>
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input type="checkbox" id="job-linkedin-description" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
@@ -633,6 +651,7 @@
 					<span id="job-stats-total">Loading jobs...</span>
 					<span id="job-stats-matched">—</span>
 					<span id="job-stats-applied">—</span>
+					<span id="job-stats-updated" class="text-xs text-gray-500 dark:text-gray-500">—</span>
 				</div>
 				<div id="job-stats-sources" class="flex flex-wrap items-center gap-2 text-xs"></div>
 			</div>
@@ -716,6 +735,7 @@
 							<option value="rejected">Rejected</option>
 						</select>
 					</label>
+					<button type="button" id="planner-export-backup" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800" title="Exports planner + application statuses (recommended)">Backup JSON</button>
 					<button type="button" id="planner-export-json" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export JSON</button>
 					<button type="button" id="planner-export-csv" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export CSV</button>
 				</div>
@@ -954,6 +974,7 @@
 		})();
 	</script>
 	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/global-widgets.js" defer></script>
 	<script src="../assets/js/sidebar.js" defer></script>
 	<script src="../assets/js/assistant.js" defer></script>
 	<script src="../assets/js/jobs.js" defer></script>

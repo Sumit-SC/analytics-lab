@@ -5,6 +5,10 @@
 (function () {
 	'use strict';
 
+	// Prevent double-init if script is included + lazy-loaded
+	if (typeof window !== 'undefined' && window.__standaloneGlobalWidgetsLoaded) return;
+	if (typeof window !== 'undefined') window.__standaloneGlobalWidgetsLoaded = true;
+
 	var QUEUE_KEY = 'standalone_music_queue';
 	var CURRENT_KEY = 'standalone_music_current';
 	var PANEL_OPEN_KEY = 'standalone_yt_panel_open';
@@ -16,7 +20,9 @@
 	var ytPlayer = null;
 	var ytFallbackIframe = null; // when YT IFrame API fails or is blocked
 	var playerReady = false;
-	var JIOSAAVN_API_BASE = 'https://saavn.sumit.co';
+	var JIOSAAVN_API_BASE = (typeof window !== 'undefined' && window.JIOSAAVN_API_BASE)
+		? String(window.JIOSAAVN_API_BASE).replace(/\/$/, '')
+		: 'https://saavn.sumit.co';
 	var saavnAudio = null;
 	var saavnQueue = [];
 	var saavnCurrentIndex = 0;

@@ -3,6 +3,7 @@
 
 	// Primary roles and locations (single source of truth for UI + rssjobs.app). Used by Role/Location dropdowns and API query.
 	var PRIMARY_ROLES = [
+		{ label: 'Analyst (any)', query: 'analyst' },
 		{ label: 'Data Analyst', query: 'data analyst' },
 		{ label: 'Senior Data Analyst', query: 'senior data analyst' },
 		{ label: 'Business Analyst', query: 'business analyst' },
@@ -147,7 +148,9 @@
 			date: item.date || new Date().toISOString(),
 			dateFormatted: item.dateFormatted || item.date_formatted || '',
 			postedAgo: item.postedAgo || item.posted_ago || '',
-			matchScore: item.matchScore != null ? item.matchScore : (item.match_score != null ? item.match_score : 0)
+			matchScore: item.matchScore != null ? item.matchScore : (item.match_score != null ? item.match_score : 0),
+			yoeMin: item.yoeMin != null ? item.yoeMin : (item.yoe_min != null ? item.yoe_min : null),
+			yoeMax: item.yoeMax != null ? item.yoeMax : (item.yoe_max != null ? item.yoe_max : null)
 		};
 	}
 
@@ -245,6 +248,19 @@
 	}
 
 	function setupEnhancedForm() {
+		// Location suggestions (Railway config uses a text input)
+		var locationDatalist = document.getElementById('job-location-suggestions');
+		if (locationDatalist) {
+			locationDatalist.innerHTML = '';
+			PRIMARY_LOCATIONS.forEach(function (loc) {
+				var opt = document.createElement('option');
+				// Use the human-friendly label as the visible suggestion text
+				opt.value = loc.label;
+				opt.setAttribute('data-value', loc.value);
+				locationDatalist.appendChild(opt);
+			});
+		}
+
 		// Populate job sites multi-select (legacy in Railway config section)
 		var multiselect = document.getElementById('job-sites-multiselect');
 		if (multiselect) {
@@ -288,16 +304,20 @@
 		var clearBtn = document.getElementById('job-clear-filters-btn');
 		if (clearBtn) {
 			clearBtn.addEventListener('click', function() {
-				document.getElementById('job-search-input').value = 'data analyst';
+				document.getElementById('job-search-input').value = 'analyst';
 				document.getElementById('job-location-input').value = 'Remote';
 				document.getElementById('job-country-select').value = 'USA';
 				document.getElementById('job-type-select').value = '';
 				document.getElementById('job-remote-only').checked = true;
 				document.getElementById('job-linkedin-description').checked = false;
+				var yoeMinEl = document.getElementById('job-yoe-min');
+				var yoeMaxEl = document.getElementById('job-yoe-max');
+				if (yoeMinEl) yoeMinEl.value = 1;
+				if (yoeMaxEl) yoeMaxEl.value = 3;
 				if (resultsSlider) resultsSlider.value = 50;
 				if (resultsDisplay) resultsDisplay.textContent = '50';
-				if (daysSlider) daysSlider.value = 3;
-				if (daysDisplay) daysDisplay.textContent = '3';
+				if (daysSlider) daysSlider.value = 7;
+				if (daysDisplay) daysDisplay.textContent = '7';
 				// Reset job sites to defaults
 				JOB_SITE_OPTIONS.forEach(function(site) {
 					var checkbox = document.getElementById('site-' + site.id);
@@ -361,7 +381,6 @@
 	// Railway: disable form controls it doesn't use (q, days, limit only); show hint
 	function applyBackendFormState(backend) {
 		var isRailway = backend === 'railway';
-		if (backend === 'vercel') return;
 		var railwayHint = document.getElementById('job-search-config-railway-hint');
 		if (railwayHint) railwayHint.classList.toggle('hidden', !isRailway);
 		var locationInput = document.getElementById('job-location-input');
@@ -388,12 +407,37 @@
 		setDisabled(locationInput, locationLabel, isRailway, 'Optional for Railway');
 		setDisabled(countrySelect, countryLabel, isRailway, 'Optional for Railway');
 		setDisabled(jobTypeSelect, jobTypeLabel, isRailway, 'Optional for Railway');
+		// Headless toggle only makes sense for Railway
+		var headlessEl = document.getElementById('job-enable-headless');
+		if (headlessEl) {
+			headlessEl.disabled = !isRailway;
+			headlessEl.classList.toggle('opacity-60', !isRailway);
+			headlessEl.setAttribute('title', isRailway ? 'Enable slow headless scrapers (e.g. Naukri)' : 'Headless scrapers require Railway backend');
+			if (!isRailway) headlessEl.checked = false;
+			headlessEl.onchange = function () {
+				applyBackendFormState(isRailway ? 'railway' : 'vercel');
+			};
+		}
 		if (jobSitesContainer) {
 			jobSitesContainer.classList.remove('opacity-60', 'pointer-events-none');
 			jobSitesContainer.setAttribute('title', 'Select which sources to fetch from');
 			if (jobSitesLabel) jobSitesLabel.classList.remove('opacity-60');
 			var siteInputs = jobSitesContainer.querySelectorAll('input[type="checkbox"]');
-			for (var i = 0; i < siteInputs.length; i++) siteInputs[i].disabled = false;
+			// Naukri requires headless scrapers (disable it unless Railway + headless enabled)
+			var headlessRequired = { 'naukri': true };
+			for (var i = 0; i < siteInputs.length; i++) {
+				var inp = siteInputs[i];
+				var id = inp && inp.value ? String(inp.value) : '';
+				if (headlessRequired[id]) {
+					var canUse = !!isRailway && !!(headlessEl && headlessEl.checked);
+					inp.disabled = !canUse;
+					inp.classList.toggle('opacity-60', !canUse);
+					inp.setAttribute('title', canUse ? '' : 'Requires Railway + Headless scrapers');
+					if (!canUse) inp.checked = false;
+				} else {
+					inp.disabled = false;
+				}
+			}
 		}
 	}
 
@@ -407,7 +451,7 @@
 				var opt = document.createElement('option');
 				opt.value = r.query;
 				opt.textContent = r.label;
-				if (r.query === 'data analyst') opt.selected = true;
+				if (r.query === 'analyst') opt.selected = true;
 				roleSelect.appendChild(opt);
 			});
 		}
@@ -768,21 +812,40 @@
 
 		var exportJsonBtn = document.getElementById('planner-export-json');
 		var exportCsvBtn = document.getElementById('planner-export-csv');
+		var exportBackupBtn = document.getElementById('planner-export-backup');
+		function downloadBlob(blob, filename) {
+			try {
+				var a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = filename;
+				a.click();
+				setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 500);
+			} catch (e) {}
+		}
 		if (exportJsonBtn) {
 			exportJsonBtn.addEventListener('click', function () {
 				var entries = getFilteredPlannerEntries();
 				var blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
-				var a = document.createElement('a');
-				a.href = URL.createObjectURL(blob);
-				a.download = 'job-planner-' + new Date().toISOString().slice(0, 10) + '.json';
-				a.click();
-				URL.revokeObjectURL(a.href);
+				downloadBlob(blob, 'job-planner-' + new Date().toISOString().slice(0, 10) + '.json');
+			});
+		}
+		if (exportBackupBtn) {
+			exportBackupBtn.addEventListener('click', function () {
+				var payload = {
+					ok: true,
+					exportedAt: new Date().toISOString(),
+					version: 1,
+					plannerEntries: plannerEntries.slice(),
+					applications: applications || {}
+				};
+				var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+				downloadBlob(blob, 'job-tracker-backup-' + new Date().toISOString().slice(0, 10) + '.json');
 			});
 		}
 		if (exportCsvBtn) {
 			exportCsvBtn.addEventListener('click', function () {
 				var entries = getFilteredPlannerEntries();
-				var headers = ['title', 'company', 'status', 'source', 'location', 'jobType', 'workMode', 'createdAt', 'updatedAt', 'notes'];
+				var headers = ['title', 'company', 'status', 'priority', 'source', 'location', 'jobType', 'workMode', 'salary', 'appliedAt', 'nextStep', 'link', 'tags', 'outcome', 'createdAt', 'updatedAt', 'notes'];
 				function csvEscape(s) {
 					if (s == null) return '';
 					var t = String(s);
@@ -794,11 +857,7 @@
 					rows.push(headers.map(function (h) { return csvEscape(e[h]); }).join(','));
 				});
 				var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-				var a = document.createElement('a');
-				a.href = URL.createObjectURL(blob);
-				a.download = 'job-planner-' + new Date().toISOString().slice(0, 10) + '.csv';
-				a.click();
-				URL.revokeObjectURL(a.href);
+				downloadBlob(blob, 'job-planner-' + new Date().toISOString().slice(0, 10) + '.csv');
 			});
 		}
 
@@ -916,6 +975,9 @@
 		var locationInput = document.getElementById('job-location-input');
 		var daysSlider = document.getElementById('days-old-slider');
 		var resultsSlider = document.getElementById('results-wanted-slider');
+		var remoteOnlyCb = document.getElementById('job-remote-only');
+		var yoeMinEl = document.getElementById('job-yoe-min');
+		var yoeMaxEl = document.getElementById('job-yoe-max');
 		var vercelRole = document.getElementById('vercel-search-role');
 		var vercelLocation = document.getElementById('vercel-search-location');
 		var vercelDays = document.getElementById('vercel-search-days');
@@ -923,16 +985,21 @@
 		// For Railway: use search config inputs. For Vercel: use Vercel search section (role, location, days)
 		var query, days, limit, location;
 		if (isRailway) {
-			query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'data analyst');
-			days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '3');
+			query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'analyst');
+			days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '7');
 			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
 			location = (locationInput && locationInput.value) ? locationInput.value.trim() : (urlParams.get('location') || 'remote');
 		} else {
-			query = (vercelRole && vercelRole.value) ? vercelRole.value.trim() : (urlParams.get('q') || 'data analyst');
+			query = (vercelRole && vercelRole.value) ? vercelRole.value.trim() : (urlParams.get('q') || 'analyst');
 			location = (vercelLocation && vercelLocation.value) ? vercelLocation.value.trim() : (urlParams.get('location') || 'remote');
-			days = (vercelDays && vercelDays.value) ? vercelDays.value : (urlParams.get('days') || '3');
+			days = (vercelDays && vercelDays.value) ? vercelDays.value : (urlParams.get('days') || '7');
 			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
 		}
+		var remoteOnly = !!(remoteOnlyCb && remoteOnlyCb.checked);
+		var yoeMin = (yoeMinEl && yoeMinEl.value !== '') ? parseInt(String(yoeMinEl.value), 10) : null;
+		var yoeMax = (yoeMaxEl && yoeMaxEl.value !== '') ? parseInt(String(yoeMaxEl.value), 10) : null;
+		if (yoeMin != null && isNaN(yoeMin)) yoeMin = null;
+		if (yoeMax != null && isNaN(yoeMax)) yoeMax = null;
 		// Pagination for Railway
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;
@@ -956,7 +1023,10 @@
 		if (isRailway) {
 			if (forceRefresh) {
 				// Railway: POST /refresh
-				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+				var headlessEl = document.getElementById('job-enable-headless');
+				var enableHeadless = !!(headlessEl && headlessEl.checked);
+				var refreshMode = enableHeadless ? 'all' : 'rss';
+				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&mode=' + encodeURIComponent(refreshMode) + '&headless=' + (enableHeadless ? '1' : '0');
 				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
 				if (sourcesParam) refreshUrl += '&sources=' + encodeURIComponent(sourcesParam);
 				
@@ -971,23 +1041,38 @@
 								var job = normalizeJobFromApi(item);
 								if (job) allJobs.push(job);
 							});
+							// Apply the user's preference after refresh (refresh returns broad set)
+							allJobs = allJobs.filter(function (j) {
+								if (remoteOnly) {
+									var loc = String(j.location || '').toLowerCase();
+									var isRemote = loc.indexOf('remote') !== -1 || loc.indexOf('wfh') !== -1 || loc.indexOf('work from home') !== -1 || loc.indexOf('distributed') !== -1 || loc.indexOf('anywhere') !== -1;
+									if (!isRemote) return false;
+								}
+								if (yoeMin != null || yoeMax != null) {
+									var jMin = (j.yoeMin == null) ? null : parseInt(String(j.yoeMin), 10);
+									var jMax = (j.yoeMax == null) ? null : parseInt(String(j.yoeMax), 10);
+									if (jMin != null && !isNaN(jMin) && yoeMax != null && jMin > yoeMax) return false;
+									if (jMax != null && !isNaN(jMax) && yoeMin != null && jMax < yoeMin) return false;
+								}
+								return true;
+							});
 							sourceCounts = refreshData.sourceCounts || {};
 							apiSources = Array.isArray(refreshData.sources) ? refreshData.sources : [];
 							processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
 							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 						} else {
 							// Fallback to /jobs endpoint
-							fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
+							fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
 						}
 					})
 					.catch(function (err) {
 						console.error('Railway refresh failed:', err);
-						fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
+						fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
 					});
 				return;
 			} else {
 				// Railway: GET /jobs (cached) - use higher limit or pagination
-				fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
+				fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
 				return;
 			}
 		}
@@ -1190,8 +1275,11 @@
 	}
 	
 	// Railway API: Fetch jobs from /jobs endpoint (cached) - supports pagination
-	function fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage) {
+	function fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax) {
 		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+		if (remoteOnly) apiUrl += '&remote_only=1';
+		if (yoeMin != null) apiUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
+		if (yoeMax != null) apiUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
 		
 		// Use pagination if provided, otherwise use limit (max 400)
 		if (page && perPage) {
@@ -1246,7 +1334,12 @@
 								return;
 							}
 							
-							fetch(proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&page=' + pageNum + '&per_page=' + jobsPerPage)
+							var pageUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+							if (remoteOnly) pageUrl += '&remote_only=1';
+							if (yoeMin != null) pageUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
+							if (yoeMax != null) pageUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
+							pageUrl += '&page=' + pageNum + '&per_page=' + jobsPerPage;
+							fetch(pageUrl)
 								.then(function (r) { return r.ok ? r.json() : null; })
 								.then(function (pageData) {
 									if (pageData && pageData.ok && Array.isArray(pageData.jobs)) {
@@ -1286,7 +1379,10 @@
 	
 	// Railway API: Fetch jobs from /refresh endpoint (scrapes fresh)
 	function fetchRailwayRefresh(proxyUrl, query, days, limit) {
-		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+		var headlessEl = document.getElementById('job-enable-headless');
+		var enableHeadless = !!(headlessEl && headlessEl.checked);
+		var refreshMode = enableHeadless ? 'all' : 'rss';
+		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&mode=' + encodeURIComponent(refreshMode) + '&headless=' + (enableHeadless ? '1' : '0');
 		var sp = buildSourcesParam();
 		if (sp) refreshUrl += '&sources=' + encodeURIComponent(sp);
 		
@@ -1361,6 +1457,23 @@
 	
 	// Process jobs data (common logic)
 	function processJobsData(data) {
+		// "Data stamp": show when the backend produced the dataset
+		(function () {
+			var stampEl = document.getElementById('job-stats-updated');
+			if (!stampEl) return;
+			var ts = (data && (data.generatedAt || data.generated_at || data.saved_at)) || null;
+			if (!ts) {
+				stampEl.textContent = '—';
+				return;
+			}
+			var d = new Date(ts);
+			if (isNaN(d.getTime())) {
+				stampEl.textContent = 'Updated: ' + String(ts);
+				return;
+			}
+			stampEl.textContent = 'Updated: ' + d.toLocaleString();
+		})();
+
 		// Compute source counts if missing (cached API usually only returns jobs + sources)
 		if (!data || !data.sourceCounts) {
 			sourceCounts = {};
@@ -2521,6 +2634,13 @@
 		}
 	}
 	
+	// Friendly display name for source id (e.g. hiring_cafe -> Hiring.cafe)
+	function sourceDisplayName(src) {
+		if (!src) return 'Unknown';
+		var opt = JOB_SITE_OPTIONS.find(function (s) { return s.id === src || (s.aliases && s.aliases.indexOf(src) !== -1); });
+		return opt ? opt.name : (src.charAt(0).toUpperCase() + src.slice(1).replace(/_/g, ' '));
+	}
+
 	// Update source statistics display
 	function updateSourceStats() {
 		var sourceStatsEl = document.getElementById('job-stats-sources');
@@ -2536,12 +2656,13 @@
 		});
 		
 		var html = '<span class="text-xs text-gray-500 dark:text-gray-400">Sources: </span>';
-		var chips = sources.slice(0, 5).map(function (src) {
-			return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" title="' + escapeHtml(src) + '">' + escapeHtml(src) + ': ' + sourceCounts[src] + '</span>';
+		var chips = sources.slice(0, 8).map(function (src) {
+			var label = sourceDisplayName(src);
+			return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" title="' + escapeHtml(src) + '">' + escapeHtml(label) + ': ' + sourceCounts[src] + '</span>';
 		});
-		if (sources.length > 5) {
-			var rest = sources.slice(5).reduce(function (sum, src) { return sum + sourceCounts[src]; }, 0);
-			chips.push('<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">+' + (sources.length - 5) + ' more (' + rest + ')</span>');
+		if (sources.length > 8) {
+			var rest = sources.slice(8).reduce(function (sum, src) { return sum + sourceCounts[src]; }, 0);
+			chips.push('<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">+' + (sources.length - 8) + ' more (' + rest + ')</span>');
 		}
 		html += chips.join(' ');
 		sourceStatsEl.innerHTML = html;
@@ -2566,7 +2687,7 @@
 		apiSources.sort().forEach(function (src) {
 			var opt = document.createElement('option');
 			opt.value = src;
-			opt.textContent = src.charAt(0).toUpperCase() + src.slice(1).replace(/_/g, ' ');
+			opt.textContent = sourceDisplayName(src);
 			if (opt.value === currentValue) opt.selected = true;
 			filterSource.appendChild(opt);
 		});

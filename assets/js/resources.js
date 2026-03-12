@@ -1352,29 +1352,63 @@
 
 		initResourcePopup();
 
-	// NOTE: resources.html lives under /pages/, resources.json under /assets/.
-	// Use ../ so this works both locally and on static hosts.
-	fetch('../assets/resources.json')
-		.then(function (res) {
-			return res.json();
-		})
-		.then(function (data) {
-			if (!data || typeof data !== 'object') {
-				throw new Error('Invalid resources data');
-			}
-			var topicKey = initialTopic;
-			if (!data[topicKey]) {
-				var keys = Object.keys(data);
-				if (!keys.length) throw new Error('No topics configured');
-				topicKey = keys[0];
-			}
-			renderTopic(topicKey, data);
-		})
-		.catch(function () {
-			root.classList.add('hidden');
-			notFound.classList.remove('hidden');
-		});
-})();
+	// NOTE: resources.html can be served at /pages/resources.html or /resources (rewrite). Fetch must work in both cases.
+	var jsonPaths = ['../assets/resources.json', './assets/resources.json'];
+	function tryFetch(idx) {
+		if (idx >= jsonPaths.length) {
+			showResourcesFallback();
+			return;
+		}
+		fetch(jsonPaths[idx])
+			.then(function (res) {
+				if (!res.ok) throw new Error('Not found');
+				return res.json();
+			})
+			.then(function (data) {
+				if (!data || typeof data !== 'object') {
+					throw new Error('Invalid resources data');
+				}
+				var topicKey = initialTopic;
+				if (!data[topicKey]) {
+					var keys = Object.keys(data);
+					if (!keys.length) throw new Error('No topics configured');
+					topicKey = keys[0];
+				}
+				renderTopic(topicKey, data);
+			})
+			.catch(function () {
+				tryFetch(idx + 1);
+			});
+	}
+
+	// When fetch fails: show "not found" + topic links so the page is still usable
+	function showResourcesFallback() {
+		root.classList.add('hidden');
+		notFound.classList.remove('hidden');
+		var topicLinks = [
+			{ topic: 'python', label: 'Python' }, { topic: 'sql', label: 'SQL' }, { topic: 'data-analytics', label: 'Data Analytics' },
+			{ topic: 'data-science', label: 'Data Science' }, { topic: 'machine-learning', label: 'Machine Learning' }, { topic: 'data-engineering', label: 'Data Engineering' }
+		];
+		var linksHtml = topicLinks.map(function (item) {
+			return '<a href="' + (window.location.pathname + '?topic=' + encodeURIComponent(item.topic)) + '" class="text-primary hover:underline">' + escapeHtml(item.label) + '</a>';
+		}).join(' · ');
+		var retryHtml = '<button type="button" id="resources-retry-btn" class="mt-3 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">Retry</button>';
+		notFound.innerHTML = '<p class="text-gray-600 dark:text-gray-400 mb-4">Could not load resources. Check your connection or try a topic below.</p>' +
+			'<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Try: ' + linksHtml + '</p>' +
+			retryHtml + '<br><a href="../index.html" class="inline-block mt-4 text-primary hover:underline">Back to Home</a>';
+		var retryBtn = document.getElementById('resources-retry-btn');
+		if (retryBtn) {
+			retryBtn.addEventListener('click', function () {
+				notFound.classList.add('hidden');
+				notFound.innerHTML = '';
+				root.classList.remove('hidden');
+				root.innerHTML = '';
+				tryFetch(0);
+			});
+		}
+	}
+
+	tryFetch(0);
 
 if (typeof initAnalyticsTracking === 'function') {
 	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'resources' });

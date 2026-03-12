@@ -45,6 +45,10 @@
 		loadScript('global-widgets.js', callback || function () {});
 	}
 
+	function loadAssistant(callback) {
+		loadScript('assistant.js', callback || function () {});
+	}
+
 	// Dict: load on first click, then open
 	var dictToggle = document.getElementById('global-dict-toggle');
 	if (dictToggle) {
@@ -75,6 +79,16 @@
 		ytPanelToggle.addEventListener('click', function () {
 			loadGlobalWidgets(function () {
 				setTimeout(function () { ytPanelToggle.click(); }, 50);
+			});
+		}, { once: true });
+	}
+
+	// Assistant: lazy-load on first open
+	var assistantBtn = document.getElementById('assistant-btn');
+	if (assistantBtn) {
+		assistantBtn.addEventListener('click', function () {
+			loadAssistant(function () {
+				setTimeout(function () { assistantBtn.click(); }, 50);
 			});
 		}, { once: true });
 	}

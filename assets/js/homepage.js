@@ -23,6 +23,7 @@
 		'Reply 1997': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg',
 		'Itaewon Class': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg',
 		'Goblin': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
+		'Goblin: The Lonely and Great God': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
 		'Guardian: The Lonely and Great God': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
 		'Crash Landing on You': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Crash_Landing_on_You_poster.jpg/800px-Crash_Landing_on_You_poster.jpg',
 		'Start-Up': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
@@ -1060,6 +1061,15 @@
 			}
 
 			function fallbackCycleOrPicsum() {
+				// Normalize images to array of URL strings (v4 has [{ type, url }], we may have [url, url])
+				function toUrlList(imgs) {
+					if (!Array.isArray(imgs) || imgs.length === 0) return [];
+					return imgs.map(function (x) {
+						if (typeof x === 'string' && x.trim().indexOf('http') === 0) return x.trim();
+						if (x && typeof x === 'object' && x.url && String(x.url).indexOf('http') === 0) return String(x.url).trim();
+						return null;
+					}).filter(Boolean);
+					}
 				// If we have a dedicated poster pool for this quote, prefer cycling that first
 				if (lastQuoteFromDb && lastQuoteFromDb.quote && Array.isArray(lastQuoteFromDb.quote.posterPool) && lastQuoteFromDb.quote.posterPool.length > 0) {
 					var pool = lastQuoteFromDb.quote.posterPool;
@@ -1073,8 +1083,9 @@
 					}
 				}
 				// Otherwise fall back to the simple images array or Picsum
-				if (lastQuoteFromDb && lastQuoteFromDb.quote.images && lastQuoteFromDb.quote.images.length > 0) {
-					var imgs = lastQuoteFromDb.quote.images;
+				var imgsRaw = lastQuoteFromDb && lastQuoteFromDb.quote.images ? lastQuoteFromDb.quote.images : [];
+				var imgs = toUrlList(imgsRaw);
+				if (imgs.length > 0) {
 					var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
 					var idx = -1;
 					for (var i = 0; i < imgs.length; i++) {
@@ -1212,7 +1223,9 @@
 
 	// Weather (Open-Meteo): saved location, search city, or use my location. Runs when DOM is ready.
 	var WEATHER_LOCATION_KEY = 'standalone_weather_location';
-	var defaultLat = 51.5074, defaultLon = -0.1278;
+	// Default city (used when geolocation is blocked/denied or first load)
+	var defaultLat = 18.5204, defaultLon = 73.8567; // Pune, India
+	var defaultCityName = 'Pune';
 	var lastDailyForecast = null;
 	var lastWeatherHourly = null;
 	var lastWeatherLat = null, lastWeatherLon = null;
@@ -1537,6 +1550,7 @@
 		if (!weatherEl) return;
 		lastDailyForecast = null;
 		weatherEl.innerHTML = '<span class="text-sm opacity-70">Weather unavailable</span>' +
+			'<div class="text-[11px] opacity-70 mt-0.5">Check your internet, or if a privacy/ad blocker is blocking <code>open-meteo.com</code>.</div>' +
 			'<div class="flex gap-2 mt-1">' +
 			'<button type="button" class="weather-retry-btn text-xs font-semibold text-primary hover:underline">Retry</button>' +
 			'<button type="button" class="weather-default-btn text-xs font-semibold text-gray-600 dark:text-gray-400 hover:underline">Use default city</button>' +
@@ -1544,10 +1558,10 @@
 		weatherEl.querySelector('.weather-retry-btn').addEventListener('click', function () {
 			var saved = getSavedLocation();
 			if (saved) fetchWeather(saved.lat, saved.lon, saved.name);
-			else fetchWeather(defaultLat, defaultLon, 'London');
+			else fetchWeather(defaultLat, defaultLon, defaultCityName);
 		});
 		weatherEl.querySelector('.weather-default-btn').addEventListener('click', function () {
-			setWeatherByCoords(defaultLat, defaultLon, 'London');
+			setWeatherByCoords(defaultLat, defaultLon, defaultCityName);
 		});
 	}
 
@@ -1654,7 +1668,7 @@
 	if (weatherMyLocBtn) {
 		weatherMyLocBtn.addEventListener('click', function () {
 			if (!navigator.geolocation || !navigator.geolocation.getCurrentPosition) {
-				setWeatherByCoords(defaultLat, defaultLon, 'London (no geolocation)');
+				setWeatherByCoords(defaultLat, defaultLon, defaultCityName + ' (no geolocation)');
 				return;
 			}
 			navigator.geolocation.getCurrentPosition(
@@ -1675,7 +1689,7 @@
 						setWeatherByCoords(lat, lon, name);
 					}).catch(function () { setWeatherByCoords(lat, lon, 'My location'); });
 				},
-				function () { setWeatherByCoords(defaultLat, defaultLon, 'London (location denied)'); }
+				function () { setWeatherByCoords(defaultLat, defaultLon, defaultCityName + ' (location denied)'); }
 			);
 		});
 	}
@@ -1764,7 +1778,7 @@
 		if (saved) {
 			fetchWeather(saved.lat, saved.lon, saved.name);
 		} else {
-			fetchWeather(defaultLat, defaultLon, 'London');
+			fetchWeather(defaultLat, defaultLon, defaultCityName);
 		}
 	}
 	if (document.readyState === 'loading') {

@@ -2,7 +2,7 @@
  * Minimal service worker: caches same-origin static assets (JS, CSS, fonts) on first use.
  * Improves repeat-visit load times. Cache name bumps when you deploy (update version below).
  */
-const CACHE_NAME = 'standalone-playground-v1';
+const CACHE_NAME = 'standalone-playground-v2';
 
 self.addEventListener('fetch', function (event) {
 	if (event.request.method !== 'GET') return;

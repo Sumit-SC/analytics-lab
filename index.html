@@ -85,17 +85,17 @@
 		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
 	</div>
 
-	<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-		<header class="mb-6 sm:mb-8">
+	<main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+		<header class="mb-5 sm:mb-6">
 			<p class="home-section-title mb-1">Second brain</p>
-			<h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Notion-like hub, minimal code</h1>
-			<p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">Built on JS libraries and free APIs — view, search, edit on the fly, then export. No backend; pre-made services only.</p>
+			<h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Notion-like hub, minimal code</h1>
+			<p class="text-gray-600 dark:text-gray-400 mt-1.5 text-sm">JS libraries and free APIs — view, search, export. No backend.</p>
 		</header>
 
 		<!-- Go to — main stars at top -->
-		<section class="notion-go-section mb-10 sm:mb-12">
-			<p class="home-section-title mb-3">Go to</p>
-			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+		<section class="notion-go-section mb-8 sm:mb-10">
+			<p class="home-section-title mb-2">Go to</p>
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
 			<a href="pages/playground.html" class="notion-go-card group">
 				<span class="notion-go-icon">&#128187;</span>
 				<h3 class="notion-go-title">Playground</h3>
@@ -145,9 +145,9 @@
 		</section>
 
 		<!-- Two columns: Left = Tips + Clock (small) then Quote card (fills rest). Right = Weather then Focus timer -->
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5 home-main-grid">
-			<div class="flex flex-col gap-3 sm:gap-4 min-h-0 home-left-column">
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 home-tips-calendar-wrap">
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-5 home-main-grid">
+			<div class="flex flex-col gap-3 min-h-0 home-left-column">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 home-tips-calendar-wrap">
 					<section class="second-brain-card home-tips-card">
 						<p class="home-section-title mb-0.5 text-xs">Refresh</p>
 						<p id="home-refresh-text" class="text-sm text-gray-700 dark:text-gray-300 mb-1">Take a breath. Stretch.</p>
@@ -204,7 +204,7 @@
 			</section>
 			</div>
 
-			<div class="flex flex-col gap-4 sm:gap-5 min-h-0 home-right-column">
+			<div class="flex flex-col gap-3 min-h-0 home-right-column">
 				<section class="second-brain-card p-4 sm:p-5 home-weather-section" id="home-weather-card">
 					<div class="home-weather-card-bg" aria-hidden="true"></div>
 					<div class="relative z-10">
@@ -316,29 +316,36 @@
 				<ul id="home-todo-list" class="space-y-1.5 text-sm text-gray-700 dark:text-gray-300 max-h-40 overflow-y-auto"></ul>
 		</section>
 
-		<!-- Powered by: JS libs + free APIs, pre-made only -->
-		<section class="mt-14 pt-10 border-t border-gray-200 dark:border-gray-700 notion-powered">
-			<p class="home-section-title mb-3">Powered by</p>
-			<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Notion-like second brain — built from <strong>JS libraries</strong> and <strong>free on-the-fly APIs</strong>. No custom backend; pre-made, compiled services only.</p>
-			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-				<div class="second-brain-card p-4">
-					<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1.5">JS libraries & runtimes</p>
-					<p class="text-gray-600 dark:text-gray-400"><a href="https://pyodide.org/" target="_blank" rel="noopener noreferrer">Pyodide</a>, <a href="https://sql.js.org/" target="_blank" rel="noopener noreferrer">sql.js</a>, <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer">Tailwind</a> (CDN), vanilla JS. <a href="https://jupyterlite.readthedocs.io/" target="_blank" rel="noopener noreferrer">JupyterLite</a>, <a href="https://developers.google.com/youtube/iframe_api_reference" target="_blank" rel="noopener noreferrer">YouTube IFrame API</a>.</p>
+		<!-- Powered by: compact, expandable -->
+		<section class="mt-10 pt-8 border-t border-gray-200 dark:border-gray-700 notion-powered">
+			<details class="group">
+				<summary class="home-section-title cursor-pointer list-none flex items-center gap-1.5 [&::-webkit-details-marker]:hidden">
+					<span>Powered by</span>
+					<span class="text-gray-400 group-open:rotate-90 transition-transform">›</span>
+				</summary>
+				<p class="text-xs text-gray-600 dark:text-gray-400 mt-2 mb-3">JS libs: Pyodide, sql.js, Tailwind, JupyterLite. APIs: Quotable, Animechan, Open-Meteo, Picsum, Dictionary, DevDocs, YouTube. No custom backend.</p>
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+					<div class="second-brain-card p-3">
+						<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1">Libraries</p>
+						<p class="text-gray-600 dark:text-gray-400"><a href="https://pyodide.org/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Pyodide</a>, <a href="https://sql.js.org/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">sql.js</a>, <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Tailwind</a>, <a href="https://jupyterlite.readthedocs.io/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">JupyterLite</a>.</p>
+					</div>
+					<div class="second-brain-card p-3">
+						<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1">APIs &amp; services</p>
+						<p class="text-gray-600 dark:text-gray-400"><a href="https://api.quotable.io/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Quotable</a>, <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Open-Meteo</a>, <a href="https://picsum.photos/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Picsum</a>, <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Dictionary</a>, <a href="https://devdocs.io/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">DevDocs</a>.</p>
+					</div>
 				</div>
-				<div class="second-brain-card p-4">
-					<p class="font-semibold text-gray-800 dark:text-gray-200 mb-1.5">Free APIs & services</p>
-					<p class="text-gray-600 dark:text-gray-400"><a href="https://api.quotable.io/" target="_blank" rel="noopener noreferrer">Quotable</a>, <a href="https://animechan.xyz/" target="_blank" rel="noopener noreferrer">Animechan</a>, <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>, <a href="https://picsum.photos/" target="_blank" rel="noopener noreferrer">Picsum</a>, <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">Dictionary API</a>, <a href="https://devdocs.io/" target="_blank" rel="noopener noreferrer">DevDocs</a>, YouTube. All no-key or public.</p>
-				</div>
-			</div>
+			</details>
 		</section>
 	</main>
 
-	<footer class="border-t border-gray-200 dark:border-gray-700 mt-16 py-6">
+	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-5">
 		<div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-600 dark:text-gray-400">
-			<p>Standalone Playground · Home · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
-			<p class="text-xs mt-1">© 2021–Present</p>
-			<p class="text-[11px] mt-2">Credits: Pyodide, sql.js, Tailwind, JupyterLite, Quotable, Animechan, Open-Meteo, Picsum, Dictionary API, DevDocs (see Powered by above). <a href="pages/docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a> · Repo &amp; deploy: see README.</p>
-			<p class="text-[11px] mt-3 text-amber-700 dark:text-amber-400/90 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2 max-w-xl mx-auto">If the site feels sluggish, try clearing this site’s cache/storage (browser settings). You’ll lose saved data (timer log, to-dos, notes, theme) but the site may run faster.</p>
+			<p>Standalone Playground · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a> · <a href="pages/docs.html" class="text-primary hover:underline">Docs</a></p>
+			<p class="text-[11px] mt-1.5">© 2021–Present. Credits: Pyodide, sql.js, Tailwind, Open-Meteo, Quotable, DevDocs.</p>
+			<details class="mt-2 text-[11px] text-amber-700 dark:text-amber-400/90">
+				<summary class="cursor-pointer hover:underline">Cache slow? Clear site data</summary>
+				<p class="mt-1 text-left max-w-md mx-auto">Clear this site’s cache/storage in browser settings to get fresh assets. You’ll lose saved data (timer, to-dos, theme).</p>
+			</details>
 		</div>
 	</footer>
 
@@ -401,6 +408,7 @@
 	<script src="./assets/js/theme.js" defer></script>
 	<script src="./assets/js/analytics.js" defer></script>
 	<script src="./assets/js/lazy-panels.js" defer></script>
+	<script src="./assets/js/global-widgets.js" defer></script>
 	<script src="./assets/js/homepage.js" defer></script>
 	<script src="./assets/js/register-sw.js" defer></script>
 </body>

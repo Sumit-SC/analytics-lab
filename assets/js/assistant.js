@@ -6,6 +6,10 @@
  */
 
 (function () {
+	// Prevent double-init if script is included + lazy-loaded
+	if (typeof window !== 'undefined' && window.__standaloneAssistantLoaded) return;
+	if (typeof window !== 'undefined') window.__standaloneAssistantLoaded = true;
+
 	var btn = document.getElementById('assistant-btn');
 	var closeBtn = document.getElementById('assistant-close');
 	var overlay = document.getElementById('assistant-overlay');
