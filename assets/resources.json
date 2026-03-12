@@ -3628,5 +3628,81 @@
       "Prepare STAR stories for impact, ownership, conflict, and learning.",
       "Practice role-specific mock interviews weekly and refine project narratives."
     ]
+  },
+  "llms": {
+    "title": "LLMs & Generative AI",
+    "summary": "Large language models, prompt engineering, and production patterns for building AI assistants and copilots.",
+    "courses": [
+      {
+        "name": "DeepLearning.AI · ChatGPT Prompt Engineering for Developers",
+        "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/"
+      },
+      {
+        "name": "DeepLearning.AI · LLMs in Production",
+        "url": "https://www.deeplearning.ai/short-courses/llms-in-production/"
+      },
+      {
+        "name": "Andrej Karpathy · Intro to LLMs (YouTube)",
+        "url": "https://www.youtube.com/watch?v=zjkBMFhNj_g"
+      }
+    ],
+    "books": [
+      {
+        "name": "LLM University (free curriculum)",
+        "url": "https://www.llm.university/"
+      },
+      {
+        "name": "Prompt Engineering Guide",
+        "url": "https://www.promptingguide.ai/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Sebastian Bubeck · Sparks of AGI",
+        "url": "https://www.microsoft.com/en-us/research/publication/sparks-of-artificial-general-intelligence-early-experiments-with-gpt-4/"
+      },
+      {
+        "name": "Lil'Log · Illustrated transformer/LLM posts",
+        "url": "https://lilianweng.github.io/"
+      },
+      {
+        "name": "Hugging Face · LLM blog",
+        "url": "https://huggingface.co/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "zjkBMFhNj_g",
+        "title": "Andrej Karpathy · Intro to LLMs (2024)",
+        "embed": true
+      },
+      {
+        "id": "liZbSI6s3Q8",
+        "title": "Stanford · CS25 Transformers United"
+      },
+      {
+        "id": "7xTGNNLPd6Q",
+        "title": "LangChain Crash Course (freeCodeCamp)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-chatgpt-prompts",
+        "url": "https://github.com/f/awesome-chatgpt-prompts"
+      },
+      {
+        "name": "awesome-llm-apps",
+        "url": "https://github.com/Hannibal046/Awesome-LLM"
+      },
+      {
+        "name": "LangChain",
+        "url": "https://github.com/langchain-ai/langchain"
+      }
+    ],
+    "paths": [
+      "Watch Karpathy's Intro to LLMs → read Lilian Weng's transformer/LLM posts → implement a basic RAG Chatbot.",
+      "Take DeepLearning.AI prompt engineering course → experiment with system/user prompts on your own data.",
+      "Learn LangChain or similar orchestration → build one end-to-end assistant (data QA, analytics helper, or code copilot)."
+    ]
   }
 }

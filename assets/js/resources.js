@@ -994,27 +994,18 @@
 			}
 		})();
 
-		// YouTube hero + queue layout with Videos / Playlists toggle
+		// YouTube panel: simple hero player + Notion-style list of videos/playlists underneath
 		(function setupYouTubePanel(topic) {
 			var panel = root.querySelector('[data-tab-panel="youtube"]');
 			if (!panel) return;
 			var container = panel.querySelector('#yt-panel');
 			if (!container) return;
 
-			var vids = (topic.youtube || []).filter(isValidYouTubeEntry).slice(0, 15);
+			var vids = (topic.youtube || []).filter(isValidYouTubeEntry).slice(0, 20);
 			if (!vids.length) {
 				container.innerHTML = '<p class="text-sm text-gray-500">(no valid curated videos for this topic yet)</p>';
 				return;
 			}
-
-			var videosOnly = vids.filter(function (v) {
-				return v && !v.playlist;
-			});
-			var playlistsOnly = vids.filter(function (v) {
-				return v && v.playlist;
-			});
-
-			var mode = videosOnly.length ? 'videos' : 'playlists';
 
 			function pickInitialIndex(list) {
 				var idx = -1;
@@ -1029,63 +1020,18 @@
 				return idx;
 			}
 
-			function getActiveList() {
-				return mode === 'playlists' ? playlistsOnly : videosOnly.length ? videosOnly : vids;
-			}
-
 			function render(heroIdx) {
 				container.innerHTML = '';
 
-				var active = getActiveList();
-				if (!active.length) {
-					container.innerHTML = '<p class="text-sm text-gray-500">(no videos in this view yet)</p>';
-					return;
+				if (heroIdx == null || heroIdx < 0 || heroIdx >= vids.length) {
+					heroIdx = pickInitialIndex(vids);
 				}
 
-				if (heroIdx == null || heroIdx < 0 || heroIdx >= active.length) {
-					heroIdx = pickInitialIndex(active);
-				}
+				var wrap = document.createElement('div');
+				wrap.className = 'space-y-3';
 
-				// Filter toggle row
-				var toggleRow = document.createElement('div');
-				toggleRow.className = 'flex items-center justify-end gap-2 mb-3 text-xs';
-				var label = document.createElement('span');
-				label.className = 'text-gray-500 dark:text-gray-400';
-				label.textContent = 'View:';
-				toggleRow.appendChild(label);
-
-				function makeToggle(type, text) {
-					var btn = document.createElement('button');
-					btn.type = 'button';
-					var isActive = mode === type;
-					btn.className =
-						'px-3 py-1 rounded-full border text-xs font-semibold transition ' +
-						(isActive
-							? 'border-primary text-primary bg-white dark:bg-gray-900 shadow-sm'
-							: 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700');
-					btn.textContent = text;
-					btn.disabled = type === 'videos' ? !videosOnly.length : !playlistsOnly.length;
-					if (btn.disabled) {
-						btn.className += ' opacity-50 cursor-not-allowed';
-					}
-					btn.addEventListener('click', function () {
-						if (btn.disabled || mode === type) return;
-						mode = type;
-						render();
-					});
-					return btn;
-				}
-
-				toggleRow.appendChild(makeToggle('videos', 'Videos'));
-				toggleRow.appendChild(makeToggle('playlists', 'Playlists'));
-				container.appendChild(toggleRow);
-
-				var grid = document.createElement('div');
-				grid.className = 'grid grid-cols-1 md:grid-cols-3 gap-4';
-
-				var left = document.createElement('div');
-				left.className = 'md:col-span-2 space-y-2';
-				var hv = active[heroIdx];
+				// Hero player
+				var hv = vids[heroIdx];
 				var embedId = (hv.id || '').trim();
 				var isPlaylist = hv.playlist && isValidYouTubePlaylistId(embedId);
 				var validVideo = !hv.playlist && isValidYouTubeVideoId(embedId);
@@ -1109,33 +1055,25 @@
 				iframe.title = hv.title || '';
 				iframe.allowFullscreen = true;
 				iframeWrapper.appendChild(iframe);
-				left.appendChild(iframeWrapper);
+				wrap.appendChild(iframeWrapper);
 				var watchLink = document.createElement('a');
 				watchLink.href = isPlaylist ? ('https://www.youtube.com/playlist?list=' + listId) : ('https://www.youtube.com/watch?v=' + embedId);
 				watchLink.target = '_blank';
 				watchLink.rel = 'noopener';
 				watchLink.className = 'text-xs text-primary hover:underline mt-1 inline-block';
 				watchLink.textContent = 'Watch on YouTube →';
-				left.appendChild(watchLink);
+				wrap.appendChild(watchLink);
 
 				var heroTitle = document.createElement('p');
 				heroTitle.className = 'text-sm font-medium text-gray-800 dark:text-gray-100';
 				heroTitle.textContent = hv.title || 'YouTube video';
-				left.appendChild(heroTitle);
+				wrap.appendChild(heroTitle);
 
-				var hint = document.createElement('p');
-				hint.className = 'text-xs text-gray-500 dark:text-gray-400';
-				hint.textContent = 'Click a video on the right to change the main player.';
-				left.appendChild(hint);
+				var listWrap = document.createElement('div');
+				listWrap.className = 'mt-3 space-y-2';
 
-				grid.appendChild(left);
-
-				var right = document.createElement('div');
-				right.className = 'space-y-2 max-h-[360px] overflow-y-auto';
-
-				for (var j = 0; j < active.length; j++) {
-					if (j === heroIdx) continue;
-					var v = active[j];
+				for (var j = 0; j < vids.length; j++) {
+					var v = vids[j];
 					if (!v || !v.id) continue;
 
 					var item = document.createElement('button');
@@ -1143,6 +1081,9 @@
 					item.className =
 						'w-full flex items-center gap-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-2 text-xs sm:text-sm';
 					item.setAttribute('data-yt-index', String(j));
+					if (j === heroIdx) {
+						item.className += ' ring-1 ring-primary/60';
+					}
 
 					var thumbWrap = document.createElement('div');
 					thumbWrap.className = 'w-16 h-10 rounded-md overflow-hidden bg-black flex-shrink-0';
@@ -1181,11 +1122,16 @@
 						});
 					})();
 
-					right.appendChild(item);
+					listWrap.appendChild(item);
 				}
 
-				grid.appendChild(right);
-				container.appendChild(grid);
+				var hint = document.createElement('p');
+				hint.className = 'text-xs text-gray-500 dark:text-gray-400';
+				hint.textContent = 'Click any card below to change the main player.';
+				wrap.appendChild(hint);
+
+				wrap.appendChild(listWrap);
+				container.appendChild(wrap);
 
 				// Hindi-friendly quick search helpers
 				var hindiRow = document.createElement('div');
