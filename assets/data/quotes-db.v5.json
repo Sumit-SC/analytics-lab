@@ -132,27 +132,70 @@
   "categories": {
     "kdrama": [
       { "work_id": "kdrama_goblin_2016", "text": "Don't run from your fate. Face it.", "author": "Kim Shin" },
+      { "work_id": "kdrama_goblin_2016", "text": "Every moment is a chance to turn things around.", "author": "Kim Shin" },
+      { "work_id": "kdrama_goblin_2016", "text": "It's okay to be a little late sometimes.", "author": "Ji Eun-tak" },
+      { "work_id": "kdrama_goblin_2016", "text": "You were my first and you will be my last.", "author": "Kim Shin" },
+      { "work_id": "kdrama_goblin_2016", "text": "If this is fate, I will accept it.", "author": "Ji Eun-tak" },
+      { "work_id": "kdrama_goblin_2016", "text": "Sometimes, you need to lose something to gain something.", "author": "Wang Yeo" },
+
       { "work_id": "kdrama_cloy_2019", "text": "Let's only think about happy things.", "author": "Yoon Se-ri" },
-      { "work_id": "kdrama_squid_game_2021", "text": "I'm not a genius. I'm just curious.", "author": "Seong Gi-hun" }
+      { "work_id": "kdrama_cloy_2019", "text": "Even in the darkest times, there is still a way.", "author": "Ri Jeong-hyeok" },
+      { "work_id": "kdrama_cloy_2019", "text": "If you don't want to be hurt, don't love.", "author": "Seo Dan" },
+      { "work_id": "kdrama_cloy_2019", "text": "The world is unfair, but we still live in it.", "author": "Yoon Se-ri" },
+
+      { "work_id": "kdrama_squid_game_2021", "text": "I'm not a genius. I'm just curious.", "author": "Seong Gi-hun" },
+      { "work_id": "kdrama_squid_game_2021", "text": "People do anything when they’re desperate.", "author": "Hwang Jun-ho" },
+      { "work_id": "kdrama_squid_game_2021", "text": "Aren’t we all equals here?", "author": "Seong Gi-hun" },
+      { "work_id": "kdrama_squid_game_2021", "text": "This is hell. What do you expect?", "author": "Kang Sae-byeok" }
     ],
     "anime": [
       { "work_id": "anime_one_piece_1999", "text": "I'm the man who will become the Pirate King!", "author": "Monkey D. Luffy" },
-      { "work_id": "anime_death_note_2006", "text": "I'll take a potato chip... and eat it!", "author": "Light Yagami" }
+      { "work_id": "anime_one_piece_1999", "text": "I don't want to conquer anything. I just think the guy with the most freedom in this whole ocean is the Pirate King!", "author": "Monkey D. Luffy" },
+      { "work_id": "anime_one_piece_1999", "text": "When you aim high, you sometimes come across fights not worth fighting.", "author": "Marshall D. Teach" },
+      { "work_id": "anime_one_piece_1999", "text": "No matter how deep the night, it always turns to day, eventually.", "author": "Brook" },
+
+      { "work_id": "anime_death_note_2006", "text": "I'll take a potato chip... and eat it!", "author": "Light Yagami" },
+      { "work_id": "anime_death_note_2006", "text": "I am Justice!", "author": "Light Yagami" },
+      { "work_id": "anime_death_note_2006", "text": "The human whose name is written in this note shall die.", "author": "Ryuk" },
+      { "work_id": "anime_death_note_2006", "text": "If you can't win the game, if you can't solve the puzzle, then you're just a loser.", "author": "Near" }
     ],
     "movie": [
       { "work_id": "movie_matrix_1999", "text": "There is no spoon.", "author": "Spoon Boy" },
-      { "work_id": "movie_interstellar_2014", "text": "Do not go gentle into that good night.", "author": "Professor Brand" }
+      { "work_id": "movie_matrix_1999", "text": "I know kung fu.", "author": "Neo" },
+      { "work_id": "movie_matrix_1999", "text": "Unfortunately, no one can be told what the Matrix is. You have to see it for yourself.", "author": "Morpheus" },
+      { "work_id": "movie_matrix_1999", "text": "Choice is an illusion created between those with power and those without.", "author": "Merovingian" },
+
+      { "work_id": "movie_interstellar_2014", "text": "Do not go gentle into that good night.", "author": "Professor Brand" },
+      { "work_id": "movie_interstellar_2014", "text": "Love is the one thing that transcends time and space.", "author": "Dr. Amelia Brand" },
+      { "work_id": "movie_interstellar_2014", "text": "We used to look up at the sky and wonder at our place in the stars.", "author": "Cooper" },
+      { "work_id": "movie_interstellar_2014", "text": "Mankind was born on Earth. It was never meant to die here.", "author": "Cooper" }
     ],
     "tv_show": [
       { "work_id": "tv_breaking_bad_2008", "text": "I am the one who knocks.", "author": "Walter White" },
-      { "work_id": "tv_stranger_things_2016", "text": "Friends don't lie.", "author": "Eleven" }
+      { "work_id": "tv_breaking_bad_2008", "text": "Say my name.", "author": "Walter White" },
+      { "work_id": "tv_breaking_bad_2008", "text": "Tread lightly.", "author": "Walter White" },
+      { "work_id": "tv_breaking_bad_2008", "text": "Yeah, science!", "author": "Jesse Pinkman" },
+
+      { "work_id": "tv_stranger_things_2016", "text": "Friends don't lie.", "author": "Eleven" },
+      { "work_id": "tv_stranger_things_2016", "text": "Mornings are for coffee and contemplation.", "author": "Jim Hopper" },
+      { "work_id": "tv_stranger_things_2016", "text": "If you believe in this story... finish it.", "author": "Dustin Henderson" },
+      { "work_id": "tv_stranger_things_2016", "text": "Why are you keeping this curiosity door locked?", "author": "Dustin Henderson" }
     ],
     "books": [
       { "work_id": "book_lotr_fellowship_1954", "text": "All we have to decide is what to do with the time that is given us.", "author": "J.R.R. Tolkien" },
-      { "work_id": "book_1984_1949", "text": "It was a bright cold day in April, and the clocks were striking thirteen.", "author": "George Orwell" }
+      { "work_id": "book_lotr_fellowship_1954", "text": "Not all those who wander are lost.", "author": "J.R.R. Tolkien" },
+      { "work_id": "book_lotr_fellowship_1954", "text": "Even the smallest person can change the course of the future.", "author": "J.R.R. Tolkien" },
+      { "work_id": "book_lotr_fellowship_1954", "text": "There is some good in this world, and it’s worth fighting for.", "author": "J.R.R. Tolkien" },
+
+      { "work_id": "book_1984_1949", "text": "It was a bright cold day in April, and the clocks were striking thirteen.", "author": "George Orwell" },
+      { "work_id": "book_1984_1949", "text": "Big Brother is watching you.", "author": "George Orwell" },
+      { "work_id": "book_1984_1949", "text": "If you want a picture of the future, imagine a boot stamping on a human face—forever.", "author": "George Orwell" },
+      { "work_id": "book_1984_1949", "text": "Freedom is the freedom to say that two plus two make four.", "author": "George Orwell" }
     ],
     "bollywood": [
-      { "work_id": "bollywood_3_idiots_2009", "text": "All is well.", "author": "Ranchoddas Shamaldas Chanchad" }
+      { "work_id": "bollywood_3_idiots_2009", "text": "All is well.", "author": "Ranchoddas Shamaldas Chanchad" },
+      { "work_id": "bollywood_3_idiots_2009", "text": "Chase excellence, and success will follow.", "author": "Ranchoddas Shamaldas Chanchad" },
+      { "work_id": "bollywood_3_idiots_2009", "text": "Don't run behind success. Run behind excellence.", "author": "Ranchoddas Shamaldas Chanchad" }
     ],
     "leaders": [
       { "work_id": "leader_mandela", "text": "It always seems impossible until it's done.", "author": "Nelson Mandela" }

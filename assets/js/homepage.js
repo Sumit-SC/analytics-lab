@@ -424,6 +424,7 @@
 			var w = quotesWorks[q.work_id];
 			if (w) {
 				return {
+					work_id: q.work_id,
 					text: q.text,
 					author: q.author || '',
 					source: w.title || '',
@@ -437,6 +438,74 @@
 			}
 		}
 		return q;
+	}
+
+	function pickAnotherQuoteSameWork() {
+		if (!lastQuoteFromDb || !lastQuoteFromDb.quote) return null;
+		var cat = currentQuoteCategory || lastQuoteFromDb.category || getCategory();
+		if (cat === 'movies') cat = 'movie';
+		var list = quotesDb && quotesDb[cat] && Array.isArray(quotesDb[cat]) ? quotesDb[cat] : null;
+		if (!list || list.length < 2) return null;
+
+		var curText = String(lastQuoteFromDb.quote.text || '').trim();
+		// v5 path: match by work_id in raw v5 quotes array; v4 path: match by source title
+		var workId = lastQuoteFromDb.quote.workId || lastQuoteFromDb.quote.work_id || null;
+		var source = String(lastQuoteFromDb.quote.source || '').trim();
+
+		var candidates = [];
+		if (workId && quotesWorks) {
+			for (var i = 0; i < list.length; i++) {
+				var raw = list[i];
+				if (!raw || raw.work_id !== workId) continue;
+				if (String(raw.text || '').trim() === curText) continue;
+				candidates.push(raw);
+			}
+			if (!candidates.length) return null;
+			var pickedRaw = pick(candidates);
+			var w = quotesWorks[workId];
+			if (!w) return null;
+			return {
+				work_id: workId,
+				text: pickedRaw.text,
+				author: pickedRaw.author || '',
+				source: w.title || source,
+				year: w.year || '',
+				imdb_id: w.imdb_id || '',
+				isbn: w.isbn || '',
+				goodreads_id: w.goodreads_id || '',
+				mal_id: w.mal_id || '',
+				images: (w.images && w.images.length) ? w.images : (pickedRaw.images || [])
+			};
+		}
+
+		// v4 fallback: same source string
+		for (var j = 0; j < list.length; j++) {
+			var q = list[j];
+			if (!q) continue;
+			if (String(q.source || '').trim() !== source) continue;
+			if (String(q.text || '').trim() === curText) continue;
+			candidates.push(q);
+		}
+		return candidates.length ? pick(candidates) : null;
+	}
+
+	function setSameWorkButtonVisibility() {
+		var btn = document.getElementById('home-quote-same-work');
+		if (!btn) return;
+		if (!lastQuoteFromDb || !lastQuoteFromDb.quote) { btn.classList.add('hidden'); return; }
+		var cat = currentQuoteCategory || lastQuoteFromDb.category || getCategory();
+		if (cat === 'movies') cat = 'movie';
+		var list = quotesDb && quotesDb[cat] && Array.isArray(quotesDb[cat]) ? quotesDb[cat] : null;
+		if (!list || list.length < 2) { btn.classList.add('hidden'); return; }
+		var workId = lastQuoteFromDb.quote.workId || lastQuoteFromDb.quote.work_id || null;
+		var source = String(lastQuoteFromDb.quote.source || '').trim();
+		var count = 0;
+		if (workId && quotesWorks) {
+			for (var i = 0; i < list.length; i++) if (list[i] && list[i].work_id === workId) count++;
+		} else if (source) {
+			for (var j = 0; j < list.length; j++) if (list[j] && String(list[j].source || '').trim() === source) count++;
+		}
+		btn.classList.toggle('hidden', count < 2);
 	}
 
 	// Resolve 1–2 image URLs: prefer quote.images from DB (v2: string[], v4: [{ type, url }]), then QUOTE_IMAGE_MAP by source/author.
@@ -649,6 +718,7 @@
 				source: quote.source,
 				images: quote.images && quote.images.length ? quote.images : (resolved || []),
 				imdbID: null,
+				workId: quote.work_id || null,
 				isbn: quote.isbn || '',
 				goodreadsId: quote.goodreads_id || '',
 				malId: quote.mal_id || '',
@@ -684,6 +754,7 @@
 
 		var livePosters = isLivePostersEnabled();
 		setWallpaperButtonVisibility();
+		setSameWorkButtonVisibility();
 
 		if (livePosters && actualCategory === 'anime' && quote.source && quote.source.trim()) {
 			var useApiFirst = isResolvedPlaceholder(resolved);
@@ -1016,6 +1087,7 @@
 	var quoteCategoryEl = document.getElementById('home-quote-category');
 	var quoteImageModeEl = document.getElementById('home-quote-image-live');
 	var quoteRefreshBtn = document.getElementById('home-quote-refresh');
+	var quoteSameWorkBtn = document.getElementById('home-quote-same-work');
 	var quoteBgRefreshBtn = document.getElementById('home-quote-bg-refresh');
 	var quoteOpenSourceBtn = document.getElementById('home-quote-open-source');
 	var quotePinterestBtn = document.getElementById('home-quote-pinterest');
@@ -1057,6 +1129,15 @@
 	if (quoteRefreshBtn) {
 		quoteRefreshBtn.addEventListener('click', function () {
 			loadQuote(getCategory());
+		});
+	}
+
+	if (quoteSameWorkBtn) {
+		quoteSameWorkBtn.addEventListener('click', function () {
+			var next = pickAnotherQuoteSameWork();
+			if (next) {
+				applyQuoteFromDb(next, getCategory(), currentQuoteCategory || getCategory());
+			}
 		});
 	}
 
