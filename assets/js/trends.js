@@ -3,6 +3,7 @@
 	// Reduces pressure on third-party APIs. Cache TTL 5 min (sessionStorage).
 	var TRENDS_CACHE_PREFIX = 'trends_cache_';
 	var TRENDS_CACHE_TTL_MS = 5 * 60 * 1000;
+	var LIVE_MODE_KEY = 'trends_live_mode';
 	window.__trendsLoaders = window.__trendsLoaders || {};
 	window.__trendsLoaded = window.__trendsLoaded || {};
 
@@ -35,6 +36,46 @@
 		if (typeof load !== 'function') return;
 		load(!!forceRefresh);
 	};
+
+	function getLiveMode() {
+		try { return localStorage.getItem(LIVE_MODE_KEY) === '1'; } catch (e) { return false; }
+	}
+	function setLiveMode(on) {
+		try { localStorage.setItem(LIVE_MODE_KEY, on ? '1' : '0'); } catch (e) {}
+	}
+
+	// Auto-refresh "live" sections every few minutes when enabled
+	(function setupLiveMode() {
+		var toggle = document.getElementById('trends-live-mode-toggle');
+		var liveSections = ['live-breaking', 'alerts', 'google-news', 'inshorts', 'wiki', 'hn'];
+		var intervalMs = 3 * 60 * 1000;
+
+		function tick() {
+			if (!getLiveMode()) return;
+			if (typeof document !== 'undefined' && typeof document.hidden === 'boolean' && document.hidden) return;
+			liveSections.forEach(function (id) {
+				if (window.__trendsLoaders[id]) {
+					window.runTrendsLoader(id, true);
+				}
+			});
+		}
+
+		if (toggle) {
+			toggle.checked = getLiveMode();
+			toggle.addEventListener('change', function () {
+				setLiveMode(toggle.checked);
+				if (toggle.checked) {
+					// Kick off an immediate refresh for live sections
+					liveSections.forEach(function (id) {
+						if (window.__trendsLoaders[id]) window.runTrendsLoader(id, true);
+					});
+				}
+			});
+		}
+
+		// Background interval for live mode
+		setInterval(tick, intervalMs);
+	})();
 
 	// Shared RSS helper (prefer our Vercel proxy vs rss2json public)
 	window.__trendsRssProxyBase = (typeof window !== 'undefined' && window.TRENDS_RSS_PROXY_URL)
