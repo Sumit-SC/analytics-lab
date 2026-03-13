@@ -49,64 +49,6 @@
 		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
 	</div>
 
-	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
-	<div class="flex relative">
-		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[240px] shadow-sm md:block sidebar-drawer">
-			<button type="button" id="sidebar-toggle-btn" class="w-full py-2 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[2.5rem]" aria-label="Toggle Resources sidebar">
-				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
-				<span class="sidebar-toggle-vertical">Resources</span>
-			</button>
-			<div class="sidebar-content p-2">
-				<h3 class="text-xs font-bold text-gray-800 dark:text-gray-100 mb-2 px-1 border-b border-gray-300 dark:border-gray-600 pb-1.5">Learn by topic</h3>
-				<nav class="space-y-0.5 text-xs">
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
-							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
-							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
-							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
-							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
-							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
-							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
-							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
-							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
-							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
-							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
-							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
-							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
-						</ul>
-					</div>
-					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
-						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
-							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
-							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
-						</ul>
-					</div>
-				</nav>
-			</div>
-		</aside>
-
 	<main class="flex-1 min-w-0 max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5" id="trends-main">
 		<header class="mb-4">
 			<h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">Trends</h1>
@@ -484,7 +426,6 @@
 			</ul>
 		</section>
 	</main>
-	</div>
 
 	<footer class="border-t border-gray-200 dark:border-gray-700 mt-10 py-5">
 		<div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-0.5">
@@ -555,7 +496,6 @@
 	<script src="../assets/js/analytics.js" defer></script>
 	<script src="../assets/js/lazy-panels.js" defer></script>
 	<script src="../assets/js/global-widgets.js" defer></script>
-	<script src="../assets/js/sidebar.js" defer></script>
 	<script src="../assets/js/trends.js" defer></script>
 	<script src="../assets/js/register-sw.js" defer></script>
 </body>
