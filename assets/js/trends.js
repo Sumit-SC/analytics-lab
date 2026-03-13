@@ -4,6 +4,7 @@
 	var TRENDS_CACHE_PREFIX = 'trends_cache_';
 	var TRENDS_CACHE_TTL_MS = 5 * 60 * 1000;
 	var LIVE_MODE_KEY = 'trends_live_mode';
+	var NEWS_REGION_KEY = 'trends_news_region';
 	window.__trendsLoaders = window.__trendsLoaders || {};
 	window.__trendsLoaded = window.__trendsLoaded || {};
 
@@ -42,6 +43,19 @@
 	}
 	function setLiveMode(on) {
 		try { localStorage.setItem(LIVE_MODE_KEY, on ? '1' : '0'); } catch (e) {}
+	}
+
+	function getNewsRegion() {
+		try {
+			var v = localStorage.getItem(NEWS_REGION_KEY) || 'US';
+			return (v === 'IN') ? 'IN' : 'US';
+		} catch (e) {
+			return 'US';
+		}
+	}
+	function setNewsRegion(v) {
+		var val = (v === 'IN') ? 'IN' : 'US';
+		try { localStorage.setItem(NEWS_REGION_KEY, val); } catch (e) {}
 	}
 
 	// Auto-refresh "live" sections every few minutes when enabled
@@ -125,6 +139,25 @@
 	setTimeout(function () {
 		injectLoadButtons();
 		observeSections();
+
+		// Region selector wiring
+		var regionSelect = document.getElementById('trends-region-select');
+		if (regionSelect) {
+			regionSelect.value = getNewsRegion();
+			regionSelect.addEventListener('change', function () {
+				setNewsRegion(regionSelect.value);
+				try {
+					// Clear cached news-related sections so next load uses the new region
+					['google-news', 'inshorts', 'live-breaking'].forEach(function (id) {
+						sessionStorage.removeItem(TRENDS_CACHE_PREFIX + id);
+					});
+				} catch (e) {}
+				// Force refresh visible news sections immediately
+				['google-news', 'inshorts', 'live-breaking'].forEach(function (id) {
+					if (window.__trendsLoaders[id]) window.runTrendsLoader(id, true);
+				});
+			});
+		}
 	}, 0);
 })();
 
@@ -412,8 +445,12 @@
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('inshorts', listEl, statusEl)) return;
 		setStatus('Loading…');
-		var feed = 'https://news.google.com/rss/search?q=' + encodeURIComponent('artificial intelligence data analytics') + '&hl=en-IN&gl=IN&ceid=IN:en';
-		window.__trendsFetchRss(feed, 12)
+		var region = getNewsRegion();
+		var base = 'https://news.google.com/rss/search?q=' + encodeURIComponent('artificial intelligence data analytics');
+		var feedUrl = region === 'IN'
+			? base + '&hl=en-IN&gl=IN&ceid=IN:en'
+			: base + '&hl=en-US&gl=US&ceid=US:en';
+		window.__trendsFetchRss(feedUrl, 12)
 			.then(function (data) {
 				var items = data && data.items ? data.items : null;
 				if (!items || !items.length) {
@@ -510,7 +547,11 @@
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('google-news', listEl, statusEl)) return;
 		setStatus('Loading…');
-		window.__trendsFetchRss('https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en', 12)
+		var region = getNewsRegion();
+		var feedUrl = region === 'IN'
+			? 'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en'
+			: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+		window.__trendsFetchRss(feedUrl, 12)
 			.then(function (data) {
 				var items = data && data.items ? data.items : null;
 				if (!items || !items.length) { setStatus('No headlines right now.'); return; }
@@ -557,8 +598,14 @@
 			return;
 		}
 		setStatus('Loading…');
-		var newsFeed = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
-		var financeFeed = 'https://news.google.com/rss/search?q=stock+market+finance+business&hl=en-US&gl=US&ceid=US:en';
+		var region = getNewsRegion();
+		var newsFeed = region === 'IN'
+			? 'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en'
+			: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+		var baseFinance = 'https://news.google.com/rss/search?q=stock+market+finance+business';
+		var financeFeed = region === 'IN'
+			? baseFinance + '&hl=en-IN&gl=IN&ceid=IN:en'
+			: baseFinance + '&hl=en-US&gl=US&ceid=US:en';
 		Promise.all([
 			window.__trendsFetchRss(newsFeed, 8),
 			window.__trendsFetchRss(financeFeed, 8)
