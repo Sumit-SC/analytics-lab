@@ -1680,3 +1680,4 @@ if (typeof initAnalyticsTracking === 'function') {
 	} catch (err) {
 		showFatalResourcesError(err);
 	}
+})();
