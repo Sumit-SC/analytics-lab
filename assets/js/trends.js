@@ -714,7 +714,8 @@
 	window.__trendsLoaders.alerts = load;
 })();
 
-(function () { — load on tap or when section visible
+(function () {
+	// TorrentFreak RSS (via our proxy) — load on tap or when section visible
 	var listEl = document.getElementById('trends-torrentfreak-list');
 	var statusEl = document.getElementById('trends-torrentfreak-status');
 	if (!listEl || !statusEl) return;
@@ -822,8 +823,22 @@
 		var now = new Date();
 		var dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
 		var tvUrl = 'https://api.tvmaze.com/schedule?country=US&date=' + dateStr;
+
+		function fetchJikanSchedule(day) {
+			var url = 'https://api.jikan.moe/v4/schedules?filter=' + encodeURIComponent(day) + '&sfw=true&limit=25';
+			return fetch(url).then(function (r) {
+				if (r.status === 429) {
+					var ra = r.headers && (r.headers.get('Retry-After') || r.headers.get('retry-after')) || '';
+					var seconds = parseInt(String(ra || '').trim(), 10);
+					var wait = Number.isFinite(seconds) && seconds > 0 ? seconds : 3;
+					throw new Error('Jikan rate-limited. Retry in ~' + wait + 's.');
+				}
+				return r.ok ? r.json() : null;
+			});
+		}
+
 		Promise.all([
-			fetch('https://api.jikan.moe/v4/schedules?filter=' + today).then(function (r) { return r.ok ? r.json() : null; }),
+			fetchJikanSchedule(today),
 			fetch(tvUrl).then(function (r) { return r.ok ? r.json() : null; })
 		]).then(function (results) {
 			var data = results[0];
@@ -865,7 +880,7 @@
 			}
 			window.__trendsWriteCache('tv-schedule', animeList.innerHTML, animeStatus.textContent, { html2: tvList.innerHTML, status2: tvStatus.textContent });
 		}).catch(function () {
-			setAnimeStatus('Could not load schedule. Use MAL link below.');
+			setAnimeStatus('Could not load schedule (Jikan). Try again in a few seconds or use the MAL link below.');
 			setTvStatus('Could not load TVMaze. Try tvmaze.com/schedule.');
 		});
 	}

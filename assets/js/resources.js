@@ -534,12 +534,14 @@
 			html += '</div>';
 		}
 
-		html += '<div class="mb-6 inline-flex flex-wrap gap-2 rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-xs sm:text-sm">';
-		html += '<button type="button" data-tab="youtube" class="tab-btn px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 text-primary font-semibold shadow-sm">YouTube</button>';
-		html += '<button type="button" data-tab="read" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Read / Blogs / Books</button>';
-		html += '<button type="button" data-tab="course" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Courses & paths</button>';
-		html += '<button type="button" data-tab="best" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Best playlists & lists</button>';
-		html += '<button type="button" data-tab="focus" class="tab-btn px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70">Focus & Ambiance</button>';
+		// Notion-style top tabs (mobile friendly)
+		html += '<div class="mb-6 flex flex-wrap gap-2 rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-xs sm:text-sm sticky top-[64px] z-10">';
+		html += '<button type="button" data-tab="youtube" class="tab-btn px-3 py-2 rounded-full bg-white dark:bg-gray-900 text-primary font-semibold shadow-sm min-h-[40px]">YouTube</button>';
+		html += '<button type="button" data-tab="articles" class="tab-btn px-3 py-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70 min-h-[40px]">Articles</button>';
+		html += '<button type="button" data-tab="books" class="tab-btn px-3 py-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70 min-h-[40px]">Books</button>';
+		html += '<button type="button" data-tab="github" class="tab-btn px-3 py-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70 min-h-[40px]">GitHub</button>';
+		html += '<button type="button" data-tab="reading" class="tab-btn px-3 py-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70 min-h-[40px]">Reading</button>';
+		html += '<button type="button" data-tab="focus" class="tab-btn px-3 py-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white/70 min-h-[40px]">Focus</button>';
 		html += '</div>';
 
 		html += '<div id="tab-panels" class="space-y-6">';
@@ -553,14 +555,17 @@
 		html += '<div id="yt-panel" class="p-5"></div>';
 		html += '</section>';
 
-		// Panel: Read / Blogs / Books — Notion-like cards; gallery/list view; open in popup
+		// View mode (Gallery/List) applies across Books/GitHub/Reading panels
 		resourceViewMode = getResourceViewMode();
 		var readViewClass = resourceViewMode === 'list' ? 'resource-list' : 'resource-gallery';
-		html += '<section data-tab-panel="read" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
-		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
-		html += '<h2 class="text-lg font-bold">📖 Read / blogs / books</h2>';
-		html += '<div class="resource-view-toggle" role="group" aria-label="View mode"><button type="button" class="resource-view-btn ' + (resourceViewMode === 'gallery' ? 'active' : '') + '" data-view="gallery">Gallery</button><button type="button" class="resource-view-btn ' + (resourceViewMode === 'list' ? 'active' : '') + '" data-view="list">List</button></div></div>';
-		html += '<div class="p-4 space-y-4 text-sm">';
+
+		function viewToggleHtml() {
+			return '<div class="resource-view-toggle" role="group" aria-label="View mode">' +
+				'<button type="button" class="resource-view-btn ' + (resourceViewMode === 'gallery' ? 'active' : '') + '" data-view="gallery">Gallery</button>' +
+				'<button type="button" class="resource-view-btn ' + (resourceViewMode === 'list' ? 'active' : '') + '" data-view="list">List</button>' +
+				'</div>';
+		}
+
 		function cardWithThumb(url, name, meta, icon) {
 			var thumb = icon || '📄';
 			var safeUrl = escapeHtml(url);
@@ -568,112 +573,93 @@
 			var safeMeta = escapeHtml(meta || '');
 			return '<button type="button" class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all w-full text-left" data-resource-url="' + safeUrl + '" data-resource-name="' + safeName + '">' +
 				'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">' + thumb + '</div>' +
-				'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + safeName + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + safeMeta + '</div></div></button>';
+				'<div class="p-3 flex-1 min-w-0">' +
+				'<div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + safeName + '</div>' +
+				'<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + safeMeta + '</div>' +
+				'</div></button>';
 		}
+		// Panel: Articles (live feed)
+		html += '<section data-tab-panel="articles" class="hidden rounded-2xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden material-elevation-1">';
+		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
+		html += '<div><h2 class="text-lg font-bold">📰 Articles</h2><p class="text-xs text-gray-500 dark:text-gray-400">Fresh links from Medium/TDS, Dev.to, Reddit, Hacker News, freeCodeCamp.</p></div>';
+		html += '<button type="button" id="resource-live-refresh" class="text-[11px] sm:text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[36px]">Refresh</button>';
+		html += '</div>';
+		html += '<div id="resource-live-trends" class="p-4 sm:p-5 space-y-4">';
+		html += '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-sm">';
+		html += '<div class="space-y-1"><p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Medium / TDS</p><ul id="resource-live-medium-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul><p id="resource-live-medium-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p></div>';
+		html += '<div class="space-y-1"><p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Dev.to</p><ul id="resource-live-devto-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul><p id="resource-live-devto-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p></div>';
+		html += '<div class="space-y-1"><p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Reddit</p><ul id="resource-live-reddit-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul><p id="resource-live-reddit-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p></div>';
+		html += '<div class="space-y-1"><p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Hacker News</p><ul id="resource-live-hn-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul><p id="resource-live-hn-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p></div>';
+		html += '<div class="space-y-1"><p class="text-xs font-semibold text-gray-600 dark:text-gray-300">freeCodeCamp</p><ul id="resource-live-fcc-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul><p id="resource-live-fcc-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p></div>';
+		html += '</div></div></section>';
+
+		// Panel: Books
+		html += '<section data-tab-panel="books" class="hidden rounded-2xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden material-elevation-1">';
+		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
+		html += '<div><h2 class="text-lg font-bold">📚 Books & docs</h2><p class="text-xs text-gray-500 dark:text-gray-400">Official docs + books for ' + escapeHtml(t.title || topicKey) + '.</p></div>' + viewToggleHtml();
+		html += '</div><div class="p-4 space-y-4 text-sm">';
 		if (t.books && t.books.length) {
-			html += '<div><h3 class="font-semibold mb-2">Books & official docs</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
-			t.books.forEach(function (r) {
-				html += cardWithThumb(r.url, r.name, 'Book / docs', '📖');
-			});
-			html += '</div></div>';
+			html += '<div class="resource-cards-wrap books-cards ' + readViewClass + '">';
+			t.books.forEach(function (r) { html += cardWithThumb(r.url, r.name, 'Book / docs', '📖'); });
+			html += '</div>';
+		} else {
+			html += '<p class="text-sm text-gray-500">(no books/docs added yet)</p>';
 		}
-		if (t.blogs && t.blogs.length) {
-			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
-			t.blogs.forEach(function (b) {
-				html += cardWithThumb(b.url, b.name, 'Blog / article', '📄');
-			});
-			html += '</div></div>';
-		}
+		html += '</div></section>';
+
+		// Panel: GitHub
+		html += '<section data-tab-panel="github" class="hidden rounded-2xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden material-elevation-1">';
+		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
+		html += '<div><h2 class="text-lg font-bold">⭐ GitHub</h2><p class="text-xs text-gray-500 dark:text-gray-400">Repos & curated lists to learn by building.</p></div>' + viewToggleHtml();
+		html += '</div><div class="p-4 space-y-4 text-sm">';
 		if (t.github && t.github.length) {
-			html += '<div class="mt-2"><h3 class="font-semibold mb-2">GitHub repositories</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
-			t.github.forEach(function (g) {
-				html += cardWithThumb(g.url, g.name, 'GitHub repo', '⭐');
-			});
+			html += '<div><h3 class="font-semibold mb-2">Topic repos</h3><div class="resource-cards-wrap github-cards ' + readViewClass + '">';
+			t.github.forEach(function (g) { html += cardWithThumb(g.url, g.name, 'GitHub repo', '⭐'); });
+			html += '</div></div>';
+		} else {
+			html += '<p class="text-sm text-gray-500">(no GitHub repos added yet)</p>';
+		}
+		html += '<div class="pt-3 border-t border-gray-200 dark:border-gray-700">';
+		html += '<h3 class="font-semibold mb-2">Curated mega-lists (always useful)</h3>';
+		html += '<ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">';
+		html += '<li><a href="https://github.com/academic/awesome-datascience" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-datascience</a></li>';
+		html += '<li><a href="https://github.com/josephmisiti/awesome-machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-machine-learning</a></li>';
+		html += '<li><a href="https://github.com/awesomedata/awesome-public-datasets" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-public-datasets</a></li>';
+		html += '<li><a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener" class="underline hover:text-primary">free-programming-books</a></li>';
+		html += '</ul></div>';
+		html += '</div></section>';
+
+		// Panel: Reading (blogs, reddit, courses, paths)
+		html += '<section data-tab-panel="reading" class="hidden rounded-2xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden material-elevation-1">';
+		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
+		html += '<div><h2 class="text-lg font-bold">📖 Reading</h2><p class="text-xs text-gray-500 dark:text-gray-400">Blogs, communities, courses & suggested paths.</p></div>' + viewToggleHtml();
+		html += '</div><div class="p-4 space-y-5 text-sm">';
+		if (t.blogs && t.blogs.length) {
+			html += '<div><h3 class="font-semibold mb-2">Blogs & long reads</h3><div class="resource-cards-wrap blogs-cards ' + readViewClass + '">';
+			t.blogs.forEach(function (b) { html += cardWithThumb(b.url, b.name, 'Blog / article', '📄'); });
 			html += '</div></div>';
 		}
 		if (t.reddit && t.reddit.length) {
-			html += '<div class="mt-2"><h3 class="font-semibold mb-2">Reddit communities</h3><div class="resource-cards-wrap read-cards ' + readViewClass + '">';
+			html += '<div><h3 class="font-semibold mb-2">Communities</h3><div class="resource-cards-wrap reddit-cards ' + readViewClass + '">';
 			t.reddit.forEach(function (r) {
 				var url = r.url || ('https://www.reddit.com/r/' + (r.subreddit || r.name || '').replace(/^r\//, '') + '/');
 				html += cardWithThumb(url, r.name || ('r/' + (r.subreddit || '')), 'Reddit', '🔴');
 			});
 			html += '</div></div>';
 		}
-		if ((!t.books || !t.books.length) && (!t.blogs || !t.blogs.length) && (!t.github || !t.github.length) && (!t.reddit || !t.reddit.length)) {
-			html += '<p class="text-sm text-gray-500">(no reading list yet)</p>';
-		}
-		html += '</div></section>';
-
-		// Panel: Courses & paths — Notion-like cards; gallery/list; open in popup
-		html += '<section data-tab-panel="course" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
-		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap items-center justify-between gap-2">';
-		html += '<h2 class="text-lg font-bold">🎓 Courses & learning paths</h2>';
-		html += '<div class="resource-view-toggle" role="group" aria-label="View mode"><button type="button" class="resource-view-btn ' + (resourceViewMode === 'gallery' ? 'active' : '') + '" data-view="gallery">Gallery</button><button type="button" class="resource-view-btn ' + (resourceViewMode === 'list' ? 'active' : '') + '" data-view="list">List</button></div></div>';
-		html += '<div class="p-4 space-y-4 text-sm">';
 		if (t.courses && t.courses.length) {
-			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="resource-cards-wrap course-cards ' + readViewClass + '">';
-			t.courses.forEach(function (c) {
-				html += '<button type="button" class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all w-full text-left" data-resource-url="' + escapeHtml(c.url) + '" data-resource-name="' + escapeHtml(c.name || '') + '">' +
-					'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">🎓</div>' +
-					'<div class="p-3 flex-1 min-w-0"><div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + escapeHtml(c.name || '') + '</div><div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Course</div></div></button>';
-			});
+			html += '<div><h3 class="font-semibold mb-2">Courses</h3><div class="resource-cards-wrap courses-cards ' + readViewClass + '">';
+			t.courses.forEach(function (c) { html += cardWithThumb(c.url, c.name, 'Course', '🎓'); });
 			html += '</div></div>';
-		} else {
-			html += '<p class="text-sm text-gray-500">(no courses added yet)</p>';
 		}
 		if (t.paths && t.paths.length) {
-			html += '<div class="mt-2 space-y-2"><h3 class="font-semibold">Suggested paths</h3><ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300">';
-			t.paths.forEach(function (p) {
-				html += '<li>' + p + '</li>';
-			});
+			html += '<div><h3 class="font-semibold mb-2">Suggested path</h3><ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300">';
+			t.paths.forEach(function (p) { html += '<li>' + escapeHtml(p) + '</li>'; });
 			html += '</ul></div>';
 		}
-		html += '</div></section>';
-
-		// Panel: Best playlists & lists — GitHub, Reddit, roadmaps
-		html += '<section data-tab-panel="best" class="hidden rounded-xl border-2 border-gray-200 bg-white dark:bg-gray-900 overflow-hidden">';
-		html += '<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"><h2 class="text-lg font-bold">⭐ Best playlists & must‑read lists</h2></div><div class="p-4 space-y-4 text-sm">';
-		html += '<p class="text-xs text-gray-500 dark:text-gray-400">Curated GitHub repos, Reddit communities, and learning lists. Use the <strong>Roadmap</strong> button in the nav to see step-by-step paths.</p>';
-		if (t.roadmapUrl) {
-			html += '<div><h3 class="font-semibold mb-1">Suggested roadmap for this topic</h3><p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Follow a structured path on roadmap.sh (opens in new tab). Tick <strong>Track</strong> in the main callout above to mark that you\'re following it.</p><a href="' + t.roadmapUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-1 rounded-lg bg-primary/90 text-white px-3 py-1.5 text-sm font-semibold hover:opacity-90">Open roadmap →</a></div>';
+		if ((!t.blogs || !t.blogs.length) && (!t.reddit || !t.reddit.length) && (!t.courses || !t.courses.length) && (!t.paths || !t.paths.length)) {
+			html += '<p class="text-sm text-gray-500">(no reading items yet)</p>';
 		}
-		if (t.github && t.github.length) {
-			html += '<div><h3 class="font-semibold mb-1">Topic-specific GitHub repos</h3><ul class="space-y-1">';
-			t.github.forEach(function (g) {
-				html += '<li><a href="' + g.url + '" target="_blank" rel="noopener" class="underline hover:text-primary">⭐ ' + g.name + ' →</a></li>';
-			});
-			html += '</ul></div>';
-		}
-		if (t.reddit && t.reddit.length) {
-			html += '<div><h3 class="font-semibold mb-1">Reddit communities</h3><ul class="space-y-1">';
-			t.reddit.forEach(function (r) {
-				var url = r.url || ('https://www.reddit.com/r/' + (r.subreddit || r.name || '').replace(/^r\//, '') + '/');
-				html += '<li><a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-primary">' + (r.name || 'r/' + (r.subreddit || '')) + ' →</a></li>';
-			});
-			html += '</ul></div>';
-		}
-		html += '<div><h3 class="font-semibold mb-1">Awesome & curated lists</h3><ul class="space-y-1">';
-		html += '<li><a href="https://github.com/vinta/awesome-python" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-python</a> · Python ecosystem</li>';
-		html += '<li><a href="https://github.com/academic/awesome-datascience" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-datascience</a> · data science resources</li>';
-		html += '<li><a href="https://github.com/josephmisiti/awesome-machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-machine-learning</a> · ML libraries & papers</li>';
-		html += '<li><a href="https://github.com/awesomedata/awesome-public-datasets" target="_blank" rel="noopener" class="underline hover:text-primary">awesome-public-datasets</a> · datasets to practice on</li>';
-		html += '</ul></div>';
-		html += '<div><h3 class="font-semibold mb-1">Free books & code repos</h3><ul class="space-y-1">';
-		html += '<li><a href="https://github.com/EbookFoundation/free-programming-books" target="_blank" rel="noopener" class="underline hover:text-primary">free-programming-books</a> · free books (all topics)</li>';
-		html += '<li><a href="https://github.com/ageron/handson-ml3" target="_blank" rel="noopener" class="underline hover:text-primary">Hands‑On ML (code)</a> · practical ML notebook repo</li>';
-		html += '<li><a href="https://github.com/rasbt/python-machine-learning-book-3rd-edition" target="_blank" rel="noopener" class="underline hover:text-primary">Python ML book (code)</a> · Python ML examples</li>';
-		html += '<li><a href="https://github.com/fastai/fastbook" target="_blank" rel="noopener" class="underline hover:text-primary">fastbook</a> · Deep Learning for Coders (fast.ai)</li>';
-		html += '</ul></div>';
-		html += '<div><h3 class="font-semibold mb-1">Practice & reference (free)</h3><ul class="space-y-1">';
-		html += '<li><a href="https://www.geeksforgeeks.org" target="_blank" rel="noopener" class="underline hover:text-primary">GeeksforGeeks</a> · data structures, algorithms, and language practice</li>';
-		html += '<li><a href="https://www.analyticsvidhya.com" target="_blank" rel="noopener" class="underline hover:text-primary">Analytics Vidhya</a> · data analytics & ML articles</li>';
-		html += '</ul></div>';
-		html += '<div><h3 class="font-semibold mb-1">Must‑read blogs & magazines</h3><ul class="space-y-1">';
-		html += '<li><a href="https://www.freecodecamp.org/news/" target="_blank" rel="noopener" class="underline hover:text-primary">freeCodeCamp News</a> · long‑form tutorials</li>';
-		html += '<li><a href="https://towardsdatascience.com" target="_blank" rel="noopener" class="underline hover:text-primary">Towards Data Science</a> · data / ML stories & guides</li>';
-		html += '<li><a href="https://medium.com/tag/data-science" target="_blank" rel="noopener" class="underline hover:text-primary">Medium · Data Science tag</a> · curated DS posts</li>';
-		html += '<li><a href="https://medium.com/tag/machine-learning" target="_blank" rel="noopener" class="underline hover:text-primary">Medium · Machine Learning tag</a> · ML deep dives</li>';
-		html += '</ul></div>';
 		html += '</div></section>';
 
 		// Panel: Focus & Ambiance — lo-fi radio, ambient scenes, study zone
@@ -738,49 +724,6 @@
 		html += '<div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-200">';
 		html += '\u{1F4A1} <strong>Tip:</strong> Play a radio station AND an ambient scene at the same time \u2014 the radio uses device audio, the scene uses YouTube, so they layer naturally for the perfect study vibe.';
 		html += '</div>';
-		html += '</div></section>';
-
-		// Live topic feed (Medium/TDS, Dev.to, Reddit, HN, freeCodeCamp) — per-topic sidebar-style block
-		html += '<section id="resource-live-trends" class="mt-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 sm:p-5 space-y-4">';
-		html += '<div class="flex flex-wrap items-center justify-between gap-2">';
-		html += '<div>';
-		html += '<h2 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100">Live topic feed</h2>';
-		html += '<p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Latest articles and posts about ' + escapeHtml(t.title || topicKey) + ' from across the web.</p>';
-		html += '</div>';
-		html += '<button type="button" id="resource-live-refresh" class="text-[11px] sm:text-xs px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Refresh</button>';
-		html += '</div>';
-		html += '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-sm">';
-
-		html += '<div class="space-y-1">';
-		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Medium / TDS</p>';
-		html += '<ul id="resource-live-medium-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
-		html += '<p id="resource-live-medium-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
-		html += '</div>';
-
-		html += '<div class="space-y-1">';
-		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Dev.to</p>';
-		html += '<ul id="resource-live-devto-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
-		html += '<p id="resource-live-devto-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
-		html += '</div>';
-
-		html += '<div class="space-y-1">';
-		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Reddit</p>';
-		html += '<ul id="resource-live-reddit-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
-		html += '<p id="resource-live-reddit-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
-		html += '</div>';
-
-		html += '<div class="space-y-1">';
-		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Hacker News</p>';
-		html += '<ul id="resource-live-hn-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
-		html += '<p id="resource-live-hn-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
-		html += '</div>';
-
-		html += '<div class="space-y-1">';
-		html += '<p class="text-xs font-semibold text-gray-600 dark:text-gray-300">freeCodeCamp</p>';
-		html += '<ul id="resource-live-fcc-list" class="space-y-1 text-xs text-gray-700 dark:text-gray-200"></ul>';
-		html += '<p id="resource-live-fcc-status" class="text-[11px] text-gray-500 dark:text-gray-500"></p>';
-		html += '</div>';
-
 		html += '</div></section>';
 
 		html += '</div>';
