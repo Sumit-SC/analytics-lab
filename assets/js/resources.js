@@ -5,6 +5,22 @@
  * Live feed: Medium/TDS, Dev.to, Reddit, Hacker News, freeCodeCamp.
  */
 (function () {
+	// If anything throws during boot, avoid a blank page.
+	function showFatalResourcesError(err) {
+		try { console.error('[resources] fatal', err); } catch (e) {}
+		var rootEl = document.getElementById('resource-root');
+		var nf = document.getElementById('resource-not-found');
+		if (rootEl) rootEl.classList.add('hidden');
+		if (nf) {
+			nf.classList.remove('hidden');
+			nf.innerHTML =
+				'<p class="text-gray-600 dark:text-gray-400 mb-2">Resources failed to load.</p>' +
+				'<p class="text-xs text-gray-500 dark:text-gray-500 mb-4">Try a hard refresh (Ctrl+F5). If it still fails, clear this site’s storage/service worker and reload.</p>' +
+				'<a href="../index.html" class="text-primary hover:underline">Back to Home</a>';
+		}
+	}
+
+	try {
 	var params = new URLSearchParams(window.location.search);
 	var initialTopic = (params.get('topic') || 'python').toLowerCase().replace(/[^a-z0-9-]/g, '');
 	var root = document.getElementById('resource-root');
@@ -1661,3 +1677,6 @@
 if (typeof initAnalyticsTracking === 'function') {
 	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'resources' });
 }
+	} catch (err) {
+		showFatalResourcesError(err);
+	}
