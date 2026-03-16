@@ -21,6 +21,12 @@
 	}
 
 	try {
+		// Boot banner: proves JS executed even if render fails later
+		try {
+			var boot = document.getElementById('resources-boot-banner');
+			if (boot) boot.textContent = 'Resources booted…';
+		} catch (e) {}
+
 	var params = new URLSearchParams(window.location.search);
 	var initialTopic = (params.get('topic') || 'python').toLowerCase().replace(/[^a-z0-9-]/g, '');
 	var root = document.getElementById('resource-root');
@@ -779,6 +785,10 @@
 
 		html += '</div>';
 		root.innerHTML = html;
+		try {
+			var boot = document.getElementById('resources-boot-banner');
+			if (boot) boot.textContent = 'Resources rendered.';
+		} catch (e) {}
 		renderSearchAndInsights(topicKey, topics, t);
 
 		// Resource cards: open in same-page popup (Notion/Medium-style)

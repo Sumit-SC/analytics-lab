@@ -58,7 +58,14 @@
 	</div>
 
 	<main class="max-w-6xl mx-auto px-4 sm:px-8 py-10">
-		<div id="resource-root"></div>
+		<div id="resource-root">
+			<div id="resources-boot-banner" class="mb-4 p-3 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/30 text-xs text-amber-800 dark:text-amber-200">
+				Loading Resources…
+			</div>
+			<div class="text-sm text-gray-600 dark:text-gray-400">
+				If this stays blank: open DevTools Console and refresh once. The page should still show a fallback message if something fails.
+			</div>
+		</div>
 		<div id="resource-not-found" class="hidden text-center py-12">
 			<p class="text-gray-600 dark:text-gray-400 mb-4">Topic not found.</p>
 			<a href="../index.html" class="text-primary hover:underline">Back to Home</a>
