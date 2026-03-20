@@ -414,6 +414,12 @@
 				if (resultsDisplay) resultsDisplay.textContent = '50';
 				if (daysSlider) daysSlider.value = 7;
 				if (daysDisplay) daysDisplay.textContent = '7';
+				var excludeEl = document.getElementById('job-filter-exclude');
+				if (excludeEl) excludeEl.value = '';
+				var tagsEl = document.getElementById('job-filter-tags');
+				if (tagsEl) tagsEl.value = '';
+				var tagModeEl = document.getElementById('job-filter-tag-mode');
+				if (tagModeEl) tagModeEl.value = 'any';
 				// Reset job sites to defaults
 				JOB_SITE_OPTIONS.forEach(function(site) {
 					var checkbox = document.getElementById('site-' + site.id);
@@ -1671,6 +1677,7 @@
 		}
 
 		// Filter out irrelevant jobs before calculating scores
+		enrichMissingJobTags();
 		allJobs = allJobs.filter(function (job) {
 			var fullText = (job.title + ' ' + job.description + ' ' + (job.tags || []).join(' ')).toLowerCase();
 			return isDataScienceJob(fullText);
@@ -1708,6 +1715,76 @@
 		if (loadingEl) loadingEl.style.display = 'none';
 		
 		updateSourceStats();
+	}
+
+	function enrichMissingJobTags() {
+		// Many sources don't provide normalized tags. For filtering, we generate lightweight tags
+		// from common skills found in title/description.
+		var tagKeywords = [
+			'sql',
+			'python',
+			'r',
+			'pandas',
+			'numpy',
+			'tableau',
+			'power bi',
+			'looker',
+			'plotly',
+			'matplotlib',
+			'seaborn',
+			'spark',
+			'airflow',
+			'kafka',
+			'dask',
+			'dbt',
+			'snowflake',
+			'redshift',
+			'bigquery',
+			'aws',
+			'azure',
+			'gcp',
+			'docker',
+			'kubernetes',
+			'machine learning',
+			'deep learning',
+			'nlp',
+			'computer vision',
+			'statistics',
+			'experiment',
+			'a/b'
+		];
+
+		for (var i = 0; i < allJobs.length; i++) {
+			var job = allJobs[i];
+			var tags = Array.isArray(job.tags) ? job.tags : [];
+			if (tags && tags.length > 0) continue;
+
+			var text = ((job.title || '') + ' ' + (job.company || '') + ' ' + (job.location || '') + ' ' + (job.description || '')).toLowerCase();
+			var found = [];
+			for (var k = 0; k < tagKeywords.length; k++) {
+				var kw = tagKeywords[k];
+				// Simple substring match; keeps it fast.
+				if (text.indexOf(kw) !== -1) found.push(kw);
+			}
+
+			// Add role-family tags if we detect them.
+			if (/(data analyst|business analyst|product analyst)/.test(text)) found.push('analyst');
+			if (/(data scientist|research scientist)/.test(text)) found.push('scientist');
+			if (/(ml engineer|machine learning engineer|analytics engineer)/.test(text)) found.push('engineer');
+
+			// De-dupe while preserving order.
+			var seen = {};
+			var deduped = [];
+			for (var f = 0; f < found.length; f++) {
+				var t = found[f];
+				if (t && !seen[t]) {
+					seen[t] = true;
+					deduped.push(t);
+				}
+			}
+
+			job.tags = deduped;
+		}
 	}
 
 	var currentDetailJob = null;
@@ -2720,6 +2797,9 @@
 		var filterStatus = document.getElementById('job-filter-status');
 		var filterAge = document.getElementById('job-filter-age');
 		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
 
 		var searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 		var sourceFilter = filterSource ? filterSource.value : 'all';
@@ -2727,6 +2807,11 @@
 		var statusFilter = filterStatus ? filterStatus.value : 'all';
 		var ageFilter = filterAge ? filterAge.value : 'all';
 		var roleFilter = filterRole ? filterRole.value : 'all';
+		var excludeInput = filterExclude ? String(filterExclude.value || '').trim().toLowerCase() : '';
+		var tagsInput = filterTags ? String(filterTags.value || '').trim().toLowerCase() : '';
+		var tagMode = filterTagMode ? filterTagMode.value : 'any';
+		var excludeTerms = excludeInput ? excludeInput.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
+		var tagTerms = tagsInput ? tagsInput.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
 		var selectedSiteAliases = getSelectedSiteAliases();
 		var useSiteFilter = hasAnySiteSelection();
 
@@ -2794,6 +2879,34 @@
 
 			// Role focus filter (Analyst / Scientist / Engineer / Associate & Junior)
 			if (!jobMatchesRole(job, roleFilter)) return false;
+
+			// Exclude keyword filter (comma-separated)
+			if (excludeTerms.length > 0) {
+				var hay = ((job.title || '') + ' ' + (job.company || '') + ' ' + (job.description || '') + ' ' + ((job.tags || []).join(' '))).toLowerCase();
+				for (var e = 0; e < excludeTerms.length; e++) {
+					var ex = excludeTerms[e];
+					if (ex && hay.indexOf(ex) !== -1) return false;
+				}
+			}
+
+			// Tag filter (comma-separated)
+			if (tagTerms.length > 0) {
+				var jobTagsText = Array.isArray(job.tags) ? job.tags.join(' ').toLowerCase() : '';
+				if (tagMode === 'all') {
+					for (var t = 0; t < tagTerms.length; t++) {
+						var term = tagTerms[t];
+						if (term && jobTagsText.indexOf(term) === -1) return false;
+					}
+				} else {
+					// any
+					var hit = false;
+					for (var t2 = 0; t2 < tagTerms.length; t2++) {
+						var term2 = tagTerms[t2];
+						if (term2 && jobTagsText.indexOf(term2) !== -1) { hit = true; break; }
+					}
+					if (!hit) return false;
+				}
+			}
 
 			return true;
 		});

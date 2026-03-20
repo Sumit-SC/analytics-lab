@@ -674,6 +674,24 @@
 					<option value="scientist">Scientist</option>
 					<option value="engineer">Engineer</option>
 				</select>
+				<input
+					id="job-filter-exclude"
+					type="text"
+					class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[190px]"
+					placeholder="Exclude: sales, intern, marketing"
+					aria-label="Exclude keywords"
+				/>
+				<input
+					id="job-filter-tags"
+					type="text"
+					class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[160px]"
+					placeholder="Tags: sql, tableau"
+					aria-label="Tag filter"
+				/>
+				<select id="job-filter-tag-mode" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[110px]">
+					<option value="any">Tag match: Any</option>
+					<option value="all">Tag match: All</option>
+				</select>
 				<button type="button" id="job-clear-filters-btn" class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-sm">
 					Clear Filters
 				</button>
