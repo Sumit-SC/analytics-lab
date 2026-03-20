@@ -176,6 +176,7 @@
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
 		setupSourcesPanel();
+		setupExternalBoardsLinks();
 		setupJobsDiffModal();
 		setupAdvancedFiltersToggle();
 		setupEventListeners();
@@ -189,6 +190,98 @@
 		}
 		setupPlannerEventListeners();
 		renderPlanner();
+	}
+
+	function getCurrentSearchContext() {
+		// Prefer whichever UI is visible/active.
+		var backendVercel = true;
+		try {
+			var rail = document.getElementById('api-backend-railway');
+			var ver = document.getElementById('api-backend-vercel');
+			if (rail && rail.checked) backendVercel = false;
+			if (ver && ver.checked) backendVercel = true;
+		} catch (e) {}
+
+		if (backendVercel) {
+			var roleEl = document.getElementById('vercel-search-role');
+			var locEl = document.getElementById('vercel-search-location');
+			var q = roleEl && roleEl.value ? String(roleEl.value) : 'data analyst';
+			var loc = locEl && locEl.value ? String(locEl.value) : 'remote';
+			return { q: q, location: loc };
+		}
+
+		var qEl = document.getElementById('job-search-input');
+		var locInput = document.getElementById('job-location-input');
+		return {
+			q: (qEl && qEl.value ? String(qEl.value) : 'data analyst'),
+			location: (locInput && locInput.value ? String(locInput.value) : 'remote')
+		};
+	}
+
+	function setupExternalBoardsLinks() {
+		var container = document.getElementById('job-external-boards-dynamic');
+		if (!container) return;
+
+		function render(boards) {
+			container.innerHTML = '';
+			if (!boards || !boards.length) {
+				container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">No boards available.</span>';
+				return;
+			}
+			for (var i = 0; i < boards.length; i++) {
+				var b = boards[i];
+				if (!b || !b.url || !b.name) continue;
+				var a = document.createElement('a');
+				a.href = b.url;
+				a.target = '_blank';
+				a.rel = 'noopener';
+				a.className = 'px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline';
+				a.textContent = b.name;
+				container.appendChild(a);
+			}
+		}
+
+		function load() {
+			var ctx = getCurrentSearchContext();
+			var base = (window.JOB_PROXY_URL || '').replace(/\/$/, '');
+			var url = base + '/api/job-boards?q=' + encodeURIComponent(ctx.q) + '&location=' + encodeURIComponent(ctx.location) + '&limit=24';
+
+			container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">Loading…</span>';
+			fetchWithTimeout(url, null, 15000)
+				.then(function (r) { return r && r.ok ? r.json() : null; })
+				.then(function (data) {
+					if (!data || !data.ok || !Array.isArray(data.boards)) {
+						container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">Boards unavailable.</span>';
+						return;
+					}
+					render(data.boards);
+				})
+				.catch(function () {
+					container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">Boards unavailable.</span>';
+				});
+		}
+
+		// Update when user changes role/location/backends.
+		document.addEventListener('change', function (e) {
+			var id = e && e.target && e.target.id ? e.target.id : '';
+			if (id === 'vercel-search-role' || id === 'vercel-search-location' || id === 'job-search-input' || id === 'job-location-input' || id === 'api-backend-railway' || id === 'api-backend-vercel') {
+				load();
+			}
+		});
+		document.addEventListener('input', function (e) {
+			var id = e && e.target && e.target.id ? e.target.id : '';
+			if (id === 'job-search-input' || id === 'job-location-input') {
+				// Avoid spamming the API while typing; small debounce.
+				try {
+					window.clearTimeout(window.__jobBoardsDebounce);
+					window.__jobBoardsDebounce = window.setTimeout(load, 500);
+				} catch (e2) {
+					load();
+				}
+			}
+		});
+
+		load();
 	}
 
 	function setupAdvancedFiltersToggle() {

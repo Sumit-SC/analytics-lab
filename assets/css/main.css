@@ -2776,10 +2776,7 @@ body:has(#global-music-bar) {
 }
 
 /* Resources flyout (right side, like Dict but with subject/subsections) */
-#sidebar ~ #global-resources-toggle,
-#sidebar ~ #global-resources-flyout {
-	display: none !important;
-}
+/* Do NOT hide when sidebar exists: users expect this everywhere. */
 
 #global-resources-toggle {
 	position: fixed;

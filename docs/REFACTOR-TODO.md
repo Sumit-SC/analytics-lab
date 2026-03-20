@@ -76,8 +76,8 @@ Use with [ROADMAP.md](./ROADMAP.md) for full backlog; this file focuses on struc
 
 ## 5. Patches and small fixes
 
-- [ ] **Pipeline (GitHub Actions)**  
-  Add deploy step (e.g. GitHub Pages or Vercel) after OMDb inject. See `.github/workflows/inject-omdb-and-deploy.yml`.
+- [x] **Pipeline (GitHub Actions)**  
+  Add deploy step (e.g. GitHub Pages or Vercel) after OMDb inject. See `.github/workflows/inject-omdb-and-deploy.yml`. Done per analytics-lab TODO.
 
 - [ ] **OMDb API key**  
   Document: local `localStorage.setItem('omdb_api_key', '...')`; production repo secret `OMDB_API_KEY`.

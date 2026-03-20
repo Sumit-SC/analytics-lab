@@ -233,9 +233,14 @@
 
 		var rolePaths = {
 			'data-analyst': ['excel', 'sql', 'stats', 'data-analytics', 'power-bi', 'tableau', 'python', 'product-analytics', 'ab-testing'],
+			'analytics-engineer': ['sql', 'dbt', 'data-modeling', 'data-warehouse', 'metrics', 'data-quality', 'python', 'airflow'],
 			'data-scientist': ['python', 'stats', 'math', 'data-science', 'machine-learning', 'deep-learning', 'nlp', 'llms'],
-			'data-engineer': ['python', 'sql', 'data-engineering', 'databases', 'cloud-data', 'airflow', 'dbt', 'spark', 'streaming'],
-			'ml-engineer': ['python', 'machine-learning', 'mlops', 'deep-learning', 'llms', 'fastapi', 'docker', 'kubernetes']
+			'ml-engineer': ['python', 'machine-learning', 'mlops', 'deep-learning', 'llms', 'docker', 'kubernetes', 'cloud-data'],
+			'mlops': ['docker', 'kubernetes', 'mlops', 'cloud-data', 'ci-cd', 'observability', 'llms'],
+			'genai-llm': ['python', 'nlp', 'llms', 'vector-databases', 'rag', 'prompt-engineering', 'mlops'],
+			'automation': ['python', 'n8n', 'apis', 'sql', 'cloud-data', 'analytics-engineering'],
+			'cloud-data': ['cloud-data', 'databases', 'data-warehouse', 'airflow', 'dbt', 'kubernetes', 'security'],
+			'data-engineer': ['python', 'sql', 'data-engineering', 'databases', 'cloud-data', 'airflow', 'dbt', 'spark', 'streaming']
 		};
 
 		function pill(topicId) {
@@ -281,9 +286,14 @@
 			'<div class="flex flex-wrap items-center gap-2">' +
 			'<select id="resources-role-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-2 text-sm text-gray-800 dark:text-gray-200" aria-label="Role">' +
 			'<option value="data-analyst">Data Analyst</option>' +
+			'<option value="analytics-engineer">Analytics Engineer</option>' +
 			'<option value="data-scientist">Data Scientist</option>' +
 			'<option value="data-engineer">Data Engineer</option>' +
 			'<option value="ml-engineer">ML Engineer</option>' +
+			'<option value="mlops">MLOps</option>' +
+			'<option value="genai-llm">GenAI / LLM</option>' +
+			'<option value="automation">Automation (n8n)</option>' +
+			'<option value="cloud-data">Cloud (data)</option>' +
 			'</select>' +
 			'<div id="resources-role-path" class="flex flex-wrap gap-2"></div>' +
 			'</div>' +
@@ -568,14 +578,20 @@
 
 		function cardWithThumb(url, name, meta, icon) {
 			var thumb = icon || '📄';
+			var domain = '';
+			try { domain = (new URL(url)).hostname.replace(/^www\./, ''); } catch (e) {}
+			var favicon = domain ? ('https://www.google.com/s2/favicons?domain=' + encodeURIComponent(domain) + '&sz=64') : '';
 			var safeUrl = escapeHtml(url);
 			var safeName = escapeHtml(name || '');
 			var safeMeta = escapeHtml(meta || '');
 			return '<button type="button" class="resource-card-with-thumb flex rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden hover:border-primary/50 hover:shadow-md transition-all w-full text-left" data-resource-url="' + safeUrl + '" data-resource-name="' + safeName + '">' +
-				'<div class="resource-card-thumb w-20 flex-shrink-0 flex items-center justify-center text-2xl bg-gray-100 dark:bg-gray-800">' + thumb + '</div>' +
+				'<div class="resource-card-thumb w-20 flex-shrink-0 flex flex-col items-center justify-center gap-1 text-2xl bg-gray-100 dark:bg-gray-800">' +
+				(favicon ? ('<img src="' + escapeHtml(favicon) + '" alt="" loading="lazy" style="width:28px;height:28px;border-radius:6px">') : '') +
+				'<span aria-hidden="true" style="font-size:18px;line-height:1">' + thumb + '</span>' +
+				'</div>' +
 				'<div class="p-3 flex-1 min-w-0">' +
 				'<div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + safeName + '</div>' +
-				'<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + safeMeta + '</div>' +
+				'<div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">' + safeMeta + (domain ? (' · ' + escapeHtml(domain)) : '') + '</div>' +
 				'</div></button>';
 		}
 		// Panel: Articles (live feed)
@@ -1014,10 +1030,9 @@
 				iframeWrapper.style.aspectRatio = '16 / 9';
 				var iframe = document.createElement('iframe');
 				iframe.className = 'w-full h-full';
-				var listId = (embedId.indexOf('PL') === 0) ? embedId : ('PL' + embedId);
 				var ytBase = 'https://www.youtube-nocookie.com/embed';
 				if (isPlaylist) {
-					iframe.src = ytBase + '/videoseries?list=' + listId + '&rel=0&modestbranding=1';
+					iframe.src = ytBase + '/videoseries?list=' + embedId + '&rel=0&modestbranding=1';
 				} else {
 					iframe.src = ytBase + '/' + embedId + '?rel=0&modestbranding=1';
 				}
@@ -1026,7 +1041,7 @@
 				iframeWrapper.appendChild(iframe);
 				wrap.appendChild(iframeWrapper);
 				var watchLink = document.createElement('a');
-				watchLink.href = isPlaylist ? ('https://www.youtube.com/playlist?list=' + listId) : ('https://www.youtube.com/watch?v=' + embedId);
+				watchLink.href = isPlaylist ? ('https://www.youtube.com/playlist?list=' + embedId) : ('https://www.youtube.com/watch?v=' + embedId);
 				watchLink.target = '_blank';
 				watchLink.rel = 'noopener';
 				watchLink.className = 'text-xs text-primary hover:underline mt-1 inline-block';
