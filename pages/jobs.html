@@ -21,12 +21,20 @@
 		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
 		// Railway: Uses /jobs (cached) and /refresh (POST, scrapes fresh)
 		// Default (Vercel): window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+		// To use Koyeb (FastAPI): window.JOB_PROXY_URL = 'https://YOUR-APP.koyeb.app';
 		// To use Railway: window.JOB_PROXY_URL = 'https://YOUR-APP.up.railway.app';
 		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
 		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
 		var __isLocalhost = false;
 		try { __isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1'); } catch (e) {}
-		window.JOB_PROXY_URL = window.JOB_PROXY_URL || (__isLocalhost ? '' : 'https://playground-serveless.vercel.app');
+		// You can also override via query param: ?backend=https://YOUR-APP.koyeb.app
+		var __backendParam = '';
+		try { __backendParam = (new URLSearchParams(window.location.search)).get('backend') || ''; } catch (e) { __backendParam = ''; }
+		if (__backendParam && typeof __backendParam === 'string') {
+			window.JOB_PROXY_URL = __backendParam.replace(/\/$/, '');
+		} else {
+			window.JOB_PROXY_URL = window.JOB_PROXY_URL || (__isLocalhost ? '' : 'https://playground-serveless.vercel.app');
+		}
 	</script>
 	<style>
 		.job-card {
