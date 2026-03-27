@@ -46,6 +46,7 @@
 		{ id: 'arbeitnow', name: 'Arbeitnow', default: true, aliases: ['arbeitnow'] },
 		{ id: 'jobicy', name: 'Jobicy', default: true, aliases: ['jobicy'] },
 		{ id: 'workingnomads', name: 'Working Nomads', default: true, aliases: ['workingnomads'] },
+		{ id: 'rssjobs.app', name: 'rssjobs.app', default: false, aliases: ['rssjobs.app', 'rssjobs'] },
 		{ id: 'naukri', name: 'Naukri', default: false, aliases: ['naukri'] },
 		{ id: 'himalayas', name: 'Himalayas', default: false, aliases: ['himalayas'] },
 		{ id: 'remote_co', name: 'Remote.co', default: false, aliases: ['remote.co', 'remoteco', 'remote_co'] },
