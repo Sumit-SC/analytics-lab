@@ -1357,6 +1357,10 @@
 		var perPage = parseInt(urlParams.get('per_page')) || null;
 		// Check for manual rssjobs URL parameter (fallback)
 		var rssjobsUrl = urlParams.get('rssjobs') || '';
+		var rssFeedInput = document.getElementById('job-rss-feed-url');
+		if (rssFeedInput && rssFeedInput.value && String(rssFeedInput.value).trim()) {
+			rssjobsUrl = String(rssFeedInput.value).trim();
+		}
 
 		// Analytics: capture job search (Railway vs Vercel) so dashboard shows usage
 		if (typeof window.trackEvent === 'function') {
