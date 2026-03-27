@@ -180,6 +180,7 @@
 		setupJobsDiffModal();
 		setupAdvancedFiltersToggle();
 		setupEventListeners();
+		setupSavedFilterPresets();
 		if (!isMobileViewport()) {
 			fetchAllJobs();
 		} else {
@@ -420,6 +421,8 @@
 				if (tagsEl) tagsEl.value = '';
 				var tagModeEl = document.getElementById('job-filter-tag-mode');
 				if (tagModeEl) tagModeEl.value = 'any';
+				var presetSelect = document.getElementById('job-filter-preset-select');
+				if (presetSelect) presetSelect.value = 'custom';
 				// Reset job sites to defaults
 				JOB_SITE_OPTIONS.forEach(function(site) {
 					var checkbox = document.getElementById('site-' + site.id);
@@ -784,6 +787,9 @@
 		var filterStatus = document.getElementById('job-filter-status');
 		var filterAge = document.getElementById('job-filter-age');
 		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
 		var refreshBtn = document.getElementById('job-refresh-btn');
 
 		if (searchInput) {
@@ -804,10 +810,170 @@
 		if (filterRole) {
 			filterRole.addEventListener('change', applyFilters);
 		}
+		if (filterExclude) {
+			filterExclude.addEventListener('input', debounce(applyFilters, 300));
+		}
+		if (filterTags) {
+			filterTags.addEventListener('input', debounce(applyFilters, 300));
+		}
+		if (filterTagMode) {
+			filterTagMode.addEventListener('change', applyFilters);
+		}
 		if (refreshBtn) {
 			refreshBtn.addEventListener('click', function () {
 				fetchAllJobs(true); // Force refresh - triggers scraping
 			});
+		}
+	}
+
+	var JOB_FILTER_PRESETS_KEY = 'job_filter_presets_v1';
+	var JOB_FILTER_PRESETS_LAST_KEY = 'job_filter_presets_last_v1';
+	function getSavedPresets() {
+		try {
+			var raw = localStorage.getItem(JOB_FILTER_PRESETS_KEY);
+			if (!raw) return [];
+			var parsed = JSON.parse(raw);
+			if (!Array.isArray(parsed)) return [];
+			return parsed;
+		} catch (e) {
+			return [];
+		}
+	}
+	function setSavedPresets(presets) {
+		try {
+			localStorage.setItem(JOB_FILTER_PRESETS_KEY, JSON.stringify(presets || []));
+		} catch (e) {}
+	}
+	function getQuickFilterState() {
+		var searchInput = document.getElementById('job-search-input');
+		var filterSource = document.getElementById('job-filter-source');
+		var filterMatch = document.getElementById('job-filter-match');
+		var filterStatus = document.getElementById('job-filter-status');
+		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
+
+		return {
+			q: searchInput ? String(searchInput.value || '') : '',
+			source: filterSource ? filterSource.value : 'all',
+			match: filterMatch ? filterMatch.value : 'all',
+			status: filterStatus ? filterStatus.value : 'all',
+			role: filterRole ? filterRole.value : 'all',
+			exclude: filterExclude ? String(filterExclude.value || '') : '',
+			tags: filterTags ? String(filterTags.value || '') : '',
+			tagMode: filterTagMode ? filterTagMode.value : 'any'
+		};
+	}
+	function applyQuickFilterStateToUI(state) {
+		if (!state) return;
+		var searchInput = document.getElementById('job-search-input');
+		var filterSource = document.getElementById('job-filter-source');
+		var filterMatch = document.getElementById('job-filter-match');
+		var filterStatus = document.getElementById('job-filter-status');
+		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
+
+		if (searchInput && state.q != null) searchInput.value = String(state.q);
+		if (filterSource && state.source != null) filterSource.value = String(state.source);
+		if (filterMatch && state.match != null) filterMatch.value = String(state.match);
+		if (filterStatus && state.status != null) filterStatus.value = String(state.status);
+		if (filterRole && state.role != null) filterRole.value = String(state.role);
+		if (filterExclude && state.exclude != null) filterExclude.value = String(state.exclude);
+		if (filterTags && state.tags != null) filterTags.value = String(state.tags);
+		if (filterTagMode && state.tagMode != null) filterTagMode.value = String(state.tagMode);
+	}
+	function setupSavedFilterPresets() {
+		var presetSelect = document.getElementById('job-filter-preset-select');
+		var presetNameInput = document.getElementById('job-filter-preset-name');
+		var presetSaveBtn = document.getElementById('job-filter-preset-save');
+		if (!presetSelect || !presetNameInput || !presetSaveBtn) return;
+
+		function render() {
+			var presets = getSavedPresets();
+			var last = localStorage.getItem(JOB_FILTER_PRESETS_LAST_KEY) || '';
+			// Keep current selected value stable if possible.
+			var current = presetSelect.value || 'custom';
+			presetSelect.innerHTML = '<option value="custom">Custom</option>';
+
+			for (var i = 0; i < presets.length; i++) {
+				var p = presets[i];
+				if (!p || !p.name) continue;
+				var opt = document.createElement('option');
+				opt.value = p.name;
+				opt.textContent = p.name;
+				presetSelect.appendChild(opt);
+			}
+
+			if (last) presetSelect.value = last;
+			else if (current && current !== 'custom') presetSelect.value = current;
+			else presetSelect.value = 'custom';
+		}
+
+		function save() {
+			var name = String(presetNameInput.value || '').trim();
+			if (!name) {
+				window.alert('Enter a preset name first.');
+				return;
+			}
+			var state = getQuickFilterState();
+			var presets = getSavedPresets();
+
+			var updated = false;
+			for (var i = 0; i < presets.length; i++) {
+				if (presets[i] && presets[i].name === name) {
+					presets[i] = { name: name, state: state, ts: Date.now() };
+					updated = true;
+					break;
+				}
+			}
+			if (!updated) {
+				presets.unshift({ name: name, state: state, ts: Date.now() });
+			}
+
+			// Keep latest 15 presets.
+			presets = presets.slice(0, 15);
+			setSavedPresets(presets);
+			localStorage.setItem(JOB_FILTER_PRESETS_LAST_KEY, name);
+			render();
+			presetSelect.value = name;
+		}
+
+		function load(name) {
+			var presets = getSavedPresets();
+			var found = null;
+			for (var i = 0; i < presets.length; i++) {
+				if (presets[i] && presets[i].name === name) {
+					found = presets[i];
+					break;
+				}
+			}
+			if (!found || !found.state) return;
+			applyQuickFilterStateToUI(found.state);
+			localStorage.setItem(JOB_FILTER_PRESETS_LAST_KEY, name);
+			applyFilters();
+		}
+
+		presetSelect.addEventListener('change', function () {
+			var v = presetSelect.value || 'custom';
+			if (v === 'custom') return;
+			load(v);
+		});
+
+		presetSaveBtn.addEventListener('click', function () {
+			save();
+			// Keep filter state as-is; no need to reload.
+			applyFilters();
+		});
+
+		// initial render + load last preset
+		render();
+		var last = localStorage.getItem(JOB_FILTER_PRESETS_LAST_KEY) || '';
+		if (last) {
+			// Apply to UI immediately; filtering will re-run after jobs load.
+			load(last);
 		}
 	}
 
