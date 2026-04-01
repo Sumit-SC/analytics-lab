@@ -17,12 +17,12 @@
 	<script src="../assets/js/nav-data.js" defer></script>
 	<script src="../assets/js/nav-inject.js" defer></script>
 	<script>
-		// Jobs API: Supports both Vercel and Railway
+		// Jobs API: Vercel (playground-serveless) or self-hosted job-search-api (Koyeb, etc.)
 		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
-		// Railway: Uses /jobs (cached) and /refresh (POST, scrapes fresh)
-		// Default (Vercel): window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
-		// To use Koyeb (FastAPI): window.JOB_PROXY_URL = 'https://YOUR-APP.koyeb.app';
-		// To use Railway: window.JOB_PROXY_URL = 'https://YOUR-APP.up.railway.app';
+		// job-search-api (FastAPI): Uses /jobs (cached) and /refresh (POST, scrapes fresh)
+		// Replace YOUR-APP with your Koyeb app hostname (no trailing slash):
+		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://YOUR-APP.koyeb.app';
+		// Default (Vercel): window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
 		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
 		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
 		var __isLocalhost = false;
@@ -74,7 +74,7 @@
 				box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
 			}
 		}
-		/* Railway UI Embed Toggle */
+		/* Job API UI embed toggle */
 		#railway-ui-embed-toggle-icon {
 			transition: transform 0.3s ease;
 		}
@@ -343,13 +343,13 @@
 		</aside>
 
 	<main class="flex-1 min-w-0 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-		<!-- Railway UI Embed (Collapsible) -->
+		<!-- job-search-api UI embed (Koyeb / FastAPI) -->
 		<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
 			<button type="button" id="railway-ui-embed-toggle" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false" aria-controls="railway-ui-embed-content">
 				<div class="flex items-center gap-3">
 					<span class="text-lg">📦</span>
 					<div>
-						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Railway Job Search UI</h2>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Job search API UI</h2>
 						<p class="text-xs text-gray-500 dark:text-gray-400">Core API, RSSJobs, JobSpy — refresh, fetch, filter in one place</p>
 					</div>
 				</div>
@@ -365,7 +365,7 @@
 						<button type="button" id="embed-blocked-banner-dismiss" class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50" aria-label="Dismiss">✕</button>
 					</div>
 					<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
-						Embedded UI from Railway. <a href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Open in new tab</a>
+						Embedded UI from job-search-api (set <code class="text-[11px]">JOB_SEARCH_API_BASE</code> in the script above). <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Open in new tab</a>
 					</p>
 					<div class="relative">
 						<iframe 
@@ -375,12 +375,12 @@
 							height="720" 
 							frameborder="0" 
 							class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-							title="Railway Job Search API UI">
+							title="Job search API UI">
 						</iframe>
 						<div id="railway-ui-embed-fallback" class="hidden absolute inset-0 rounded-lg border-2 border-dashed border-amber-400 dark:border-amber-600 bg-amber-50/95 dark:bg-amber-900/20 flex flex-col items-center justify-center p-6 text-center">
 							<p class="text-amber-800 dark:text-amber-200 font-medium mb-2">Embed may be blocked by an extension</p>
 							<p class="text-sm text-gray-700 dark:text-gray-300 mb-4">The panel above didn’t load. Use the button below to open the app in a new tab.</p>
-							<a id="railway-ui-embed-fallback-link" href="https://job-search-api-production-5d5d.up.railway.app/ui/" target="_blank" rel="noopener" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open Railway Job Search UI in new tab</a>
+							<a id="railway-ui-embed-fallback-link" href="#" target="_blank" rel="noopener" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open job-search-api UI in new tab</a>
 						</div>
 					</div>
 				</div>
@@ -463,12 +463,12 @@
 				Portfolio-ready workspace to source, score, and track data and analytics roles from multiple boards in one view.
 			</p>
 			
-			<!-- API Backend: Railway (default) | Vercel -->
+			<!-- API Backend: Koyeb (job-search-api) | Vercel -->
 			<div class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
 				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="railway" id="api-backend-railway" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-					<span class="text-sm text-gray-800 dark:text-gray-200">Railway</span>
+					<input type="radio" name="api-backend" value="koyeb" id="api-backend-koyeb" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+					<span class="text-sm text-gray-800 dark:text-gray-200">Koyeb</span>
 				</label>
 				<label class="flex items-center gap-2 cursor-pointer">
 					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
@@ -539,12 +539,12 @@
 			</div>
 			
 			<div id="job-tracker-main">
-			<!-- Search Configuration: shown only when Backend = Railway -->
+			<!-- Search Configuration: shown only when Backend = Koyeb (job-search-api) -->
 			<div id="job-search-config-section" class="mb-6 p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
 				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
 					<span>⚙️</span> Search Configuration
 				</h2>
-				<p id="job-search-config-railway-hint" class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Railway uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per site</strong> only.</p>
+				<p id="job-search-config-koyeb-hint" class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Koyeb (job-search-api) uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per site</strong> only.</p>
 				<div class="flex items-center justify-between mb-3 md:hidden">
 					<span class="text-xs text-gray-500 dark:text-gray-400">Advanced filters (optional)</span>
 					<button type="button" id="job-advanced-toggle" class="px-3 py-1 rounded-full bg-primary/5 text-primary text-xs font-semibold">
@@ -602,7 +602,7 @@
 						</div>
 					</div>
 
-					<!-- YOE filter (Railway supports server-side; Vercel ignores, UI filters locally where possible) -->
+					<!-- YOE filter (job-search-api supports server-side; Vercel ignores, UI filters locally where possible) -->
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
 							🎯 Experience (YOE)
@@ -650,7 +650,7 @@
 				</div>
 				</div>
 				
-				<!-- Action Buttons (Railway: Search Jobs; Clear Filters is below for both backends) -->
+				<!-- Action Buttons (Koyeb: Search Jobs; Clear Filters is below for both backends) -->
 				<div class="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
 					<button type="button" id="job-refresh-btn" class="px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
 						🔍 Search Jobs
@@ -658,7 +658,7 @@
 				</div>
 			</div>
 			
-			<!-- Quick Filters Row (visible for both Railway and Vercel) -->
+			<!-- Quick Filters Row (visible for both Koyeb and Vercel) -->
 			<div class="quick-filters-row flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters:</span>
 				<select id="job-filter-source" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
@@ -1015,7 +1015,7 @@
 		<div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
 			<p>Standalone Playground · Job Tracker · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
 			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present</p>
-			<p class="text-[11px] mt-2 text-gray-500 dark:text-gray-400">Credits: Jobs API (Vercel/Railway), OMDb proxy. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
+			<p class="text-[11px] mt-2 text-gray-500 dark:text-gray-400">Credits: Jobs API (Vercel / Koyeb), OMDb proxy. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
 		</div>
 	</footer>
 

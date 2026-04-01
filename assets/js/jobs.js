@@ -43,19 +43,25 @@
 		{ id: 'indeed', name: 'Indeed', default: true, aliases: ['indeed', 'indeed_rss'] },
 		{ id: 'linkedin', name: 'LinkedIn', default: true, aliases: ['linkedin'] },
 		{ id: 'hiring_cafe', name: 'hiring.cafe', default: true, aliases: ['hiring_cafe', 'hiringcafe'] },
+		{ id: 'hirist', name: 'Hirist', default: false, aliases: ['hirist'] },
 		{ id: 'arbeitnow', name: 'Arbeitnow', default: true, aliases: ['arbeitnow'] },
 		{ id: 'jobicy', name: 'Jobicy', default: true, aliases: ['jobicy'] },
 		{ id: 'workingnomads', name: 'Working Nomads', default: true, aliases: ['workingnomads'] },
 		{ id: 'hn_jobs', name: 'HN Jobs (hnrss)', default: false, aliases: ['hn_jobs', 'hnrss_jobs'] },
 		{ id: 'naukri', name: 'Naukri', default: false, aliases: ['naukri'] },
+		{ id: 'foundit', name: 'Foundit', default: false, aliases: ['foundit'] },
 		{ id: 'himalayas', name: 'Himalayas', default: false, aliases: ['himalayas'] },
+		{ id: 'shine', name: 'Shine', default: false, aliases: ['shine'] },
+		{ id: 'monster', name: 'Monster', default: false, aliases: ['monster'] },
 		{ id: 'remote_co', name: 'Remote.co', default: false, aliases: ['remote.co', 'remoteco', 'remote_co'] },
 		{ id: 'jobspresso', name: 'Jobspresso', default: false, aliases: ['jobspresso'] },
 		{ id: 'authentic_jobs', name: 'Authentic Jobs', default: false, aliases: ['authenticjobs', 'authentic_jobs'] },
+		{ id: 'glassdoor', name: 'Glassdoor', default: false, aliases: ['glassdoor'] },
 		{ id: 'stackoverflow', name: 'Stack Overflow', default: false, aliases: ['stackoverflow', 'stack_overflow'] },
 		{ id: 'greenhouse', name: 'Greenhouse', default: false, aliases: ['greenhouse'] },
 		{ id: 'lever', name: 'Lever', default: false, aliases: ['lever'] },
 		{ id: 'hn_jobs', name: 'HN Jobs', default: false, aliases: ['hn_jobs', 'hnjobs'] },
+		{ id: 'justremote', name: 'JustRemote', default: false, aliases: ['justremote'] },
 		// TrueUp doesn't expose a stable public API we can call from the browser; keep as an optional backend source name.
 		{ id: 'trueup', name: 'TrueUp', default: false, aliases: ['trueup'] }
 	];
@@ -136,7 +142,7 @@
 		);
 	}
 
-	// Normalize a job from API (Railway uses snake_case; Vercel uses camelCase)
+	// Normalize a job from API (job-search-api uses snake_case; Vercel uses camelCase)
 	function normalizeJobFromApi(item) {
 		if (!item || !item.title || !item.url) return null;
 		return {
@@ -198,9 +204,9 @@
 		// Prefer whichever UI is visible/active.
 		var backendVercel = true;
 		try {
-			var rail = document.getElementById('api-backend-railway');
+			var koyeb = document.getElementById('api-backend-koyeb');
 			var ver = document.getElementById('api-backend-vercel');
-			if (rail && rail.checked) backendVercel = false;
+			if (koyeb && koyeb.checked) backendVercel = false;
 			if (ver && ver.checked) backendVercel = true;
 		} catch (e) {}
 
@@ -266,7 +272,7 @@
 		// Update when user changes role/location/backends.
 		document.addEventListener('change', function (e) {
 			var id = e && e.target && e.target.id ? e.target.id : '';
-			if (id === 'vercel-search-role' || id === 'vercel-search-location' || id === 'job-search-input' || id === 'job-location-input' || id === 'api-backend-railway' || id === 'api-backend-vercel') {
+			if (id === 'vercel-search-role' || id === 'vercel-search-location' || id === 'job-search-input' || id === 'job-location-input' || id === 'api-backend-koyeb' || id === 'api-backend-vercel') {
 				load();
 			}
 		});
@@ -346,7 +352,7 @@
 	}
 
 	function setupEnhancedForm() {
-		// Location suggestions (Railway config uses a text input)
+		// Location suggestions (Koyeb / job-search-api config uses a text input)
 		var locationDatalist = document.getElementById('job-location-suggestions');
 		if (locationDatalist) {
 			locationDatalist.innerHTML = '';
@@ -359,7 +365,7 @@
 			});
 		}
 
-		// Populate job sites multi-select (legacy in Railway config section)
+		// Populate job sites multi-select (legacy in job-search-api config section)
 		var multiselect = document.getElementById('job-sites-multiselect');
 		if (multiselect) {
 			multiselect.innerHTML = '';
@@ -444,20 +450,35 @@
 		}
 	}
 	
-		// Setup API Backend: Railway (default) | Vercel — Railway shows search config, Vercel fetches directly from endpoints
-	var RAILWAY_API_URL = 'https://job-search-api-production-5d5d.up.railway.app';
+		// Base URL for job-search-api (Koyeb, local, etc.) — set window.JOB_SEARCH_API_BASE in jobs.html
+	function getJobSearchApiBase() {
+		if (typeof window === 'undefined' || window.JOB_SEARCH_API_BASE == null || window.JOB_SEARCH_API_BASE === '') return '';
+		return String(window.JOB_SEARCH_API_BASE).replace(/\/$/, '');
+	}
+	function proxyUrlLooksLikeJobSearchApi(proxyUrl) {
+		if (!proxyUrl) return false;
+		var p = String(proxyUrl).toLowerCase();
+		return p.indexOf('koyeb.app') !== -1 || p.indexOf('railway.app') !== -1
+			|| p.indexOf('localhost') !== -1 || p.indexOf('127.0.0.1') !== -1;
+	}
+
+		// Setup API Backend: Koyeb (job-search-api) | Vercel
 	function setupApiBackendToggle() {
-		var railwayRadio = document.getElementById('api-backend-railway');
+		try {
+			var legacy = localStorage.getItem('job_tracker_api_backend');
+			if (legacy === 'railway') localStorage.setItem('job_tracker_api_backend', 'koyeb');
+		} catch (eMigrate) { /* ignore */ }
+		var koyebRadio = document.getElementById('api-backend-koyeb');
 		var vercelRadio = document.getElementById('api-backend-vercel');
 		var statusEl = document.getElementById('api-status');
 		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'vercel';
 		if (savedBackend === 'vercel' && vercelRadio) vercelRadio.checked = true;
-		else if (railwayRadio) railwayRadio.checked = true;
+		else if (koyebRadio) koyebRadio.checked = true;
 
 		function updateApiBackend(backend) {
-			if (backend === 'railway') {
-				window.JOB_PROXY_URL = RAILWAY_API_URL;
-				if (statusEl) statusEl.textContent = '✓ Railway';
+			if (backend === 'koyeb') {
+				window.JOB_PROXY_URL = getJobSearchApiBase();
+				if (statusEl) statusEl.textContent = '✓ Koyeb';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
 				if (statusEl) statusEl.textContent = '✓ Vercel';
@@ -465,30 +486,29 @@
 			localStorage.setItem('job_tracker_api_backend', backend);
 			applyBackendVisibility(backend);
 			applyBackendFormState(backend);
-			// Initial load: use cached/snapshot (no force refresh) so both backends load quickly
 			fetchAllJobs(false);
 		}
 
-		if (railwayRadio) railwayRadio.addEventListener('change', function () { if (railwayRadio.checked) updateApiBackend('railway'); });
+		if (koyebRadio) koyebRadio.addEventListener('change', function () { if (koyebRadio.checked) updateApiBackend('koyeb'); });
 		if (vercelRadio) vercelRadio.addEventListener('change', function () { if (vercelRadio.checked) updateApiBackend('vercel'); });
-		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'railway');
+		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'koyeb');
 	}
 
-	// Railway: show full search config. Vercel: show vercel-search-section + sources panel.
+	// Koyeb (job-search-api): show full search config. Vercel: show vercel-search-section + sources panel.
 	function applyBackendVisibility(backend) {
 		var searchConfig = document.getElementById('job-search-config-section');
 		var vercelSearch = document.getElementById('vercel-search-section');
 		var sourcesPanel = document.getElementById('job-sources-panel');
-		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'railway');
+		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'koyeb');
 		if (vercelSearch) vercelSearch.classList.toggle('hidden', backend !== 'vercel');
 		if (sourcesPanel) sourcesPanel.classList.toggle('hidden', false);
 	}
 
-	// Railway: disable form controls it doesn't use (q, days, limit only); show hint
+	// Koyeb (job-search-api): disable form controls it doesn't use (q, days, limit only); show hint
 	function applyBackendFormState(backend) {
-		var isRailway = backend === 'railway';
-		var railwayHint = document.getElementById('job-search-config-railway-hint');
-		if (railwayHint) railwayHint.classList.toggle('hidden', !isRailway);
+		var isKoyeb = backend === 'koyeb';
+		var koyebHint = document.getElementById('job-search-config-koyeb-hint');
+		if (koyebHint) koyebHint.classList.toggle('hidden', !isKoyeb);
 		var locationInput = document.getElementById('job-location-input');
 		var countrySelect = document.getElementById('job-country-select');
 		var jobSitesContainer = document.getElementById('job-sites-multiselect');
@@ -510,18 +530,17 @@
 				label.classList.toggle('cursor-not-allowed', disabled);
 			}
 		}
-		setDisabled(locationInput, locationLabel, isRailway, 'Optional for Railway');
-		setDisabled(countrySelect, countryLabel, isRailway, 'Optional for Railway');
-		setDisabled(jobTypeSelect, jobTypeLabel, isRailway, 'Optional for Railway');
-		// Headless toggle only makes sense for Railway
+		setDisabled(locationInput, locationLabel, isKoyeb, 'Optional for job-search-api');
+		setDisabled(countrySelect, countryLabel, isKoyeb, 'Optional for job-search-api');
+		setDisabled(jobTypeSelect, jobTypeLabel, isKoyeb, 'Optional for job-search-api');
 		var headlessEl = document.getElementById('job-enable-headless');
 		if (headlessEl) {
-			headlessEl.disabled = !isRailway;
-			headlessEl.classList.toggle('opacity-60', !isRailway);
-			headlessEl.setAttribute('title', isRailway ? 'Enable slow headless scrapers (e.g. Naukri)' : 'Headless scrapers require Railway backend');
-			if (!isRailway) headlessEl.checked = false;
+			headlessEl.disabled = !isKoyeb;
+			headlessEl.classList.toggle('opacity-60', !isKoyeb);
+			headlessEl.setAttribute('title', isKoyeb ? 'Enable slow headless scrapers (e.g. Naukri)' : 'Headless scrapers require Koyeb / job-search-api backend');
+			if (!isKoyeb) headlessEl.checked = false;
 			headlessEl.onchange = function () {
-				applyBackendFormState(isRailway ? 'railway' : 'vercel');
+				applyBackendFormState(isKoyeb ? 'koyeb' : 'vercel');
 			};
 		}
 		if (jobSitesContainer) {
@@ -529,16 +548,25 @@
 			jobSitesContainer.setAttribute('title', 'Select which sources to fetch from');
 			if (jobSitesLabel) jobSitesLabel.classList.remove('opacity-60');
 			var siteInputs = jobSitesContainer.querySelectorAll('input[type="checkbox"]');
-			// Naukri requires headless scrapers (disable it unless Railway + headless enabled)
-			var headlessRequired = { 'naukri': true };
+			// These sources are implemented as Playwright headless scrapers (only work when "Headless" is enabled).
+			var headlessRequired = {
+				'linkedin': true,
+				'indeed': true,
+				'naukri': true,
+				'hirist': true,
+				'foundit': true,
+				'shine': true,
+				'monster': true,
+				'glassdoor': true
+			};
 			for (var i = 0; i < siteInputs.length; i++) {
 				var inp = siteInputs[i];
 				var id = inp && inp.value ? String(inp.value) : '';
 				if (headlessRequired[id]) {
-					var canUse = !!isRailway && !!(headlessEl && headlessEl.checked);
+					var canUse = !!isKoyeb && !!(headlessEl && headlessEl.checked);
 					inp.disabled = !canUse;
 					inp.classList.toggle('opacity-60', !canUse);
-					inp.setAttribute('title', canUse ? '' : 'Requires Railway + Headless scrapers');
+					inp.setAttribute('title', canUse ? '' : 'Requires Koyeb + Headless scrapers');
 					if (!canUse) inp.checked = false;
 				} else {
 					inp.disabled = false;
@@ -575,17 +603,21 @@
 		}
 	}
 
-	// Railway UI embed at top: collapsible; URL from current JOB_PROXY_URL when Railway, else default
+	// job-search-api UI embed: collapsible; URL from JOB_PROXY_URL or JOB_SEARCH_API_BASE
 	var EMBED_LOAD_TIMEOUT_MS = 8000;
 	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
-	function getRailwayEmbedUrl() {
+	function getJobSearchApiEmbedUrl() {
 		var proxy = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		if (proxy && (proxy.indexOf('railway') !== -1 || proxy.indexOf('up.railway.app') !== -1)) return proxy + '/ui/';
-		return RAILWAY_API_URL + '/ui/';
+		if (proxy && proxyUrlLooksLikeJobSearchApi(proxy)) return proxy + '/ui/';
+		var base = getJobSearchApiBase();
+		return base ? base + '/ui/' : '';
 	}
 	function setupRailwayUiEmbedToggle() {
 		var fallbackLink = document.getElementById('railway-ui-embed-fallback-link');
-		if (fallbackLink) fallbackLink.href = getRailwayEmbedUrl();
+		var openTab = document.getElementById('job-api-ui-open-tab');
+		var embedUrl = getJobSearchApiEmbedUrl();
+		if (fallbackLink && embedUrl) fallbackLink.href = embedUrl;
+		if (openTab && embedUrl) openTab.href = embedUrl;
 		var toggleBtn = document.getElementById('railway-ui-embed-toggle');
 		var contentDiv = document.getElementById('railway-ui-embed-content');
 		var iframe = document.getElementById('railway-ui-embed-iframe');
@@ -644,7 +676,7 @@
 				if (!src || src === 'about:blank' || src === '') {
 					hideFallback();
 					if (bannerEl) bannerEl.classList.add('hidden');
-					iframe.setAttribute('src', getRailwayEmbedUrl());
+					iframe.setAttribute('src', getJobSearchApiEmbedUrl());
 					loadTimeoutId = setTimeout(function () {
 						loadTimeoutId = null;
 						showFallback();
@@ -691,13 +723,13 @@
 
 		function setRssPanelVisible(visible) {
 			if (rssPanel) rssPanel.classList.toggle('hidden', !visible);
-			// Hide feed URL input when Railway backend is selected (not needed)
+			// Hide feed URL input when Koyeb / job-search-api backend is selected (not needed)
 			var feedUrlInput = document.getElementById('job-rss-feed-url');
 			var feedUrlLabel = feedUrlInput ? feedUrlInput.previousElementSibling : null;
 			var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-			var railwayRadio = document.getElementById('api-backend-railway');
-			var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
-			if (visible && isRailway && feedUrlInput) {
+			var koyebRadio = document.getElementById('api-backend-koyeb');
+			var isKoyebBackend = (koyebRadio && koyebRadio.checked) || (proxyUrl && proxyUrlLooksLikeJobSearchApi(proxyUrl));
+			if (visible && isKoyebBackend && feedUrlInput) {
 				feedUrlInput.style.display = 'none';
 				if (feedUrlLabel && feedUrlLabel.tagName === 'LABEL') feedUrlLabel.style.display = 'none';
 			} else if (visible && feedUrlInput) {
@@ -1192,7 +1224,7 @@
 		try {
 			var urlParams = new URLSearchParams(window.location.search);
 			var q = (document.getElementById('job-search-input') && document.getElementById('job-search-input').value) || (urlParams.get('q') || '');
-			var backend = (document.getElementById('api-backend-railway') && document.getElementById('api-backend-railway').checked) ? 'railway' : 'vercel';
+			var backend = (document.getElementById('api-backend-koyeb') && document.getElementById('api-backend-koyeb').checked) ? 'koyeb' : 'vercel';
 			var sources = buildSourcesParam() || '';
 			return { backend: backend, query: String(q || '').trim(), sources: String(sources || '').trim() };
 		} catch (e) {
@@ -1317,11 +1349,11 @@
 		allJobs = [];
 		
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		var railwayRadio = document.getElementById('api-backend-railway');
+		var koyebRadio = document.getElementById('api-backend-koyeb');
 		var vercelRadio = document.getElementById('api-backend-vercel');
-		var isRailway = (railwayRadio && railwayRadio.checked);
+		var isKoyeb = (koyebRadio && koyebRadio.checked);
 		if (!proxyUrl && vercelRadio && vercelRadio.checked) proxyUrl = 'https://playground-serveless.vercel.app';
-		if (!proxyUrl && isRailway) proxyUrl = RAILWAY_API_URL;
+		if (!proxyUrl && isKoyeb) proxyUrl = getJobSearchApiBase();
 		
 		var urlParams = new URLSearchParams(window.location.search);
 		var searchInput = document.getElementById('job-search-input');
@@ -1335,9 +1367,9 @@
 		var vercelLocation = document.getElementById('vercel-search-location');
 		var vercelDays = document.getElementById('vercel-search-days');
 		
-		// For Railway: use search config inputs. For Vercel: use Vercel search section (role, location, days)
+		// For Koyeb (job-search-api): use search config inputs. For Vercel: use Vercel search section (role, location, days)
 		var query, days, limit, location;
-		if (isRailway) {
+		if (isKoyeb) {
 			query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'analyst');
 			days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '7');
 			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
@@ -1353,7 +1385,7 @@
 		var yoeMax = (yoeMaxEl && yoeMaxEl.value !== '') ? parseInt(String(yoeMaxEl.value), 10) : null;
 		if (yoeMin != null && isNaN(yoeMin)) yoeMin = null;
 		if (yoeMax != null && isNaN(yoeMax)) yoeMax = null;
-		// Pagination for Railway
+		// Pagination for job-search-api
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;
 		// Check for manual rssjobs URL parameter (fallback)
@@ -1363,10 +1395,10 @@
 			rssjobsUrl = String(rssFeedInput.value).trim();
 		}
 
-		// Analytics: capture job search (Railway vs Vercel) so dashboard shows usage
+		// Analytics: capture job search (Koyeb vs Vercel) so dashboard shows usage
 		if (typeof window.trackEvent === 'function') {
-			window.trackEvent('jobs_search_' + (isRailway ? 'railway' : 'vercel'), {
-				backend: isRailway ? 'railway' : 'vercel',
+			window.trackEvent('jobs_search_' + (isKoyeb ? 'koyeb' : 'vercel'), {
+				backend: isKoyeb ? 'koyeb' : 'vercel',
 				query: query || null,
 				days: days || null,
 				limit: limit || null,
@@ -1376,10 +1408,10 @@
 		
 		var sourcesParam = buildSourcesParam();
 		
-		// Railway API: Use /refresh (POST) and /jobs (GET) endpoints
-		if (isRailway) {
+		// job-search-api: Use /refresh (POST) and /jobs (GET) endpoints
+		if (isKoyeb) {
 			if (forceRefresh) {
-				// Railway: POST /refresh
+				// POST /refresh
 				var headlessEl = document.getElementById('job-enable-headless');
 				var enableHeadless = !!(headlessEl && headlessEl.checked);
 				var refreshMode = enableHeadless ? 'all' : 'rss';
@@ -1392,7 +1424,7 @@
 					.then(function (res) {
 						var refreshData = res.ok ? res.body : null;
 						if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs)) {
-							// Railway /refresh returns jobs directly (snake_case from FastAPI)
+							// /refresh returns jobs directly (snake_case from FastAPI)
 							allJobs = [];
 							refreshData.jobs.forEach(function (item) {
 								var job = normalizeJobFromApi(item);
@@ -1419,17 +1451,17 @@
 							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 						} else {
 							// Fallback to /jobs endpoint
-							fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
+							fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
 						}
 					})
 					.catch(function (err) {
-						console.error('Railway refresh failed:', err);
-						fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
+						console.error('job-search-api refresh failed:', err);
+						fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
 					});
 				return;
 			} else {
-				// Railway: GET /jobs (cached) - use higher limit or pagination
-				fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
+				// GET /jobs (cached) - use higher limit or pagination
+				fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
 				return;
 			}
 		}
@@ -1472,7 +1504,7 @@
 		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
 	}
 	
-	// Fetch jobs from rssjobs.app via Railway /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
+	// Fetch jobs from rssjobs.app via job-search-api /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
 	function fetchRssJobsFromRssjobsApp(keywords, location) {
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
@@ -1495,16 +1527,16 @@
 		if (errorEl) errorEl.classList.add('hidden');
 		
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		var railwayRadio = document.getElementById('api-backend-railway');
-		var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
+		var koyebRadio = document.getElementById('api-backend-koyeb');
+		var isKoyebBackend = (koyebRadio && koyebRadio.checked) || (proxyUrl && proxyUrlLooksLikeJobSearchApi(proxyUrl));
 		
 		// Use keywords and location from dropdowns (no feed URL required)
 		var query = keywords || 'data analyst';
 		var loc = location || 'remote';
 		var limit = 400;
 		
-		if (isRailway) {
-			// Railway: Use /rssjobs endpoint directly (no feed URL needed, no CORS)
+		if (isKoyebBackend) {
+			// job-search-api: Use /rssjobs endpoint directly (no feed URL needed, no CORS)
 			var apiUrl = proxyUrl + '/rssjobs?keywords=' + encodeURIComponent(query) + '&location=' + encodeURIComponent(loc) + '&limit=' + limit;
 			
 			fetch(apiUrl)
@@ -1535,7 +1567,7 @@
 					saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 				})
 				.catch(function (err) {
-					console.error('Railway /rssjobs error:', err);
+					console.error('job-search-api /rssjobs error:', err);
 					if (loadingEl) loadingEl.style.display = 'none';
 					if (errorEl) errorEl.classList.remove('hidden');
 					if (errorMsgEl) {
@@ -1595,7 +1627,7 @@
 		if (loadingEl) loadingEl.style.display = 'none';
 		if (errorEl) {
 			errorEl.classList.remove('hidden');
-			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Try switching between Railway and Vercel above, then click Refresh.';
+			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Try switching between Koyeb and Vercel above, then click Refresh.';
 			var retryBtn = document.getElementById('job-error-retry');
 			if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
 		}
@@ -1631,8 +1663,8 @@
 			});
 	}
 	
-	// Railway API: Fetch jobs from /jobs endpoint (cached) - supports pagination
-	function fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax) {
+	// job-search-api: Fetch jobs from /jobs endpoint (cached) - supports pagination
+	function fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax) {
 		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
 		if (remoteOnly) apiUrl += '&remote_only=1';
 		if (yoeMin != null) apiUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
@@ -1654,9 +1686,9 @@
 				var errorEl = document.getElementById('job-error');
 				
 				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
-					// Railway /jobs might be empty if storage not persisting, try /refresh as fallback
-					console.log('Railway /jobs empty, trying /refresh...');
-					fetchRailwayRefresh(proxyUrl, query, days, limit);
+					// /jobs might be empty if storage not persisting, try /refresh as fallback
+					console.log('job-search-api /jobs empty, trying /refresh...');
+					fetchJobSearchApiRefresh(proxyUrl, query, days, limit);
 					return;
 				}
 				
@@ -1672,7 +1704,7 @@
 				// Handle pagination info if available
 				if (data.total !== undefined && data.page !== undefined && data.per_page !== undefined) {
 					var totalPages = Math.ceil(data.total / data.per_page);
-					console.log('Railway pagination:', 'Page ' + data.page + ' of ' + totalPages + ', Total jobs: ' + data.total);
+					console.log('job-search-api pagination:', 'Page ' + data.page + ' of ' + totalPages + ', Total jobs: ' + data.total);
 					
 					// If using pagination and there are more pages, fetch them
 					// But only if we're not already at the limit
@@ -1728,14 +1760,14 @@
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
-				console.error('Railway /jobs error:', err);
+				console.error('job-search-api /jobs error:', err);
 				// Fallback to /refresh
-				fetchRailwayRefresh(proxyUrl, query, days, limit);
+				fetchJobSearchApiRefresh(proxyUrl, query, days, limit);
 			});
 	}
 	
-	// Railway API: Fetch jobs from /refresh endpoint (scrapes fresh)
-	function fetchRailwayRefresh(proxyUrl, query, days, limit) {
+	// job-search-api: Fetch jobs from /refresh endpoint (scrapes fresh)
+	function fetchJobSearchApiRefresh(proxyUrl, query, days, limit) {
 		var headlessEl = document.getElementById('job-enable-headless');
 		var enableHeadless = !!(headlessEl && headlessEl.checked);
 		var refreshMode = enableHeadless ? 'all' : 'rss';
@@ -1766,7 +1798,7 @@
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
-				console.error('Railway /refresh error:', err);
+				console.error('job-search-api /refresh error:', err);
 				tryBrowserCacheThenError(1000 * 60 * 30);
 			});
 	}

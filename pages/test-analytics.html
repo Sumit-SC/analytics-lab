@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>System & API Test — Analytics, Vercel, Railway, Project APIs</title>
+    <title>System & API Test — Analytics, Vercel, Koyeb, Project APIs</title>
     <script>
-        // Same config as jobs.html — edit here and in jobs.html when switching to Railway
-        // Vercel (default): window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
-        // Railway: window.JOB_PROXY_URL = 'https://YOUR-APP.up.railway.app';
+        // Same knobs as jobs.html — set Koyeb URL after deploy (job-search-api)
+        window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://YOUR-APP.koyeb.app';
         window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
         window.OMDB_PROXY_URL = window.OMDB_PROXY_URL || 'https://playground-serveless.vercel.app';
     </script>
@@ -40,7 +39,7 @@
 </head>
 <body>
     <h1>System & API test</h1>
-    <p class="subtitle">Cloudflare Worker, Vercel APIs, Railway, and project APIs used across the site. Use this page to verify endpoints and see <a href="./docs.html">Docs</a> for details.</p>
+    <p class="subtitle">Cloudflare Worker, Vercel APIs, Koyeb (job-search-api), and project APIs used across the site. Use this page to verify endpoints and see <a href="./docs.html">Docs</a> for details.</p>
 
     <!-- Cloudflare: Analytics Worker + D1 -->
     <div class="section">
@@ -82,18 +81,18 @@
         <p class="muted">Testing ground: deploy your own Vercel project with api/omdb.js, set env <code>OMDB_API_KEY</code>.</p>
     </div>
 
-    <!-- Railway: Job-search-api -->
+    <!-- Koyeb: job-search-api -->
     <div class="section">
-        <h2>Railway — Job search API & UI</h2>
-        <p class="muted">job-search-api: scrapers, RSS, local UI. Events from Railway UI send site=railway-ui to analytics.</p>
-        <p><strong>Base URL:</strong> <code id="railway-base">—</code></p>
+        <h2>Koyeb — Job search API & UI</h2>
+        <p class="muted">job-search-api: scrapers, RSS, local UI. UI pages can send <code>site=railway-ui</code> to analytics (legacy label).</p>
+        <p><strong>Base URL:</strong> <code id="jobsearch-api-base">—</code></p>
         <div class="api-row">
             <span class="api-name">Jobs / health</span>
-            <span class="api-desc">Health or jobs endpoint — depends on your Railway deploy</span>
-            <button onclick="testRailway()">Test</button>
-            <span class="test-result" id="railway-result">—</span>
+            <span class="api-desc">GET /health — job-search-api on Koyeb (see <code>job-search-api/KOYEB.md</code>)</span>
+            <button onclick="testJobSearchApi()">Test</button>
+            <span class="test-result" id="jobsearch-api-result">—</span>
         </div>
-        <p class="muted">Testing page: your Railway app URL (e.g. job-search-api index, jobspy, rssjobs). See Docs.</p>
+        <p class="muted">Set <code>JOB_SEARCH_API_BASE</code> in the script above to your Koyeb app URL.</p>
     </div>
 
     <!-- Project APIs: used across Home, Trends, Playground, etc. -->
@@ -116,8 +115,8 @@
             vercelProxyBase: typeof window !== 'undefined' && window.OMDB_PROXY_URL
                 ? String(window.OMDB_PROXY_URL).replace(/\/$/, '')
                 : 'https://playground-serveless.vercel.app',
-            railwayBase: typeof window !== 'undefined' && window.JOB_PROXY_URL
-                ? String(window.JOB_PROXY_URL).replace(/\/$/, '')
+            jobSearchApiBase: typeof window !== 'undefined' && window.JOB_SEARCH_API_BASE
+                ? String(window.JOB_SEARCH_API_BASE).replace(/\/$/, '')
                 : ''
         };
 
@@ -133,7 +132,7 @@
         function showConfig() {
             el('cf-base').textContent = CONFIG.cloudflareBase;
             el('vercel-base').textContent = CONFIG.vercelProxyBase || '(not set — set OMDB_PROXY_URL)';
-            el('railway-base').textContent = CONFIG.railwayBase || '(not set — set JOB_PROXY_URL for Jobs)';
+            el('jobsearch-api-base').textContent = CONFIG.jobSearchApiBase || '(not set — set JOB_SEARCH_API_BASE)';
         }
 
         async function testCfHealth() {
@@ -215,23 +214,23 @@
             }
         }
 
-        // ----- Railway -----
-        async function testRailway() {
-            setResult('railway-result', '…', false);
-            if (!CONFIG.railwayBase) {
-                setResult('railway-result', 'No base URL', true);
+        // ----- job-search-api (Koyeb) -----
+        async function testJobSearchApi() {
+            setResult('jobsearch-api-result', '…', false);
+            if (!CONFIG.jobSearchApiBase) {
+                setResult('jobsearch-api-result', 'No base URL', true);
                 return;
             }
             try {
-                var r = await fetch(CONFIG.railwayBase + '/');
+                var r = await fetch(CONFIG.jobSearchApiBase + '/');
                 if (r.ok || r.status === 200) {
-                    setResult('railway-result', '✓ Reachable', false);
+                    setResult('jobsearch-api-result', '✓ Reachable', false);
                 } else {
-                    var r2 = await fetch(CONFIG.railwayBase + '/health').catch(function() { return null; });
-                    setResult('railway-result', (r2 && r2.ok) ? '✓ health OK' : '✗ ' + r.status, !(r2 && r2.ok));
+                    var r2 = await fetch(CONFIG.jobSearchApiBase + '/health').catch(function() { return null; });
+                    setResult('jobsearch-api-result', (r2 && r2.ok) ? '✓ health OK' : '✗ ' + r.status, !(r2 && r2.ok));
                 }
             } catch (e) {
-                setResult('railway-result', '✗ ' + e.message, true);
+                setResult('jobsearch-api-result', '✗ ' + e.message, true);
             }
         }
 

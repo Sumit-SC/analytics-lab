@@ -51,7 +51,7 @@
 				<li><a href="./resources.html" class="text-primary hover:underline">Resources</a> — Courses, books, YouTube, GitHub, learning paths by topic</li>
 				<li><a href="./tools.html" class="text-primary hover:underline">Tools</a> — Word editors, notebook, backup/restore, PDF viewer</li>
 				<li><a href="./jobs.html" class="text-primary hover:underline">Jobs</a> — Job listings (playground-serveless / job-search-api), filters, Binder notebook</li>
-				<li><a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test</a> — Cloudflare, Vercel, Railway, project APIs health checks</li>
+				<li><a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test</a> — Cloudflare, Vercel, Koyeb, project APIs health checks</li>
 				<li><a href="./docs.html" class="text-primary hover:underline">Docs</a> — This page</li>
 			</ul>
 		</section>
@@ -82,7 +82,7 @@
 			<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 list-disc list-inside">
 				<li><strong class="text-gray-800 dark:text-gray-200">Cloudflare</strong> — Analytics Worker (health at <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">/health</code>), event ingest (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">/api/events</code>), D1-backed dashboard (Basic auth).</li>
 				<li><strong class="text-gray-800 dark:text-gray-200">Vercel</strong> — OMDb/CineMaterial proxy, jobs snapshot/cached APIs. Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">OMDB_PROXY_URL</code> in the site; test page uses it for OMDb and jobs checks. Testing ground: deploy <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">api/omdb.js</code> with <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">OMDB_API_KEY</code>.</li>
-				<li><strong class="text-gray-800 dark:text-gray-200">Railway</strong> — Job-search-api (scrapers, RSS, local UI). Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_PROXY_URL</code> to your Railway app URL for jobs; test page can ping health/root.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Koyeb</strong> — Job-search-api (scrapers, RSS, local UI). Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_SEARCH_API_BASE</code> in <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">jobs.html</code> to your app URL; choose Backend → Koyeb on the Jobs page.</li>
 				<li><strong class="text-gray-800 dark:text-gray-200">Project APIs</strong> — Quotable, Animechan, Open-Meteo, Dictionary, Jikan, Wikipedia, Hacker News, Inshorts, TVMaze, Picsum, GitHub trending, Dev.to, etc. Each has a <strong>Test</strong> button to check connectivity from the browser.</li>
 			</ul>
 			<p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Analytics debug: <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">?analytics_debug=1</code> or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">localStorage.setItem('analytics_debug','1')</code> and DevTools Console.</p>
