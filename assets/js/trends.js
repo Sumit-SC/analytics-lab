@@ -95,9 +95,24 @@
 	window.__trendsRssProxyBase = (typeof window !== 'undefined' && window.TRENDS_RSS_PROXY_URL)
 		? String(window.TRENDS_RSS_PROXY_URL).replace(/\/$/, '')
 		: 'https://playground-serveless.vercel.app/api/rss';
+	function fetchJsonWithTimeout(url, timeoutMs) {
+		var controller = new AbortController();
+		var t = setTimeout(function () { controller.abort(); }, timeoutMs || 12000);
+		return fetch(url, { signal: controller.signal }).then(function (r) {
+			clearTimeout(t);
+			return r.ok ? r.json() : null;
+		}).catch(function () {
+			clearTimeout(t);
+			return null;
+		});
+	}
 	window.__trendsFetchRss = function (feedUrl, count) {
 		var u = window.__trendsRssProxyBase + '?url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(count || 10));
-		return fetch(u).then(function (r) { return r.ok ? r.json() : null; });
+		var rss2json = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(count || 10));
+		return fetchJsonWithTimeout(u, 12000).then(function (primary) {
+			if (primary && Array.isArray(primary.items) && primary.items.length) return primary;
+			return fetchJsonWithTimeout(rss2json, 12000);
+		});
 	};
 
 	function injectLoadButtons() {
@@ -139,6 +154,10 @@
 	setTimeout(function () {
 		injectLoadButtons();
 		observeSections();
+		// Eager-load key sections so page doesn't feel static on first open.
+		['live-breaking', 'alerts', 'hn', 'google-news', 'inshorts', 'wiki', 'devto', 'github'].forEach(function (id) {
+			if (window.__trendsLoaders[id]) window.runTrendsLoader(id, false);
+		});
 
 		// Region selector wiring
 		var regionSelect = document.getElementById('trends-region-select');

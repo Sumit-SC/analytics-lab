@@ -1005,7 +1005,46 @@
 				return idx;
 			}
 
-			function render(heroIdx) {
+			function getVideoValidityCache(id) {
+				try {
+					var raw = sessionStorage.getItem('resources_yt_valid_' + id);
+					if (raw === '1') return true;
+					if (raw === '0') return false;
+				} catch (e) {}
+				return null;
+			}
+			function setVideoValidityCache(id, ok) {
+				try { sessionStorage.setItem('resources_yt_valid_' + id, ok ? '1' : '0'); } catch (e) {}
+			}
+			function validateYouTubeEntry(entry) {
+				if (!entry || !entry.id) return Promise.resolve(false);
+				if (entry.playlist) return Promise.resolve(true);
+				var id = String(entry.id || '').trim();
+				if (!isValidYouTubeVideoId(id)) return Promise.resolve(false);
+				var cached = getVideoValidityCache(id);
+				if (cached != null) return Promise.resolve(cached);
+				var url = 'https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + id);
+				return fetch(url)
+					.then(function (r) { return r.ok ? r.json() : null; })
+					.then(function (data) {
+						var ok = !!(data && !data.error);
+						setVideoValidityCache(id, ok);
+						return ok;
+					})
+					.catch(function () {
+						// Keep unknown videos usable when validator is unavailable.
+						return true;
+					});
+			}
+			function filterPlayableVideos(list) {
+				return Promise.all((list || []).map(function (v) {
+					return validateYouTubeEntry(v).then(function (ok) { return ok ? v : null; });
+				})).then(function (checked) {
+					return checked.filter(Boolean);
+				});
+			}
+
+			function render(heroIdx, skippedCount) {
 				container.innerHTML = '';
 
 				if (heroIdx == null || heroIdx < 0 || heroIdx >= vids.length) {
@@ -1030,11 +1069,12 @@
 				iframeWrapper.style.aspectRatio = '16 / 9';
 				var iframe = document.createElement('iframe');
 				iframe.className = 'w-full h-full';
-				var ytBase = 'https://www.youtube-nocookie.com/embed';
+				// Prefer standard YouTube embed for broader compatibility; some videos fail in nocookie mode.
+				var ytBase = 'https://www.youtube.com/embed';
 				if (isPlaylist) {
-					iframe.src = ytBase + '/videoseries?list=' + embedId + '&rel=0&modestbranding=1';
+					iframe.src = ytBase + '/videoseries?list=' + embedId + '&rel=0&modestbranding=1&playsinline=1';
 				} else {
-					iframe.src = ytBase + '/' + embedId + '?rel=0&modestbranding=1';
+					iframe.src = ytBase + '/' + embedId + '?rel=0&modestbranding=1&playsinline=1';
 				}
 				iframe.title = hv.title || '';
 				iframe.allowFullscreen = true;
@@ -1047,6 +1087,13 @@
 				watchLink.className = 'text-xs text-primary hover:underline mt-1 inline-block';
 				watchLink.textContent = 'Watch on YouTube →';
 				wrap.appendChild(watchLink);
+				var watchPipedLink = document.createElement('a');
+				watchPipedLink.href = isPlaylist ? ('https://piped.video/playlist?list=' + embedId) : ('https://piped.video/watch?v=' + embedId);
+				watchPipedLink.target = '_blank';
+				watchPipedLink.rel = 'noopener';
+				watchPipedLink.className = 'text-xs text-gray-500 dark:text-gray-400 hover:underline ml-3 inline-block';
+				watchPipedLink.textContent = 'Open in Piped (fallback) →';
+				wrap.appendChild(watchPipedLink);
 
 				var heroTitle = document.createElement('p');
 				heroTitle.className = 'text-sm font-medium text-gray-800 dark:text-gray-100';
@@ -1113,6 +1160,12 @@
 				hint.className = 'text-xs text-gray-500 dark:text-gray-400';
 				hint.textContent = 'Click any card below to change the main player.';
 				wrap.appendChild(hint);
+				if (typeof skippedCount === 'number' && skippedCount > 0) {
+					var skippedNote = document.createElement('p');
+					skippedNote.className = 'text-xs text-amber-700 dark:text-amber-300';
+					skippedNote.textContent = 'Skipped broken videos: ' + skippedCount;
+					wrap.appendChild(skippedNote);
+				}
 
 				wrap.appendChild(listWrap);
 				container.appendChild(wrap);
@@ -1227,7 +1280,7 @@
 						iframeWrap.style.minHeight = '200px';
 						var iframe = document.createElement('iframe');
 						iframe.className = 'w-full h-full';
-						iframe.src = 'https://www.youtube-nocookie.com/embed/videoseries?list=' + uploadsListId + '&rel=0&modestbranding=1';
+						iframe.src = 'https://www.youtube.com/embed/videoseries?list=' + uploadsListId + '&rel=0&modestbranding=1&playsinline=1';
 						iframe.title = 'Channel uploads';
 						iframe.allowFullscreen = true;
 						iframeWrap.appendChild(iframe);
@@ -1256,8 +1309,19 @@
 					});
 				}
 			}
-
-			render();
+			container.innerHTML = '<p class="text-sm text-gray-500">Checking playable videos…</p>';
+			filterPlayableVideos(vids).then(function (playable) {
+				if (playable && playable.length) {
+					var skipped = Math.max(0, vids.length - playable.length);
+					vids = playable;
+					render(null, skipped);
+					return;
+				}
+				// Last fallback: keep original list if validation returns nothing.
+				render();
+			}).catch(function () {
+				render();
+			});
 		})(t);
 
 		// Live topic trends: Medium/TDS tag feed, Dev.to tag feed, Reddit hot posts

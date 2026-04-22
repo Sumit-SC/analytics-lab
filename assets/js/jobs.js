@@ -96,6 +96,7 @@
 	var plannerEntries = [];
 	var sourceCounts = {}; // Track jobs per source from API
 	var apiSources = []; // List of sources from API
+	var lastFetchContext = { query: 'analyst', location: 'remote', days: 7, limit: 200 };
 
 	// Lightweight caching to avoid rate limits (especially Remotive)
 	var CACHE_PREFIX = 'job_tracker_cache_v1_';
@@ -1385,6 +1386,12 @@
 		var yoeMax = (yoeMaxEl && yoeMaxEl.value !== '') ? parseInt(String(yoeMaxEl.value), 10) : null;
 		if (yoeMin != null && isNaN(yoeMin)) yoeMin = null;
 		if (yoeMax != null && isNaN(yoeMax)) yoeMax = null;
+		lastFetchContext = {
+			query: query || 'analyst',
+			location: location || 'remote',
+			days: parseInt(days, 10) || 7,
+			limit: parseInt(limit, 10) || 200
+		};
 		// Pagination for job-search-api
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;
@@ -1624,13 +1631,142 @@
 			if (loadingEl) loadingEl.style.display = 'none';
 			return;
 		}
-		if (loadingEl) loadingEl.style.display = 'none';
-		if (errorEl) {
-			errorEl.classList.remove('hidden');
-			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Try switching between Koyeb and Vercel above, then click Refresh.';
-			var retryBtn = document.getElementById('job-error-retry');
-			if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
+		// Last-resort fallback: direct free public APIs (no Vercel/Koyeb dependency).
+		fetchPublicJobsFallback(
+			(lastFetchContext && lastFetchContext.query) || 'analyst',
+			(lastFetchContext && lastFetchContext.location) || 'remote',
+			(lastFetchContext && lastFetchContext.days) || 7,
+			(lastFetchContext && lastFetchContext.limit) || 200
+		).then(function (ok) {
+			if (ok) {
+				if (loadingEl) loadingEl.style.display = 'none';
+				return;
+			}
+			if (loadingEl) loadingEl.style.display = 'none';
+			if (errorEl) {
+				errorEl.classList.remove('hidden');
+				if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Backends are down and public fallback also failed. Try again later.';
+				var retryBtn = document.getElementById('job-error-retry');
+				if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
+			}
+		}).catch(function () {
+			if (loadingEl) loadingEl.style.display = 'none';
+			if (errorEl) {
+				errorEl.classList.remove('hidden');
+				if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Backends are down and public fallback also failed. Try again later.';
+				var retryBtn2 = document.getElementById('job-error-retry');
+				if (retryBtn2) retryBtn2.onclick = function () { fetchAllJobs(true); };
+			}
+		});
+	}
+
+	function fetchPublicJobsFallback(query, location, days, limit) {
+		var q = String(query || 'analyst').toLowerCase();
+		var loc = String(location || 'remote').toLowerCase();
+		var maxItems = Math.min(parseInt(limit, 10) || 200, 400);
+		var cutoffMs = Date.now() - ((parseInt(days, 10) || 7) * 24 * 60 * 60 * 1000);
+
+		function parseDateSafe(raw) {
+			if (!raw) return null;
+			var d = new Date(raw);
+			return isNaN(d.getTime()) ? null : d;
 		}
+		function containsQuery(text) {
+			if (!q) return true;
+			var t = String(text || '').toLowerCase();
+			return q.split(/\s+/).some(function (tok) { return tok && t.indexOf(tok) !== -1; });
+		}
+		function containsLocation(text) {
+			if (!loc || loc === 'remote' || loc === 'remote (any)') return true;
+			return String(text || '').toLowerCase().indexOf(loc) !== -1;
+		}
+
+		var remotiveUrl = 'https://remotive.com/api/remote-jobs?search=' + encodeURIComponent(q);
+		var arbeitnowUrl = 'https://www.arbeitnow.com/api/job-board-api';
+
+		var remotiveReq = fetchWithTimeout(remotiveUrl, {}, 12000)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var out = [];
+				var jobs = data && Array.isArray(data.jobs) ? data.jobs : [];
+				for (var i = 0; i < jobs.length; i++) {
+					var j = jobs[i] || {};
+					var posted = parseDateSafe(j.publication_date);
+					if (posted && posted.getTime() < cutoffMs) continue;
+					var hay = [j.title, j.company_name, j.description, j.category].join(' ');
+					if (!containsQuery(hay)) continue;
+					if (!containsLocation(j.candidate_required_location)) continue;
+					out.push({
+						id: 'free_remotive_' + (j.id || i),
+						title: j.title || 'Untitled role',
+						company: j.company_name || 'Unknown',
+						location: j.candidate_required_location || 'Remote',
+						url: j.url || '',
+						date: posted ? posted.toISOString() : null,
+						description: j.description || '',
+						source: 'remotive',
+						tags: Array.isArray(j.tags) ? j.tags : ['remotive']
+					});
+				}
+				return out;
+			})
+			.catch(function () { return []; });
+
+		var arbeitnowReq = fetchWithTimeout(arbeitnowUrl, {}, 12000)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var out = [];
+				var jobs = data && Array.isArray(data.data) ? data.data : [];
+				for (var i = 0; i < jobs.length; i++) {
+					var j = jobs[i] || {};
+					var posted = parseDateSafe(j.created_at || j.createdAt);
+					if (posted && posted.getTime() < cutoffMs) continue;
+					var hay = [j.title, j.company_name, j.description, (j.tags || []).join(' ')].join(' ');
+					if (!containsQuery(hay)) continue;
+					if (!containsLocation(j.location)) continue;
+					out.push({
+						id: 'free_arbeitnow_' + (j.slug || i),
+						title: j.title || 'Untitled role',
+						company: j.company_name || 'Unknown',
+						location: j.location || 'Remote',
+						url: j.url || '',
+						date: posted ? posted.toISOString() : null,
+						description: j.description || '',
+						source: 'arbeitnow',
+						tags: Array.isArray(j.tags) ? j.tags : ['arbeitnow']
+					});
+				}
+				return out;
+			})
+			.catch(function () { return []; });
+
+		return Promise.all([remotiveReq, arbeitnowReq]).then(function (res) {
+			var merged = (res[0] || []).concat(res[1] || []);
+			if (!merged.length) return false;
+			merged.sort(function (a, b) {
+				var da = a.date ? new Date(a.date).getTime() : 0;
+				var db = b.date ? new Date(b.date).getTime() : 0;
+				return db - da;
+			});
+			allJobs = merged.slice(0, maxItems).map(function (item) {
+				return normalizeJobFromApi(item) || item;
+			}).filter(Boolean);
+			sourceCounts = {};
+			allJobs.forEach(function (j) {
+				var src = j.source || 'public_api';
+				sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+			});
+			apiSources = Object.keys(sourceCounts);
+			processJobsData({
+				sourceCounts: sourceCounts,
+				sources: apiSources,
+				generatedAt: new Date().toISOString()
+			});
+			saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+			return true;
+		}).catch(function () {
+			return false;
+		});
 	}
 
 	// Fetch from cached jobs API (fallback when snapshot fails)
