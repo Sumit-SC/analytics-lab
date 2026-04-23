@@ -143,15 +143,44 @@
 		);
 	}
 
+	function canonicalizeJobUrl(rawUrl) {
+		try {
+			var u = new URL(String(rawUrl || '').trim());
+			// Remove tracking fragments and common marketing params.
+			u.hash = '';
+			var drop = {
+				'utm_source': 1, 'utm_medium': 1, 'utm_campaign': 1, 'utm_term': 1, 'utm_content': 1,
+				'ref': 1, 'ref_src': 1, 'source': 1, 'trk': 1, 'tracking': 1
+			};
+			Object.keys(drop).forEach(function (k) { u.searchParams.delete(k); });
+			var s = u.toString();
+			return s.endsWith('/') ? s.slice(0, -1) : s;
+		} catch (e) {
+			var txt = String(rawUrl || '').trim();
+			return txt.endsWith('/') ? txt.slice(0, -1) : txt;
+		}
+	}
+	function simpleHash(input) {
+		var s = String(input || '');
+		var h = 0;
+		for (var i = 0; i < s.length; i++) {
+			h = ((h << 5) - h) + s.charCodeAt(i);
+			h |= 0;
+		}
+		return Math.abs(h).toString(36);
+	}
+
 	// Normalize a job from API (job-search-api uses snake_case; Vercel uses camelCase)
 	function normalizeJobFromApi(item) {
 		if (!item || !item.title || !item.url) return null;
+		var canonicalUrl = canonicalizeJobUrl(item.url);
+		var fallbackId = 'job_' + simpleHash([canonicalUrl, item.title || '', item.company || ''].join('|'));
 		return {
-			id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+			id: item.id || fallbackId,
 			title: item.title,
 			company: item.company || 'Unknown',
 			location: item.location || 'Remote',
-			url: item.url,
+			url: canonicalUrl,
 			description: item.description || '',
 			tags: Array.isArray(item.tags) ? item.tags : [],
 			source: item.source || 'unknown',
@@ -2021,6 +2050,16 @@
 			var fullText = (job.title + ' ' + job.description + ' ' + (job.tags || []).join(' ')).toLowerCase();
 			return isDataScienceJob(fullText);
 		});
+		// Canonical URL dedupe to avoid duplicates across feeds/sources.
+		var seenCanonical = {};
+		allJobs = allJobs.filter(function (job) {
+			var key = canonicalizeJobUrl(job.url);
+			if (!key) return false;
+			if (seenCanonical[key]) return false;
+			seenCanonical[key] = true;
+			job.url = key;
+			return true;
+		});
 
 		// Calculate match scores
 		allJobs.forEach(function (job) {
@@ -2041,6 +2080,30 @@
 		});
 
 		updateSourceFilterDropdown();
+		(function renderSourceDegradationNotice() {
+			var host = document.getElementById('job-stats-diff');
+			if (!host) return;
+			var id = 'job-source-issues-inline';
+			var existing = document.getElementById(id);
+			if (!data || !Array.isArray(data._errors) || !data._errors.length) {
+				if (existing) existing.remove();
+				return;
+			}
+			var unique = {};
+			for (var i = 0; i < data._errors.length; i++) {
+				var src = data._errors[i] && data._errors[i].source ? String(data._errors[i].source) : 'unknown';
+				unique[src] = true;
+			}
+			var badSources = Object.keys(unique).sort();
+			if (!existing) {
+				existing = document.createElement('span');
+				existing.id = id;
+				existing.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300';
+				host.appendChild(existing);
+			}
+			existing.textContent = 'Degraded sources: ' + badSources.join(', ');
+			existing.title = 'Some sources failed in this fetch. Results may be partial.';
+		})();
 		
 		// Added/removed since last refresh (per query + selected sources)
 		try {
