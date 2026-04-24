@@ -97,6 +97,15 @@
 	var sourceCounts = {}; // Track jobs per source from API
 	var apiSources = []; // List of sources from API
 	var lastFetchContext = { query: 'analyst', location: 'remote', days: 7, limit: 200 };
+	var activeJobsRequestId = 0;
+
+	function beginJobsRequest() {
+		activeJobsRequestId += 1;
+		return activeJobsRequestId;
+	}
+	function isActiveJobsRequest(requestId) {
+		return requestId === activeJobsRequestId;
+	}
 
 	// Lightweight caching to avoid rate limits (especially Remotive)
 	var CACHE_PREFIX = 'job_tracker_cache_v1_';
@@ -1357,6 +1366,7 @@
 
 	// Fetch jobs from cached API (fast) or trigger refresh
 	function fetchAllJobs(forceRefresh) {
+		var requestId = beginJobsRequest();
 		var loadingEl = document.getElementById('job-loading');
 		var jobListEl = document.getElementById('job-list');
 		var emptyEl = document.getElementById('job-empty');
@@ -1483,21 +1493,23 @@
 							});
 							sourceCounts = refreshData.sourceCounts || {};
 							apiSources = Array.isArray(refreshData.sources) ? refreshData.sources : [];
-							processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+							if (!isActiveJobsRequest(requestId)) return;
+							processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 						} else {
 							// Fallback to /jobs endpoint
-							fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
+							fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId);
 						}
 					})
 					.catch(function (err) {
 						console.error('job-search-api refresh failed:', err);
-						fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
+						if (!isActiveJobsRequest(requestId)) return;
+						fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId);
 					});
 				return;
 			} else {
 				// GET /jobs (cached) - use higher limit or pagination
-				fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax);
+				fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId);
 				return;
 			}
 		}
@@ -1520,28 +1532,31 @@
 							var job = normalizeJobFromApi(item);
 							if (job) allJobs.push(job);
 						});
-						processJobsData(refreshData);
+						if (!isActiveJobsRequest(requestId)) return;
+						processJobsData(refreshData, requestId);
 						saveJobsToBrowserCache({
 							jobs: allJobs.slice(0),
 							sourceCounts: refreshData.sourceCounts || {},
 							sources: refreshData.sources || []
 						});
 					} else {
-						fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+						fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location, requestId);
 					}
 				})
 				.catch(function (err) {
 					console.error('Refresh failed:', err);
-					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+					if (!isActiveJobsRequest(requestId)) return;
+					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location, requestId);
 				});
 			return;
 		}
 		// Primary: use jobs-snapshot (same API as playground); pass location for Vercel (Indeed/Stack Overflow)
-		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location, requestId);
 	}
 	
 	// Fetch jobs from rssjobs.app via job-search-api /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
 	function fetchRssJobsFromRssjobsApp(keywords, location) {
+		var requestId = beginJobsRequest();
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
 		var errorMsgEl = document.getElementById('job-error-message');
@@ -1599,7 +1614,8 @@
 					
 					sourceCounts = { 'rssjobs.app': allJobs.length };
 					apiSources = ['rssjobs.app'];
-					processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+					if (!isActiveJobsRequest(requestId)) return;
+					processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 					saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 				})
 				.catch(function (err) {
@@ -1615,7 +1631,7 @@
 			var rssjobsFeedUrl = feedUrlInput && feedUrlInput.value ? feedUrlInput.value.trim() : '';
 			var urlParams = new URLSearchParams(window.location.search);
 			var days = urlParams.get('days') || '3';
-			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, loc);
+			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, loc, requestId);
 		}
 	}
 	
@@ -1647,7 +1663,7 @@
 	}
 	
 	// Try browser cache then show error (used when both snapshot and cached API fail)
-	function tryBrowserCacheThenError(cacheMaxAgeMs) {
+	function tryBrowserCacheThenError(cacheMaxAgeMs, requestId) {
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
 		var errorMsgEl = document.getElementById('job-error-message');
@@ -1656,7 +1672,8 @@
 			allJobs = cached.jobs.slice(0);
 			sourceCounts = cached.sourceCounts || {};
 			apiSources = Array.isArray(cached.sources) ? cached.sources : [];
-			processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+			if (!isActiveJobsRequest(requestId)) return;
+			processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 			if (loadingEl) loadingEl.style.display = 'none';
 			return;
 		}
@@ -1665,8 +1682,10 @@
 			(lastFetchContext && lastFetchContext.query) || 'analyst',
 			(lastFetchContext && lastFetchContext.location) || 'remote',
 			(lastFetchContext && lastFetchContext.days) || 7,
-			(lastFetchContext && lastFetchContext.limit) || 200
+			(lastFetchContext && lastFetchContext.limit) || 200,
+			requestId
 		).then(function (ok) {
+			if (!isActiveJobsRequest(requestId)) return;
 			if (ok) {
 				if (loadingEl) loadingEl.style.display = 'none';
 				return;
@@ -1679,6 +1698,7 @@
 				if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
 			}
 		}).catch(function () {
+			if (!isActiveJobsRequest(requestId)) return;
 			if (loadingEl) loadingEl.style.display = 'none';
 			if (errorEl) {
 				errorEl.classList.remove('hidden');
@@ -1689,7 +1709,7 @@
 		});
 	}
 
-	function fetchPublicJobsFallback(query, location, days, limit) {
+	function fetchPublicJobsFallback(query, location, days, limit, requestId) {
 		var q = String(query || 'analyst').toLowerCase();
 		var loc = String(location || 'remote').toLowerCase();
 		var maxItems = Math.min(parseInt(limit, 10) || 200, 400);
@@ -1786,11 +1806,12 @@
 				sourceCounts[src] = (sourceCounts[src] || 0) + 1;
 			});
 			apiSources = Object.keys(sourceCounts);
+			if (!isActiveJobsRequest(requestId)) return false;
 			processJobsData({
 				sourceCounts: sourceCounts,
 				sources: apiSources,
 				generatedAt: new Date().toISOString()
-			});
+			}, requestId);
 			saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			return true;
 		}).catch(function () {
@@ -1799,7 +1820,7 @@
 	}
 
 	// Fetch from cached jobs API (fallback when snapshot fails)
-	function fetchCachedJobs(proxyUrl, query, days, limit) {
+	function fetchCachedJobs(proxyUrl, query, days, limit, requestId) {
 		var cachedUrl = proxyUrl 
 			? (proxyUrl + '/api/jobs-cached?q=' + encodeURIComponent(query))
 			: ('/api/jobs-cached?q=' + encodeURIComponent(query));
@@ -1811,7 +1832,7 @@
 				var errorEl = document.getElementById('job-error');
 				
 				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
-					tryBrowserCacheThenError(1000 * 60 * 30);
+					tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 					return;
 				}
 				
@@ -1819,17 +1840,18 @@
 					var job = normalizeJobFromApi(item);
 					if (job) allJobs.push(job);
 				});
-				processJobsData(data);
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData(data, requestId);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
 				console.error('Cached jobs API error:', err);
-				tryBrowserCacheThenError(1000 * 60 * 30);
+				tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 			});
 	}
 	
 	// job-search-api: Fetch jobs from /jobs endpoint (cached) - supports pagination
-	function fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax) {
+	function fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId) {
 		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
 		if (remoteOnly) apiUrl += '&remote_only=1';
 		if (yoeMin != null) apiUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
@@ -1853,7 +1875,7 @@
 				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
 					// /jobs might be empty if storage not persisting, try /refresh as fallback
 					console.log('job-search-api /jobs empty, trying /refresh...');
-					fetchJobSearchApiRefresh(proxyUrl, query, days, limit);
+					fetchJobSearchApiRefresh(proxyUrl, query, days, limit, requestId);
 					return;
 				}
 				
@@ -1883,7 +1905,8 @@
 						var pagesFetched = 0;
 						var fetchNextPage = function(pageNum) {
 							if (pagesFetched >= pagesNeeded || allJobs.length >= targetLimit) {
-								processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+								if (!isActiveJobsRequest(requestId)) return;
+								processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 								saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 								return;
 							}
@@ -1893,9 +1916,10 @@
 							if (yoeMin != null) pageUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
 							if (yoeMax != null) pageUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
 							pageUrl += '&page=' + pageNum + '&per_page=' + jobsPerPage;
-							fetch(pageUrl)
+							fetchWithTimeout(pageUrl, {}, 22000)
 								.then(function (r) { return r.ok ? r.json() : null; })
 								.then(function (pageData) {
+									if (!isActiveJobsRequest(requestId)) return;
 									if (pageData && pageData.ok && Array.isArray(pageData.jobs)) {
 										pageData.jobs.forEach(function (item) {
 											var job = normalizeJobFromApi(item);
@@ -1904,13 +1928,14 @@
 										pagesFetched++;
 										fetchNextPage(pageNum + 1);
 									} else {
-										processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+										processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 										saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 									}
 								})
 								.catch(function (err) {
 									console.error('Error fetching page ' + pageNum + ':', err);
-									processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+									if (!isActiveJobsRequest(requestId)) return;
+									processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 									saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 								});
 						};
@@ -1921,18 +1946,19 @@
 					}
 				}
 				
-				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
 				console.error('job-search-api /jobs error:', err);
 				// Fallback to /refresh
-				fetchJobSearchApiRefresh(proxyUrl, query, days, limit);
+				fetchJobSearchApiRefresh(proxyUrl, query, days, limit, requestId);
 			});
 	}
 	
 	// job-search-api: Fetch jobs from /refresh endpoint (scrapes fresh)
-	function fetchJobSearchApiRefresh(proxyUrl, query, days, limit) {
+	function fetchJobSearchApiRefresh(proxyUrl, query, days, limit, requestId) {
 		var headlessEl = document.getElementById('job-enable-headless');
 		var enableHeadless = !!(headlessEl && headlessEl.checked);
 		var refreshMode = enableHeadless ? 'all' : 'rss';
@@ -1947,7 +1973,7 @@
 				var errorEl = document.getElementById('job-error');
 				
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
-					tryBrowserCacheThenError(1000 * 60 * 30);
+					tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 					return;
 				}
 				
@@ -1959,17 +1985,18 @@
 				
 				sourceCounts = data.sourceCounts || {};
 				apiSources = Array.isArray(data.sources) ? data.sources : [];
-				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
 				console.error('job-search-api /refresh error:', err);
-				tryBrowserCacheThenError(1000 * 60 * 30);
+				tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 			});
 	}
 	
 	// Primary: jobs-snapshot API (same as Playground). Optional location (for Indeed/Stack Overflow), rssjobs = rssjobs.app feed URL.
-	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, location) {
+	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, location, requestId) {
 		var apiUrl = proxyUrl
 			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
 			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
@@ -1985,7 +2012,7 @@
 			.then(function (data) {
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
 					console.log('Jobs snapshot failed, trying cached API...');
-					fetchCachedJobs(proxyUrl, query, days, limit);
+					fetchCachedJobs(proxyUrl, query, days, limit, requestId);
 					return;
 				}
 				
@@ -1994,7 +2021,8 @@
 					if (job) allJobs.push(job);
 				});
 				
-				processJobsData(data);
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData(data, requestId);
 
 				// Save latest successful jobs snapshot to browser cache (temporary DB)
 				saveJobsToBrowserCache({
@@ -2005,12 +2033,13 @@
 			})
 			.catch(function (err) {
 				console.error('Jobs snapshot network error:', err);
-				fetchCachedJobs(proxyUrl, query, days, limit);
+				fetchCachedJobs(proxyUrl, query, days, limit, requestId);
 			});
 	}
 	
 	// Process jobs data (common logic)
-	function processJobsData(data) {
+	function processJobsData(data, requestId) {
+		if (requestId != null && !isActiveJobsRequest(requestId)) return;
 		// "Data stamp": show when the backend produced the dataset
 		(function () {
 			var stampEl = document.getElementById('job-stats-updated');
