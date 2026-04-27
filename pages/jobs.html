@@ -475,6 +475,9 @@
 					<span class="text-sm text-gray-800 dark:text-gray-200">Vercel</span>
 				</label>
 				<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
+				<span id="job-live-pill" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+					● Idle
+				</span>
 			</div>
 			
 			<!-- Vercel search: role, location, days + Search button (visible only when Backend = Vercel) -->
@@ -655,6 +658,11 @@
 					<button type="button" id="job-refresh-btn" class="px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
 						🔍 Search Jobs
 					</button>
+					<label class="inline-flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+						<input type="checkbox" id="job-auto-refresh-toggle" class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+						<span id="job-auto-refresh-label">Auto-refresh (5m)</span>
+					</label>
+					<span id="job-last-refresh-text" class="text-xs text-gray-500 dark:text-gray-400">Last refresh: —</span>
 				</div>
 			</div>
 			
@@ -696,6 +704,10 @@
 					<option value="scientist">Scientist</option>
 					<option value="engineer">Engineer</option>
 				</select>
+				<label class="inline-flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+					<input type="checkbox" id="job-filter-new-only" class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+					<span>New only</span>
+				</label>
 				<input
 					id="job-filter-exclude"
 					type="text"
@@ -748,6 +760,9 @@
 					<span id="job-stats-applied">—</span>
 					<span id="job-stats-updated" class="text-xs text-gray-500 dark:text-gray-500">—</span>
 				</div>
+				<div class="text-xs text-gray-500 dark:text-gray-400">
+					<span id="job-stats-context">Feed: initializing...</span>
+				</div>
 				<div id="job-stats-diff" class="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
 					<span class="font-semibold text-gray-700 dark:text-gray-300">Changes since last refresh:</span>
 					<span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-400/20">+<span id="job-diff-added">0</span> added</span>
@@ -757,6 +772,16 @@
 				<div id="job-stats-sources" class="flex flex-wrap items-center gap-2 text-xs"></div>
 			</div>
 		</header>
+
+		<div id="job-new-banner" class="hidden mb-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-3">
+			<div class="flex flex-wrap items-center justify-between gap-2">
+				<p id="job-new-banner-text" class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">No new jobs yet.</p>
+				<div class="flex items-center gap-2">
+					<button type="button" id="job-new-banner-jump" class="px-2.5 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Jump to results</button>
+					<button type="button" id="job-new-banner-view" class="px-2.5 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40">View changes</button>
+				</div>
+			</div>
+		</div>
 
 		<div id="jobs-list-anchor">
 		<div id="job-loading" class="text-center py-12">

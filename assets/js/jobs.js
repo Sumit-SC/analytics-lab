@@ -98,6 +98,12 @@
 	var apiSources = []; // List of sources from API
 	var lastFetchContext = { query: 'analyst', location: 'remote', days: 7, limit: 200 };
 	var activeJobsRequestId = 0;
+	var AUTO_REFRESH_KEY = 'job_auto_refresh_enabled_v1';
+	var AUTO_REFRESH_MS = 5 * 60 * 1000;
+	var autoRefreshTimerId = null;
+	var refreshAgeTimerId = null;
+	var lastRefreshAtMs = 0;
+	var latestAddedJobKeys = {};
 
 	function beginJobsRequest() {
 		activeJobsRequestId += 1;
@@ -105,6 +111,79 @@
 	}
 	function isActiveJobsRequest(requestId) {
 		return requestId === activeJobsRequestId;
+	}
+	function setJobLivePill(state, message) {
+		var pill = document.getElementById('job-live-pill');
+		if (!pill) return;
+		var text = message || 'Idle';
+		if (state === 'loading') {
+			pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700 animate-pulse';
+			pill.textContent = '● ' + text;
+			return;
+		}
+		if (state === 'ok') {
+			pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700';
+			pill.textContent = '● ' + text;
+			return;
+		}
+		if (state === 'warn') {
+			pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700';
+			pill.textContent = '● ' + text;
+			return;
+		}
+		pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700';
+		pill.textContent = '● ' + text;
+	}
+	function humanizeElapsed(ms) {
+		var mins = Math.floor(ms / 60000);
+		if (mins < 1) return 'just now';
+		if (mins < 60) return mins + 'm ago';
+		var hrs = Math.floor(mins / 60);
+		if (hrs < 24) return hrs + 'h ago';
+		var days = Math.floor(hrs / 24);
+		return days + 'd ago';
+	}
+	function renderLastRefreshText() {
+		var el = document.getElementById('job-last-refresh-text');
+		if (!el) return;
+		if (!lastRefreshAtMs) {
+			el.textContent = 'Last refresh: —';
+			return;
+		}
+		el.textContent = 'Last refresh: ' + humanizeElapsed(Date.now() - lastRefreshAtMs);
+	}
+	function markRefreshCompleteNow() {
+		lastRefreshAtMs = Date.now();
+		renderLastRefreshText();
+	}
+	function applyAutoRefresh(enabled) {
+		if (autoRefreshTimerId) {
+			clearInterval(autoRefreshTimerId);
+			autoRefreshTimerId = null;
+		}
+		var label = document.getElementById('job-auto-refresh-label');
+		if (label) label.textContent = enabled ? 'Auto-refresh ON (5m)' : 'Auto-refresh (5m)';
+		if (!enabled) return;
+		autoRefreshTimerId = setInterval(function () {
+			if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+			fetchAllJobs(false);
+		}, AUTO_REFRESH_MS);
+	}
+	function setupAutoRefreshUi() {
+		var toggle = document.getElementById('job-auto-refresh-toggle');
+		if (!toggle) return;
+		var enabled = false;
+		try { enabled = localStorage.getItem(AUTO_REFRESH_KEY) === '1'; } catch (e) {}
+		toggle.checked = enabled;
+		applyAutoRefresh(enabled);
+		toggle.addEventListener('change', function () {
+			var next = !!toggle.checked;
+			try { localStorage.setItem(AUTO_REFRESH_KEY, next ? '1' : '0'); } catch (e) {}
+			applyAutoRefresh(next);
+		});
+		if (refreshAgeTimerId) clearInterval(refreshAgeTimerId);
+		refreshAgeTimerId = setInterval(renderLastRefreshText, 30000);
+		renderLastRefreshText();
 	}
 
 	// Lightweight caching to avoid rate limits (especially Remotive)
@@ -227,6 +306,7 @@
 		setupAdvancedFiltersToggle();
 		setupEventListeners();
 		setupSavedFilterPresets();
+		setupAutoRefreshUi();
 		if (!isMobileViewport()) {
 			fetchAllJobs();
 		} else {
@@ -857,6 +937,7 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
 		var filterAge = document.getElementById('job-filter-age');
 		var filterRole = document.getElementById('job-filter-role');
 		var filterExclude = document.getElementById('job-filter-exclude');
@@ -875,6 +956,9 @@
 		}
 		if (filterStatus) {
 			filterStatus.addEventListener('change', applyFilters);
+		}
+		if (filterNewOnly) {
+			filterNewOnly.addEventListener('change', applyFilters);
 		}
 		if (filterAge) {
 			filterAge.addEventListener('change', applyFilters);
@@ -921,6 +1005,7 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
 		var filterRole = document.getElementById('job-filter-role');
 		var filterExclude = document.getElementById('job-filter-exclude');
 		var filterTags = document.getElementById('job-filter-tags');
@@ -931,6 +1016,7 @@
 			source: filterSource ? filterSource.value : 'all',
 			match: filterMatch ? filterMatch.value : 'all',
 			status: filterStatus ? filterStatus.value : 'all',
+			newOnly: !!(filterNewOnly && filterNewOnly.checked),
 			role: filterRole ? filterRole.value : 'all',
 			exclude: filterExclude ? String(filterExclude.value || '') : '',
 			tags: filterTags ? String(filterTags.value || '') : '',
@@ -943,6 +1029,7 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
 		var filterRole = document.getElementById('job-filter-role');
 		var filterExclude = document.getElementById('job-filter-exclude');
 		var filterTags = document.getElementById('job-filter-tags');
@@ -952,6 +1039,7 @@
 		if (filterSource && state.source != null) filterSource.value = String(state.source);
 		if (filterMatch && state.match != null) filterMatch.value = String(state.match);
 		if (filterStatus && state.status != null) filterStatus.value = String(state.status);
+		if (filterNewOnly && state.newOnly != null) filterNewOnly.checked = !!state.newOnly;
 		if (filterRole && state.role != null) filterRole.value = String(state.role);
 		if (filterExclude && state.exclude != null) filterExclude.value = String(state.exclude);
 		if (filterTags && state.tags != null) filterTags.value = String(state.tags);
@@ -1307,6 +1395,10 @@
 			curKeys.forEach(function (k) { if (!lastSet.has(k)) added.push(k); });
 			lastKeys.forEach(function (k) { if (!curSet.has(k)) removed.push(k); });
 		}
+		latestAddedJobKeys = {};
+		if (sameCtx && added.length) {
+			added.forEach(function (k) { latestAddedJobKeys[k] = true; });
+		}
 
 		var lookup = {};
 		(jobs || []).forEach(function (j) {
@@ -1329,6 +1421,13 @@
 		if (removedEl) removedEl.textContent = String(removed.length);
 		var btn = document.getElementById('job-diff-view-btn');
 		if (btn) btn.classList.toggle('hidden', !(sameCtx && (added.length || removed.length)));
+		var banner = document.getElementById('job-new-banner');
+		var bannerText = document.getElementById('job-new-banner-text');
+		if (banner) {
+			var showBanner = sameCtx && added.length > 0;
+			banner.classList.toggle('hidden', !showBanner);
+			if (showBanner && bannerText) bannerText.textContent = added.length + ' new jobs since last refresh';
+		}
 	}
 
 	function saveJobsToBrowserCache(payload) {
@@ -1367,6 +1466,7 @@
 	// Fetch jobs from cached API (fast) or trigger refresh
 	function fetchAllJobs(forceRefresh) {
 		var requestId = beginJobsRequest();
+		setJobLivePill('loading', forceRefresh ? 'Refreshing feed...' : 'Fetching jobs...');
 		var loadingEl = document.getElementById('job-loading');
 		var jobListEl = document.getElementById('job-list');
 		var emptyEl = document.getElementById('job-empty');
@@ -1431,6 +1531,16 @@
 			days: parseInt(days, 10) || 7,
 			limit: parseInt(limit, 10) || 200
 		};
+		(function renderLoadingFetchContext() {
+			var contextEl = document.getElementById('job-stats-context');
+			if (!contextEl) return;
+			var backendLabel = isKoyeb ? 'Koyeb API' : 'Vercel snapshot';
+			var sp = buildSourcesParam();
+			var sourcesCount = sp ? sp.split(',').filter(Boolean).length : 0;
+			var sourcesLabel = sourcesCount > 0 ? String(sourcesCount) : 'default';
+			contextEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+			contextEl.textContent = 'Feed: ' + backendLabel + ' · Sources: ' + sourcesLabel + ' · Fetching...';
+		})();
 		// Pagination for job-search-api
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;
@@ -1674,6 +1784,7 @@
 			apiSources = Array.isArray(cached.sources) ? cached.sources : [];
 			if (!isActiveJobsRequest(requestId)) return;
 			processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
+			setJobLivePill('warn', 'Using browser cache');
 			if (loadingEl) loadingEl.style.display = 'none';
 			return;
 		}
@@ -1687,6 +1798,7 @@
 		).then(function (ok) {
 			if (!isActiveJobsRequest(requestId)) return;
 			if (ok) {
+				setJobLivePill('warn', 'Using public fallback APIs');
 				if (loadingEl) loadingEl.style.display = 'none';
 				return;
 			}
@@ -1694,6 +1806,7 @@
 			if (errorEl) {
 				errorEl.classList.remove('hidden');
 				if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Backends are down and public fallback also failed. Try again later.';
+				setJobLivePill('error', 'Feed unavailable');
 				var retryBtn = document.getElementById('job-error-retry');
 				if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
 			}
@@ -1703,6 +1816,7 @@
 			if (errorEl) {
 				errorEl.classList.remove('hidden');
 				if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Backends are down and public fallback also failed. Try again later.';
+				setJobLivePill('error', 'Feed unavailable');
 				var retryBtn2 = document.getElementById('job-error-retry');
 				if (retryBtn2) retryBtn2.onclick = function () { fetchAllJobs(true); };
 			}
@@ -2116,6 +2230,7 @@
 			var existing = document.getElementById(id);
 			if (!data || !Array.isArray(data._errors) || !data._errors.length) {
 				if (existing) existing.remove();
+				setJobLivePill('ok', 'Live feed healthy');
 				return;
 			}
 			var unique = {};
@@ -2132,6 +2247,38 @@
 			}
 			existing.textContent = 'Degraded sources: ' + badSources.join(', ');
 			existing.title = 'Some sources failed in this fetch. Results may be partial.';
+			setJobLivePill('warn', 'Partial feed (' + badSources.length + ' degraded)');
+		})();
+		markRefreshCompleteNow();
+		(function renderFetchContextStatus() {
+			var contextEl = document.getElementById('job-stats-context');
+			if (!contextEl) return;
+			var ctx = getSnapshotContext();
+			var backend = (ctx && ctx.backend) || 'unknown';
+			var backendLabel = backend === 'koyeb'
+				? 'Koyeb API'
+				: (backend === 'vercel' ? 'Vercel snapshot' : 'Browser/public fallback');
+			var sourceTotal = Object.keys(sourceCounts || {}).length;
+			var errorsCount = (data && Array.isArray(data._errors)) ? data._errors.length : 0;
+			var ts = data && (data.generatedAt || data.generated_at || data.saved_at);
+			var freshness = '';
+			if (ts) {
+				var d = new Date(ts);
+				if (!isNaN(d.getTime())) {
+					var ageMin = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+					freshness = ageMin <= 1 ? 'fresh now' : ('fresh ' + ageMin + 'm ago');
+				}
+			}
+			var parts = [
+				'Feed: ' + backendLabel,
+				'Sources: ' + sourceTotal
+			];
+			if (freshness) parts.push(freshness);
+			if (errorsCount > 0) parts.push('partial (' + errorsCount + ' source errors)');
+			contextEl.textContent = parts.join(' · ');
+			contextEl.className = errorsCount > 0
+				? 'text-xs text-amber-700 dark:text-amber-300'
+				: 'text-xs text-gray-500 dark:text-gray-400';
 		})();
 		
 		// Added/removed since last refresh (per query + selected sources)
@@ -3226,6 +3373,7 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
 		var filterAge = document.getElementById('job-filter-age');
 		var filterRole = document.getElementById('job-filter-role');
 		var filterExclude = document.getElementById('job-filter-exclude');
@@ -3236,6 +3384,7 @@
 		var sourceFilter = filterSource ? filterSource.value : 'all';
 		var matchFilter = filterMatch ? filterMatch.value : 'all';
 		var statusFilter = filterStatus ? filterStatus.value : 'all';
+		var newOnlyFilter = !!(filterNewOnly && filterNewOnly.checked);
 		var ageFilter = filterAge ? filterAge.value : 'all';
 		var roleFilter = filterRole ? filterRole.value : 'all';
 		var excludeInput = filterExclude ? String(filterExclude.value || '').trim().toLowerCase() : '';
@@ -3273,6 +3422,10 @@
 			if (statusFilter !== 'all') {
 				var status = applications[job.id] || 'new';
 				if (status !== statusFilter) return false;
+			}
+			if (newOnlyFilter) {
+				var jobKey = normalizeJobKey(job);
+				if (!jobKey || !latestAddedJobKeys[jobKey]) return false;
 			}
 
 			// Age filter (freshness) — works with date, dateFormatted, or postedAgo
@@ -3446,8 +3599,11 @@
 			var status = applications[job.id] || 'new';
 			var matchClass = 'match-' + matchLevel;
 			var statusClass = 'status-' + status;
+			var jobKey = normalizeJobKey(job);
+			var isNewSinceLastRefresh = !!(jobKey && latestAddedJobKeys[jobKey]);
+			var newCardClass = isNewSinceLastRefresh ? ' ring-2 ring-emerald-400/70 dark:ring-emerald-500/60' : '';
 
-			html += '<div class="job-card group material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1">';
+			html += '<div class="job-card group material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1' + newCardClass + '">';
 			html += '<div class="flex items-start justify-between mb-2">';
 			html += '<div class="flex-1">';
 			html += '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">';
@@ -3460,6 +3616,9 @@
 			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">' + companyLocation + '</p>';
 			html += '</div>';
 			html += '<div class="flex flex-col gap-2 items-end">';
+			if (isNewSinceLastRefresh) {
+				html += '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-400/30">New</span>';
+			}
 			html += '<span class="match-badge ' + matchClass + '">' + job.matchScore + '% match</span>';
 			html += '<select class="status-select text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800" data-job-id="' + job.id + '">';
 			html += '<option value="new"' + (status === 'new' ? ' selected' : '') + '>New</option>';
@@ -3510,70 +3669,61 @@
 		});
 
 		jobListEl.innerHTML = html;
+		var jobById = {};
+		filteredJobs.forEach(function (j) { jobById[j.id] = j; });
 
-		// Add event listeners for status changes
-		jobListEl.querySelectorAll('.status-select').forEach(function (select) {
-			select.addEventListener('change', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var newStatus = this.value;
-				applications[jobId] = newStatus;
-				saveApplications();
-				applyFilters(); // Re-render to update stats
-			});
-		});
-
-		// Add event listeners for "Prepare" (Copy for ChatGPT/Gemini) buttons
-		jobListEl.querySelectorAll('.job-prep-chatgpt-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (!job) return;
-				var prompt = buildChatGPTPrepPrompt(job);
+		// Use delegated handlers to avoid attaching many listeners per render.
+		jobListEl.onchange = function (event) {
+			var select = event.target.closest('.status-select');
+			if (!select) return;
+			var jobId = select.getAttribute('data-job-id');
+			var newStatus = select.value;
+			applications[jobId] = newStatus;
+			saveApplications();
+			applyFilters(); // Re-render to update stats
+		};
+		jobListEl.onclick = function (event) {
+			var prepBtn = event.target.closest('.job-prep-chatgpt-btn');
+			if (prepBtn) {
+				var prepJob = jobById[prepBtn.getAttribute('data-job-id')];
+				if (!prepJob) return;
+				var prompt = buildChatGPTPrepPrompt(prepJob);
 				navigator.clipboard.writeText(prompt).then(function () {
 					window.open('https://chat.openai.com/', '_blank', 'noopener');
 					window.alert('Prompt copied. Paste it in the new ChatGPT tab. The AI will ask about your background first, then run a mock interview based on this JD.');
 				}).catch(function () {
 					window.prompt('Copy this prompt and paste into ChatGPT or Gemini:', prompt);
 				});
-			});
-		});
-
-		// "Interview Prep" buttons → send JD to assistant panel
-		jobListEl.querySelectorAll('.job-send-to-prep-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (!job) return;
-				var desc = String(job.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+				return;
+			}
+			var interviewBtn = event.target.closest('.job-send-to-prep-btn');
+			if (interviewBtn) {
+				var interviewJob = jobById[interviewBtn.getAttribute('data-job-id')];
+				if (!interviewJob) return;
+				var desc = String(interviewJob.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 				if (desc.length > 1200) desc = desc.slice(0, 1200) + '...';
-				var prepMessage = 'Help me prepare for an interview for this role:\n\nRole: ' + (job.title || '') + '\nCompany: ' + (job.company || '') + '\nLocation: ' + (job.location || '') + '\n\nJob description:\n' + desc + '\n\nPlease suggest: 1) 5–8 likely interview questions for this role, 2) how to answer them using the STAR method, 3) key skills and points to emphasize from my experience.';
+				var prepMessage = 'Help me prepare for an interview for this role:\n\nRole: ' + (interviewJob.title || '') + '\nCompany: ' + (interviewJob.company || '') + '\nLocation: ' + (interviewJob.location || '') + '\n\nJob description:\n' + desc + '\n\nPlease suggest: 1) 5–8 likely interview questions for this role, 2) how to answer them using the STAR method, 3) key skills and points to emphasize from my experience.';
 				if (typeof window.openAssistantWithMessage === 'function') {
 					window.openAssistantWithMessage(prepMessage);
 				} else {
 					window.alert('Interview Prep assistant is loading. Try again in a moment.');
 				}
-			});
-		});
+				return;
+			}
+			var plannerBtn = event.target.closest('.job-add-to-planner-btn');
+			if (plannerBtn) {
+				var plannerJob = jobById[plannerBtn.getAttribute('data-job-id')];
+				if (plannerJob) addJobToPlanner(plannerJob);
+				return;
+			}
+			var detailsBtn = event.target.closest('.job-details-btn');
+			if (detailsBtn) {
+				var detailsJob = jobById[detailsBtn.getAttribute('data-job-id')];
+				if (detailsJob) openJobDetails(detailsJob);
+			}
+		};
 
-		// Add event listeners for "Add to planner" buttons
-		jobListEl.querySelectorAll('.job-add-to-planner-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (job) {
-					addJobToPlanner(job);
-				}
-			});
-		});
-
-		// Add event listeners for "Details" buttons + modal close
-		jobListEl.querySelectorAll('.job-details-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (job) openJobDetails(job);
-			});
-		});
+		// Modal close handlers
 		var closeBtn = document.getElementById('job-detail-close');
 		var backdrop = document.getElementById('job-detail-backdrop');
 		if (closeBtn) closeBtn.onclick = closeJobDetails;
@@ -3757,6 +3907,8 @@
 	function setupJobsDiffModal() {
 		var modal = document.getElementById('job-diff-modal');
 		var openBtn = document.getElementById('job-diff-view-btn');
+		var openBannerBtn = document.getElementById('job-new-banner-view');
+		var jumpBannerBtn = document.getElementById('job-new-banner-jump');
 		var closeBtn = document.getElementById('job-diff-close');
 		var backdrop = document.getElementById('job-diff-backdrop');
 		var addedList = document.getElementById('job-diff-added-list');
@@ -3818,6 +3970,13 @@
 		}
 
 		openBtn.addEventListener('click', open);
+		if (openBannerBtn) openBannerBtn.addEventListener('click', open);
+		if (jumpBannerBtn) {
+			jumpBannerBtn.addEventListener('click', function () {
+				var anchor = document.getElementById('jobs-list-anchor');
+				if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			});
+		}
 		if (closeBtn) closeBtn.addEventListener('click', close);
 		if (backdrop) backdrop.addEventListener('click', close);
 		document.addEventListener('keydown', function (e) {
@@ -3833,8 +3992,10 @@
 				close();
 				var a = document.getElementById('job-diff-added');
 				var r = document.getElementById('job-diff-removed');
+				var b = document.getElementById('job-new-banner');
 				if (a) a.textContent = '0';
 				if (r) r.textContent = '0';
+				if (b) b.classList.add('hidden');
 				openBtn.classList.add('hidden');
 			});
 		}

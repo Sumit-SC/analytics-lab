@@ -91,10 +91,17 @@
 		setInterval(tick, intervalMs);
 	})();
 
-	// Shared RSS helper (prefer our Vercel proxy vs rss2json public)
-	window.__trendsRssProxyBase = (typeof window !== 'undefined' && window.TRENDS_RSS_PROXY_URL)
+	// Shared RSS helper (prefer configured proxy, fallback to playground-serveless).
+	var configuredTrendsProxy = (typeof window !== 'undefined' && window.TRENDS_RSS_PROXY_URL)
 		? String(window.TRENDS_RSS_PROXY_URL).replace(/\/$/, '')
-		: 'https://playground-serveless.vercel.app/api/rss';
+		: '';
+	var configuredJobProxy = (typeof window !== 'undefined' && window.JOB_PROXY_URL)
+		? String(window.JOB_PROXY_URL).replace(/\/$/, '')
+		: '';
+	if (!configuredTrendsProxy && configuredJobProxy && configuredJobProxy.indexOf('playground-serveless') !== -1) {
+		configuredTrendsProxy = configuredJobProxy + '/api/rss';
+	}
+	window.__trendsRssProxyBase = configuredTrendsProxy || 'https://playground-serveless.vercel.app/api/rss';
 	function fetchJsonWithTimeout(url, timeoutMs) {
 		var controller = new AbortController();
 		var t = setTimeout(function () { controller.abort(); }, timeoutMs || 12000);
