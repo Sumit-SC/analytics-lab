@@ -99,6 +99,7 @@
 	var lastFetchContext = { query: 'analyst', location: 'remote', days: 7, limit: 200 };
 	var activeJobsRequestId = 0;
 	var AUTO_REFRESH_KEY = 'job_auto_refresh_enabled_v1';
+	var FETCH_PROFILE_KEY = 'job_fetch_profile_v1';
 	var AUTO_REFRESH_MS = 5 * 60 * 1000;
 	var autoRefreshTimerId = null;
 	var refreshAgeTimerId = null;
@@ -297,6 +298,7 @@
 		loadPlanner();
 		setupRssModeAndDropdowns();
 		setupApiBackendToggle();
+		setupFetchProfileToggle();
 		setupVercelSearchSection();
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
@@ -317,6 +319,34 @@
 		}
 		setupPlannerEventListeners();
 		renderPlanner();
+	}
+
+	function getSelectedFetchProfile() {
+		var saved = 'basic';
+		try { saved = localStorage.getItem(FETCH_PROFILE_KEY) || 'basic'; } catch (e) {}
+		return saved === 'advanced' ? 'advanced' : 'basic';
+	}
+
+	function updateFetchProfileUi() {
+		var basicBtn = document.getElementById('fetch-profile-basic');
+		var advBtn = document.getElementById('fetch-profile-advanced');
+		var selected = getSelectedFetchProfile();
+		if (basicBtn) basicBtn.classList.toggle('active', selected === 'basic');
+		if (advBtn) advBtn.classList.toggle('active', selected === 'advanced');
+	}
+
+	function setupFetchProfileToggle() {
+		var basicBtn = document.getElementById('fetch-profile-basic');
+		var advBtn = document.getElementById('fetch-profile-advanced');
+		if (!basicBtn || !advBtn) return;
+		function setProfile(p) {
+			var next = p === 'advanced' ? 'advanced' : 'basic';
+			try { localStorage.setItem(FETCH_PROFILE_KEY, next); } catch (e) {}
+			updateFetchProfileUi();
+		}
+		basicBtn.addEventListener('click', function () { setProfile('basic'); });
+		advBtn.addEventListener('click', function () { setProfile('advanced'); });
+		updateFetchProfileUi();
 	}
 
 	function getCurrentSearchContext() {
@@ -1525,11 +1555,13 @@
 		var yoeMax = (yoeMaxEl && yoeMaxEl.value !== '') ? parseInt(String(yoeMaxEl.value), 10) : null;
 		if (yoeMin != null && isNaN(yoeMin)) yoeMin = null;
 		if (yoeMax != null && isNaN(yoeMax)) yoeMax = null;
+		var fetchProfile = getSelectedFetchProfile();
 		lastFetchContext = {
 			query: query || 'analyst',
 			location: location || 'remote',
 			days: parseInt(days, 10) || 7,
-			limit: parseInt(limit, 10) || 200
+			limit: parseInt(limit, 10) || 200,
+			fetchProfile: fetchProfile
 		};
 		(function renderLoadingFetchContext() {
 			var contextEl = document.getElementById('job-stats-context');
@@ -1539,7 +1571,7 @@
 			var sourcesCount = sp ? sp.split(',').filter(Boolean).length : 0;
 			var sourcesLabel = sourcesCount > 0 ? String(sourcesCount) : 'default';
 			contextEl.className = 'text-xs text-gray-500 dark:text-gray-400';
-			contextEl.textContent = 'Feed: ' + backendLabel + ' · Sources: ' + sourcesLabel + ' · Fetching...';
+			contextEl.textContent = 'Feed: ' + backendLabel + ' · Mode: ' + (fetchProfile === 'advanced' ? 'Advanced' : 'Basic') + ' · Sources: ' + sourcesLabel + ' · Fetching...';
 		})();
 		// Pagination for job-search-api
 		var page = parseInt(urlParams.get('page')) || null;
@@ -1570,8 +1602,9 @@
 				// POST /refresh
 				var headlessEl = document.getElementById('job-enable-headless');
 				var enableHeadless = !!(headlessEl && headlessEl.checked);
-				var refreshMode = enableHeadless ? 'all' : 'rss';
+				var refreshMode = (fetchProfile === 'advanced' || enableHeadless) ? 'all' : 'rss';
 				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&mode=' + encodeURIComponent(refreshMode) + '&headless=' + (enableHeadless ? '1' : '0');
+				refreshUrl += '&fetch_profile=' + encodeURIComponent(fetchProfile);
 				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
 				if (sourcesParam) refreshUrl += '&sources=' + encodeURIComponent(sourcesParam);
 				
@@ -1608,18 +1641,18 @@
 							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 						} else {
 							// Fallback to /jobs endpoint
-							fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId);
+							fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId);
 						}
 					})
 					.catch(function (err) {
 						console.error('job-search-api refresh failed:', err);
 						if (!isActiveJobsRequest(requestId)) return;
-						fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId);
+						fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId);
 					});
 				return;
 			} else {
 				// GET /jobs (cached) - use higher limit or pagination
-				fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId);
+				fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId);
 				return;
 			}
 		}
@@ -1965,11 +1998,17 @@
 	}
 	
 	// job-search-api: Fetch jobs from /jobs endpoint (cached) - supports pagination
-	function fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, requestId) {
-		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+	function fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId) {
+		var useSearchEndpoint = true;
+		var apiUrl = proxyUrl + (useSearchEndpoint ? '/jobs/search' : '/jobs') + '?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
 		if (remoteOnly) apiUrl += '&remote_only=1';
 		if (yoeMin != null) apiUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
 		if (yoeMax != null) apiUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
+		apiUrl += '&sort=relevance';
+		apiUrl += '&role_profile=' + encodeURIComponent('data_analytics');
+		if (fetchProfile === 'advanced') {
+			apiUrl += '&min_match_score=30';
+		}
 		
 		// Use pagination if provided, otherwise use limit (max 400)
 		if (page && perPage) {
@@ -1989,7 +2028,7 @@
 				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
 					// /jobs might be empty if storage not persisting, try /refresh as fallback
 					console.log('job-search-api /jobs empty, trying /refresh...');
-					fetchJobSearchApiRefresh(proxyUrl, query, days, limit, requestId);
+					fetchJobSearchApiRefresh(proxyUrl, query, days, limit, fetchProfile, requestId);
 					return;
 				}
 				
@@ -2025,10 +2064,11 @@
 								return;
 							}
 							
-							var pageUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+							var pageUrl = proxyUrl + (useSearchEndpoint ? '/jobs/search' : '/jobs') + '?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
 							if (remoteOnly) pageUrl += '&remote_only=1';
 							if (yoeMin != null) pageUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
 							if (yoeMax != null) pageUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
+							pageUrl += '&sort=relevance&role_profile=data_analytics';
 							pageUrl += '&page=' + pageNum + '&per_page=' + jobsPerPage;
 							fetchWithTimeout(pageUrl, {}, 22000)
 								.then(function (r) { return r.ok ? r.json() : null; })
@@ -2067,16 +2107,17 @@
 			.catch(function (err) {
 				console.error('job-search-api /jobs error:', err);
 				// Fallback to /refresh
-				fetchJobSearchApiRefresh(proxyUrl, query, days, limit, requestId);
+				fetchJobSearchApiRefresh(proxyUrl, query, days, limit, fetchProfile, requestId);
 			});
 	}
 	
 	// job-search-api: Fetch jobs from /refresh endpoint (scrapes fresh)
-	function fetchJobSearchApiRefresh(proxyUrl, query, days, limit, requestId) {
+	function fetchJobSearchApiRefresh(proxyUrl, query, days, limit, fetchProfile, requestId) {
 		var headlessEl = document.getElementById('job-enable-headless');
 		var enableHeadless = !!(headlessEl && headlessEl.checked);
-		var refreshMode = enableHeadless ? 'all' : 'rss';
+		var refreshMode = (fetchProfile === 'advanced' || enableHeadless) ? 'all' : 'rss';
 		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&mode=' + encodeURIComponent(refreshMode) + '&headless=' + (enableHeadless ? '1' : '0');
+		refreshUrl += '&fetch_profile=' + encodeURIComponent(fetchProfile || 'basic');
 		var sp = buildSourcesParam();
 		if (sp) refreshUrl += '&sources=' + encodeURIComponent(sp);
 		
