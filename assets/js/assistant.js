@@ -349,10 +349,10 @@
 				.catch(function () {
 					add('assistant', 'Model failed. Using Wikipedia + Google.', text);
 					fetchWikipedia(text).then(function (w) {
-						add('assistant', w || \"I couldn't find a direct answer. Use Google below.\", text, w ? null : 'Tap here to search on Google →');
+						add('assistant', w || "I couldn't find a direct answer. Use Google below.", text, w ? null : 'Tap here to search on Google →');
 						push({
 							role: 'assistant',
-							text: w || \"I couldn't find a direct answer. Use Google below.\",
+							text: w || "I couldn't find a direct answer. Use Google below.",
 							searchQuery: text,
 						});
 					});
@@ -377,10 +377,10 @@
 		}
 
 		fetchWikipedia(text).then(function (w) {
-			add('assistant', w || \"I couldn't find a direct answer. Use Google below.\", text, w ? null : 'Tap here to search on Google →');
+			add('assistant', w || "I couldn't find a direct answer. Use Google below.", text, w ? null : 'Tap here to search on Google →');
 			push({
 				role: 'assistant',
-				text: w || \"I couldn't find a direct answer. Use Google below.\",
+				text: w || "I couldn't find a direct answer. Use Google below.",
 				searchQuery: text,
 			});
 		});
