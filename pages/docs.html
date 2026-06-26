@@ -12,16 +12,18 @@
 	<script src="../assets/js/nav-data.js" defer></script>
 	<script src="../assets/js/nav-inject.js" defer></script>
 </head>
-<body class="page-docs bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="docs">
-	<nav class="app-bar bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
-		<div class="max-w-5xl mx-auto px-4 sm:px-6">
+<body class="page-playground bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="playground">
+	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
 				<a href="../index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
-					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
-					<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
-					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
-					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
+					<button type="button" id="sidebar-mobile-toggle" class="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Open Resources menu">&#9776; Resources</button>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer"><span aria-hidden="true">&#9776;</span><span class="ml-1 text-sm font-medium">Menu</span></button>
+				<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
+				<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs material-elevation-1">🌙</button>
 				</div>
 			</div>
 		</div>
@@ -32,9 +34,103 @@
 			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
 			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
 		</div>
-		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
+		<nav class="nav-drawer-links" data-nav-inject="drawer">
+		</nav>
+		<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle Roadmap">Roadmap</button>
 	</div>
 
+	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
+	<div class="flex relative">
+		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
+			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources sidebar">
+				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
+				<span class="sidebar-toggle-vertical">Resources</span>
+			</button>
+			<div class="sidebar-content p-3">
+				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
+				<nav class="space-y-1 text-sm">
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
+							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
+							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
+							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
+							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
+							<li><a href="./resources.html?topic=oops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OOP</a></li>
+							<li><a href="./resources.html?topic=prompting" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Prompting</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
+							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
+							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
+							<li><a href="./resources.html?topic=data-visualization" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Visualization</a></li>
+							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization (Python)</a></li>
+							<li><a href="./resources.html?topic=product-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Product Analytics</a></li>
+							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
+							<li><a href="./resources.html?topic=time-series" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Time Series</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
+							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
+							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
+							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
+							<li><a href="./resources.html?topic=nlp" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NLP</a></li>
+							<li><a href="./resources.html?topic=computer-vision" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Computer Vision</a></li>
+							<li><a href="./resources.html?topic=opencv" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OpenCV</a></li>
+							<li><a href="./resources.html?topic=reinforcement-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Reinforcement Learning</a></li>
+							<li><a href="./resources.html?topic=feature-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Feature Engineering</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
+							<li><a href="./resources.html?topic=spark" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Apache Spark</a></li>
+							<li><a href="./resources.html?topic=streaming" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Streaming Data</a></li>
+							<li><a href="./resources.html?topic=data-warehousing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Warehousing</a></li>
+							<li><a href="./resources.html?topic=databases" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Databases</a></li>
+							<li><a href="./resources.html?topic=cloud-data" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Cloud Platforms</a></li>
+							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
+							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
+							<li><a href="./resources.html?topic=mlops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">MLOps</a></li>
+							<li><a href="./resources.html?topic=devops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">DevOps</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming Languages</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=r" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">R Programming</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=business-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Business Analytics</a></li>
+							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
+							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
+							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Tools & Career</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=editors-ides" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Editors & IDEs</a></li>
+							<li><a href="./resources.html?topic=productivity-tools" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Productivity Tools</a></li>
+							<li><a href="./resources.html?topic=communication" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Communication</a></li>
+							<li><a href="./resources.html?topic=resume-interview" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Resume & Interview</a></li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</aside>
+	
 	<main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 		<header class="mb-8">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Docs &amp; Sitemap</h1>
@@ -132,7 +228,7 @@
 		</div>
 	</div>
 
-	<div id="global-music-bar">
+	<!-- <div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
 		<div class="global-music-source">
 			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
@@ -147,7 +243,7 @@
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
-	</div>
+	</div> -->
 	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
 	<div id="global-resources-flyout">
 		<div class="global-resources-header">
@@ -166,7 +262,7 @@
 		<div id="global-dict-body" class="global-dict-body"></div>
 		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
 	</div>
-	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<!-- <button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
 	<div id="global-yt-panel">
 		<div class="global-yt-panel-header">
 			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
@@ -182,7 +278,7 @@
 			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
 		</div>
 		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
-	</div>
+	</div> -->
 
 	<script src="../assets/js/nav-mobile.js" defer></script>
 	<script src="../assets/js/color-theme.js" defer></script>
