@@ -60,22 +60,27 @@
 				<button type="button" class="trends-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[40px]" data-trend-filter="entertainment" role="tab" aria-selected="false">Entertainment</button>
 				<button type="button" class="trends-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary/50 transition-all min-h-[40px]" data-trend-filter="anime" role="tab" aria-selected="false">Anime</button>
 			</div>
-			<div class="mt-2 flex flex-wrap items-center gap-2">
-				<button type="button" id="trends-customize-btn" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-primary border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 transition-colors" aria-expanded="false" aria-controls="trends-customize-panel">⚙️ Sections</button>
-				<label class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
-					<input type="checkbox" id="trends-piracy-toggle" class="rounded border-gray-400 text-primary focus:ring-primary">
-					<span>Piracy index</span>
-				</label>
-				<label class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
-					<input type="checkbox" id="trends-live-mode-toggle" class="rounded border-gray-400 text-primary focus:ring-primary">
-					<span>Auto-refresh (live)</span>
-				</label>
-				<div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-					<span>Region:</span>
-					<select id="trends-region-select" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs">
-						<option value="US">Global/US</option>
-						<option value="IN">India</option>
-					</select>
+			<div class="mt-2 flex flex-wrap items-center justify-between gap-4">
+				<div class="flex flex-wrap items-center gap-2">
+					<button type="button" id="trends-customize-btn" class="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-primary border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 transition-colors" aria-expanded="false" aria-controls="trends-customize-panel">⚙️ Sections</button>
+					<label class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+						<input type="checkbox" id="trends-piracy-toggle" class="rounded border-gray-400 text-primary focus:ring-primary">
+						<span>Piracy index</span>
+					</label>
+					<label class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+						<input type="checkbox" id="trends-live-mode-toggle" class="rounded border-gray-400 text-primary focus:ring-primary">
+						<span>Auto-refresh (live)</span>
+					</label>
+					<div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+						<span>Region:</span>
+						<select id="trends-region-select" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs">
+							<option value="US">Global/US</option>
+							<option value="IN">India</option>
+						</select>
+					</div>
+				</div>
+				<div class="w-full sm:w-auto flex-1 max-w-xs">
+					<input type="text" id="trends-search-input" placeholder="Search loaded trends..." class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 py-1 text-xs focus:border-primary focus:ring-1 focus:ring-primary" aria-label="Search loaded trends">
 				</div>
 			</div>
 			<div id="trends-customize-panel" class="hidden mt-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60" aria-hidden="true">

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>System & API Test — Analytics, Vercel, Koyeb, Project APIs</title>
+    <title>System & API Test — Analytics, Vercel, Hugging Face, Project APIs</title>
     <script>
-        // Same knobs as jobs.html — set Koyeb URL after deploy (job-search-api)
-        window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://YOUR-APP.koyeb.app';
+        // Same knobs as jobs.html — set Hugging Face URL after deploy (job-search-api)
+        window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://username-space-name.hf.space';
         window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
         window.OMDB_PROXY_URL = window.OMDB_PROXY_URL || 'https://playground-serveless.vercel.app';
     </script>
@@ -39,7 +39,7 @@
 </head>
 <body>
     <h1>System & API test</h1>
-    <p class="subtitle">Cloudflare Worker, Vercel APIs, Koyeb (job-search-api), and project APIs used across the site. Use this page to verify endpoints and see <a href="./docs.html">Docs</a> for details.</p>
+    <p class="subtitle">Cloudflare Worker, Vercel APIs, Hugging Face (job-search-api), and project APIs used across the site. Use this page to verify endpoints and see <a href="./docs.html">Docs</a> for details.</p>
 
     <!-- Cloudflare: Analytics Worker + D1 -->
     <div class="section">
@@ -81,18 +81,18 @@
         <p class="muted">Testing ground: deploy your own Vercel project with api/omdb.js, set env <code>OMDB_API_KEY</code>.</p>
     </div>
 
-    <!-- Koyeb: job-search-api -->
+    <!-- Hugging Face: job-search-api -->
     <div class="section">
-        <h2>Koyeb — Job search API & UI</h2>
+        <h2>Hugging Face (HF) — Job search API & UI</h2>
         <p class="muted">job-search-api: scrapers, RSS, local UI. UI pages can send <code>site=railway-ui</code> to analytics (legacy label).</p>
         <p><strong>Base URL:</strong> <code id="jobsearch-api-base">—</code></p>
         <div class="api-row">
             <span class="api-name">Jobs / health</span>
-            <span class="api-desc">GET /health — job-search-api on Koyeb (see <code>job-search-api/KOYEB.md</code>)</span>
+            <span class="api-desc">GET /health — job-search-api on Hugging Face (HF)</span>
             <button onclick="testJobSearchApi()">Test</button>
             <span class="test-result" id="jobsearch-api-result">—</span>
         </div>
-        <p class="muted">Set <code>JOB_SEARCH_API_BASE</code> in the script above to your Koyeb app URL.</p>
+        <p class="muted">Set <code>JOB_SEARCH_API_BASE</code> in the script above to your Hugging Face Space URL.</p>
     </div>
 
     <!-- Project APIs: used across Home, Trends, Playground, etc. -->

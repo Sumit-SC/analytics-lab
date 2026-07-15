@@ -30,6 +30,9 @@
 			if (optExtra) payload.extra = optExtra;
 			sessionStorage.setItem(TRENDS_CACHE_PREFIX + sectionId, JSON.stringify(payload));
 		} catch (e) {}
+		if (typeof window.__trendsTriggerCounterUpdate === 'function') {
+			window.__trendsTriggerCounterUpdate();
+		}
 	};
 
 	window.runTrendsLoader = function (sectionId, forceRefresh) {
@@ -1353,10 +1356,72 @@
 				window.__trendsWriteCache('anime', html, 'Top ' + items.length + ' anime.');
 			})
 			.catch(function () {
-				setStatus('Could not reach Jikan API. Try again later.');
-			});
-	}
 	window.__trendsLoaders.anime = load;
+
+	window.__trendsTriggerCounterUpdate = function () {
+		var categories = ['tech', 'news', 'entertainment', 'anime'];
+		var allCount = 0;
+
+		categories.forEach(function (cat) {
+			var btn = document.querySelector('.trends-filter-btn[data-trend-filter="' + cat + '"]');
+			if (!btn) return;
+			
+			var sections = document.querySelectorAll('#trends-sections-wrap section.trends-section[data-trend-category="' + cat + '"]');
+			var count = 0;
+			sections.forEach(function (sec) {
+				count += sec.querySelectorAll('li').length;
+			});
+			
+			var baseText = cat.charAt(0).toUpperCase() + cat.slice(1);
+			btn.textContent = baseText + ' (' + count + ')';
+			allCount += count;
+		});
+
+		var allBtn = document.querySelector('.trends-filter-btn[data-trend-filter="all"]');
+		if (allBtn) {
+			allBtn.textContent = 'All (' + allCount + ')';
+		}
+	};
+
+	// Input listener for trends filter search box
+	(function setupTrendsSearch() {
+		var searchInput = document.getElementById('trends-search-input');
+		if (!searchInput) return;
+
+		searchInput.addEventListener('input', function () {
+			var query = searchInput.value.toLowerCase().trim();
+			var sections = document.querySelectorAll('#trends-sections-wrap section.trends-section');
+			
+			sections.forEach(function (sec) {
+				var items = sec.querySelectorAll('li');
+				var visibleCount = 0;
+				
+				items.forEach(function (li) {
+					var text = li.textContent.toLowerCase();
+					if (text.indexOf(query) !== -1) {
+						li.style.display = '';
+						visibleCount++;
+					} else {
+						li.style.display = 'none';
+					}
+				});
+
+				// Dim section if query is set and no items matched
+				if (query && visibleCount === 0) {
+					sec.style.opacity = '0.35';
+				} else {
+					sec.style.opacity = '';
+				}
+			});
+		});
+	})();
+
+	// Trigger initial count calculations
+	setTimeout(function () {
+		if (typeof window.__trendsTriggerCounterUpdate === 'function') {
+			window.__trendsTriggerCounterUpdate();
+		}
+	}, 1000);
 })();
 
 // Analytics: track visits and time-on-page for Trends

@@ -17,17 +17,17 @@
 	<script src="../assets/js/nav-data.js" defer></script>
 	<script src="../assets/js/nav-inject.js" defer></script>
 	<script>
-		// Jobs API: Vercel (playground-serveless) or self-hosted job-search-api (Koyeb, etc.)
+		// Jobs API: Vercel (playground-serveless) or self-hosted job-search-api (Hugging Face, etc.)
 		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
 		// job-search-api (FastAPI): Uses /jobs (cached) and /refresh (POST, scrapes fresh)
-		// Replace YOUR-APP with your Koyeb app hostname (no trailing slash):
-		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://YOUR-APP.koyeb.app';
+		// Replace YOUR-APP with your Hugging Face app hostname (no trailing slash):
+		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://username-space-name.hf.space';
 		// Default (Vercel): window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
 		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
 		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
 		var __isLocalhost = false;
 		try { __isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1'); } catch (e) {}
-		// You can also override via query param: ?backend=https://YOUR-APP.koyeb.app
+		// You can also override via query param: ?backend=https://username-space-name.hf.space
 		var __backendParam = '';
 		try { __backendParam = (new URLSearchParams(window.location.search)).get('backend') || ''; } catch (e) { __backendParam = ''; }
 		if (__backendParam && typeof __backendParam === 'string') {
@@ -487,7 +487,7 @@
 				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
 				<label class="flex items-center gap-2 cursor-pointer">
 					<input type="radio" name="api-backend" value="koyeb" id="api-backend-koyeb" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-					<span class="text-sm text-gray-800 dark:text-gray-200">Koyeb</span>
+					<span class="text-sm text-gray-800 dark:text-gray-200">Hugging Face (HF)</span>
 				</label>
 				<label class="flex items-center gap-2 cursor-pointer">
 					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
@@ -571,7 +571,7 @@
 				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
 					<span>⚙️</span> Search Configuration
 				</h2>
-				<p id="job-search-config-koyeb-hint" class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Koyeb (job-search-api) uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per site</strong> only.</p>
+				<p id="job-search-config-koyeb-hint" class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Hugging Face (job-search-api) uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per site</strong> only.</p>
 				<div class="flex items-center justify-between mb-3 md:hidden">
 					<span class="text-xs text-gray-500 dark:text-gray-400">Advanced filters (optional)</span>
 					<button type="button" id="job-advanced-toggle" class="px-3 py-1 rounded-full bg-primary/5 text-primary text-xs font-semibold">
@@ -1064,7 +1064,7 @@
 		<div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
 			<p>Standalone Playground · Job Tracker · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
 			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present</p>
-			<p class="text-[11px] mt-2 text-gray-500 dark:text-gray-400">Credits: Jobs API (Vercel / Koyeb), OMDb proxy. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
+			<p class="text-[11px] mt-2 text-gray-500 dark:text-gray-400">Credits: Jobs API (Vercel / Hugging Face), OMDb proxy. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
 		</div>
 	</footer>
 

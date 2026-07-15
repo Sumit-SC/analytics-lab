@@ -627,7 +627,7 @@
 		function updateApiBackend(backend) {
 			if (backend === 'koyeb') {
 				window.JOB_PROXY_URL = getJobSearchApiBase();
-				if (statusEl) statusEl.textContent = '✓ Koyeb';
+				if (statusEl) statusEl.textContent = '✓ Hugging Face';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
 				if (statusEl) statusEl.textContent = '✓ Vercel';
@@ -686,7 +686,7 @@
 		if (headlessEl) {
 			headlessEl.disabled = !isKoyeb;
 			headlessEl.classList.toggle('opacity-60', !isKoyeb);
-			headlessEl.setAttribute('title', isKoyeb ? 'Enable slow headless scrapers (e.g. Naukri)' : 'Headless scrapers require Koyeb / job-search-api backend');
+			headlessEl.setAttribute('title', isKoyeb ? 'Enable slow headless scrapers (e.g. Naukri)' : 'Headless scrapers require Hugging Face / job-search-api backend');
 			if (!isKoyeb) headlessEl.checked = false;
 			headlessEl.onchange = function () {
 				applyBackendFormState(isKoyeb ? 'koyeb' : 'vercel');
@@ -715,7 +715,7 @@
 					var canUse = !!isKoyeb && !!(headlessEl && headlessEl.checked);
 					inp.disabled = !canUse;
 					inp.classList.toggle('opacity-60', !canUse);
-					inp.setAttribute('title', canUse ? '' : 'Requires Koyeb + Headless scrapers');
+					inp.setAttribute('title', canUse ? '' : 'Requires Hugging Face + Headless scrapers');
 					if (!canUse) inp.checked = false;
 				} else {
 					inp.disabled = false;
@@ -1566,7 +1566,7 @@
 		(function renderLoadingFetchContext() {
 			var contextEl = document.getElementById('job-stats-context');
 			if (!contextEl) return;
-			var backendLabel = isKoyeb ? 'Koyeb API' : 'Vercel snapshot';
+			var backendLabel = isKoyeb ? 'Hugging Face API' : 'Vercel snapshot';
 			var sp = buildSourcesParam();
 			var sourcesCount = sp ? sp.split(',').filter(Boolean).length : 0;
 			var sourcesLabel = sourcesCount > 0 ? String(sourcesCount) : 'default';
@@ -2297,7 +2297,7 @@
 			var ctx = getSnapshotContext();
 			var backend = (ctx && ctx.backend) || 'unknown';
 			var backendLabel = backend === 'koyeb'
-				? 'Koyeb API'
+				? 'Hugging Face API'
 				: (backend === 'vercel' ? 'Vercel snapshot' : 'Browser/public fallback');
 			var sourceTotal = Object.keys(sourceCounts || {}).length;
 			var errorsCount = (data && Array.isArray(data._errors)) ? data._errors.length : 0;
