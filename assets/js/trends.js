@@ -1356,6 +1356,9 @@
 				window.__trendsWriteCache('anime', html, 'Top ' + items.length + ' anime.');
 			})
 			.catch(function () {
+				setStatus('Could not reach Jikan API. Try again later.');
+			});
+	}
 	window.__trendsLoaders.anime = load;
 
 	window.__trendsTriggerCounterUpdate = function () {
