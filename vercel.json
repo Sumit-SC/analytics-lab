@@ -1,1 +1,30 @@
-{"version":2,"rewrites":[{"source":"/jobs","destination":"/pages/jobs.html"},{"source":"/playground","destination":"/pages/playground.html"},{"source":"/resources","destination":"/pages/resources.html"},{"source":"/tools","destination":"/pages/tools.html"},{"source":"/trends","destination":"/pages/trends.html"},{"source":"/docs","destination":"/pages/docs.html"},{"source":"/","destination":"/index.html"}]}
+{
+  "version": 2,
+  "rewrites": [
+    {"source": "/jobs", "destination": "/pages/jobs.html"},
+    {"source": "/playground", "destination": "/pages/playground.html"},
+    {"source": "/resources", "destination": "/pages/resources.html"},
+    {"source": "/tools", "destination": "/pages/tools.html"},
+    {"source": "/trends", "destination": "/pages/trends.html"},
+    {"source": "/docs", "destination": "/pages/docs.html"},
+    {"source": "/", "destination": "/index.html"}
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [{"key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800"}]
+    },
+    {
+      "source": "/(.*)\\.(js|css|woff2|woff|ttf|eot)",
+      "headers": [{"key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800"}]
+    },
+    {
+      "source": "/(.*)\\.json",
+      "headers": [{"key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=3600"}]
+    },
+    {
+      "source": "/(.*)\\.html",
+      "headers": [{"key": "Cache-Control", "value": "public, max-age=0, must-revalidate"}]
+    }
+  ]
+}

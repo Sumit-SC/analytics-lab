@@ -9,8 +9,9 @@
 	var QUOTE_IMAGE_MODE_KEY = 'home_quote_image_mode'; // 'live' or 'local'
 	// With "Use live posters" ON: images from API (Jikan for anime, OMDb for movie/series) when available, else from quote.images in JSON. OFF: local map + embedded quote.images only.
 
-	// Local quote DB: faster than APIs, no broken endpoints. Loaded from assets/data/quotes-db.json
-	var quotesDb = null;
+	// Local quote DB: v5 preferred (normalized: works + categories), fallback to v4 categories.
+	var quotesDb = null; // v4 categories object OR v5 categories object
+	var quotesWorks = null; // v5 works map
 	var lastQuoteFromDb = null; // { quote: { text, author, source, images }, category } for wallpaper refresh
 	var currentQuoteCategory = null; // actual category of the currently displayed quote (for image-refresh fetch)
 
@@ -23,6 +24,7 @@
 		'Reply 1997': 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d8/TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg/800px-TVN%27s_Reply_1988_%28%EC%9D%91%EB%8B%B5%ED%95%98%EB%9D%BC_1988%29_poster.jpg',
 		'Itaewon Class': 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg',
 		'Goblin': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
+		'Goblin: The Lonely and Great God': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
 		'Guardian: The Lonely and Great God': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
 		'Crash Landing on You': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Crash_Landing_on_You_poster.jpg/800px-Crash_Landing_on_You_poster.jpg',
 		'Start-Up': 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg',
@@ -309,8 +311,48 @@
 		if (quoteAttr) quoteAttr.textContent = attr ? '— ' + attr : '';
 		if (quoteMeta) {
 			quoteMeta.textContent = meta || '';
-			quoteMeta.classList.toggle('hidden', !meta);
+			quoteMeta.classList.toggle('hidden', !(meta && String(meta).trim()));
 		}
+	}
+
+	function toUrlList(imgs) {
+		if (!imgs || !imgs.length) return [];
+		var out = [];
+		for (var i = 0; i < imgs.length; i++) {
+			var it = imgs[i];
+			var u = (typeof it === 'string') ? it : (it && it.url);
+			if (u && typeof u === 'string') out.push(u);
+		}
+		return out;
+	}
+
+	function setWallpaperButtonVisibility() {
+		var btn = document.getElementById('home-quote-bg-refresh');
+		if (!btn) return;
+		var imgs = lastQuoteFromDb && lastQuoteFromDb.quote ? (lastQuoteFromDb.quote.posterPool || lastQuoteFromDb.quote.images) : null;
+		var list = toUrlList(imgs);
+		btn.classList.toggle('hidden', list.length < 2);
+	}
+
+	function getExternalLinkForCurrentQuote() {
+		var q = lastQuoteFromDb && lastQuoteFromDb.quote ? lastQuoteFromDb.quote : null;
+		if (!q) return null;
+		if (q.imdbID && /^tt\d+$/.test(String(q.imdbID))) {
+			return { url: 'https://www.imdb.com/title/' + String(q.imdbID).trim() + '/', label: 'IMDb' };
+		}
+		if (q.goodreadsId && String(q.goodreadsId).trim()) {
+			return { url: 'https://www.goodreads.com/book/show/' + encodeURIComponent(String(q.goodreadsId).trim()), label: 'Goodreads' };
+		}
+		if (q.isbn && String(q.isbn).trim()) {
+			var isbn = String(q.isbn).trim();
+			return { url: 'https://www.amazon.com/s?k=' + encodeURIComponent(isbn), label: 'Amazon' };
+		}
+		if (q.malId && String(q.malId).trim()) {
+			return { url: 'https://myanimelist.net/anime/' + encodeURIComponent(String(q.malId).trim()), label: 'MAL' };
+		}
+		var src = (q.source && String(q.source).trim()) || '';
+		if (src) return { url: 'https://www.google.com/search?q=' + encodeURIComponent(src), label: 'Search' };
+		return null;
 	}
 
 	function isValidImageUrl(url) {
@@ -376,7 +418,94 @@
 	// Pick a random quote from local DB for category; return null if DB not ready or category empty
 	function pickFromLocalDb(category) {
 		if (!quotesDb || typeof quotesDb[category] !== 'object' || !quotesDb[category].length) return null;
-		return pick(quotesDb[category]);
+		var q = pick(quotesDb[category]);
+		// v5: quote references a work_id; hydrate into v4-like shape used by the UI (source/year/imdb_id/images).
+		if (q && q.work_id && quotesWorks && typeof quotesWorks === 'object') {
+			var w = quotesWorks[q.work_id];
+			if (w) {
+				return {
+					work_id: q.work_id,
+					text: q.text,
+					author: q.author || '',
+					source: w.title || '',
+					year: w.year || '',
+					imdb_id: w.imdb_id || '',
+					isbn: w.isbn || '',
+					goodreads_id: w.goodreads_id || '',
+					mal_id: w.mal_id || '',
+					images: (w.images && w.images.length) ? w.images : (q.images || [])
+				};
+			}
+		}
+		return q;
+	}
+
+	function pickAnotherQuoteSameWork() {
+		if (!lastQuoteFromDb || !lastQuoteFromDb.quote) return null;
+		var cat = currentQuoteCategory || lastQuoteFromDb.category || getCategory();
+		if (cat === 'movies') cat = 'movie';
+		var list = quotesDb && quotesDb[cat] && Array.isArray(quotesDb[cat]) ? quotesDb[cat] : null;
+		if (!list || list.length < 2) return null;
+
+		var curText = String(lastQuoteFromDb.quote.text || '').trim();
+		// v5 path: match by work_id in raw v5 quotes array; v4 path: match by source title
+		var workId = lastQuoteFromDb.quote.workId || lastQuoteFromDb.quote.work_id || null;
+		var source = String(lastQuoteFromDb.quote.source || '').trim();
+
+		var candidates = [];
+		if (workId && quotesWorks) {
+			for (var i = 0; i < list.length; i++) {
+				var raw = list[i];
+				if (!raw || raw.work_id !== workId) continue;
+				if (String(raw.text || '').trim() === curText) continue;
+				candidates.push(raw);
+			}
+			if (!candidates.length) return null;
+			var pickedRaw = pick(candidates);
+			var w = quotesWorks[workId];
+			if (!w) return null;
+			return {
+				work_id: workId,
+				text: pickedRaw.text,
+				author: pickedRaw.author || '',
+				source: w.title || source,
+				year: w.year || '',
+				imdb_id: w.imdb_id || '',
+				isbn: w.isbn || '',
+				goodreads_id: w.goodreads_id || '',
+				mal_id: w.mal_id || '',
+				images: (w.images && w.images.length) ? w.images : (pickedRaw.images || [])
+			};
+		}
+
+		// v4 fallback: same source string
+		for (var j = 0; j < list.length; j++) {
+			var q = list[j];
+			if (!q) continue;
+			if (String(q.source || '').trim() !== source) continue;
+			if (String(q.text || '').trim() === curText) continue;
+			candidates.push(q);
+		}
+		return candidates.length ? pick(candidates) : null;
+	}
+
+	function setSameWorkButtonVisibility() {
+		var btn = document.getElementById('home-quote-same-work');
+		if (!btn) return;
+		if (!lastQuoteFromDb || !lastQuoteFromDb.quote) { btn.classList.add('hidden'); return; }
+		var cat = currentQuoteCategory || lastQuoteFromDb.category || getCategory();
+		if (cat === 'movies') cat = 'movie';
+		var list = quotesDb && quotesDb[cat] && Array.isArray(quotesDb[cat]) ? quotesDb[cat] : null;
+		if (!list || list.length < 2) { btn.classList.add('hidden'); return; }
+		var workId = lastQuoteFromDb.quote.workId || lastQuoteFromDb.quote.work_id || null;
+		var source = String(lastQuoteFromDb.quote.source || '').trim();
+		var count = 0;
+		if (workId && quotesWorks) {
+			for (var i = 0; i < list.length; i++) if (list[i] && list[i].work_id === workId) count++;
+		} else if (source) {
+			for (var j = 0; j < list.length; j++) if (list[j] && String(list[j].source || '').trim() === source) count++;
+		}
+		btn.classList.toggle('hidden', count < 2);
 	}
 
 	// Resolve 1–2 image URLs: prefer quote.images from DB (v2: string[], v4: [{ type, url }]), then QUOTE_IMAGE_MAP by source/author.
@@ -589,6 +718,10 @@
 				source: quote.source,
 				images: quote.images && quote.images.length ? quote.images : (resolved || []),
 				imdbID: null,
+				workId: quote.work_id || null,
+				isbn: quote.isbn || '',
+				goodreadsId: quote.goodreads_id || '',
+				malId: quote.mal_id || '',
 				omdbTitle: null,
 				omdbType: null,
 				posterPool: null,
@@ -620,6 +753,8 @@
 		}
 
 		var livePosters = isLivePostersEnabled();
+		setWallpaperButtonVisibility();
+		setSameWorkButtonVisibility();
 
 		if (livePosters && actualCategory === 'anime' && quote.source && quote.source.trim()) {
 			var useApiFirst = isResolvedPlaceholder(resolved);
@@ -628,17 +763,20 @@
 				var animeFallbackTimer = setTimeout(function () {
 					timedOut = true;
 					setBgAndImages(resolved);
+					setWallpaperButtonVisibility();
 				}, API_FIRST_TIMEOUT_MS);
 				fetchJikanImage(quote.source.trim(), function (url) {
 					if (timedOut) return;
 					clearTimeout(animeFallbackTimer);
 					if (url) setBgAndImages([url, url]);
 					else setBgAndImages(resolved);
+					setWallpaperButtonVisibility();
 				});
 			} else {
 				setBgAndImages(resolved);
 				fetchJikanImage(quote.source.trim(), function (url) {
 					if (url) setBgAndImages([url, url]);
+					setWallpaperButtonVisibility();
 				});
 			}
 			return;
@@ -681,6 +819,7 @@
 
 				function applyFallback() {
 					setBgAndImages(resolved);
+					setWallpaperButtonVisibility();
 				}
 
 				var mediaFallbackTimer = null;
@@ -948,7 +1087,9 @@
 	var quoteCategoryEl = document.getElementById('home-quote-category');
 	var quoteImageModeEl = document.getElementById('home-quote-image-live');
 	var quoteRefreshBtn = document.getElementById('home-quote-refresh');
+	var quoteSameWorkBtn = document.getElementById('home-quote-same-work');
 	var quoteBgRefreshBtn = document.getElementById('home-quote-bg-refresh');
+	var quoteOpenSourceBtn = document.getElementById('home-quote-open-source');
 	var quotePinterestBtn = document.getElementById('home-quote-pinterest');
 
 	function getCategory() {
@@ -988,6 +1129,15 @@
 	if (quoteRefreshBtn) {
 		quoteRefreshBtn.addEventListener('click', function () {
 			loadQuote(getCategory());
+		});
+	}
+
+	if (quoteSameWorkBtn) {
+		quoteSameWorkBtn.addEventListener('click', function () {
+			var next = pickAnotherQuoteSameWork();
+			if (next) {
+				applyQuoteFromDb(next, getCategory(), currentQuoteCategory || getCategory());
+			}
 		});
 	}
 
@@ -1060,6 +1210,15 @@
 			}
 
 			function fallbackCycleOrPicsum() {
+				// Normalize images to array of URL strings (v4 has [{ type, url }], we may have [url, url])
+				function toUrlList(imgs) {
+					if (!Array.isArray(imgs) || imgs.length === 0) return [];
+					return imgs.map(function (x) {
+						if (typeof x === 'string' && x.trim().indexOf('http') === 0) return x.trim();
+						if (x && typeof x === 'object' && x.url && String(x.url).indexOf('http') === 0) return String(x.url).trim();
+						return null;
+					}).filter(Boolean);
+					}
 				// If we have a dedicated poster pool for this quote, prefer cycling that first
 				if (lastQuoteFromDb && lastQuoteFromDb.quote && Array.isArray(lastQuoteFromDb.quote.posterPool) && lastQuoteFromDb.quote.posterPool.length > 0) {
 					var pool = lastQuoteFromDb.quote.posterPool;
@@ -1073,8 +1232,9 @@
 					}
 				}
 				// Otherwise fall back to the simple images array or Picsum
-				if (lastQuoteFromDb && lastQuoteFromDb.quote.images && lastQuoteFromDb.quote.images.length > 0) {
-					var imgs = lastQuoteFromDb.quote.images;
+				var imgsRaw = lastQuoteFromDb && lastQuoteFromDb.quote.images ? lastQuoteFromDb.quote.images : [];
+				var imgs = toUrlList(imgsRaw);
+				if (imgs.length > 0) {
 					var currentUrl = (bg.style.backgroundImage || '').replace(/^url\(["']?|["']?\)$/g, '');
 					var idx = -1;
 					for (var i = 0; i < imgs.length; i++) {
@@ -1113,6 +1273,7 @@
 						if (urls && urls.length > 0 && lastQuoteFromDb && lastQuoteFromDb.quote) {
 							lastQuoteFromDb.quote.posterPool = urls;
 							lastQuoteFromDb.quote.posterPoolIndex = 0;
+							setWallpaperButtonVisibility();
 							var first = urls[0] && String(urls[0]).trim();
 							if (bg && isValidImageUrl(first)) {
 								setQuoteBgImage(bg, first);
@@ -1129,6 +1290,7 @@
 						if (urls && urls.length > 0 && lastQuoteFromDb && lastQuoteFromDb.quote) {
 							lastQuoteFromDb.quote.posterPool = urls;
 							lastQuoteFromDb.quote.posterPoolIndex = 0;
+							setWallpaperButtonVisibility();
 							var first = urls[0] && String(urls[0]).trim();
 							if (bg && isValidImageUrl(first)) {
 								setQuoteBgImage(bg, first);
@@ -1157,30 +1319,80 @@
 		});
 	}
 
+	if (quoteOpenSourceBtn) {
+		quoteOpenSourceBtn.addEventListener('click', function () {
+			var link = getExternalLinkForCurrentQuote();
+			if (!link || !link.url) return;
+			try { window.open(link.url, '_blank', 'noopener'); } catch (e) {}
+		});
+	}
+
 	// Set default poster immediately so poster is never blank (default quote in HTML is Plutarch)
 	var bgEl = document.getElementById('home-quote-bg');
 	if (bgEl) setQuoteImage(null, 'Plutarch');
 
-	// Load local quote DB then show initial quote (faster than APIs)
-	fetch('./assets/data/quotes-db.v4.json')
-		.then(function (r) { return r.ok ? r.json() : null; })
-		.then(function (data) {
-			if (data && typeof data === 'object') {
-				// Support both old flat shape and new v4 { meta, categories } shape
-				var categories = data.categories || data;
-				quotesDb = categories;
+	function mergeCategoriesV5WithV4(v5Categories, v4Categories) {
+		var merged = {};
+		if (v5Categories && typeof v5Categories === 'object') {
+			Object.keys(v5Categories).forEach(function (k) {
+				if (Array.isArray(v5Categories[k])) merged[k] = v5Categories[k].slice();
+			});
+		}
+		if (v4Categories && typeof v4Categories === 'object') {
+			Object.keys(v4Categories).forEach(function (k) {
+				if (!Array.isArray(v4Categories[k]) || !v4Categories[k].length) return;
+				if (!merged[k]) merged[k] = [];
+				// Append v4 quotes so library is richer while v5 hosts shared metadata/images
+				for (var i = 0; i < v4Categories[k].length; i++) {
+					var entry = v4Categories[k][i];
+					if (!entry) continue;
+					var a = entry.author && String(entry.author).trim();
+					if (!a || a.toLowerCase() === 'unknown') continue;
+					merged[k].push(entry);
+				}
+			});
+		}
+		return merged;
+	}
 
-				// Temporarily exclude entries with author "Unknown" so we can verify DB works with known entries
-				Object.keys(quotesDb).forEach(function (key) {
-					if (Array.isArray(quotesDb[key])) {
-						quotesDb[key] = quotesDb[key].filter(function (entry) {
-							var a = entry && entry.author && String(entry.author).trim();
-							return a && a.toLowerCase() !== 'unknown';
-						});
-					}
-				});
+	// Load local quote DB then show initial quote (v5 preferred and enriched with v4, fallback to v4-only)
+	fetch('./assets/data/quotes-db.v5.json')
+		.then(function (r) { return r.ok ? r.json() : null; })
+		.then(function (data5) {
+			if (data5 && data5.meta && data5.meta.version === 5 && data5.categories && data5.works) {
+				quotesWorks = data5.works;
+				var v5Categories = data5.categories;
+				// Also load v4 to pull in the larger quote library (Naruto, DBZ, extra kdrama, etc.)
+				return fetch('./assets/data/quotes-db.v4.json')
+					.then(function (r2) { return r2.ok ? r2.json() : null; })
+					.then(function (data4) {
+						var v4Categories = (data4 && typeof data4 === 'object') ? (data4.categories || data4) : null;
+						quotesDb = mergeCategoriesV5WithV4(v5Categories, v4Categories);
+						loadQuote(getCategory());
+					})
+					.catch(function () {
+						quotesDb = mergeCategoriesV5WithV4(v5Categories, null);
+						loadQuote(getCategory());
+					});
 			}
-			loadQuote(getCategory());
+			// If v5 is missing/invalid, fall back to v4-only
+			return fetch('./assets/data/quotes-db.v4.json')
+				.then(function (r2) { return r2.ok ? r2.json() : null; })
+				.then(function (data4) {
+					if (data4 && typeof data4 === 'object') {
+						var categories = data4.categories || data4;
+						quotesDb = {};
+						Object.keys(categories).forEach(function (key) {
+							if (!Array.isArray(categories[key])) return;
+							quotesDb[key] = categories[key].filter(function (entry) {
+								var a = entry && entry.author && String(entry.author).trim();
+								return a && a.toLowerCase() !== 'unknown';
+							});
+						});
+						quotesWorks = null;
+					}
+					loadQuote(getCategory());
+				});
 		})
 		.catch(function () {
 			loadQuote(getCategory());
@@ -1212,7 +1424,9 @@
 
 	// Weather (Open-Meteo): saved location, search city, or use my location. Runs when DOM is ready.
 	var WEATHER_LOCATION_KEY = 'standalone_weather_location';
-	var defaultLat = 51.5074, defaultLon = -0.1278;
+	// Default city (used when geolocation is blocked/denied or first load)
+	var defaultLat = 18.5204, defaultLon = 73.8567; // Pune, India
+	var defaultCityName = 'Pune';
 	var lastDailyForecast = null;
 	var lastWeatherHourly = null;
 	var lastWeatherLat = null, lastWeatherLon = null;
@@ -1537,6 +1751,7 @@
 		if (!weatherEl) return;
 		lastDailyForecast = null;
 		weatherEl.innerHTML = '<span class="text-sm opacity-70">Weather unavailable</span>' +
+			'<div class="text-[11px] opacity-70 mt-0.5">Check your internet, or if a privacy/ad blocker is blocking <code>open-meteo.com</code>.</div>' +
 			'<div class="flex gap-2 mt-1">' +
 			'<button type="button" class="weather-retry-btn text-xs font-semibold text-primary hover:underline">Retry</button>' +
 			'<button type="button" class="weather-default-btn text-xs font-semibold text-gray-600 dark:text-gray-400 hover:underline">Use default city</button>' +
@@ -1544,10 +1759,10 @@
 		weatherEl.querySelector('.weather-retry-btn').addEventListener('click', function () {
 			var saved = getSavedLocation();
 			if (saved) fetchWeather(saved.lat, saved.lon, saved.name);
-			else fetchWeather(defaultLat, defaultLon, 'London');
+			else fetchWeather(defaultLat, defaultLon, defaultCityName);
 		});
 		weatherEl.querySelector('.weather-default-btn').addEventListener('click', function () {
-			setWeatherByCoords(defaultLat, defaultLon, 'London');
+			setWeatherByCoords(defaultLat, defaultLon, defaultCityName);
 		});
 	}
 
@@ -1654,7 +1869,7 @@
 	if (weatherMyLocBtn) {
 		weatherMyLocBtn.addEventListener('click', function () {
 			if (!navigator.geolocation || !navigator.geolocation.getCurrentPosition) {
-				setWeatherByCoords(defaultLat, defaultLon, 'London (no geolocation)');
+				setWeatherByCoords(defaultLat, defaultLon, defaultCityName + ' (no geolocation)');
 				return;
 			}
 			navigator.geolocation.getCurrentPosition(
@@ -1675,7 +1890,7 @@
 						setWeatherByCoords(lat, lon, name);
 					}).catch(function () { setWeatherByCoords(lat, lon, 'My location'); });
 				},
-				function () { setWeatherByCoords(defaultLat, defaultLon, 'London (location denied)'); }
+				function () { setWeatherByCoords(defaultLat, defaultLon, defaultCityName + ' (location denied)'); }
 			);
 		});
 	}
@@ -1764,7 +1979,7 @@
 		if (saved) {
 			fetchWeather(saved.lat, saved.lon, saved.name);
 		} else {
-			fetchWeather(defaultLat, defaultLon, 'London');
+			fetchWeather(defaultLat, defaultLon, defaultCityName);
 		}
 	}
 	if (document.readyState === 'loading') {

@@ -130,6 +130,15 @@
 							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
 						</ul>
 					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Tools & Career</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=editors-ides" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Editors & IDEs</a></li>
+							<li><a href="./resources.html?topic=productivity-tools" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Productivity Tools</a></li>
+							<li><a href="./resources.html?topic=communication" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Communication</a></li>
+							<li><a href="./resources.html?topic=resume-interview" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Resume & Interview</a></li>
+						</ul>
+					</div>
 				</nav>
 			</div>
 		</aside>
@@ -143,7 +152,7 @@
 				<div class="flex items-center gap-2">
 					<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Mode:</span>
 					<button type="button" id="playground-mode-tech" class="playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all" data-mode="tech">Tech</button>
-					<button type="button" id="playground-mode-nontech" class="playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all" data-mode="nontech">Non-tech</button>
+					<button type="button" id="playground-mode-nontech" class="playground-mode-btn px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-all" data-mode="nontech">Non-Tech</button>
 				</div>
 			</div>
 
@@ -393,7 +402,7 @@
 		</div>
 	</footer>
 
-	<div id="global-music-bar">
+	<!-- <div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
 		<div class="global-music-source">
 			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
@@ -408,7 +417,7 @@
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
-	</div>
+	</div> -->
 	<button type="button" id="global-omdb-toggle" class="global-omdb-toggle" aria-label="Open IMDb search">IMDb</button>
 	<div id="global-omdb-flyout" class="global-omdb-flyout">
 		<div class="global-omdb-header">
@@ -431,7 +440,7 @@
 		<div id="global-dict-body" class="global-dict-body"></div>
 		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
 	</div>
-	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<!-- <button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
 	<div id="global-yt-panel">
 		<div class="global-yt-panel-header">
 			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
@@ -447,7 +456,7 @@
 			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
 		</div>
 		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
-	</div>
+	</div> -->
 
 	<script src="../assets/js/nav-mobile.js" defer></script>
 	<script src="../assets/js/color-theme.js" defer></script>
@@ -455,6 +464,7 @@
 	<script src="../assets/js/analytics.js" defer></script>
 	<script src="../assets/js/roadmap.js" defer></script>
 	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/global-widgets.js" defer></script>
 	<script src="../assets/js/omdb-widget.js" defer></script>
 	<script src="../assets/js/sidebar.js" defer></script>
 	<script src="../assets/js/playground.js" defer></script>

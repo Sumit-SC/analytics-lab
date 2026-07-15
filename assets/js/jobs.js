@@ -3,6 +3,7 @@
 
 	// Primary roles and locations (single source of truth for UI + rssjobs.app). Used by Role/Location dropdowns and API query.
 	var PRIMARY_ROLES = [
+		{ label: 'Analyst (any)', query: 'analyst' },
 		{ label: 'Data Analyst', query: 'data analyst' },
 		{ label: 'Senior Data Analyst', query: 'senior data analyst' },
 		{ label: 'Business Analyst', query: 'business analyst' },
@@ -42,18 +43,27 @@
 		{ id: 'indeed', name: 'Indeed', default: true, aliases: ['indeed', 'indeed_rss'] },
 		{ id: 'linkedin', name: 'LinkedIn', default: true, aliases: ['linkedin'] },
 		{ id: 'hiring_cafe', name: 'hiring.cafe', default: true, aliases: ['hiring_cafe', 'hiringcafe'] },
+		{ id: 'hirist', name: 'Hirist', default: false, aliases: ['hirist'] },
 		{ id: 'arbeitnow', name: 'Arbeitnow', default: true, aliases: ['arbeitnow'] },
 		{ id: 'jobicy', name: 'Jobicy', default: true, aliases: ['jobicy'] },
 		{ id: 'workingnomads', name: 'Working Nomads', default: true, aliases: ['workingnomads'] },
+		{ id: 'hn_jobs', name: 'HN Jobs (hnrss)', default: false, aliases: ['hn_jobs', 'hnrss_jobs'] },
 		{ id: 'naukri', name: 'Naukri', default: false, aliases: ['naukri'] },
+		{ id: 'foundit', name: 'Foundit', default: false, aliases: ['foundit'] },
 		{ id: 'himalayas', name: 'Himalayas', default: false, aliases: ['himalayas'] },
+		{ id: 'shine', name: 'Shine', default: false, aliases: ['shine'] },
+		{ id: 'monster', name: 'Monster', default: false, aliases: ['monster'] },
 		{ id: 'remote_co', name: 'Remote.co', default: false, aliases: ['remote.co', 'remoteco', 'remote_co'] },
 		{ id: 'jobspresso', name: 'Jobspresso', default: false, aliases: ['jobspresso'] },
 		{ id: 'authentic_jobs', name: 'Authentic Jobs', default: false, aliases: ['authenticjobs', 'authentic_jobs'] },
+		{ id: 'glassdoor', name: 'Glassdoor', default: false, aliases: ['glassdoor'] },
 		{ id: 'stackoverflow', name: 'Stack Overflow', default: false, aliases: ['stackoverflow', 'stack_overflow'] },
 		{ id: 'greenhouse', name: 'Greenhouse', default: false, aliases: ['greenhouse'] },
 		{ id: 'lever', name: 'Lever', default: false, aliases: ['lever'] },
-		{ id: 'hn_jobs', name: 'HN Jobs', default: false, aliases: ['hn_jobs', 'hnjobs'] }
+		{ id: 'hn_jobs', name: 'HN Jobs', default: false, aliases: ['hn_jobs', 'hnjobs'] },
+		{ id: 'justremote', name: 'JustRemote', default: false, aliases: ['justremote'] },
+		// TrueUp doesn't expose a stable public API we can call from the browser; keep as an optional backend source name.
+		{ id: 'trueup', name: 'TrueUp', default: false, aliases: ['trueup'] }
 	];
 
 	// Skillset keywords for matching (data science domain)
@@ -86,6 +96,96 @@
 	var plannerEntries = [];
 	var sourceCounts = {}; // Track jobs per source from API
 	var apiSources = []; // List of sources from API
+	var lastFetchContext = { query: 'analyst', location: 'remote', days: 7, limit: 200 };
+	var activeJobsRequestId = 0;
+	var AUTO_REFRESH_KEY = 'job_auto_refresh_enabled_v1';
+	var FETCH_PROFILE_KEY = 'job_fetch_profile_v1';
+	var AUTO_REFRESH_MS = 5 * 60 * 1000;
+	var autoRefreshTimerId = null;
+	var refreshAgeTimerId = null;
+	var lastRefreshAtMs = 0;
+	var latestAddedJobKeys = {};
+
+	function beginJobsRequest() {
+		activeJobsRequestId += 1;
+		return activeJobsRequestId;
+	}
+	function isActiveJobsRequest(requestId) {
+		return requestId === activeJobsRequestId;
+	}
+	function setJobLivePill(state, message) {
+		var pill = document.getElementById('job-live-pill');
+		if (!pill) return;
+		var text = message || 'Idle';
+		if (state === 'loading') {
+			pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700 animate-pulse';
+			pill.textContent = '● ' + text;
+			return;
+		}
+		if (state === 'ok') {
+			pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700';
+			pill.textContent = '● ' + text;
+			return;
+		}
+		if (state === 'warn') {
+			pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700';
+			pill.textContent = '● ' + text;
+			return;
+		}
+		pill.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700';
+		pill.textContent = '● ' + text;
+	}
+	function humanizeElapsed(ms) {
+		var mins = Math.floor(ms / 60000);
+		if (mins < 1) return 'just now';
+		if (mins < 60) return mins + 'm ago';
+		var hrs = Math.floor(mins / 60);
+		if (hrs < 24) return hrs + 'h ago';
+		var days = Math.floor(hrs / 24);
+		return days + 'd ago';
+	}
+	function renderLastRefreshText() {
+		var el = document.getElementById('job-last-refresh-text');
+		if (!el) return;
+		if (!lastRefreshAtMs) {
+			el.textContent = 'Last refresh: —';
+			return;
+		}
+		el.textContent = 'Last refresh: ' + humanizeElapsed(Date.now() - lastRefreshAtMs);
+	}
+	function markRefreshCompleteNow() {
+		lastRefreshAtMs = Date.now();
+		renderLastRefreshText();
+	}
+	function applyAutoRefresh(enabled) {
+		if (autoRefreshTimerId) {
+			clearInterval(autoRefreshTimerId);
+			autoRefreshTimerId = null;
+		}
+		var label = document.getElementById('job-auto-refresh-label');
+		if (label) label.textContent = enabled ? 'Auto-refresh ON (5m)' : 'Auto-refresh (5m)';
+		if (!enabled) return;
+		autoRefreshTimerId = setInterval(function () {
+			if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+			fetchAllJobs(false);
+		}, AUTO_REFRESH_MS);
+	}
+	function setupAutoRefreshUi() {
+		var toggle = document.getElementById('job-auto-refresh-toggle');
+		if (!toggle) return;
+		var enabled = false;
+		try { enabled = localStorage.getItem(AUTO_REFRESH_KEY) === '1'; } catch (e) {}
+		toggle.checked = enabled;
+		applyAutoRefresh(enabled);
+		toggle.addEventListener('change', function () {
+			var next = !!toggle.checked;
+			try { localStorage.setItem(AUTO_REFRESH_KEY, next ? '1' : '0'); } catch (e) {}
+			applyAutoRefresh(next);
+		});
+		if (refreshAgeTimerId) clearInterval(refreshAgeTimerId);
+		refreshAgeTimerId = setInterval(renderLastRefreshText, 30000);
+		renderLastRefreshText();
+	}
 
 	// Lightweight caching to avoid rate limits (especially Remotive)
 	var CACHE_PREFIX = 'job_tracker_cache_v1_';
@@ -132,22 +232,53 @@
 		);
 	}
 
-	// Normalize a job from API (Railway uses snake_case; Vercel uses camelCase)
+	function canonicalizeJobUrl(rawUrl) {
+		try {
+			var u = new URL(String(rawUrl || '').trim());
+			// Remove tracking fragments and common marketing params.
+			u.hash = '';
+			var drop = {
+				'utm_source': 1, 'utm_medium': 1, 'utm_campaign': 1, 'utm_term': 1, 'utm_content': 1,
+				'ref': 1, 'ref_src': 1, 'source': 1, 'trk': 1, 'tracking': 1
+			};
+			Object.keys(drop).forEach(function (k) { u.searchParams.delete(k); });
+			var s = u.toString();
+			return s.endsWith('/') ? s.slice(0, -1) : s;
+		} catch (e) {
+			var txt = String(rawUrl || '').trim();
+			return txt.endsWith('/') ? txt.slice(0, -1) : txt;
+		}
+	}
+	function simpleHash(input) {
+		var s = String(input || '');
+		var h = 0;
+		for (var i = 0; i < s.length; i++) {
+			h = ((h << 5) - h) + s.charCodeAt(i);
+			h |= 0;
+		}
+		return Math.abs(h).toString(36);
+	}
+
+	// Normalize a job from API (job-search-api uses snake_case; Vercel uses camelCase)
 	function normalizeJobFromApi(item) {
 		if (!item || !item.title || !item.url) return null;
+		var canonicalUrl = canonicalizeJobUrl(item.url);
+		var fallbackId = 'job_' + simpleHash([canonicalUrl, item.title || '', item.company || ''].join('|'));
 		return {
-			id: item.id || ('job_' + Math.random().toString(36).slice(2)),
+			id: item.id || fallbackId,
 			title: item.title,
 			company: item.company || 'Unknown',
 			location: item.location || 'Remote',
-			url: item.url,
+			url: canonicalUrl,
 			description: item.description || '',
 			tags: Array.isArray(item.tags) ? item.tags : [],
 			source: item.source || 'unknown',
 			date: item.date || new Date().toISOString(),
 			dateFormatted: item.dateFormatted || item.date_formatted || '',
 			postedAgo: item.postedAgo || item.posted_ago || '',
-			matchScore: item.matchScore != null ? item.matchScore : (item.match_score != null ? item.match_score : 0)
+			matchScore: item.matchScore != null ? item.matchScore : (item.match_score != null ? item.match_score : 0),
+			yoeMin: item.yoeMin != null ? item.yoeMin : (item.yoe_min != null ? item.yoe_min : null),
+			yoeMax: item.yoeMax != null ? item.yoeMax : (item.yoe_max != null ? item.yoe_max : null)
 		};
 	}
 
@@ -167,12 +298,17 @@
 		loadPlanner();
 		setupRssModeAndDropdowns();
 		setupApiBackendToggle();
+		setupFetchProfileToggle();
 		setupVercelSearchSection();
 		setupRailwayUiEmbedToggle();
 		setupEnhancedForm();
 		setupSourcesPanel();
+		setupExternalBoardsLinks();
+		setupJobsDiffModal();
 		setupAdvancedFiltersToggle();
 		setupEventListeners();
+		setupSavedFilterPresets();
+		setupAutoRefreshUi();
 		if (!isMobileViewport()) {
 			fetchAllJobs();
 		} else {
@@ -183,6 +319,126 @@
 		}
 		setupPlannerEventListeners();
 		renderPlanner();
+	}
+
+	function getSelectedFetchProfile() {
+		var saved = 'basic';
+		try { saved = localStorage.getItem(FETCH_PROFILE_KEY) || 'basic'; } catch (e) {}
+		return saved === 'advanced' ? 'advanced' : 'basic';
+	}
+
+	function updateFetchProfileUi() {
+		var basicBtn = document.getElementById('fetch-profile-basic');
+		var advBtn = document.getElementById('fetch-profile-advanced');
+		var selected = getSelectedFetchProfile();
+		if (basicBtn) basicBtn.classList.toggle('active', selected === 'basic');
+		if (advBtn) advBtn.classList.toggle('active', selected === 'advanced');
+	}
+
+	function setupFetchProfileToggle() {
+		var basicBtn = document.getElementById('fetch-profile-basic');
+		var advBtn = document.getElementById('fetch-profile-advanced');
+		if (!basicBtn || !advBtn) return;
+		function setProfile(p) {
+			var next = p === 'advanced' ? 'advanced' : 'basic';
+			try { localStorage.setItem(FETCH_PROFILE_KEY, next); } catch (e) {}
+			updateFetchProfileUi();
+		}
+		basicBtn.addEventListener('click', function () { setProfile('basic'); });
+		advBtn.addEventListener('click', function () { setProfile('advanced'); });
+		updateFetchProfileUi();
+	}
+
+	function getCurrentSearchContext() {
+		// Prefer whichever UI is visible/active.
+		var backendVercel = true;
+		try {
+			var koyeb = document.getElementById('api-backend-koyeb');
+			var ver = document.getElementById('api-backend-vercel');
+			if (koyeb && koyeb.checked) backendVercel = false;
+			if (ver && ver.checked) backendVercel = true;
+		} catch (e) {}
+
+		if (backendVercel) {
+			var roleEl = document.getElementById('vercel-search-role');
+			var locEl = document.getElementById('vercel-search-location');
+			var q = roleEl && roleEl.value ? String(roleEl.value) : 'data analyst';
+			var loc = locEl && locEl.value ? String(locEl.value) : 'remote';
+			return { q: q, location: loc };
+		}
+
+		var qEl = document.getElementById('job-search-input');
+		var locInput = document.getElementById('job-location-input');
+		return {
+			q: (qEl && qEl.value ? String(qEl.value) : 'data analyst'),
+			location: (locInput && locInput.value ? String(locInput.value) : 'remote')
+		};
+	}
+
+	function setupExternalBoardsLinks() {
+		var container = document.getElementById('job-external-boards-dynamic');
+		if (!container) return;
+
+		function render(boards) {
+			container.innerHTML = '';
+			if (!boards || !boards.length) {
+				container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">No boards available.</span>';
+				return;
+			}
+			for (var i = 0; i < boards.length; i++) {
+				var b = boards[i];
+				if (!b || !b.url || !b.name) continue;
+				var a = document.createElement('a');
+				a.href = b.url;
+				a.target = '_blank';
+				a.rel = 'noopener';
+				a.className = 'px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline';
+				a.textContent = b.name;
+				container.appendChild(a);
+			}
+		}
+
+		function load() {
+			var ctx = getCurrentSearchContext();
+			var base = (window.JOB_PROXY_URL || '').replace(/\/$/, '');
+			var url = base + '/api/job-boards?q=' + encodeURIComponent(ctx.q) + '&location=' + encodeURIComponent(ctx.location) + '&limit=24';
+
+			container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">Loading…</span>';
+			fetchWithTimeout(url, null, 15000)
+				.then(function (r) { return r && r.ok ? r.json() : null; })
+				.then(function (data) {
+					if (!data || !data.ok || !Array.isArray(data.boards)) {
+						container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">Boards unavailable.</span>';
+						return;
+					}
+					render(data.boards);
+				})
+				.catch(function () {
+					container.innerHTML = '<span class="text-[11px] text-gray-500 dark:text-gray-400">Boards unavailable.</span>';
+				});
+		}
+
+		// Update when user changes role/location/backends.
+		document.addEventListener('change', function (e) {
+			var id = e && e.target && e.target.id ? e.target.id : '';
+			if (id === 'vercel-search-role' || id === 'vercel-search-location' || id === 'job-search-input' || id === 'job-location-input' || id === 'api-backend-koyeb' || id === 'api-backend-vercel') {
+				load();
+			}
+		});
+		document.addEventListener('input', function (e) {
+			var id = e && e.target && e.target.id ? e.target.id : '';
+			if (id === 'job-search-input' || id === 'job-location-input') {
+				// Avoid spamming the API while typing; small debounce.
+				try {
+					window.clearTimeout(window.__jobBoardsDebounce);
+					window.__jobBoardsDebounce = window.setTimeout(load, 500);
+				} catch (e2) {
+					load();
+				}
+			}
+		});
+
+		load();
 	}
 
 	function setupAdvancedFiltersToggle() {
@@ -245,7 +501,20 @@
 	}
 
 	function setupEnhancedForm() {
-		// Populate job sites multi-select (legacy in Railway config section)
+		// Location suggestions (Koyeb / job-search-api config uses a text input)
+		var locationDatalist = document.getElementById('job-location-suggestions');
+		if (locationDatalist) {
+			locationDatalist.innerHTML = '';
+			PRIMARY_LOCATIONS.forEach(function (loc) {
+				var opt = document.createElement('option');
+				// Use the human-friendly label as the visible suggestion text
+				opt.value = loc.label;
+				opt.setAttribute('data-value', loc.value);
+				locationDatalist.appendChild(opt);
+			});
+		}
+
+		// Populate job sites multi-select (legacy in job-search-api config section)
 		var multiselect = document.getElementById('job-sites-multiselect');
 		if (multiselect) {
 			multiselect.innerHTML = '';
@@ -288,16 +557,28 @@
 		var clearBtn = document.getElementById('job-clear-filters-btn');
 		if (clearBtn) {
 			clearBtn.addEventListener('click', function() {
-				document.getElementById('job-search-input').value = 'data analyst';
+				document.getElementById('job-search-input').value = 'analyst';
 				document.getElementById('job-location-input').value = 'Remote';
 				document.getElementById('job-country-select').value = 'USA';
 				document.getElementById('job-type-select').value = '';
 				document.getElementById('job-remote-only').checked = true;
 				document.getElementById('job-linkedin-description').checked = false;
+				var yoeMinEl = document.getElementById('job-yoe-min');
+				var yoeMaxEl = document.getElementById('job-yoe-max');
+				if (yoeMinEl) yoeMinEl.value = 1;
+				if (yoeMaxEl) yoeMaxEl.value = 3;
 				if (resultsSlider) resultsSlider.value = 50;
 				if (resultsDisplay) resultsDisplay.textContent = '50';
-				if (daysSlider) daysSlider.value = 3;
-				if (daysDisplay) daysDisplay.textContent = '3';
+				if (daysSlider) daysSlider.value = 7;
+				if (daysDisplay) daysDisplay.textContent = '7';
+				var excludeEl = document.getElementById('job-filter-exclude');
+				if (excludeEl) excludeEl.value = '';
+				var tagsEl = document.getElementById('job-filter-tags');
+				if (tagsEl) tagsEl.value = '';
+				var tagModeEl = document.getElementById('job-filter-tag-mode');
+				if (tagModeEl) tagModeEl.value = 'any';
+				var presetSelect = document.getElementById('job-filter-preset-select');
+				if (presetSelect) presetSelect.value = 'custom';
 				// Reset job sites to defaults
 				JOB_SITE_OPTIONS.forEach(function(site) {
 					var checkbox = document.getElementById('site-' + site.id);
@@ -318,20 +599,36 @@
 		}
 	}
 	
-		// Setup API Backend: Railway (default) | Vercel — Railway shows search config, Vercel fetches directly from endpoints
-	var RAILWAY_API_URL = 'https://job-search-api-production-5d5d.up.railway.app';
+		// Base URL for job-search-api (Koyeb, local, etc.) — set window.JOB_SEARCH_API_BASE in jobs.html
+	function getJobSearchApiBase() {
+		if (typeof window === 'undefined' || window.JOB_SEARCH_API_BASE == null || window.JOB_SEARCH_API_BASE === '') return '';
+		return String(window.JOB_SEARCH_API_BASE).replace(/\/$/, '');
+	}
+	function proxyUrlLooksLikeJobSearchApi(proxyUrl) {
+		if (!proxyUrl) return false;
+		var p = String(proxyUrl).toLowerCase();
+		return p.indexOf('koyeb.app') !== -1 || p.indexOf('railway.app') !== -1
+			|| p.indexOf('localhost') !== -1 || p.indexOf('127.0.0.1') !== -1
+			|| p.indexOf('hf.space') !== -1 || p.indexOf('jobs-proxy') !== -1;
+	}
+
+		// Setup API Backend: Koyeb (job-search-api) | Vercel
 	function setupApiBackendToggle() {
-		var railwayRadio = document.getElementById('api-backend-railway');
+		try {
+			var legacy = localStorage.getItem('job_tracker_api_backend');
+			if (legacy === 'railway') localStorage.setItem('job_tracker_api_backend', 'koyeb');
+		} catch (eMigrate) { /* ignore */ }
+		var koyebRadio = document.getElementById('api-backend-koyeb');
 		var vercelRadio = document.getElementById('api-backend-vercel');
 		var statusEl = document.getElementById('api-status');
 		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'vercel';
 		if (savedBackend === 'vercel' && vercelRadio) vercelRadio.checked = true;
-		else if (railwayRadio) railwayRadio.checked = true;
+		else if (koyebRadio) koyebRadio.checked = true;
 
 		function updateApiBackend(backend) {
-			if (backend === 'railway') {
-				window.JOB_PROXY_URL = RAILWAY_API_URL;
-				if (statusEl) statusEl.textContent = '✓ Railway';
+			if (backend === 'koyeb') {
+				window.JOB_PROXY_URL = getJobSearchApiBase();
+				if (statusEl) statusEl.textContent = '✓ Hugging Face';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
 				if (statusEl) statusEl.textContent = '✓ Vercel';
@@ -339,31 +636,29 @@
 			localStorage.setItem('job_tracker_api_backend', backend);
 			applyBackendVisibility(backend);
 			applyBackendFormState(backend);
-			// Initial load: use cached/snapshot (no force refresh) so both backends load quickly
 			fetchAllJobs(false);
 		}
 
-		if (railwayRadio) railwayRadio.addEventListener('change', function () { if (railwayRadio.checked) updateApiBackend('railway'); });
+		if (koyebRadio) koyebRadio.addEventListener('change', function () { if (koyebRadio.checked) updateApiBackend('koyeb'); });
 		if (vercelRadio) vercelRadio.addEventListener('change', function () { if (vercelRadio.checked) updateApiBackend('vercel'); });
-		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'railway');
+		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'koyeb');
 	}
 
-	// Railway: show full search config. Vercel: show vercel-search-section + sources panel.
+	// Koyeb (job-search-api): show full search config. Vercel: show vercel-search-section + sources panel.
 	function applyBackendVisibility(backend) {
 		var searchConfig = document.getElementById('job-search-config-section');
 		var vercelSearch = document.getElementById('vercel-search-section');
 		var sourcesPanel = document.getElementById('job-sources-panel');
-		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'railway');
+		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'koyeb');
 		if (vercelSearch) vercelSearch.classList.toggle('hidden', backend !== 'vercel');
 		if (sourcesPanel) sourcesPanel.classList.toggle('hidden', false);
 	}
 
-	// Railway: disable form controls it doesn't use (q, days, limit only); show hint
+	// Koyeb (job-search-api): disable form controls it doesn't use (q, days, limit only); show hint
 	function applyBackendFormState(backend) {
-		var isRailway = backend === 'railway';
-		if (backend === 'vercel') return;
-		var railwayHint = document.getElementById('job-search-config-railway-hint');
-		if (railwayHint) railwayHint.classList.toggle('hidden', !isRailway);
+		var isKoyeb = backend === 'koyeb';
+		var koyebHint = document.getElementById('job-search-config-koyeb-hint');
+		if (koyebHint) koyebHint.classList.toggle('hidden', !isKoyeb);
 		var locationInput = document.getElementById('job-location-input');
 		var countrySelect = document.getElementById('job-country-select');
 		var jobSitesContainer = document.getElementById('job-sites-multiselect');
@@ -385,15 +680,48 @@
 				label.classList.toggle('cursor-not-allowed', disabled);
 			}
 		}
-		setDisabled(locationInput, locationLabel, isRailway, 'Optional for Railway');
-		setDisabled(countrySelect, countryLabel, isRailway, 'Optional for Railway');
-		setDisabled(jobTypeSelect, jobTypeLabel, isRailway, 'Optional for Railway');
+		setDisabled(locationInput, locationLabel, isKoyeb, 'Optional for job-search-api');
+		setDisabled(countrySelect, countryLabel, isKoyeb, 'Optional for job-search-api');
+		setDisabled(jobTypeSelect, jobTypeLabel, isKoyeb, 'Optional for job-search-api');
+		var headlessEl = document.getElementById('job-enable-headless');
+		if (headlessEl) {
+			headlessEl.disabled = !isKoyeb;
+			headlessEl.classList.toggle('opacity-60', !isKoyeb);
+			headlessEl.setAttribute('title', isKoyeb ? 'Enable slow headless scrapers (e.g. Naukri)' : 'Headless scrapers require Hugging Face / job-search-api backend');
+			if (!isKoyeb) headlessEl.checked = false;
+			headlessEl.onchange = function () {
+				applyBackendFormState(isKoyeb ? 'koyeb' : 'vercel');
+			};
+		}
 		if (jobSitesContainer) {
 			jobSitesContainer.classList.remove('opacity-60', 'pointer-events-none');
 			jobSitesContainer.setAttribute('title', 'Select which sources to fetch from');
 			if (jobSitesLabel) jobSitesLabel.classList.remove('opacity-60');
 			var siteInputs = jobSitesContainer.querySelectorAll('input[type="checkbox"]');
-			for (var i = 0; i < siteInputs.length; i++) siteInputs[i].disabled = false;
+			// These sources are implemented as Playwright headless scrapers (only work when "Headless" is enabled).
+			var headlessRequired = {
+				'linkedin': true,
+				'indeed': true,
+				'naukri': true,
+				'hirist': true,
+				'foundit': true,
+				'shine': true,
+				'monster': true,
+				'glassdoor': true
+			};
+			for (var i = 0; i < siteInputs.length; i++) {
+				var inp = siteInputs[i];
+				var id = inp && inp.value ? String(inp.value) : '';
+				if (headlessRequired[id]) {
+					var canUse = !!isKoyeb && !!(headlessEl && headlessEl.checked);
+					inp.disabled = !canUse;
+					inp.classList.toggle('opacity-60', !canUse);
+					inp.setAttribute('title', canUse ? '' : 'Requires Hugging Face + Headless scrapers');
+					if (!canUse) inp.checked = false;
+				} else {
+					inp.disabled = false;
+				}
+			}
 		}
 	}
 
@@ -407,7 +735,7 @@
 				var opt = document.createElement('option');
 				opt.value = r.query;
 				opt.textContent = r.label;
-				if (r.query === 'data analyst') opt.selected = true;
+				if (r.query === 'analyst') opt.selected = true;
 				roleSelect.appendChild(opt);
 			});
 		}
@@ -425,17 +753,21 @@
 		}
 	}
 
-	// Railway UI embed at top: collapsible; URL from current JOB_PROXY_URL when Railway, else default
+	// job-search-api UI embed: collapsible; URL from JOB_PROXY_URL or JOB_SEARCH_API_BASE
 	var EMBED_LOAD_TIMEOUT_MS = 8000;
 	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
-	function getRailwayEmbedUrl() {
+	function getJobSearchApiEmbedUrl() {
 		var proxy = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		if (proxy && (proxy.indexOf('railway') !== -1 || proxy.indexOf('up.railway.app') !== -1)) return proxy + '/ui/';
-		return RAILWAY_API_URL + '/ui/';
+		if (proxy && proxyUrlLooksLikeJobSearchApi(proxy)) return proxy + '/ui/';
+		var base = getJobSearchApiBase();
+		return base ? base + '/ui/' : '';
 	}
 	function setupRailwayUiEmbedToggle() {
 		var fallbackLink = document.getElementById('railway-ui-embed-fallback-link');
-		if (fallbackLink) fallbackLink.href = getRailwayEmbedUrl();
+		var openTab = document.getElementById('job-api-ui-open-tab');
+		var embedUrl = getJobSearchApiEmbedUrl();
+		if (fallbackLink && embedUrl) fallbackLink.href = embedUrl;
+		if (openTab && embedUrl) openTab.href = embedUrl;
 		var toggleBtn = document.getElementById('railway-ui-embed-toggle');
 		var contentDiv = document.getElementById('railway-ui-embed-content');
 		var iframe = document.getElementById('railway-ui-embed-iframe');
@@ -494,7 +826,7 @@
 				if (!src || src === 'about:blank' || src === '') {
 					hideFallback();
 					if (bannerEl) bannerEl.classList.add('hidden');
-					iframe.setAttribute('src', getRailwayEmbedUrl());
+					iframe.setAttribute('src', getJobSearchApiEmbedUrl());
 					loadTimeoutId = setTimeout(function () {
 						loadTimeoutId = null;
 						showFallback();
@@ -541,13 +873,13 @@
 
 		function setRssPanelVisible(visible) {
 			if (rssPanel) rssPanel.classList.toggle('hidden', !visible);
-			// Hide feed URL input when Railway backend is selected (not needed)
+			// Hide feed URL input when Koyeb / job-search-api backend is selected (not needed)
 			var feedUrlInput = document.getElementById('job-rss-feed-url');
 			var feedUrlLabel = feedUrlInput ? feedUrlInput.previousElementSibling : null;
 			var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-			var railwayRadio = document.getElementById('api-backend-railway');
-			var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
-			if (visible && isRailway && feedUrlInput) {
+			var koyebRadio = document.getElementById('api-backend-koyeb');
+			var isKoyebBackend = (koyebRadio && koyebRadio.checked) || (proxyUrl && proxyUrlLooksLikeJobSearchApi(proxyUrl));
+			if (visible && isKoyebBackend && feedUrlInput) {
 				feedUrlInput.style.display = 'none';
 				if (feedUrlLabel && feedUrlLabel.tagName === 'LABEL') feedUrlLabel.style.display = 'none';
 			} else if (visible && feedUrlInput) {
@@ -636,8 +968,12 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
 		var filterAge = document.getElementById('job-filter-age');
 		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
 		var refreshBtn = document.getElementById('job-refresh-btn');
 
 		if (searchInput) {
@@ -652,16 +988,183 @@
 		if (filterStatus) {
 			filterStatus.addEventListener('change', applyFilters);
 		}
+		if (filterNewOnly) {
+			filterNewOnly.addEventListener('change', applyFilters);
+		}
 		if (filterAge) {
 			filterAge.addEventListener('change', applyFilters);
 		}
 		if (filterRole) {
 			filterRole.addEventListener('change', applyFilters);
 		}
+		if (filterExclude) {
+			filterExclude.addEventListener('input', debounce(applyFilters, 300));
+		}
+		if (filterTags) {
+			filterTags.addEventListener('input', debounce(applyFilters, 300));
+		}
+		if (filterTagMode) {
+			filterTagMode.addEventListener('change', applyFilters);
+		}
 		if (refreshBtn) {
 			refreshBtn.addEventListener('click', function () {
 				fetchAllJobs(true); // Force refresh - triggers scraping
 			});
+		}
+	}
+
+	var JOB_FILTER_PRESETS_KEY = 'job_filter_presets_v1';
+	var JOB_FILTER_PRESETS_LAST_KEY = 'job_filter_presets_last_v1';
+	function getSavedPresets() {
+		try {
+			var raw = localStorage.getItem(JOB_FILTER_PRESETS_KEY);
+			if (!raw) return [];
+			var parsed = JSON.parse(raw);
+			if (!Array.isArray(parsed)) return [];
+			return parsed;
+		} catch (e) {
+			return [];
+		}
+	}
+	function setSavedPresets(presets) {
+		try {
+			localStorage.setItem(JOB_FILTER_PRESETS_KEY, JSON.stringify(presets || []));
+		} catch (e) {}
+	}
+	function getQuickFilterState() {
+		var searchInput = document.getElementById('job-search-input');
+		var filterSource = document.getElementById('job-filter-source');
+		var filterMatch = document.getElementById('job-filter-match');
+		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
+		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
+
+		return {
+			q: searchInput ? String(searchInput.value || '') : '',
+			source: filterSource ? filterSource.value : 'all',
+			match: filterMatch ? filterMatch.value : 'all',
+			status: filterStatus ? filterStatus.value : 'all',
+			newOnly: !!(filterNewOnly && filterNewOnly.checked),
+			role: filterRole ? filterRole.value : 'all',
+			exclude: filterExclude ? String(filterExclude.value || '') : '',
+			tags: filterTags ? String(filterTags.value || '') : '',
+			tagMode: filterTagMode ? filterTagMode.value : 'any'
+		};
+	}
+	function applyQuickFilterStateToUI(state) {
+		if (!state) return;
+		var searchInput = document.getElementById('job-search-input');
+		var filterSource = document.getElementById('job-filter-source');
+		var filterMatch = document.getElementById('job-filter-match');
+		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
+		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
+
+		if (searchInput && state.q != null) searchInput.value = String(state.q);
+		if (filterSource && state.source != null) filterSource.value = String(state.source);
+		if (filterMatch && state.match != null) filterMatch.value = String(state.match);
+		if (filterStatus && state.status != null) filterStatus.value = String(state.status);
+		if (filterNewOnly && state.newOnly != null) filterNewOnly.checked = !!state.newOnly;
+		if (filterRole && state.role != null) filterRole.value = String(state.role);
+		if (filterExclude && state.exclude != null) filterExclude.value = String(state.exclude);
+		if (filterTags && state.tags != null) filterTags.value = String(state.tags);
+		if (filterTagMode && state.tagMode != null) filterTagMode.value = String(state.tagMode);
+	}
+	function setupSavedFilterPresets() {
+		var presetSelect = document.getElementById('job-filter-preset-select');
+		var presetNameInput = document.getElementById('job-filter-preset-name');
+		var presetSaveBtn = document.getElementById('job-filter-preset-save');
+		if (!presetSelect || !presetNameInput || !presetSaveBtn) return;
+
+		function render() {
+			var presets = getSavedPresets();
+			var last = localStorage.getItem(JOB_FILTER_PRESETS_LAST_KEY) || '';
+			// Keep current selected value stable if possible.
+			var current = presetSelect.value || 'custom';
+			presetSelect.innerHTML = '<option value="custom">Custom</option>';
+
+			for (var i = 0; i < presets.length; i++) {
+				var p = presets[i];
+				if (!p || !p.name) continue;
+				var opt = document.createElement('option');
+				opt.value = p.name;
+				opt.textContent = p.name;
+				presetSelect.appendChild(opt);
+			}
+
+			if (last) presetSelect.value = last;
+			else if (current && current !== 'custom') presetSelect.value = current;
+			else presetSelect.value = 'custom';
+		}
+
+		function save() {
+			var name = String(presetNameInput.value || '').trim();
+			if (!name) {
+				window.alert('Enter a preset name first.');
+				return;
+			}
+			var state = getQuickFilterState();
+			var presets = getSavedPresets();
+
+			var updated = false;
+			for (var i = 0; i < presets.length; i++) {
+				if (presets[i] && presets[i].name === name) {
+					presets[i] = { name: name, state: state, ts: Date.now() };
+					updated = true;
+					break;
+				}
+			}
+			if (!updated) {
+				presets.unshift({ name: name, state: state, ts: Date.now() });
+			}
+
+			// Keep latest 15 presets.
+			presets = presets.slice(0, 15);
+			setSavedPresets(presets);
+			localStorage.setItem(JOB_FILTER_PRESETS_LAST_KEY, name);
+			render();
+			presetSelect.value = name;
+		}
+
+		function load(name) {
+			var presets = getSavedPresets();
+			var found = null;
+			for (var i = 0; i < presets.length; i++) {
+				if (presets[i] && presets[i].name === name) {
+					found = presets[i];
+					break;
+				}
+			}
+			if (!found || !found.state) return;
+			applyQuickFilterStateToUI(found.state);
+			localStorage.setItem(JOB_FILTER_PRESETS_LAST_KEY, name);
+			applyFilters();
+		}
+
+		presetSelect.addEventListener('change', function () {
+			var v = presetSelect.value || 'custom';
+			if (v === 'custom') return;
+			load(v);
+		});
+
+		presetSaveBtn.addEventListener('click', function () {
+			save();
+			// Keep filter state as-is; no need to reload.
+			applyFilters();
+		});
+
+		// initial render + load last preset
+		render();
+		var last = localStorage.getItem(JOB_FILTER_PRESETS_LAST_KEY) || '';
+		if (last) {
+			// Apply to UI immediately; filtering will re-run after jobs load.
+			load(last);
 		}
 	}
 
@@ -768,21 +1271,40 @@
 
 		var exportJsonBtn = document.getElementById('planner-export-json');
 		var exportCsvBtn = document.getElementById('planner-export-csv');
+		var exportBackupBtn = document.getElementById('planner-export-backup');
+		function downloadBlob(blob, filename) {
+			try {
+				var a = document.createElement('a');
+				a.href = URL.createObjectURL(blob);
+				a.download = filename;
+				a.click();
+				setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 500);
+			} catch (e) {}
+		}
 		if (exportJsonBtn) {
 			exportJsonBtn.addEventListener('click', function () {
 				var entries = getFilteredPlannerEntries();
 				var blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
-				var a = document.createElement('a');
-				a.href = URL.createObjectURL(blob);
-				a.download = 'job-planner-' + new Date().toISOString().slice(0, 10) + '.json';
-				a.click();
-				URL.revokeObjectURL(a.href);
+				downloadBlob(blob, 'job-planner-' + new Date().toISOString().slice(0, 10) + '.json');
+			});
+		}
+		if (exportBackupBtn) {
+			exportBackupBtn.addEventListener('click', function () {
+				var payload = {
+					ok: true,
+					exportedAt: new Date().toISOString(),
+					version: 1,
+					plannerEntries: plannerEntries.slice(),
+					applications: applications || {}
+				};
+				var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+				downloadBlob(blob, 'job-tracker-backup-' + new Date().toISOString().slice(0, 10) + '.json');
 			});
 		}
 		if (exportCsvBtn) {
 			exportCsvBtn.addEventListener('click', function () {
 				var entries = getFilteredPlannerEntries();
-				var headers = ['title', 'company', 'status', 'source', 'location', 'jobType', 'workMode', 'createdAt', 'updatedAt', 'notes'];
+				var headers = ['title', 'company', 'status', 'priority', 'source', 'location', 'jobType', 'workMode', 'salary', 'appliedAt', 'nextStep', 'link', 'tags', 'outcome', 'createdAt', 'updatedAt', 'notes'];
 				function csvEscape(s) {
 					if (s == null) return '';
 					var t = String(s);
@@ -794,11 +1316,7 @@
 					rows.push(headers.map(function (h) { return csvEscape(e[h]); }).join(','));
 				});
 				var blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-				var a = document.createElement('a');
-				a.href = URL.createObjectURL(blob);
-				a.download = 'job-planner-' + new Date().toISOString().slice(0, 10) + '.csv';
-				a.click();
-				URL.revokeObjectURL(a.href);
+				downloadBlob(blob, 'job-planner-' + new Date().toISOString().slice(0, 10) + '.csv');
 			});
 		}
 
@@ -847,6 +1365,101 @@
 
 	// Browser-side temporary jobs DB (localStorage cache)
 	var BROWSER_JOBS_CACHE_KEY = 'analytics_lab_jobs_cache_v1';
+	// Snapshot diff cache (per query + selected sources, in this browser)
+	var JOBS_DIFF_KEY = 'analytics_lab_jobs_diff_v1';
+	var JOBS_LAST_SNAPSHOT_KEY = 'analytics_lab_jobs_last_snapshot_v1';
+
+	function safeLower(s) { return String(s || '').trim().toLowerCase(); }
+
+	function normalizeJobKey(job) {
+		if (!job) return '';
+		var url = String(job.url || '').trim();
+		if (url) return 'url:' + url;
+		return 'f:' + [job.source, job.title, job.company, job.location].map(safeLower).join('|');
+	}
+
+	function getSnapshotContext() {
+		try {
+			var urlParams = new URLSearchParams(window.location.search);
+			var q = (document.getElementById('job-search-input') && document.getElementById('job-search-input').value) || (urlParams.get('q') || '');
+			var backend = (document.getElementById('api-backend-koyeb') && document.getElementById('api-backend-koyeb').checked) ? 'koyeb' : 'vercel';
+			var sources = buildSourcesParam() || '';
+			return { backend: backend, query: String(q || '').trim(), sources: String(sources || '').trim() };
+		} catch (e) {
+			return { backend: 'unknown', query: '', sources: '' };
+		}
+	}
+
+	function writeLastSnapshot(ctx, jobs) {
+		try {
+			var payload = { ts: Date.now(), ctx: ctx || {}, keys: (jobs || []).map(normalizeJobKey).filter(Boolean) };
+			window.localStorage.setItem(JOBS_LAST_SNAPSHOT_KEY, JSON.stringify(payload));
+		} catch (e) {}
+	}
+
+	function readLastSnapshot() {
+		try {
+			var raw = window.localStorage.getItem(JOBS_LAST_SNAPSHOT_KEY);
+			if (!raw) return null;
+			var data = JSON.parse(raw);
+			if (!data || !Array.isArray(data.keys)) return null;
+			return data;
+		} catch (e) { return null; }
+	}
+
+	function computeAndRenderDiff(ctx, jobs) {
+		if (typeof window === 'undefined' || !window.localStorage) return;
+		var last = readLastSnapshot();
+		var curKeys = (jobs || []).map(normalizeJobKey).filter(Boolean);
+		var curSet = new Set(curKeys);
+		var lastKeys = (last && Array.isArray(last.keys)) ? last.keys : [];
+		var lastSet = new Set(lastKeys);
+
+		var sameCtx = !!(last && last.ctx &&
+			String(last.ctx.backend || '') === String(ctx.backend || '') &&
+			String(last.ctx.query || '') === String(ctx.query || '') &&
+			String(last.ctx.sources || '') === String(ctx.sources || ''));
+
+		var added = [];
+		var removed = [];
+		if (sameCtx) {
+			curKeys.forEach(function (k) { if (!lastSet.has(k)) added.push(k); });
+			lastKeys.forEach(function (k) { if (!curSet.has(k)) removed.push(k); });
+		}
+		latestAddedJobKeys = {};
+		if (sameCtx && added.length) {
+			added.forEach(function (k) { latestAddedJobKeys[k] = true; });
+		}
+
+		var lookup = {};
+		(jobs || []).forEach(function (j) {
+			var k = normalizeJobKey(j);
+			if (k && !lookup[k]) lookup[k] = { title: j.title, company: j.company, source: j.source, url: j.url, location: j.location };
+		});
+		try {
+			window.localStorage.setItem(JOBS_DIFF_KEY, JSON.stringify({
+				ts: Date.now(),
+				ctx: ctx,
+				added: added.slice(0, 200),
+				removed: removed.slice(0, 200),
+				lookup: lookup
+			}));
+		} catch (e) {}
+
+		var addedEl = document.getElementById('job-diff-added');
+		var removedEl = document.getElementById('job-diff-removed');
+		if (addedEl) addedEl.textContent = String(added.length);
+		if (removedEl) removedEl.textContent = String(removed.length);
+		var btn = document.getElementById('job-diff-view-btn');
+		if (btn) btn.classList.toggle('hidden', !(sameCtx && (added.length || removed.length)));
+		var banner = document.getElementById('job-new-banner');
+		var bannerText = document.getElementById('job-new-banner-text');
+		if (banner) {
+			var showBanner = sameCtx && added.length > 0;
+			banner.classList.toggle('hidden', !showBanner);
+			if (showBanner && bannerText) bannerText.textContent = added.length + ' new jobs since last refresh';
+		}
+	}
 
 	function saveJobsToBrowserCache(payload) {
 		try {
@@ -883,6 +1496,8 @@
 
 	// Fetch jobs from cached API (fast) or trigger refresh
 	function fetchAllJobs(forceRefresh) {
+		var requestId = beginJobsRequest();
+		setJobLivePill('loading', forceRefresh ? 'Refreshing feed...' : 'Fetching jobs...');
 		var loadingEl = document.getElementById('job-loading');
 		var jobListEl = document.getElementById('job-list');
 		var emptyEl = document.getElementById('job-empty');
@@ -905,44 +1520,74 @@
 		allJobs = [];
 		
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		var railwayRadio = document.getElementById('api-backend-railway');
+		var koyebRadio = document.getElementById('api-backend-koyeb');
 		var vercelRadio = document.getElementById('api-backend-vercel');
-		var isRailway = (railwayRadio && railwayRadio.checked);
+		var isKoyeb = (koyebRadio && koyebRadio.checked);
 		if (!proxyUrl && vercelRadio && vercelRadio.checked) proxyUrl = 'https://playground-serveless.vercel.app';
-		if (!proxyUrl && isRailway) proxyUrl = RAILWAY_API_URL;
+		if (!proxyUrl && isKoyeb) proxyUrl = getJobSearchApiBase();
 		
 		var urlParams = new URLSearchParams(window.location.search);
 		var searchInput = document.getElementById('job-search-input');
 		var locationInput = document.getElementById('job-location-input');
 		var daysSlider = document.getElementById('days-old-slider');
 		var resultsSlider = document.getElementById('results-wanted-slider');
+		var remoteOnlyCb = document.getElementById('job-remote-only');
+		var yoeMinEl = document.getElementById('job-yoe-min');
+		var yoeMaxEl = document.getElementById('job-yoe-max');
 		var vercelRole = document.getElementById('vercel-search-role');
 		var vercelLocation = document.getElementById('vercel-search-location');
 		var vercelDays = document.getElementById('vercel-search-days');
 		
-		// For Railway: use search config inputs. For Vercel: use Vercel search section (role, location, days)
+		// For Koyeb (job-search-api): use search config inputs. For Vercel: use Vercel search section (role, location, days)
 		var query, days, limit, location;
-		if (isRailway) {
-			query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'data analyst');
-			days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '3');
+		if (isKoyeb) {
+			query = (searchInput && searchInput.value) ? searchInput.value.trim() : (urlParams.get('q') || 'analyst');
+			days = (daysSlider && daysSlider.value) ? daysSlider.value : (urlParams.get('days') || '7');
 			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
 			location = (locationInput && locationInput.value) ? locationInput.value.trim() : (urlParams.get('location') || 'remote');
 		} else {
-			query = (vercelRole && vercelRole.value) ? vercelRole.value.trim() : (urlParams.get('q') || 'data analyst');
+			query = (vercelRole && vercelRole.value) ? vercelRole.value.trim() : (urlParams.get('q') || 'analyst');
 			location = (vercelLocation && vercelLocation.value) ? vercelLocation.value.trim() : (urlParams.get('location') || 'remote');
-			days = (vercelDays && vercelDays.value) ? vercelDays.value : (urlParams.get('days') || '3');
+			days = (vercelDays && vercelDays.value) ? vercelDays.value : (urlParams.get('days') || '7');
 			limit = (resultsSlider && resultsSlider.value) ? resultsSlider.value : (urlParams.get('limit') || '400');
 		}
-		// Pagination for Railway
+		var remoteOnly = !!(remoteOnlyCb && remoteOnlyCb.checked);
+		var yoeMin = (yoeMinEl && yoeMinEl.value !== '') ? parseInt(String(yoeMinEl.value), 10) : null;
+		var yoeMax = (yoeMaxEl && yoeMaxEl.value !== '') ? parseInt(String(yoeMaxEl.value), 10) : null;
+		if (yoeMin != null && isNaN(yoeMin)) yoeMin = null;
+		if (yoeMax != null && isNaN(yoeMax)) yoeMax = null;
+		var fetchProfile = getSelectedFetchProfile();
+		lastFetchContext = {
+			query: query || 'analyst',
+			location: location || 'remote',
+			days: parseInt(days, 10) || 7,
+			limit: parseInt(limit, 10) || 200,
+			fetchProfile: fetchProfile
+		};
+		(function renderLoadingFetchContext() {
+			var contextEl = document.getElementById('job-stats-context');
+			if (!contextEl) return;
+			var backendLabel = isKoyeb ? 'Hugging Face API' : 'Vercel snapshot';
+			var sp = buildSourcesParam();
+			var sourcesCount = sp ? sp.split(',').filter(Boolean).length : 0;
+			var sourcesLabel = sourcesCount > 0 ? String(sourcesCount) : 'default';
+			contextEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+			contextEl.textContent = 'Feed: ' + backendLabel + ' · Mode: ' + (fetchProfile === 'advanced' ? 'Advanced' : 'Basic') + ' · Sources: ' + sourcesLabel + ' · Fetching...';
+		})();
+		// Pagination for job-search-api
 		var page = parseInt(urlParams.get('page')) || null;
 		var perPage = parseInt(urlParams.get('per_page')) || null;
 		// Check for manual rssjobs URL parameter (fallback)
 		var rssjobsUrl = urlParams.get('rssjobs') || '';
+		var rssFeedInput = document.getElementById('job-rss-feed-url');
+		if (rssFeedInput && rssFeedInput.value && String(rssFeedInput.value).trim()) {
+			rssjobsUrl = String(rssFeedInput.value).trim();
+		}
 
-		// Analytics: capture job search (Railway vs Vercel) so dashboard shows usage
+		// Analytics: capture job search (Koyeb vs Vercel) so dashboard shows usage
 		if (typeof window.trackEvent === 'function') {
-			window.trackEvent('jobs_search_' + (isRailway ? 'railway' : 'vercel'), {
-				backend: isRailway ? 'railway' : 'vercel',
+			window.trackEvent('jobs_search_' + (isKoyeb ? 'koyeb' : 'vercel'), {
+				backend: isKoyeb ? 'koyeb' : 'vercel',
 				query: query || null,
 				days: days || null,
 				limit: limit || null,
@@ -952,11 +1597,15 @@
 		
 		var sourcesParam = buildSourcesParam();
 		
-		// Railway API: Use /refresh (POST) and /jobs (GET) endpoints
-		if (isRailway) {
+		// job-search-api: Use /refresh (POST) and /jobs (GET) endpoints
+		if (isKoyeb) {
 			if (forceRefresh) {
-				// Railway: POST /refresh
-				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+				// POST /refresh
+				var headlessEl = document.getElementById('job-enable-headless');
+				var enableHeadless = !!(headlessEl && headlessEl.checked);
+				var refreshMode = (fetchProfile === 'advanced' || enableHeadless) ? 'all' : 'rss';
+				var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&mode=' + encodeURIComponent(refreshMode) + '&headless=' + (enableHeadless ? '1' : '0');
+				refreshUrl += '&fetch_profile=' + encodeURIComponent(fetchProfile);
 				if (rssjobsUrl) refreshUrl += '&rssjobs=' + encodeURIComponent(rssjobsUrl);
 				if (sourcesParam) refreshUrl += '&sources=' + encodeURIComponent(sourcesParam);
 				
@@ -965,29 +1614,46 @@
 					.then(function (res) {
 						var refreshData = res.ok ? res.body : null;
 						if (refreshData && refreshData.ok && Array.isArray(refreshData.jobs)) {
-							// Railway /refresh returns jobs directly (snake_case from FastAPI)
+							// /refresh returns jobs directly (snake_case from FastAPI)
 							allJobs = [];
 							refreshData.jobs.forEach(function (item) {
 								var job = normalizeJobFromApi(item);
 								if (job) allJobs.push(job);
 							});
+							// Apply the user's preference after refresh (refresh returns broad set)
+							allJobs = allJobs.filter(function (j) {
+								if (remoteOnly) {
+									var loc = String(j.location || '').toLowerCase();
+									var isRemote = loc.indexOf('remote') !== -1 || loc.indexOf('wfh') !== -1 || loc.indexOf('work from home') !== -1 || loc.indexOf('distributed') !== -1 || loc.indexOf('anywhere') !== -1;
+									if (!isRemote) return false;
+								}
+								if (yoeMin != null || yoeMax != null) {
+									var jMin = (j.yoeMin == null) ? null : parseInt(String(j.yoeMin), 10);
+									var jMax = (j.yoeMax == null) ? null : parseInt(String(j.yoeMax), 10);
+									if (jMin != null && !isNaN(jMin) && yoeMax != null && jMin > yoeMax) return false;
+									if (jMax != null && !isNaN(jMax) && yoeMin != null && jMax < yoeMin) return false;
+								}
+								return true;
+							});
 							sourceCounts = refreshData.sourceCounts || {};
 							apiSources = Array.isArray(refreshData.sources) ? refreshData.sources : [];
-							processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+							if (!isActiveJobsRequest(requestId)) return;
+							processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 							saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 						} else {
 							// Fallback to /jobs endpoint
-							fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
+							fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId);
 						}
 					})
 					.catch(function (err) {
-						console.error('Railway refresh failed:', err);
-						fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
+						console.error('job-search-api refresh failed:', err);
+						if (!isActiveJobsRequest(requestId)) return;
+						fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId);
 					});
 				return;
 			} else {
-				// Railway: GET /jobs (cached) - use higher limit or pagination
-				fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage);
+				// GET /jobs (cached) - use higher limit or pagination
+				fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId);
 				return;
 			}
 		}
@@ -1010,28 +1676,31 @@
 							var job = normalizeJobFromApi(item);
 							if (job) allJobs.push(job);
 						});
-						processJobsData(refreshData);
+						if (!isActiveJobsRequest(requestId)) return;
+						processJobsData(refreshData, requestId);
 						saveJobsToBrowserCache({
 							jobs: allJobs.slice(0),
 							sourceCounts: refreshData.sourceCounts || {},
 							sources: refreshData.sources || []
 						});
 					} else {
-						fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+						fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location, requestId);
 					}
 				})
 				.catch(function (err) {
 					console.error('Refresh failed:', err);
-					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+					if (!isActiveJobsRequest(requestId)) return;
+					fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location, requestId);
 				});
 			return;
 		}
 		// Primary: use jobs-snapshot (same API as playground); pass location for Vercel (Indeed/Stack Overflow)
-		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location);
+		fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsUrl, location, requestId);
 	}
 	
-	// Fetch jobs from rssjobs.app via Railway /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
+	// Fetch jobs from rssjobs.app via job-search-api /rssjobs endpoint (no CORS, no feed URL needed) or Vercel proxy
 	function fetchRssJobsFromRssjobsApp(keywords, location) {
+		var requestId = beginJobsRequest();
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
 		var errorMsgEl = document.getElementById('job-error-message');
@@ -1053,16 +1722,16 @@
 		if (errorEl) errorEl.classList.add('hidden');
 		
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		var railwayRadio = document.getElementById('api-backend-railway');
-		var isRailway = (railwayRadio && railwayRadio.checked) || (proxyUrl && (proxyUrl.includes('railway.app') || proxyUrl.includes('up.railway.app')));
+		var koyebRadio = document.getElementById('api-backend-koyeb');
+		var isKoyebBackend = (koyebRadio && koyebRadio.checked) || (proxyUrl && proxyUrlLooksLikeJobSearchApi(proxyUrl));
 		
 		// Use keywords and location from dropdowns (no feed URL required)
 		var query = keywords || 'data analyst';
 		var loc = location || 'remote';
 		var limit = 400;
 		
-		if (isRailway) {
-			// Railway: Use /rssjobs endpoint directly (no feed URL needed, no CORS)
+		if (isKoyebBackend) {
+			// job-search-api: Use /rssjobs endpoint directly (no feed URL needed, no CORS)
 			var apiUrl = proxyUrl + '/rssjobs?keywords=' + encodeURIComponent(query) + '&location=' + encodeURIComponent(loc) + '&limit=' + limit;
 			
 			fetch(apiUrl)
@@ -1089,11 +1758,12 @@
 					
 					sourceCounts = { 'rssjobs.app': allJobs.length };
 					apiSources = ['rssjobs.app'];
-					processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+					if (!isActiveJobsRequest(requestId)) return;
+					processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 					saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 				})
 				.catch(function (err) {
-					console.error('Railway /rssjobs error:', err);
+					console.error('job-search-api /rssjobs error:', err);
 					if (loadingEl) loadingEl.style.display = 'none';
 					if (errorEl) errorEl.classList.remove('hidden');
 					if (errorMsgEl) {
@@ -1105,7 +1775,7 @@
 			var rssjobsFeedUrl = feedUrlInput && feedUrlInput.value ? feedUrlInput.value.trim() : '';
 			var urlParams = new URLSearchParams(window.location.search);
 			var days = urlParams.get('days') || '3';
-			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, loc);
+			fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, loc, requestId);
 		}
 	}
 	
@@ -1137,7 +1807,7 @@
 	}
 	
 	// Try browser cache then show error (used when both snapshot and cached API fail)
-	function tryBrowserCacheThenError(cacheMaxAgeMs) {
+	function tryBrowserCacheThenError(cacheMaxAgeMs, requestId) {
 		var loadingEl = document.getElementById('job-loading');
 		var errorEl = document.getElementById('job-error');
 		var errorMsgEl = document.getElementById('job-error-message');
@@ -1146,21 +1816,159 @@
 			allJobs = cached.jobs.slice(0);
 			sourceCounts = cached.sourceCounts || {};
 			apiSources = Array.isArray(cached.sources) ? cached.sources : [];
-			processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+			if (!isActiveJobsRequest(requestId)) return;
+			processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
+			setJobLivePill('warn', 'Using browser cache');
 			if (loadingEl) loadingEl.style.display = 'none';
 			return;
 		}
-		if (loadingEl) loadingEl.style.display = 'none';
-		if (errorEl) {
-			errorEl.classList.remove('hidden');
-			if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Try switching between Railway and Vercel above, then click Refresh.';
-			var retryBtn = document.getElementById('job-error-retry');
-			if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
+		// Last-resort fallback: direct free public APIs (no Vercel/Koyeb dependency).
+		fetchPublicJobsFallback(
+			(lastFetchContext && lastFetchContext.query) || 'analyst',
+			(lastFetchContext && lastFetchContext.location) || 'remote',
+			(lastFetchContext && lastFetchContext.days) || 7,
+			(lastFetchContext && lastFetchContext.limit) || 200,
+			requestId
+		).then(function (ok) {
+			if (!isActiveJobsRequest(requestId)) return;
+			if (ok) {
+				setJobLivePill('warn', 'Using public fallback APIs');
+				if (loadingEl) loadingEl.style.display = 'none';
+				return;
+			}
+			if (loadingEl) loadingEl.style.display = 'none';
+			if (errorEl) {
+				errorEl.classList.remove('hidden');
+				if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Backends are down and public fallback also failed. Try again later.';
+				setJobLivePill('error', 'Feed unavailable');
+				var retryBtn = document.getElementById('job-error-retry');
+				if (retryBtn) retryBtn.onclick = function () { fetchAllJobs(true); };
+			}
+		}).catch(function () {
+			if (!isActiveJobsRequest(requestId)) return;
+			if (loadingEl) loadingEl.style.display = 'none';
+			if (errorEl) {
+				errorEl.classList.remove('hidden');
+				if (errorMsgEl) errorMsgEl.textContent = 'Could not load jobs. Backends are down and public fallback also failed. Try again later.';
+				setJobLivePill('error', 'Feed unavailable');
+				var retryBtn2 = document.getElementById('job-error-retry');
+				if (retryBtn2) retryBtn2.onclick = function () { fetchAllJobs(true); };
+			}
+		});
+	}
+
+	function fetchPublicJobsFallback(query, location, days, limit, requestId) {
+		var q = String(query || 'analyst').toLowerCase();
+		var loc = String(location || 'remote').toLowerCase();
+		var maxItems = Math.min(parseInt(limit, 10) || 200, 400);
+		var cutoffMs = Date.now() - ((parseInt(days, 10) || 7) * 24 * 60 * 60 * 1000);
+
+		function parseDateSafe(raw) {
+			if (!raw) return null;
+			var d = new Date(raw);
+			return isNaN(d.getTime()) ? null : d;
 		}
+		function containsQuery(text) {
+			if (!q) return true;
+			var t = String(text || '').toLowerCase();
+			return q.split(/\s+/).some(function (tok) { return tok && t.indexOf(tok) !== -1; });
+		}
+		function containsLocation(text) {
+			if (!loc || loc === 'remote' || loc === 'remote (any)') return true;
+			return String(text || '').toLowerCase().indexOf(loc) !== -1;
+		}
+
+		var remotiveUrl = 'https://remotive.com/api/remote-jobs?search=' + encodeURIComponent(q);
+		var arbeitnowUrl = 'https://www.arbeitnow.com/api/job-board-api';
+
+		var remotiveReq = fetchWithTimeout(remotiveUrl, {}, 12000)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var out = [];
+				var jobs = data && Array.isArray(data.jobs) ? data.jobs : [];
+				for (var i = 0; i < jobs.length; i++) {
+					var j = jobs[i] || {};
+					var posted = parseDateSafe(j.publication_date);
+					if (posted && posted.getTime() < cutoffMs) continue;
+					var hay = [j.title, j.company_name, j.description, j.category].join(' ');
+					if (!containsQuery(hay)) continue;
+					if (!containsLocation(j.candidate_required_location)) continue;
+					out.push({
+						id: 'free_remotive_' + (j.id || i),
+						title: j.title || 'Untitled role',
+						company: j.company_name || 'Unknown',
+						location: j.candidate_required_location || 'Remote',
+						url: j.url || '',
+						date: posted ? posted.toISOString() : null,
+						description: j.description || '',
+						source: 'remotive',
+						tags: Array.isArray(j.tags) ? j.tags : ['remotive']
+					});
+				}
+				return out;
+			})
+			.catch(function () { return []; });
+
+		var arbeitnowReq = fetchWithTimeout(arbeitnowUrl, {}, 12000)
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				var out = [];
+				var jobs = data && Array.isArray(data.data) ? data.data : [];
+				for (var i = 0; i < jobs.length; i++) {
+					var j = jobs[i] || {};
+					var posted = parseDateSafe(j.created_at || j.createdAt);
+					if (posted && posted.getTime() < cutoffMs) continue;
+					var hay = [j.title, j.company_name, j.description, (j.tags || []).join(' ')].join(' ');
+					if (!containsQuery(hay)) continue;
+					if (!containsLocation(j.location)) continue;
+					out.push({
+						id: 'free_arbeitnow_' + (j.slug || i),
+						title: j.title || 'Untitled role',
+						company: j.company_name || 'Unknown',
+						location: j.location || 'Remote',
+						url: j.url || '',
+						date: posted ? posted.toISOString() : null,
+						description: j.description || '',
+						source: 'arbeitnow',
+						tags: Array.isArray(j.tags) ? j.tags : ['arbeitnow']
+					});
+				}
+				return out;
+			})
+			.catch(function () { return []; });
+
+		return Promise.all([remotiveReq, arbeitnowReq]).then(function (res) {
+			var merged = (res[0] || []).concat(res[1] || []);
+			if (!merged.length) return false;
+			merged.sort(function (a, b) {
+				var da = a.date ? new Date(a.date).getTime() : 0;
+				var db = b.date ? new Date(b.date).getTime() : 0;
+				return db - da;
+			});
+			allJobs = merged.slice(0, maxItems).map(function (item) {
+				return normalizeJobFromApi(item) || item;
+			}).filter(Boolean);
+			sourceCounts = {};
+			allJobs.forEach(function (j) {
+				var src = j.source || 'public_api';
+				sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+			});
+			apiSources = Object.keys(sourceCounts);
+			if (!isActiveJobsRequest(requestId)) return false;
+			processJobsData({
+				sourceCounts: sourceCounts,
+				sources: apiSources,
+				generatedAt: new Date().toISOString()
+			}, requestId);
+			saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
+			return true;
+		}).catch(function () {
+			return false;
+		});
 	}
 
 	// Fetch from cached jobs API (fallback when snapshot fails)
-	function fetchCachedJobs(proxyUrl, query, days, limit) {
+	function fetchCachedJobs(proxyUrl, query, days, limit, requestId) {
 		var cachedUrl = proxyUrl 
 			? (proxyUrl + '/api/jobs-cached?q=' + encodeURIComponent(query))
 			: ('/api/jobs-cached?q=' + encodeURIComponent(query));
@@ -1172,7 +1980,7 @@
 				var errorEl = document.getElementById('job-error');
 				
 				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
-					tryBrowserCacheThenError(1000 * 60 * 30);
+					tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 					return;
 				}
 				
@@ -1180,18 +1988,28 @@
 					var job = normalizeJobFromApi(item);
 					if (job) allJobs.push(job);
 				});
-				processJobsData(data);
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData(data, requestId);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
 				console.error('Cached jobs API error:', err);
-				tryBrowserCacheThenError(1000 * 60 * 30);
+				tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 			});
 	}
 	
-	// Railway API: Fetch jobs from /jobs endpoint (cached) - supports pagination
-	function fetchRailwayJobs(proxyUrl, query, days, limit, page, perPage) {
-		var apiUrl = proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+	// job-search-api: Fetch jobs from /jobs endpoint (cached) - supports pagination
+	function fetchJobSearchApiJobs(proxyUrl, query, days, limit, page, perPage, remoteOnly, yoeMin, yoeMax, fetchProfile, requestId) {
+		var useSearchEndpoint = true;
+		var apiUrl = proxyUrl + (useSearchEndpoint ? '/jobs/search' : '/jobs') + '?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+		if (remoteOnly) apiUrl += '&remote_only=1';
+		if (yoeMin != null) apiUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
+		if (yoeMax != null) apiUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
+		apiUrl += '&sort=relevance';
+		apiUrl += '&role_profile=' + encodeURIComponent('data_analytics');
+		if (fetchProfile === 'advanced') {
+			apiUrl += '&min_match_score=30';
+		}
 		
 		// Use pagination if provided, otherwise use limit (max 400)
 		if (page && perPage) {
@@ -1209,9 +2027,9 @@
 				var errorEl = document.getElementById('job-error');
 				
 				if (!data || !data.ok || !Array.isArray(data.jobs) || data.jobs.length === 0) {
-					// Railway /jobs might be empty if storage not persisting, try /refresh as fallback
-					console.log('Railway /jobs empty, trying /refresh...');
-					fetchRailwayRefresh(proxyUrl, query, days, limit);
+					// /jobs might be empty if storage not persisting, try /refresh as fallback
+					console.log('job-search-api /jobs empty, trying /refresh...');
+					fetchJobSearchApiRefresh(proxyUrl, query, days, limit, fetchProfile, requestId);
 					return;
 				}
 				
@@ -1227,7 +2045,7 @@
 				// Handle pagination info if available
 				if (data.total !== undefined && data.page !== undefined && data.per_page !== undefined) {
 					var totalPages = Math.ceil(data.total / data.per_page);
-					console.log('Railway pagination:', 'Page ' + data.page + ' of ' + totalPages + ', Total jobs: ' + data.total);
+					console.log('job-search-api pagination:', 'Page ' + data.page + ' of ' + totalPages + ', Total jobs: ' + data.total);
 					
 					// If using pagination and there are more pages, fetch them
 					// But only if we're not already at the limit
@@ -1241,14 +2059,22 @@
 						var pagesFetched = 0;
 						var fetchNextPage = function(pageNum) {
 							if (pagesFetched >= pagesNeeded || allJobs.length >= targetLimit) {
-								processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+								if (!isActiveJobsRequest(requestId)) return;
+								processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 								saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 								return;
 							}
 							
-							fetch(proxyUrl + '/jobs?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&page=' + pageNum + '&per_page=' + jobsPerPage)
+							var pageUrl = proxyUrl + (useSearchEndpoint ? '/jobs/search' : '/jobs') + '?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days);
+							if (remoteOnly) pageUrl += '&remote_only=1';
+							if (yoeMin != null) pageUrl += '&yoe_min=' + encodeURIComponent(String(yoeMin));
+							if (yoeMax != null) pageUrl += '&yoe_max=' + encodeURIComponent(String(yoeMax));
+							pageUrl += '&sort=relevance&role_profile=data_analytics';
+							pageUrl += '&page=' + pageNum + '&per_page=' + jobsPerPage;
+							fetchWithTimeout(pageUrl, {}, 22000)
 								.then(function (r) { return r.ok ? r.json() : null; })
 								.then(function (pageData) {
+									if (!isActiveJobsRequest(requestId)) return;
 									if (pageData && pageData.ok && Array.isArray(pageData.jobs)) {
 										pageData.jobs.forEach(function (item) {
 											var job = normalizeJobFromApi(item);
@@ -1257,13 +2083,14 @@
 										pagesFetched++;
 										fetchNextPage(pageNum + 1);
 									} else {
-										processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+										processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 										saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 									}
 								})
 								.catch(function (err) {
 									console.error('Error fetching page ' + pageNum + ':', err);
-									processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+									if (!isActiveJobsRequest(requestId)) return;
+									processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 									saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 								});
 						};
@@ -1274,19 +2101,24 @@
 					}
 				}
 				
-				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
-				console.error('Railway /jobs error:', err);
+				console.error('job-search-api /jobs error:', err);
 				// Fallback to /refresh
-				fetchRailwayRefresh(proxyUrl, query, days, limit);
+				fetchJobSearchApiRefresh(proxyUrl, query, days, limit, fetchProfile, requestId);
 			});
 	}
 	
-	// Railway API: Fetch jobs from /refresh endpoint (scrapes fresh)
-	function fetchRailwayRefresh(proxyUrl, query, days, limit) {
-		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&headless=0';
+	// job-search-api: Fetch jobs from /refresh endpoint (scrapes fresh)
+	function fetchJobSearchApiRefresh(proxyUrl, query, days, limit, fetchProfile, requestId) {
+		var headlessEl = document.getElementById('job-enable-headless');
+		var enableHeadless = !!(headlessEl && headlessEl.checked);
+		var refreshMode = (fetchProfile === 'advanced' || enableHeadless) ? 'all' : 'rss';
+		var refreshUrl = proxyUrl + '/refresh?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&mode=' + encodeURIComponent(refreshMode) + '&headless=' + (enableHeadless ? '1' : '0');
+		refreshUrl += '&fetch_profile=' + encodeURIComponent(fetchProfile || 'basic');
 		var sp = buildSourcesParam();
 		if (sp) refreshUrl += '&sources=' + encodeURIComponent(sp);
 		
@@ -1297,7 +2129,7 @@
 				var errorEl = document.getElementById('job-error');
 				
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
-					tryBrowserCacheThenError(1000 * 60 * 30);
+					tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 					return;
 				}
 				
@@ -1309,17 +2141,18 @@
 				
 				sourceCounts = data.sourceCounts || {};
 				apiSources = Array.isArray(data.sources) ? data.sources : [];
-				processJobsData({ sourceCounts: sourceCounts, sources: apiSources });
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData({ sourceCounts: sourceCounts, sources: apiSources }, requestId);
 				saveJobsToBrowserCache({ jobs: allJobs.slice(0), sourceCounts: sourceCounts, sources: apiSources });
 			})
 			.catch(function (err) {
-				console.error('Railway /refresh error:', err);
-				tryBrowserCacheThenError(1000 * 60 * 30);
+				console.error('job-search-api /refresh error:', err);
+				tryBrowserCacheThenError(1000 * 60 * 30, requestId);
 			});
 	}
 	
 	// Primary: jobs-snapshot API (same as Playground). Optional location (for Indeed/Stack Overflow), rssjobs = rssjobs.app feed URL.
-	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, location) {
+	function fetchJobsSnapshot(proxyUrl, query, days, limit, rssjobsFeedUrl, location, requestId) {
 		var apiUrl = proxyUrl
 			? (proxyUrl + '/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit))
 			: ('/api/jobs-snapshot?q=' + encodeURIComponent(query) + '&days=' + encodeURIComponent(days) + '&limit=' + encodeURIComponent(limit));
@@ -1335,7 +2168,7 @@
 			.then(function (data) {
 				if (!data || !data.ok || !Array.isArray(data.jobs)) {
 					console.log('Jobs snapshot failed, trying cached API...');
-					fetchCachedJobs(proxyUrl, query, days, limit);
+					fetchCachedJobs(proxyUrl, query, days, limit, requestId);
 					return;
 				}
 				
@@ -1344,7 +2177,8 @@
 					if (job) allJobs.push(job);
 				});
 				
-				processJobsData(data);
+				if (!isActiveJobsRequest(requestId)) return;
+				processJobsData(data, requestId);
 
 				// Save latest successful jobs snapshot to browser cache (temporary DB)
 				saveJobsToBrowserCache({
@@ -1355,12 +2189,30 @@
 			})
 			.catch(function (err) {
 				console.error('Jobs snapshot network error:', err);
-				fetchCachedJobs(proxyUrl, query, days, limit);
+				fetchCachedJobs(proxyUrl, query, days, limit, requestId);
 			});
 	}
 	
 	// Process jobs data (common logic)
-	function processJobsData(data) {
+	function processJobsData(data, requestId) {
+		if (requestId != null && !isActiveJobsRequest(requestId)) return;
+		// "Data stamp": show when the backend produced the dataset
+		(function () {
+			var stampEl = document.getElementById('job-stats-updated');
+			if (!stampEl) return;
+			var ts = (data && (data.generatedAt || data.generated_at || data.saved_at)) || null;
+			if (!ts) {
+				stampEl.textContent = '—';
+				return;
+			}
+			var d = new Date(ts);
+			if (isNaN(d.getTime())) {
+				stampEl.textContent = 'Updated: ' + String(ts);
+				return;
+			}
+			stampEl.textContent = 'Updated: ' + d.toLocaleString();
+		})();
+
 		// Compute source counts if missing (cached API usually only returns jobs + sources)
 		if (!data || !data.sourceCounts) {
 			sourceCounts = {};
@@ -1378,9 +2230,20 @@
 		}
 
 		// Filter out irrelevant jobs before calculating scores
+		enrichMissingJobTags();
 		allJobs = allJobs.filter(function (job) {
 			var fullText = (job.title + ' ' + job.description + ' ' + (job.tags || []).join(' ')).toLowerCase();
 			return isDataScienceJob(fullText);
+		});
+		// Canonical URL dedupe to avoid duplicates across feeds/sources.
+		var seenCanonical = {};
+		allJobs = allJobs.filter(function (job) {
+			var key = canonicalizeJobUrl(job.url);
+			if (!key) return false;
+			if (seenCanonical[key]) return false;
+			seenCanonical[key] = true;
+			job.url = key;
+			return true;
 		});
 
 		// Calculate match scores
@@ -1402,12 +2265,146 @@
 		});
 
 		updateSourceFilterDropdown();
+		(function renderSourceDegradationNotice() {
+			var host = document.getElementById('job-stats-diff');
+			if (!host) return;
+			var id = 'job-source-issues-inline';
+			var existing = document.getElementById(id);
+			if (!data || !Array.isArray(data._errors) || !data._errors.length) {
+				if (existing) existing.remove();
+				setJobLivePill('ok', 'Live feed healthy');
+				return;
+			}
+			var unique = {};
+			for (var i = 0; i < data._errors.length; i++) {
+				var src = data._errors[i] && data._errors[i].source ? String(data._errors[i].source) : 'unknown';
+				unique[src] = true;
+			}
+			var badSources = Object.keys(unique).sort();
+			if (!existing) {
+				existing = document.createElement('span');
+				existing.id = id;
+				existing.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300';
+				host.appendChild(existing);
+			}
+			existing.textContent = 'Degraded sources: ' + badSources.join(', ');
+			existing.title = 'Some sources failed in this fetch. Results may be partial.';
+			setJobLivePill('warn', 'Partial feed (' + badSources.length + ' degraded)');
+		})();
+		markRefreshCompleteNow();
+		(function renderFetchContextStatus() {
+			var contextEl = document.getElementById('job-stats-context');
+			if (!contextEl) return;
+			var ctx = getSnapshotContext();
+			var backend = (ctx && ctx.backend) || 'unknown';
+			var backendLabel = backend === 'koyeb'
+				? 'Hugging Face API'
+				: (backend === 'vercel' ? 'Vercel snapshot' : 'Browser/public fallback');
+			var sourceTotal = Object.keys(sourceCounts || {}).length;
+			var errorsCount = (data && Array.isArray(data._errors)) ? data._errors.length : 0;
+			var ts = data && (data.generatedAt || data.generated_at || data.saved_at);
+			var freshness = '';
+			if (ts) {
+				var d = new Date(ts);
+				if (!isNaN(d.getTime())) {
+					var ageMin = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+					freshness = ageMin <= 1 ? 'fresh now' : ('fresh ' + ageMin + 'm ago');
+				}
+			}
+			var parts = [
+				'Feed: ' + backendLabel,
+				'Sources: ' + sourceTotal
+			];
+			if (freshness) parts.push(freshness);
+			if (errorsCount > 0) parts.push('partial (' + errorsCount + ' source errors)');
+			contextEl.textContent = parts.join(' · ');
+			contextEl.className = errorsCount > 0
+				? 'text-xs text-amber-700 dark:text-amber-300'
+				: 'text-xs text-gray-500 dark:text-gray-400';
+		})();
+		
+		// Added/removed since last refresh (per query + selected sources)
+		try {
+			var ctx = getSnapshotContext();
+			computeAndRenderDiff(ctx, allJobs);
+			writeLastSnapshot(ctx, allJobs);
+		} catch (e) {}
 		
 		applyFilters();
 		var loadingEl = document.getElementById('job-loading');
 		if (loadingEl) loadingEl.style.display = 'none';
 		
 		updateSourceStats();
+	}
+
+	function enrichMissingJobTags() {
+		// Many sources don't provide normalized tags. For filtering, we generate lightweight tags
+		// from common skills found in title/description.
+		var tagKeywords = [
+			'sql',
+			'python',
+			'r',
+			'pandas',
+			'numpy',
+			'tableau',
+			'power bi',
+			'looker',
+			'plotly',
+			'matplotlib',
+			'seaborn',
+			'spark',
+			'airflow',
+			'kafka',
+			'dask',
+			'dbt',
+			'snowflake',
+			'redshift',
+			'bigquery',
+			'aws',
+			'azure',
+			'gcp',
+			'docker',
+			'kubernetes',
+			'machine learning',
+			'deep learning',
+			'nlp',
+			'computer vision',
+			'statistics',
+			'experiment',
+			'a/b'
+		];
+
+		for (var i = 0; i < allJobs.length; i++) {
+			var job = allJobs[i];
+			var tags = Array.isArray(job.tags) ? job.tags : [];
+			if (tags && tags.length > 0) continue;
+
+			var text = ((job.title || '') + ' ' + (job.company || '') + ' ' + (job.location || '') + ' ' + (job.description || '')).toLowerCase();
+			var found = [];
+			for (var k = 0; k < tagKeywords.length; k++) {
+				var kw = tagKeywords[k];
+				// Simple substring match; keeps it fast.
+				if (text.indexOf(kw) !== -1) found.push(kw);
+			}
+
+			// Add role-family tags if we detect them.
+			if (/(data analyst|business analyst|product analyst)/.test(text)) found.push('analyst');
+			if (/(data scientist|research scientist)/.test(text)) found.push('scientist');
+			if (/(ml engineer|machine learning engineer|analytics engineer)/.test(text)) found.push('engineer');
+
+			// De-dupe while preserving order.
+			var seen = {};
+			var deduped = [];
+			for (var f = 0; f < found.length; f++) {
+				var t = found[f];
+				if (t && !seen[t]) {
+					seen[t] = true;
+					deduped.push(t);
+				}
+			}
+
+			job.tags = deduped;
+		}
 	}
 
 	var currentDetailJob = null;
@@ -2418,15 +3415,25 @@
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
 		var filterStatus = document.getElementById('job-filter-status');
+		var filterNewOnly = document.getElementById('job-filter-new-only');
 		var filterAge = document.getElementById('job-filter-age');
 		var filterRole = document.getElementById('job-filter-role');
+		var filterExclude = document.getElementById('job-filter-exclude');
+		var filterTags = document.getElementById('job-filter-tags');
+		var filterTagMode = document.getElementById('job-filter-tag-mode');
 
 		var searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 		var sourceFilter = filterSource ? filterSource.value : 'all';
 		var matchFilter = filterMatch ? filterMatch.value : 'all';
 		var statusFilter = filterStatus ? filterStatus.value : 'all';
+		var newOnlyFilter = !!(filterNewOnly && filterNewOnly.checked);
 		var ageFilter = filterAge ? filterAge.value : 'all';
 		var roleFilter = filterRole ? filterRole.value : 'all';
+		var excludeInput = filterExclude ? String(filterExclude.value || '').trim().toLowerCase() : '';
+		var tagsInput = filterTags ? String(filterTags.value || '').trim().toLowerCase() : '';
+		var tagMode = filterTagMode ? filterTagMode.value : 'any';
+		var excludeTerms = excludeInput ? excludeInput.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
+		var tagTerms = tagsInput ? tagsInput.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
 		var selectedSiteAliases = getSelectedSiteAliases();
 		var useSiteFilter = hasAnySiteSelection();
 
@@ -2457,6 +3464,10 @@
 			if (statusFilter !== 'all') {
 				var status = applications[job.id] || 'new';
 				if (status !== statusFilter) return false;
+			}
+			if (newOnlyFilter) {
+				var jobKey = normalizeJobKey(job);
+				if (!jobKey || !latestAddedJobKeys[jobKey]) return false;
 			}
 
 			// Age filter (freshness) — works with date, dateFormatted, or postedAgo
@@ -2495,6 +3506,34 @@
 			// Role focus filter (Analyst / Scientist / Engineer / Associate & Junior)
 			if (!jobMatchesRole(job, roleFilter)) return false;
 
+			// Exclude keyword filter (comma-separated)
+			if (excludeTerms.length > 0) {
+				var hay = ((job.title || '') + ' ' + (job.company || '') + ' ' + (job.description || '') + ' ' + ((job.tags || []).join(' '))).toLowerCase();
+				for (var e = 0; e < excludeTerms.length; e++) {
+					var ex = excludeTerms[e];
+					if (ex && hay.indexOf(ex) !== -1) return false;
+				}
+			}
+
+			// Tag filter (comma-separated)
+			if (tagTerms.length > 0) {
+				var jobTagsText = Array.isArray(job.tags) ? job.tags.join(' ').toLowerCase() : '';
+				if (tagMode === 'all') {
+					for (var t = 0; t < tagTerms.length; t++) {
+						var term = tagTerms[t];
+						if (term && jobTagsText.indexOf(term) === -1) return false;
+					}
+				} else {
+					// any
+					var hit = false;
+					for (var t2 = 0; t2 < tagTerms.length; t2++) {
+						var term2 = tagTerms[t2];
+						if (term2 && jobTagsText.indexOf(term2) !== -1) { hit = true; break; }
+					}
+					if (!hit) return false;
+				}
+			}
+
 			return true;
 		});
 
@@ -2521,6 +3560,13 @@
 		}
 	}
 	
+	// Friendly display name for source id (e.g. hiring_cafe -> Hiring.cafe)
+	function sourceDisplayName(src) {
+		if (!src) return 'Unknown';
+		var opt = JOB_SITE_OPTIONS.find(function (s) { return s.id === src || (s.aliases && s.aliases.indexOf(src) !== -1); });
+		return opt ? opt.name : (src.charAt(0).toUpperCase() + src.slice(1).replace(/_/g, ' '));
+	}
+
 	// Update source statistics display
 	function updateSourceStats() {
 		var sourceStatsEl = document.getElementById('job-stats-sources');
@@ -2536,12 +3582,13 @@
 		});
 		
 		var html = '<span class="text-xs text-gray-500 dark:text-gray-400">Sources: </span>';
-		var chips = sources.slice(0, 5).map(function (src) {
-			return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" title="' + escapeHtml(src) + '">' + escapeHtml(src) + ': ' + sourceCounts[src] + '</span>';
+		var chips = sources.slice(0, 8).map(function (src) {
+			var label = sourceDisplayName(src);
+			return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300" title="' + escapeHtml(src) + '">' + escapeHtml(label) + ': ' + sourceCounts[src] + '</span>';
 		});
-		if (sources.length > 5) {
-			var rest = sources.slice(5).reduce(function (sum, src) { return sum + sourceCounts[src]; }, 0);
-			chips.push('<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">+' + (sources.length - 5) + ' more (' + rest + ')</span>');
+		if (sources.length > 8) {
+			var rest = sources.slice(8).reduce(function (sum, src) { return sum + sourceCounts[src]; }, 0);
+			chips.push('<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">+' + (sources.length - 8) + ' more (' + rest + ')</span>');
 		}
 		html += chips.join(' ');
 		sourceStatsEl.innerHTML = html;
@@ -2566,7 +3613,7 @@
 		apiSources.sort().forEach(function (src) {
 			var opt = document.createElement('option');
 			opt.value = src;
-			opt.textContent = src.charAt(0).toUpperCase() + src.slice(1).replace(/_/g, ' ');
+			opt.textContent = sourceDisplayName(src);
 			if (opt.value === currentValue) opt.selected = true;
 			filterSource.appendChild(opt);
 		});
@@ -2594,8 +3641,11 @@
 			var status = applications[job.id] || 'new';
 			var matchClass = 'match-' + matchLevel;
 			var statusClass = 'status-' + status;
+			var jobKey = normalizeJobKey(job);
+			var isNewSinceLastRefresh = !!(jobKey && latestAddedJobKeys[jobKey]);
+			var newCardClass = isNewSinceLastRefresh ? ' ring-2 ring-emerald-400/70 dark:ring-emerald-500/60' : '';
 
-			html += '<div class="job-card group material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1">';
+			html += '<div class="job-card group material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1' + newCardClass + '">';
 			html += '<div class="flex items-start justify-between mb-2">';
 			html += '<div class="flex-1">';
 			html += '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">';
@@ -2608,6 +3658,9 @@
 			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">' + companyLocation + '</p>';
 			html += '</div>';
 			html += '<div class="flex flex-col gap-2 items-end">';
+			if (isNewSinceLastRefresh) {
+				html += '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-400/30">New</span>';
+			}
 			html += '<span class="match-badge ' + matchClass + '">' + job.matchScore + '% match</span>';
 			html += '<select class="status-select text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800" data-job-id="' + job.id + '">';
 			html += '<option value="new"' + (status === 'new' ? ' selected' : '') + '>New</option>';
@@ -2658,70 +3711,61 @@
 		});
 
 		jobListEl.innerHTML = html;
+		var jobById = {};
+		filteredJobs.forEach(function (j) { jobById[j.id] = j; });
 
-		// Add event listeners for status changes
-		jobListEl.querySelectorAll('.status-select').forEach(function (select) {
-			select.addEventListener('change', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var newStatus = this.value;
-				applications[jobId] = newStatus;
-				saveApplications();
-				applyFilters(); // Re-render to update stats
-			});
-		});
-
-		// Add event listeners for "Prepare" (Copy for ChatGPT/Gemini) buttons
-		jobListEl.querySelectorAll('.job-prep-chatgpt-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (!job) return;
-				var prompt = buildChatGPTPrepPrompt(job);
+		// Use delegated handlers to avoid attaching many listeners per render.
+		jobListEl.onchange = function (event) {
+			var select = event.target.closest('.status-select');
+			if (!select) return;
+			var jobId = select.getAttribute('data-job-id');
+			var newStatus = select.value;
+			applications[jobId] = newStatus;
+			saveApplications();
+			applyFilters(); // Re-render to update stats
+		};
+		jobListEl.onclick = function (event) {
+			var prepBtn = event.target.closest('.job-prep-chatgpt-btn');
+			if (prepBtn) {
+				var prepJob = jobById[prepBtn.getAttribute('data-job-id')];
+				if (!prepJob) return;
+				var prompt = buildChatGPTPrepPrompt(prepJob);
 				navigator.clipboard.writeText(prompt).then(function () {
 					window.open('https://chat.openai.com/', '_blank', 'noopener');
 					window.alert('Prompt copied. Paste it in the new ChatGPT tab. The AI will ask about your background first, then run a mock interview based on this JD.');
 				}).catch(function () {
 					window.prompt('Copy this prompt and paste into ChatGPT or Gemini:', prompt);
 				});
-			});
-		});
-
-		// "Interview Prep" buttons → send JD to assistant panel
-		jobListEl.querySelectorAll('.job-send-to-prep-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (!job) return;
-				var desc = String(job.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+				return;
+			}
+			var interviewBtn = event.target.closest('.job-send-to-prep-btn');
+			if (interviewBtn) {
+				var interviewJob = jobById[interviewBtn.getAttribute('data-job-id')];
+				if (!interviewJob) return;
+				var desc = String(interviewJob.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 				if (desc.length > 1200) desc = desc.slice(0, 1200) + '...';
-				var prepMessage = 'Help me prepare for an interview for this role:\n\nRole: ' + (job.title || '') + '\nCompany: ' + (job.company || '') + '\nLocation: ' + (job.location || '') + '\n\nJob description:\n' + desc + '\n\nPlease suggest: 1) 5–8 likely interview questions for this role, 2) how to answer them using the STAR method, 3) key skills and points to emphasize from my experience.';
+				var prepMessage = 'Help me prepare for an interview for this role:\n\nRole: ' + (interviewJob.title || '') + '\nCompany: ' + (interviewJob.company || '') + '\nLocation: ' + (interviewJob.location || '') + '\n\nJob description:\n' + desc + '\n\nPlease suggest: 1) 5–8 likely interview questions for this role, 2) how to answer them using the STAR method, 3) key skills and points to emphasize from my experience.';
 				if (typeof window.openAssistantWithMessage === 'function') {
 					window.openAssistantWithMessage(prepMessage);
 				} else {
 					window.alert('Interview Prep assistant is loading. Try again in a moment.');
 				}
-			});
-		});
+				return;
+			}
+			var plannerBtn = event.target.closest('.job-add-to-planner-btn');
+			if (plannerBtn) {
+				var plannerJob = jobById[plannerBtn.getAttribute('data-job-id')];
+				if (plannerJob) addJobToPlanner(plannerJob);
+				return;
+			}
+			var detailsBtn = event.target.closest('.job-details-btn');
+			if (detailsBtn) {
+				var detailsJob = jobById[detailsBtn.getAttribute('data-job-id')];
+				if (detailsJob) openJobDetails(detailsJob);
+			}
+		};
 
-		// Add event listeners for "Add to planner" buttons
-		jobListEl.querySelectorAll('.job-add-to-planner-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (job) {
-					addJobToPlanner(job);
-				}
-			});
-		});
-
-		// Add event listeners for "Details" buttons + modal close
-		jobListEl.querySelectorAll('.job-details-btn').forEach(function (btn) {
-			btn.addEventListener('click', function () {
-				var jobId = this.getAttribute('data-job-id');
-				var job = filteredJobs.find(function (j) { return j.id === jobId; });
-				if (job) openJobDetails(job);
-			});
-		});
+		// Modal close handlers
 		var closeBtn = document.getElementById('job-detail-close');
 		var backdrop = document.getElementById('job-detail-backdrop');
 		if (closeBtn) closeBtn.onclick = closeJobDetails;
@@ -2899,6 +3943,104 @@
 		var div = document.createElement('div');
 		div.textContent = text;
 		return div.innerHTML;
+	}
+
+	// Changes modal: added/removed since last refresh (local browser only)
+	function setupJobsDiffModal() {
+		var modal = document.getElementById('job-diff-modal');
+		var openBtn = document.getElementById('job-diff-view-btn');
+		var openBannerBtn = document.getElementById('job-new-banner-view');
+		var jumpBannerBtn = document.getElementById('job-new-banner-jump');
+		var closeBtn = document.getElementById('job-diff-close');
+		var backdrop = document.getElementById('job-diff-backdrop');
+		var addedList = document.getElementById('job-diff-added-list');
+		var removedList = document.getElementById('job-diff-removed-list');
+		var metaEl = document.getElementById('job-diff-meta');
+		var clearBtn = document.getElementById('job-diff-clear');
+		if (!modal || !openBtn) return;
+
+		function readDiff() {
+			try {
+				var raw = window.localStorage.getItem(JOBS_DIFF_KEY);
+				return raw ? JSON.parse(raw) : null;
+			} catch (e) { return null; }
+		}
+
+		function renderList(keys, lookup) {
+			if (!keys || !keys.length) return '<li class="text-xs text-gray-500 dark:text-gray-400">None</li>';
+			return keys.slice(0, 100).map(function (k) {
+				var j = lookup && lookup[k] ? lookup[k] : null;
+				var title = j && j.title ? j.title : k;
+				var company = j && j.company ? j.company : '';
+				var source = j && j.source ? j.source : '';
+				var loc = j && j.location ? j.location : '';
+				var url = j && j.url ? j.url : '';
+				var meta = [company, loc, source].filter(Boolean).join(' · ');
+				var body = '<div class="min-w-0">' +
+					'<div class="font-semibold text-gray-800 dark:text-gray-100 truncate">' + escapeHtml(title) + '</div>' +
+					(meta ? '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">' + escapeHtml(meta) + '</div>' : '') +
+					'</div>';
+				if (url) {
+					return '<li class="border-b border-gray-200 dark:border-gray-800 pb-2 last:border-b-0">' +
+						'<a class="block hover:underline text-primary" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + body + '</a>' +
+					'</li>';
+				}
+				return '<li class="border-b border-gray-200 dark:border-gray-800 pb-2 last:border-b-0">' + body + '</li>';
+			}).join('');
+		}
+
+		function open() {
+			var d = readDiff();
+			var added = d && Array.isArray(d.added) ? d.added : [];
+			var removed = d && Array.isArray(d.removed) ? d.removed : [];
+			var lookup = d && d.lookup ? d.lookup : {};
+			if (addedList) addedList.innerHTML = renderList(added, lookup);
+			if (removedList) removedList.innerHTML = renderList(removed, lookup);
+			if (metaEl) {
+				var when = d && d.ts ? new Date(d.ts).toLocaleString() : '';
+				var ctx = d && d.ctx ? d.ctx : null;
+				var ctxText = ctx ? ('Query: ' + (ctx.query || '—') + ' · Sources: ' + (ctx.sources || 'defaults') + ' · Backend: ' + (ctx.backend || '—')) : '';
+				metaEl.textContent = (when ? ('Computed: ' + when) : '—') + (ctxText ? (' · ' + ctxText) : '');
+			}
+			modal.classList.remove('hidden');
+			modal.setAttribute('aria-hidden', 'false');
+		}
+
+		function close() {
+			modal.classList.add('hidden');
+			modal.setAttribute('aria-hidden', 'true');
+		}
+
+		openBtn.addEventListener('click', open);
+		if (openBannerBtn) openBannerBtn.addEventListener('click', open);
+		if (jumpBannerBtn) {
+			jumpBannerBtn.addEventListener('click', function () {
+				var anchor = document.getElementById('jobs-list-anchor');
+				if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			});
+		}
+		if (closeBtn) closeBtn.addEventListener('click', close);
+		if (backdrop) backdrop.addEventListener('click', close);
+		document.addEventListener('keydown', function (e) {
+			if (modal.classList.contains('hidden')) return;
+			if (e.key === 'Escape') close();
+		});
+		if (clearBtn) {
+			clearBtn.addEventListener('click', function () {
+				try {
+					window.localStorage.removeItem(JOBS_LAST_SNAPSHOT_KEY);
+					window.localStorage.removeItem(JOBS_DIFF_KEY);
+				} catch (e) {}
+				close();
+				var a = document.getElementById('job-diff-added');
+				var r = document.getElementById('job-diff-removed');
+				var b = document.getElementById('job-new-banner');
+				if (a) a.textContent = '0';
+				if (r) r.textContent = '0';
+				if (b) b.classList.add('hidden');
+				openBtn.classList.add('hidden');
+			});
+		}
 	}
 
 	// Initialize on DOM ready

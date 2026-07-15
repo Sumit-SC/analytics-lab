@@ -1,0 +1,208 @@
+{
+  "meta": {
+    "version": 5,
+    "description": "Normalized quotes DB: works (titles) host shared metadata + image pools; quotes reference works to avoid repetition."
+  },
+  "works": {
+    "kdrama_goblin_2016": {
+      "title": "Goblin: The Lonely and Great God",
+      "year": "2016",
+      "kind": "kdrama",
+      "imdb_id": "tt5994364",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" },
+        { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" }
+      ]
+    },
+    "kdrama_cloy_2019": {
+      "title": "Crash Landing on You",
+      "year": "2019",
+      "kind": "kdrama",
+      "imdb_id": "tt10850932",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/f/f0/Crash_Landing_on_You_main_poster.jpg" }
+      ]
+    },
+    "kdrama_squid_game_2021": {
+      "title": "Squid Game",
+      "year": "2021",
+      "kind": "kdrama",
+      "imdb_id": "tt10919420",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg" }
+      ]
+    },
+    "anime_one_piece_1999": {
+      "title": "One Piece",
+      "year": "1999",
+      "kind": "anime",
+      "imdb_id": "tt0388629",
+      "mal_id": 21,
+      "images": [
+        { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/en/6/6f/One_Piece,_Volume_61_Cover_(Japanese).png" },
+        { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/0/09/One_Piece_logo.svg" }
+      ]
+    },
+    "anime_death_note_2006": {
+      "title": "Death Note",
+      "year": "2006",
+      "kind": "anime",
+      "imdb_id": "tt0877057",
+      "mal_id": 1535,
+      "images": [
+        { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6f/Death_Note_Vol_1.jpg/800px-Death_Note_Vol_1.jpg" }
+      ]
+    },
+    "movie_matrix_1999": {
+      "title": "The Matrix",
+      "year": "1999",
+      "kind": "movie",
+      "imdb_id": "tt0133093",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg" }
+      ]
+    },
+    "movie_interstellar_2014": {
+      "title": "Interstellar",
+      "year": "2014",
+      "kind": "movie",
+      "imdb_id": "tt0816692",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg" }
+      ]
+    },
+    "tv_breaking_bad_2008": {
+      "title": "Breaking Bad",
+      "year": "2008",
+      "kind": "tv_show",
+      "imdb_id": "tt0903747",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/6/61/Breaking_Bad_title_card.png" }
+      ]
+    },
+    "tv_stranger_things_2016": {
+      "title": "Stranger Things",
+      "year": "2016",
+      "kind": "tv_show",
+      "imdb_id": "tt4574334",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/3/38/Stranger_Things_season_1.jpg" }
+      ]
+    },
+    "book_lotr_fellowship_1954": {
+      "title": "The Fellowship of the Ring",
+      "year": "1954",
+      "kind": "book",
+      "isbn": "9780618260263",
+      "goodreads_id": "3263607",
+      "images": [
+        { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/en/8/8e/The_Fellowship_of_the_Ring_cover.gif" },
+        { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/isbn/9780618260263-L.jpg" }
+      ]
+    },
+    "book_1984_1949": {
+      "title": "Nineteen Eighty-Four",
+      "year": "1949",
+      "kind": "book",
+      "isbn": "9780451524935",
+      "goodreads_id": "40961427",
+      "images": [
+        { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/1984first.jpg/800px-1984first.jpg" },
+        { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg" }
+      ]
+    },
+    "bollywood_3_idiots_2009": {
+      "title": "3 Idiots",
+      "year": "2009",
+      "kind": "bollywood",
+      "imdb_id": "tt1187043",
+      "images": [
+        { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/3_idiots_poster.jpg/800px-3_idiots_poster.jpg" }
+      ]
+    },
+    "leader_mandela": {
+      "title": "Nelson Mandela",
+      "year": "",
+      "kind": "leader",
+      "images": [
+        { "type": "portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/0/0a/Nelson_Mandela-2008_%28edit%29.jpg" }
+      ]
+    }
+  },
+  "categories": {
+    "kdrama": [
+      { "work_id": "kdrama_goblin_2016", "text": "Don't run from your fate. Face it.", "author": "Kim Shin" },
+      { "work_id": "kdrama_goblin_2016", "text": "Every moment is a chance to turn things around.", "author": "Kim Shin" },
+      { "work_id": "kdrama_goblin_2016", "text": "It's okay to be a little late sometimes.", "author": "Ji Eun-tak" },
+      { "work_id": "kdrama_goblin_2016", "text": "You were my first and you will be my last.", "author": "Kim Shin" },
+      { "work_id": "kdrama_goblin_2016", "text": "If this is fate, I will accept it.", "author": "Ji Eun-tak" },
+      { "work_id": "kdrama_goblin_2016", "text": "Sometimes, you need to lose something to gain something.", "author": "Wang Yeo" },
+
+      { "work_id": "kdrama_cloy_2019", "text": "Let's only think about happy things.", "author": "Yoon Se-ri" },
+      { "work_id": "kdrama_cloy_2019", "text": "Even in the darkest times, there is still a way.", "author": "Ri Jeong-hyeok" },
+      { "work_id": "kdrama_cloy_2019", "text": "If you don't want to be hurt, don't love.", "author": "Seo Dan" },
+      { "work_id": "kdrama_cloy_2019", "text": "The world is unfair, but we still live in it.", "author": "Yoon Se-ri" },
+
+      { "work_id": "kdrama_squid_game_2021", "text": "I'm not a genius. I'm just curious.", "author": "Seong Gi-hun" },
+      { "work_id": "kdrama_squid_game_2021", "text": "People do anything when they’re desperate.", "author": "Hwang Jun-ho" },
+      { "work_id": "kdrama_squid_game_2021", "text": "Aren’t we all equals here?", "author": "Seong Gi-hun" },
+      { "work_id": "kdrama_squid_game_2021", "text": "This is hell. What do you expect?", "author": "Kang Sae-byeok" }
+    ],
+    "anime": [
+      { "work_id": "anime_one_piece_1999", "text": "I'm the man who will become the Pirate King!", "author": "Monkey D. Luffy" },
+      { "work_id": "anime_one_piece_1999", "text": "I don't want to conquer anything. I just think the guy with the most freedom in this whole ocean is the Pirate King!", "author": "Monkey D. Luffy" },
+      { "work_id": "anime_one_piece_1999", "text": "When you aim high, you sometimes come across fights not worth fighting.", "author": "Marshall D. Teach" },
+      { "work_id": "anime_one_piece_1999", "text": "No matter how deep the night, it always turns to day, eventually.", "author": "Brook" },
+
+      { "work_id": "anime_death_note_2006", "text": "I'll take a potato chip... and eat it!", "author": "Light Yagami" },
+      { "work_id": "anime_death_note_2006", "text": "I am Justice!", "author": "Light Yagami" },
+      { "work_id": "anime_death_note_2006", "text": "The human whose name is written in this note shall die.", "author": "Ryuk" },
+      { "work_id": "anime_death_note_2006", "text": "If you can't win the game, if you can't solve the puzzle, then you're just a loser.", "author": "Near" }
+    ],
+    "movie": [
+      { "work_id": "movie_matrix_1999", "text": "There is no spoon.", "author": "Spoon Boy" },
+      { "work_id": "movie_matrix_1999", "text": "I know kung fu.", "author": "Neo" },
+      { "work_id": "movie_matrix_1999", "text": "Unfortunately, no one can be told what the Matrix is. You have to see it for yourself.", "author": "Morpheus" },
+      { "work_id": "movie_matrix_1999", "text": "Choice is an illusion created between those with power and those without.", "author": "Merovingian" },
+
+      { "work_id": "movie_interstellar_2014", "text": "Do not go gentle into that good night.", "author": "Professor Brand" },
+      { "work_id": "movie_interstellar_2014", "text": "Love is the one thing that transcends time and space.", "author": "Dr. Amelia Brand" },
+      { "work_id": "movie_interstellar_2014", "text": "We used to look up at the sky and wonder at our place in the stars.", "author": "Cooper" },
+      { "work_id": "movie_interstellar_2014", "text": "Mankind was born on Earth. It was never meant to die here.", "author": "Cooper" }
+    ],
+    "tv_show": [
+      { "work_id": "tv_breaking_bad_2008", "text": "I am the one who knocks.", "author": "Walter White" },
+      { "work_id": "tv_breaking_bad_2008", "text": "Say my name.", "author": "Walter White" },
+      { "work_id": "tv_breaking_bad_2008", "text": "Tread lightly.", "author": "Walter White" },
+      { "work_id": "tv_breaking_bad_2008", "text": "Yeah, science!", "author": "Jesse Pinkman" },
+
+      { "work_id": "tv_stranger_things_2016", "text": "Friends don't lie.", "author": "Eleven" },
+      { "work_id": "tv_stranger_things_2016", "text": "Mornings are for coffee and contemplation.", "author": "Jim Hopper" },
+      { "work_id": "tv_stranger_things_2016", "text": "If you believe in this story... finish it.", "author": "Dustin Henderson" },
+      { "work_id": "tv_stranger_things_2016", "text": "Why are you keeping this curiosity door locked?", "author": "Dustin Henderson" }
+    ],
+    "books": [
+      { "work_id": "book_lotr_fellowship_1954", "text": "All we have to decide is what to do with the time that is given us.", "author": "J.R.R. Tolkien" },
+      { "work_id": "book_lotr_fellowship_1954", "text": "Not all those who wander are lost.", "author": "J.R.R. Tolkien" },
+      { "work_id": "book_lotr_fellowship_1954", "text": "Even the smallest person can change the course of the future.", "author": "J.R.R. Tolkien" },
+      { "work_id": "book_lotr_fellowship_1954", "text": "There is some good in this world, and it’s worth fighting for.", "author": "J.R.R. Tolkien" },
+
+      { "work_id": "book_1984_1949", "text": "It was a bright cold day in April, and the clocks were striking thirteen.", "author": "George Orwell" },
+      { "work_id": "book_1984_1949", "text": "Big Brother is watching you.", "author": "George Orwell" },
+      { "work_id": "book_1984_1949", "text": "If you want a picture of the future, imagine a boot stamping on a human face—forever.", "author": "George Orwell" },
+      { "work_id": "book_1984_1949", "text": "Freedom is the freedom to say that two plus two make four.", "author": "George Orwell" }
+    ],
+    "bollywood": [
+      { "work_id": "bollywood_3_idiots_2009", "text": "All is well.", "author": "Ranchoddas Shamaldas Chanchad" },
+      { "work_id": "bollywood_3_idiots_2009", "text": "Chase excellence, and success will follow.", "author": "Ranchoddas Shamaldas Chanchad" },
+      { "work_id": "bollywood_3_idiots_2009", "text": "Don't run behind success. Run behind excellence.", "author": "Ranchoddas Shamaldas Chanchad" }
+    ],
+    "leaders": [
+      { "work_id": "leader_mandela", "text": "It always seems impossible until it's done.", "author": "Nelson Mandela" }
+    ],
+    "life": [
+      { "text": "Life is what happens when you're busy making other plans.", "author": "John Lennon", "images": [] }
+    ]
+  }
+}
+

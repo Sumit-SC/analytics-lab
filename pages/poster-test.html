@@ -4,6 +4,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<title>CineMaterial poster test</title>
+	<link rel="stylesheet" href="../assets/css/main.css">
 	<style>
 		body { font-family: system-ui, sans-serif; max-width: 560px; margin: 2rem auto; padding: 0 1rem; }
 		.quote { margin-bottom: 1rem; }
@@ -38,6 +39,85 @@
 		<button type="button" id="btn-next">Next quote</button>
 	</div>
 	<p id="status"></p>
+
+	<!-- Assistant + global widgets (for consistency with other pages) -->
+	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center" aria-label="Open learning assistant">
+		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+	</button>
+	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
+	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant">
+		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+			<div>
+				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">FAQ + Wikipedia by default. Optional full chatbot (~80MB). Saved locally in your browser.</p>
+			</div>
+			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">&#10005;</button>
+		</div>
+		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-white dark:bg-gray-900"></div>
+		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+			<div class="flex gap-2">
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Ask anything…">
+				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">Send</button>
+			</div>
+			<div class="flex flex-wrap items-center gap-2 mt-3">
+				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800">Enable full chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-800">Clear chat</button>
+				<span id="assistant-mode-status" class="text-xs text-gray-500 dark:text-gray-400"></span>
+			</div>
+		</div>
+	</div>
+
+	<div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-spotify" class="global-music-source-btn" aria-pressed="false" data-source="spotify" title="Paste Spotify track/album/playlist URLs">Spotify</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+			<button type="button" id="global-music-source-radio" class="global-music-source-btn" aria-pressed="false" data-source="radio" title="Free internet radio (no API)">Radio</button>
+		</div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div>
+	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
+	<div id="global-resources-flyout">
+		<div class="global-resources-header">
+			<span>Resources</span>
+			<button type="button" id="global-resources-close" class="global-resources-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-resources-body"></div>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<label class="global-yt-panel-piped-label"><input type="checkbox" id="global-yt-panel-piped" aria-label="Use Piped for video"> Piped</label>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above, or open this panel and use the search below.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
+		<div id="global-spotify-embed" class="global-spotify-embed" style="display:none;">
+			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
+	</div>
 
 	<script>
 		// Mini "DB" like your quotes: we need source (title), type and (ideally) imdbId for the API
@@ -123,9 +203,21 @@
 					var urls = [];
 					for (var i = 0; i < data.posters.length; i++) {
 						var u = data.posters[i] && (data.posters[i].url || (typeof data.posters[i] === 'string' ? data.posters[i] : null));
-						if (u && typeof u === 'string' && u.indexOf('http') === 0) urls.push(u);
+						if (!u || typeof u !== 'string' || u.indexOf('http') !== 0) continue;
+						// Defensive: ignore CineMaterial icons/logos if scraper breaks (common failure mode)
+						var lower = u.toLowerCase();
+						var isCdnPoster = u.indexOf('https://cdn.cinematerial.com/') === 0 && lower.indexOf('/p/') !== -1;
+						if (!isCdnPoster) continue;
+						if (lower.indexOf('logo') !== -1 || lower.indexOf('/images/icons/') !== -1) continue;
+						urls.push(u);
 					}
-					done(urls.length ? urls : null);
+					if (urls.length) { done(urls); return; }
+					// If API returned only junk/non-posters, surface debug info for quicker fixes
+					var hint = '';
+					if (data && data.pageUrl) hint += ' pageUrl=' + data.pageUrl;
+					if (data && Array.isArray(data.posterPages) && data.posterPages.length) hint += ' posterPages=' + data.posterPages.length;
+					setStatus('CineMaterial returned no usable CDN posters.' + hint, true);
+					done(null);
 				})
 				.catch(function () { done(null); });
 		}
@@ -237,5 +329,11 @@
 
 		showQuote();
 	</script>
+
+	<script src="../assets/js/analytics.js" defer></script>
+	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/global-widgets.js" defer></script>
+	<script src="../assets/js/assistant.js" defer></script>
+	<script src="../assets/js/register-sw.js" defer></script>
 </body>
 </html>

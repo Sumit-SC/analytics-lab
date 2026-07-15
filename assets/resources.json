@@ -129,12 +129,18 @@
         "id": "PLWKjhJtqVAbnupwRFOq9zHd8iqb_b0At9",
         "title": "Python Tutorials Playlist (freeCodeCamp)",
         "playlist": true
+      },
+      {
+        "id": "_uQrJ0TkZlc",
+        "title": "Python in 30 min - Quick tutorial (Programming with Mosh)"
       }
     ],
     "channels": [
-      { "name": "Corey Schafer", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Python & dev tutorials" },
-      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Free courses & projects" },
-      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, ML, data science" }
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Free full courses & projects" },
+      { "name": "Corey Schafer", "id": "UCCezIgC97PvUuR4_gbFUs5g", "description": "Python & dev tutorials" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, ML, data science" },
+      { "name": "Tech With Tim", "id": "UC4JX40jDee_tINbkjycV4hQ", "description": "Python & game dev" },
+      { "name": "Neural Nine", "id": "UC8uT9RHJf6vBRYcLWp4VQYQ", "description": "Python projects & security" }
     ],
     "github": [
       {
@@ -148,6 +154,14 @@
       {
         "name": "30-seconds-of-python",
         "url": "https://github.com/30-seconds/30-seconds-of-python"
+      },
+      {
+        "name": "freeCodeCamp Python repo",
+        "url": "https://github.com/freeCodeCamp/freeCodeCamp"
+      },
+      {
+        "name": "Real Python samples",
+        "url": "https://github.com/realpython/materials"
       }
     ],
     "paths": [
@@ -217,13 +231,22 @@
         "embed": true
       },
       {
-        "id": "uhxtUt_-GyM",
-        "title": "Statistics for Data Science (edureka!, 500K+ views)"
-      },
-      {
         "id": "PPLop4L2eGk",
         "title": "Statistics Fundamentals (StatQuest)"
+      },
+      {
+        "id": "p8u2iEOsBqY",
+        "title": "Statistics for Data Science (Krish Naik, short)"
       }
+    ],
+    "channels": [
+      { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "Statistics & ML explained simply" },
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Full courses including stats" },
+      { "name": "Krish Naik", "id": "UCNU_lfiiWBdtULKFw89Dx0g", "description": "Data science & stats" }
+    ],
+    "reddit": [
+      { "name": "r/statistics", "subreddit": "statistics" },
+      { "name": "r/datascience", "subreddit": "datascience" }
     ],
     "github": [
       {
@@ -389,7 +412,8 @@
     "roadmapUrl": "https://roadmap.sh/sql",
     "reddit": [
       { "name": "r/SQL", "subreddit": "SQL" },
-      { "name": "r/datascience", "subreddit": "datascience" }
+      { "name": "r/datascience", "subreddit": "datascience" },
+      { "name": "r/Database", "subreddit": "Database" }
     ],
     "courses": [
       {
@@ -464,7 +488,16 @@
         "id": "PLXDaaNmzYOAKY6hIOoL3RG4duErSAumvw",
         "title": "Danny Ma's 8-Week SQL Challenge",
         "playlist": true
+      },
+      {
+        "id": "p3qvj9hO_Bo",
+        "title": "SQL in 1 hour (freeCodeCamp short)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "SQL & database courses" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "SQL, Power BI, data analytics" },
+      { "name": "techTFQ", "id": "UCn16MkUrXhPqvF8uS-7q1dA", "description": "SQL tutorials & projects" }
     ],
     "github": [
       {
@@ -546,7 +579,20 @@
         "id": "PL4cUxeGkcCzgoKro6z4o6k3gB9k9qZ9y9",
         "title": "Git & GitHub Playlist (Net Ninja)",
         "playlist": true
+      },
+      {
+        "id": "apGV9Kg7ics",
+        "title": "Git in 1 hour (freeCodeCamp)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Git & GitHub crash course" },
+      { "name": "Traversy Media", "id": "UC29ju8bIPH5as8OGnQzwJyA", "description": "Git & web dev" },
+      { "name": "The Net Ninja", "id": "UCW5YeuERMmlnqo4oq8vwUpg", "description": "Git & full-stack" }
+    ],
+    "reddit": [
+      { "name": "r/git", "subreddit": "git" },
+      { "name": "r/github", "subreddit": "github" }
     ],
     "github": [
       {
@@ -628,7 +674,17 @@
         "id": "PL-osiE80TeTsWmV9i9c58mdDCSskIFdDS",
         "title": "Pandas Tutorials Playlist (Corey Schafer)",
         "playlist": true
+      },
+      {
+        "id": "vmEHCJofslg",
+        "title": "Pandas in 20 min (Corey Schafer short)"
       }
+    ],
+    "channels": [
+      { "name": "Corey Schafer", "id": "UCCezIgC97PvUuR4_gbFUs5g", "description": "Pandas & Python data" },
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Pandas full course" },
+      { "name": "Data School", "id": "UCnVzApLJ2y2uyO_E6XdxiIQ", "description": "Pandas & data analysis" },
+      { "name": "Krish Naik", "id": "UCNU_lfiiWBdtULKFw89Dx0g", "description": "Pandas & data science" }
     ],
     "github": [
       {
@@ -642,7 +698,15 @@
       {
         "name": "pandas-exercises",
         "url": "https://github.com/guipsamora/pandas_exercises"
+      },
+      {
+        "name": "datascience-ipython-notebooks",
+        "url": "https://github.com/donnemartin/data-science-ipython-notebooks"
       }
+    ],
+    "reddit": [
+      { "name": "r/learnpython", "subreddit": "learnpython" },
+      { "name": "r/datascience", "subreddit": "datascience" }
     ],
     "paths": [
       "Complete Kaggle Pandas course → watch Corey Schafer's playlist → practice on real datasets.",
@@ -710,7 +774,20 @@
         "id": "PLWKjhJtqVAbnqBxcdjVGgT3uOC10MDwRj",
         "title": "NumPy Tutorials Playlist (Corey Schafer)",
         "playlist": true
+      },
+      {
+        "id": "QUT1VHIxAN4",
+        "title": "NumPy in 20 min (Corey Schafer)"
       }
+    ],
+    "channels": [
+      { "name": "Corey Schafer", "id": "UCCezIgC97PvUuR4_gbFUs5g", "description": "NumPy & Python" },
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "NumPy full course" },
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "NumPy for ML" }
+    ],
+    "reddit": [
+      { "name": "r/learnpython", "subreddit": "learnpython" },
+      { "name": "r/datascience", "subreddit": "datascience" }
     ],
     "github": [
       {
@@ -868,6 +945,13 @@
         "playlist": true
       }
     ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Excel & analytics courses" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "Excel, SQL, Power BI" }
+    ],
+    "reddit": [
+      { "name": "r/excel", "subreddit": "excel" }
+    ],
     "github": [
       {
         "name": "excel-formula-examples",
@@ -946,6 +1030,14 @@
         "playlist": true
       }
     ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Power BI full course" },
+      { "name": "Guy in a Cube", "id": "UC2D0_2cFQqLPEQL7yOk2How", "description": "Power BI & Microsoft BI" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "Power BI & SQL" }
+    ],
+    "reddit": [
+      { "name": "r/PowerBI", "subreddit": "PowerBI" }
+    ],
     "github": [
       {
         "name": "powerbi-visuals",
@@ -1002,6 +1094,14 @@
       {
         "name": "Medium · Tableau",
         "url": "https://medium.com/tag/tableau"
+      },
+      {
+        "name": "Towards Data Science · Tableau",
+        "url": "https://towardsdatascience.com/tagged/tableau"
+      },
+      {
+        "name": "freeCodeCamp · Tableau",
+        "url": "https://www.freecodecamp.org/news/tag/tableau/"
       }
     ],
     "youtube": [
@@ -1019,6 +1119,13 @@
         "title": "Tableau Tutorials Playlist",
         "playlist": true
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Tableau full course" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "Tableau & BI" }
+    ],
+    "reddit": [
+      { "name": "r/tableau", "subreddit": "tableau" }
     ],
     "github": [
       {
@@ -1080,6 +1187,10 @@
       {
         "name": "Medium · Business Analytics",
         "url": "https://medium.com/tag/business-analytics"
+      },
+      {
+        "name": "freeCodeCamp · Analytics",
+        "url": "https://www.freecodecamp.org/news/tag/analytics/"
       }
     ],
     "youtube": [
@@ -1092,6 +1203,14 @@
         "id": "ua-CiDNNj30",
         "title": "Business Analytics Course (freeCodeCamp)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Business analytics course" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "BI & analytics" }
+    ],
+    "reddit": [
+      { "name": "r/BusinessIntelligence", "subreddit": "BusinessIntelligence" },
+      { "name": "r/analytics", "subreddit": "analytics" }
     ],
     "github": [
       {
@@ -1169,8 +1288,8 @@
         "url": "https://medium.com/tag/data-science"
       },
       {
-        "name": "KDnuggets",
-        "url": "https://www.kdnuggets.com/"
+        "name": "freeCodeCamp News · Data Science",
+        "url": "https://www.freecodecamp.org/news/tag/data-science/"
       }
     ],
     "youtube": [
@@ -1195,12 +1314,18 @@
       {
         "id": "r-uOLxNrNk8",
         "title": "Data Analytics + Excel for Beginners (freeCodeCamp)"
+      },
+      {
+        "id": "ua-CiDNNj30",
+        "title": "Data Science in 12 hours (freeCodeCamp full course)"
       }
     ],
     "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Data science full course" },
       { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "Statistics & ML explained simply" },
       { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "Python, data science, ML" },
-      { "name": "Ken Jee", "id": "UCiT9RITQ9PW6BXRV0l3dzHg", "description": "Data science career & projects" }
+      { "name": "Ken Jee", "id": "UCiT9RITQ9PW6BhXK0y2jaeg", "description": "Data science career & projects" },
+      { "name": "Krish Naik", "id": "UCNU_lfiiWBdtULKFw89Dx0g", "description": "Data science tutorials" }
     ],
     "github": [
       {
@@ -1307,6 +1432,11 @@
         "id": "3hLmDS179rg",
         "title": "AWS Data Analytics (freeCodeCamp)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Data engineering crash course" },
+      { "name": "DataTalksClub", "id": "UCV8e2gBxdFyT_yKWyFqRfEA", "description": "Zoomcamp & DE talks" },
+      { "name": "Seattle Data Guy", "id": "UCbFbNhnbN_C0xV795_1oR0g", "description": "Data engineering & career" }
     ],
     "roadmapUrl": "https://roadmap.sh/data-engineer",
     "reddit": [
@@ -1423,9 +1553,11 @@
       }
     ],
     "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "ML & data science courses" },
       { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "ML & statistics explained" },
       { "name": "3Blue1Brown", "id": "UCYO_jab_esuFRV4b17AJtAw", "description": "Math & neural networks" },
-      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "ML with Python" }
+      { "name": "Sentdex", "id": "UC4fGJodYjwB1TR9_FJcRjCw", "description": "ML with Python" },
+      { "name": "Krish Naik", "id": "UCNU_lfiiWBdtULKFw89Dx0g", "description": "ML & deep learning" }
     ],
     "github": [
       {
@@ -1540,6 +1672,12 @@
         "title": "Machine Learning Course (StatQuest)"
       }
     ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Deep learning full course" },
+      { "name": "3Blue1Brown", "id": "UCYO_jab_esuFRV4b17AJtAw", "description": "Neural networks explained" },
+      { "name": "StatQuest", "id": "UCtYLUTtgS3k1Fg4y5tAhEgw", "description": "Deep learning basics" },
+      { "name": "Yannic Kilcher", "id": "UCZHmQk67mN31J4JcrEYGGLg", "description": "Papers & research" }
+    ],
     "github": [
       {
         "name": "d2l-ai",
@@ -1642,6 +1780,15 @@
         "title": "Neural Networks from Scratch (3Blue1Brown)"
       }
     ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "LLM & NLP courses" },
+      { "name": "Hugging Face", "id": "UCZVXDj2B7c-NhQN3lZ2t0aA", "description": "NLP & transformers" },
+      { "name": "Two Minute Papers", "id": "UCbfYPyITQ-7l4upoX8nvctg", "description": "AI research summaries" }
+    ],
+    "reddit": [
+      { "name": "r/LocalLLaMA", "subreddit": "LocalLLaMA" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" }
+    ],
     "github": [
       {
         "name": "awesome-llm",
@@ -1739,6 +1886,15 @@
         "id": "x7X9w_GIm1s",
         "title": "LLM Full Course (freeCodeCamp)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "NLP course" },
+      { "name": "Hugging Face", "id": "UCZVXDj2B7c-NhQN3lZ2t0aA", "description": "NLP & transformers" },
+      { "name": "Krish Naik", "id": "UCNU_lfiiWBdtULKFw89Dx0g", "description": "NLP tutorials" }
+    ],
+    "reddit": [
+      { "name": "r/LanguageTechnology", "subreddit": "LanguageTechnology" },
+      { "name": "r/MachineLearning", "subreddit": "MachineLearning" }
     ],
     "github": [
       {
@@ -1839,7 +1995,22 @@
       {
         "id": "VL0H-qTclOg",
         "title": "Excel for Beginners (freeCodeCamp)"
+      },
+      {
+        "id": "r-uOLxNrNk8",
+        "title": "Data Analytics in 11 hours (freeCodeCamp full course)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Data analytics & Excel courses" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "SQL, Power BI, dashboards" },
+      { "name": "Ken Jee", "id": "UCiT9RITQ9PW6BhXK0y2jaeg", "description": "Data projects & career" },
+      { "name": "Luke Barousse", "id": "UCv0z26FYHfGpD5gZOXEYu0g", "description": "Data analytics & Python" }
+    ],
+    "reddit": [
+      { "name": "r/dataanalysis", "subreddit": "dataanalysis" },
+      { "name": "r/datascience", "subreddit": "datascience" },
+      { "name": "r/BusinessIntelligence", "subreddit": "BusinessIntelligence" }
     ],
     "github": [
       {
@@ -1897,6 +2068,14 @@
       {
         "name": "Data Visualization Society",
         "url": "https://www.datavisualizationsociety.org/blog"
+      },
+      {
+        "name": "Towards Data Science · Data Visualization",
+        "url": "https://towardsdatascience.com/tagged/data-visualization"
+      },
+      {
+        "name": "freeCodeCamp · Data Viz",
+        "url": "https://www.freecodecamp.org/news/tag/data-visualization/"
       }
     ],
     "youtube": [
@@ -1923,6 +2102,18 @@
         "id": "6xv6Y0rRES0",
         "title": "Tableau Full Course (freeCodeCamp)"
       }
+    ],
+    "channels": [
+      { "name": "freeCodeCamp.org", "id": "UC8butISFwT-Wl7EV0hUK0BQ", "description": "Tableau & Excel viz courses" },
+      { "name": "Corey Schafer", "id": "UCCezIgC97PvUuR4_gbFUs5g", "description": "Matplotlib & Python viz" },
+      { "name": "Alex the Analyst", "id": "UC7cs8q-gJRlGwj4A8OmCmXg", "description": "Power BI & dashboards" }
+    ],
+    "reddit": [
+      { "name": "r/dataisbeautiful", "subreddit": "dataisbeautiful" },
+      { "name": "r/visualization", "subreddit": "visualization" }
+    ],
+    "github": [
+      { "name": "awesome-datavisualization", "url": "https://github.com/fasouto/awesome-datavisualization" }
     ],
     "paths": [
       "Learn matplotlib/seaborn → Tableau/Power BI → D3.js for interactivity → build portfolio.",
@@ -3436,6 +3627,82 @@
       "Build one resume + one portfolio story for each target role (analyst, scientist, engineer).",
       "Prepare STAR stories for impact, ownership, conflict, and learning.",
       "Practice role-specific mock interviews weekly and refine project narratives."
+    ]
+  },
+  "llms": {
+    "title": "LLMs & Generative AI",
+    "summary": "Large language models, prompt engineering, and production patterns for building AI assistants and copilots.",
+    "courses": [
+      {
+        "name": "DeepLearning.AI · ChatGPT Prompt Engineering for Developers",
+        "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/"
+      },
+      {
+        "name": "DeepLearning.AI · LLMs in Production",
+        "url": "https://www.deeplearning.ai/short-courses/llms-in-production/"
+      },
+      {
+        "name": "Andrej Karpathy · Intro to LLMs (YouTube)",
+        "url": "https://www.youtube.com/watch?v=zjkBMFhNj_g"
+      }
+    ],
+    "books": [
+      {
+        "name": "LLM University (free curriculum)",
+        "url": "https://www.llm.university/"
+      },
+      {
+        "name": "Prompt Engineering Guide",
+        "url": "https://www.promptingguide.ai/"
+      }
+    ],
+    "blogs": [
+      {
+        "name": "Sebastian Bubeck · Sparks of AGI",
+        "url": "https://www.microsoft.com/en-us/research/publication/sparks-of-artificial-general-intelligence-early-experiments-with-gpt-4/"
+      },
+      {
+        "name": "Lil'Log · Illustrated transformer/LLM posts",
+        "url": "https://lilianweng.github.io/"
+      },
+      {
+        "name": "Hugging Face · LLM blog",
+        "url": "https://huggingface.co/blog"
+      }
+    ],
+    "youtube": [
+      {
+        "id": "zjkBMFhNj_g",
+        "title": "Andrej Karpathy · Intro to LLMs (2024)",
+        "embed": true
+      },
+      {
+        "id": "liZbSI6s3Q8",
+        "title": "Stanford · CS25 Transformers United"
+      },
+      {
+        "id": "7xTGNNLPd6Q",
+        "title": "LangChain Crash Course (freeCodeCamp)"
+      }
+    ],
+    "github": [
+      {
+        "name": "awesome-chatgpt-prompts",
+        "url": "https://github.com/f/awesome-chatgpt-prompts"
+      },
+      {
+        "name": "awesome-llm-apps",
+        "url": "https://github.com/Hannibal046/Awesome-LLM"
+      },
+      {
+        "name": "LangChain",
+        "url": "https://github.com/langchain-ai/langchain"
+      }
+    ],
+    "paths": [
+      "Watch Karpathy's Intro to LLMs → read Lilian Weng's transformer/LLM posts → implement a basic RAG Chatbot.",
+      "Take DeepLearning.AI prompt engineering course → experiment with system/user prompts on your own data.",
+      "Learn LangChain or similar orchestration → build one end-to-end assistant (data QA, analytics helper, or code copilot)."
     ]
   }
 }

@@ -3,6 +3,8 @@
 	// Reduces pressure on third-party APIs. Cache TTL 5 min (sessionStorage).
 	var TRENDS_CACHE_PREFIX = 'trends_cache_';
 	var TRENDS_CACHE_TTL_MS = 5 * 60 * 1000;
+	var LIVE_MODE_KEY = 'trends_live_mode';
+	var NEWS_REGION_KEY = 'trends_news_region';
 	window.__trendsLoaders = window.__trendsLoaders || {};
 	window.__trendsLoaded = window.__trendsLoaded || {};
 
@@ -28,12 +30,99 @@
 			if (optExtra) payload.extra = optExtra;
 			sessionStorage.setItem(TRENDS_CACHE_PREFIX + sectionId, JSON.stringify(payload));
 		} catch (e) {}
+		if (typeof window.__trendsTriggerCounterUpdate === 'function') {
+			window.__trendsTriggerCounterUpdate();
+		}
 	};
 
 	window.runTrendsLoader = function (sectionId, forceRefresh) {
 		var load = window.__trendsLoaders[sectionId];
 		if (typeof load !== 'function') return;
 		load(!!forceRefresh);
+	};
+
+	function getLiveMode() {
+		try { return localStorage.getItem(LIVE_MODE_KEY) === '1'; } catch (e) { return false; }
+	}
+	function setLiveMode(on) {
+		try { localStorage.setItem(LIVE_MODE_KEY, on ? '1' : '0'); } catch (e) {}
+	}
+
+	function getNewsRegion() {
+		try {
+			var v = localStorage.getItem(NEWS_REGION_KEY) || 'US';
+			return (v === 'IN') ? 'IN' : 'US';
+		} catch (e) {
+			return 'US';
+		}
+	}
+	function setNewsRegion(v) {
+		var val = (v === 'IN') ? 'IN' : 'US';
+		try { localStorage.setItem(NEWS_REGION_KEY, val); } catch (e) {}
+	}
+
+	// Auto-refresh "live" sections every few minutes when enabled
+	(function setupLiveMode() {
+		var toggle = document.getElementById('trends-live-mode-toggle');
+		var liveSections = ['live-breaking', 'alerts', 'google-news', 'inshorts', 'wiki', 'hn'];
+		var intervalMs = 3 * 60 * 1000;
+
+		function tick() {
+			if (!getLiveMode()) return;
+			if (typeof document !== 'undefined' && typeof document.hidden === 'boolean' && document.hidden) return;
+			liveSections.forEach(function (id) {
+				if (window.__trendsLoaders[id]) {
+					window.runTrendsLoader(id, true);
+				}
+			});
+		}
+
+		if (toggle) {
+			toggle.checked = getLiveMode();
+			toggle.addEventListener('change', function () {
+				setLiveMode(toggle.checked);
+				if (toggle.checked) {
+					// Kick off an immediate refresh for live sections
+					liveSections.forEach(function (id) {
+						if (window.__trendsLoaders[id]) window.runTrendsLoader(id, true);
+					});
+				}
+			});
+		}
+
+		// Background interval for live mode
+		setInterval(tick, intervalMs);
+	})();
+
+	// Shared RSS helper (prefer configured proxy, fallback to playground-serveless).
+	var configuredTrendsProxy = (typeof window !== 'undefined' && window.TRENDS_RSS_PROXY_URL)
+		? String(window.TRENDS_RSS_PROXY_URL).replace(/\/$/, '')
+		: '';
+	var configuredJobProxy = (typeof window !== 'undefined' && window.JOB_PROXY_URL)
+		? String(window.JOB_PROXY_URL).replace(/\/$/, '')
+		: '';
+	if (!configuredTrendsProxy && configuredJobProxy && configuredJobProxy.indexOf('playground-serveless') !== -1) {
+		configuredTrendsProxy = configuredJobProxy + '/api/rss';
+	}
+	window.__trendsRssProxyBase = configuredTrendsProxy || 'https://playground-serveless.vercel.app/api/rss';
+	function fetchJsonWithTimeout(url, timeoutMs) {
+		var controller = new AbortController();
+		var t = setTimeout(function () { controller.abort(); }, timeoutMs || 12000);
+		return fetch(url, { signal: controller.signal }).then(function (r) {
+			clearTimeout(t);
+			return r.ok ? r.json() : null;
+		}).catch(function () {
+			clearTimeout(t);
+			return null;
+		});
+	}
+	window.__trendsFetchRss = function (feedUrl, count) {
+		var u = window.__trendsRssProxyBase + '?url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(count || 10));
+		var rss2json = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(count || 10));
+		return fetchJsonWithTimeout(u, 12000).then(function (primary) {
+			if (primary && Array.isArray(primary.items) && primary.items.length) return primary;
+			return fetchJsonWithTimeout(rss2json, 12000);
+		});
 	};
 
 	function injectLoadButtons() {
@@ -75,6 +164,29 @@
 	setTimeout(function () {
 		injectLoadButtons();
 		observeSections();
+		// Eager-load key sections so page doesn't feel static on first open.
+		['live-breaking', 'alerts', 'hn', 'google-news', 'inshorts', 'wiki', 'devto', 'github'].forEach(function (id) {
+			if (window.__trendsLoaders[id]) window.runTrendsLoader(id, false);
+		});
+
+		// Region selector wiring
+		var regionSelect = document.getElementById('trends-region-select');
+		if (regionSelect) {
+			regionSelect.value = getNewsRegion();
+			regionSelect.addEventListener('change', function () {
+				setNewsRegion(regionSelect.value);
+				try {
+					// Clear cached news-related sections so next load uses the new region
+					['google-news', 'inshorts', 'live-breaking'].forEach(function (id) {
+						sessionStorage.removeItem(TRENDS_CACHE_PREFIX + id);
+					});
+				} catch (e) {}
+				// Force refresh visible news sections immediately
+				['google-news', 'inshorts', 'live-breaking'].forEach(function (id) {
+					if (window.__trendsLoaders[id]) window.runTrendsLoader(id, true);
+				});
+			});
+		}
 	}, 0);
 })();
 
@@ -147,11 +259,14 @@
 	var togglesWrap = document.getElementById('trends-section-toggles');
 	var customizeBtn = document.getElementById('trends-customize-btn');
 	var sectionLabels = {
+		'live-breaking': 'Live & Breaking',
+		alerts: 'Alerts',
 		hn: 'Hacker News',
 		'google-news': 'Google News',
-		inshorts: 'Inshorts',
+		inshorts: 'AI & Data headlines',
 		wiki: 'Wikipedia',
 		medium: 'Towards Data Science',
+		visualcapitalist: 'Visual Capitalist',
 		devto: 'Dev.to',
 		'reddit-ds': 'Reddit r/datascience',
 		'reddit-ml': 'Reddit r/MachineLearning',
@@ -250,6 +365,44 @@
 })();
 
 (function () {
+	// Visual Capitalist RSS (via our proxy) — load on tap or when section visible
+	var listEl = document.getElementById('trends-visualcapitalist-list');
+	var statusEl = document.getElementById('trends-visualcapitalist-status');
+	if (!listEl || !statusEl) return;
+
+	function setStatus(text) { statusEl.textContent = text; }
+	setStatus('Tap Load or scroll here to fetch.');
+
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('visualcapitalist', listEl, statusEl)) return;
+		setStatus('Loading…');
+		window.__trendsFetchRss('https://www.visualcapitalist.com/feed/', 12)
+			.then(function (data) {
+				var items = data && data.items ? data.items : null;
+				if (!items || !items.length) { setStatus('No posts right now.'); return; }
+				items = items.slice(0, 10);
+				setStatus('Showing ' + items.length + ' posts.');
+				var html = '';
+				items.forEach(function (item) {
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.link || '#';
+					var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
+					if (pub) html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">' + pub + '</div>';
+					html += '</li>';
+				});
+				listEl.innerHTML = html;
+				window.__trendsWriteCache('visualcapitalist', html, 'Showing ' + items.length + ' posts.');
+			})
+			.catch(function () {
+				setStatus('Could not load Visual Capitalist feed. Open visualcapitalist.com instead.');
+			});
+	}
+	window.__trendsLoaders.visualcapitalist = load;
+})();
+
+(function () {
 	// Hacker News top stories (lightweight snapshot) — load on tap or when section visible
 	var listEl = document.getElementById('trends-hn-list');
 	var statusEl = document.getElementById('trends-hn-status');
@@ -308,7 +461,7 @@
 })();
 
 (function () {
-	// Inshorts news — load on tap or when section visible
+	// AI/Data headlines (Google News search RSS) — replaces flaky Inshorts APIs
 	var listEl = document.getElementById('trends-inshorts-list');
 	var statusEl = document.getElementById('trends-inshorts-status');
 	if (!listEl || !statusEl) return;
@@ -318,50 +471,39 @@
 	}
 	setStatus('Tap Load or scroll here to fetch.');
 
-	var endpoints = [
-		'https://inshorts.vercel.app/news?category=all',
-		'https://inshorts.vercel.app/api/news?category=all',
-		'https://inshortsapi.vercel.app/news?category=all'
-	];
-
-	function tryFetch(idx, forceRefresh) {
-		if (idx >= endpoints.length) {
-			setStatus('Could not reach Inshorts API. Try again later.');
-			return;
-		}
-		fetch(endpoints[idx])
-			.then(function (r) { return r.ok ? r.json() : null; })
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('inshorts', listEl, statusEl)) return;
+		setStatus('Loading…');
+		var region = getNewsRegion();
+		var base = 'https://news.google.com/rss/search?q=' + encodeURIComponent('artificial intelligence data analytics');
+		var feedUrl = region === 'IN'
+			? base + '&hl=en-IN&gl=IN&ceid=IN:en'
+			: base + '&hl=en-US&gl=US&ceid=US:en';
+		window.__trendsFetchRss(feedUrl, 12)
 			.then(function (data) {
-				var items = Array.isArray(data) ? data : (data && data.data) ? data.data : (data && data.news) ? data.news : null;
+				var items = data && data.items ? data.items : null;
 				if (!items || !items.length) {
-					if (idx + 1 < endpoints.length) tryFetch(idx + 1, forceRefresh);
-					else setStatus('No news items in this snapshot.');
+					setStatus('No headlines right now.');
 					return;
 				}
 				var take = items.slice(0, 10);
 				setStatus('Showing ' + take.length + ' headlines.');
 				var html = '';
 				take.forEach(function (item) {
-					var title = (item.title || item.headline || '').trim() || 'Untitled';
-					var url = item.url || item.readMoreUrl || item.link || '#';
-					var content = (item.content || item.summary || '').trim();
+					var title = (item.title || '').trim() || 'Untitled';
+					var url = item.link || '#';
+					var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
 					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
 					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
-					if (content) html += '<p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">' + content.replace(/</g, '&lt;').substring(0, 160) + (content.length > 160 ? '…' : '') + '</p>';
+					if (pub) html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">' + pub + '</div>';
 					html += '</li>';
 				});
 				listEl.innerHTML = html;
 				window.__trendsWriteCache('inshorts', html, 'Showing ' + take.length + ' headlines.');
 			})
 			.catch(function () {
-				tryFetch(idx + 1, forceRefresh);
+				setStatus('Could not load AI/data headlines feed. Open Google News instead.');
 			});
-	}
-
-	function load(forceRefresh) {
-		if (!forceRefresh && window.__trendsApplyCache('inshorts', listEl, statusEl)) return;
-		setStatus('Loading…');
-		tryFetch(0, forceRefresh);
 	}
 	window.__trendsLoaders.inshorts = load;
 })();
@@ -421,7 +563,7 @@
 })();
 
 (function () {
-	// Google News (RSS via RSS2JSON) — load on tap or when section visible
+	// Google News (RSS via our proxy) — load on tap or when section visible
 	var listEl = document.getElementById('trends-google-news-list');
 	var statusEl = document.getElementById('trends-google-news-status');
 	if (!listEl || !statusEl) return;
@@ -434,21 +576,20 @@
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('google-news', listEl, statusEl)) return;
 		setStatus('Loading…');
-		var rssUrl = encodeURIComponent('https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en');
-		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=12';
-		fetch(apiUrl)
-			.then(function (r) { return r.ok ? r.json() : null; })
+		var region = getNewsRegion();
+		var feedUrl = region === 'IN'
+			? 'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en'
+			: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+		window.__trendsFetchRss(feedUrl, 12)
 			.then(function (data) {
-				if (!data || !data.items || !data.items.length) {
-					setStatus('No headlines right now.');
-					return;
-				}
-				var items = data.items.slice(0, 10);
+				var items = data && data.items ? data.items : null;
+				if (!items || !items.length) { setStatus('No headlines right now.'); return; }
+				items = items.slice(0, 10);
 				setStatus('Showing ' + items.length + ' headlines.');
 				var html = '';
 				items.forEach(function (item) {
 					var title = (item.title || '').trim() || 'Untitled';
-					var url = item.link || item.guid || '#';
+					var url = item.link || '#';
 					var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
 					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
 					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
@@ -466,7 +607,144 @@
 })();
 
 (function () {
-	// TorrentFreak RSS — load on tap or when section visible
+	// Live & Breaking: top headlines + finance (Google News RSS), "Updated at" timestamp
+	var newsList = document.getElementById('trends-live-breaking-news');
+	var financeList = document.getElementById('trends-live-breaking-finance');
+	var statusEl = document.getElementById('trends-live-breaking-status');
+	var updatedEl = document.getElementById('live-breaking-updated');
+	if (!newsList || !financeList || !statusEl) return;
+
+	function setStatus(t) { statusEl.textContent = t; }
+	function setUpdated() {
+		if (updatedEl) updatedEl.textContent = 'Updated at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+	setStatus('Tap Load or scroll here to fetch.');
+
+	function load(forceRefresh) {
+		var optExtra = { listEl2: financeList, statusEl2: null };
+		if (!forceRefresh && window.__trendsApplyCache('live-breaking', newsList, statusEl, optExtra)) {
+			if (updatedEl) updatedEl.textContent = 'Cached · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			return;
+		}
+		setStatus('Loading…');
+		var region = getNewsRegion();
+		var newsFeed = region === 'IN'
+			? 'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en'
+			: 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+		var baseFinance = 'https://news.google.com/rss/search?q=stock+market+finance+business';
+		var financeFeed = region === 'IN'
+			? baseFinance + '&hl=en-IN&gl=IN&ceid=IN:en'
+			: baseFinance + '&hl=en-US&gl=US&ceid=US:en';
+		Promise.all([
+			window.__trendsFetchRss(newsFeed, 8),
+			window.__trendsFetchRss(financeFeed, 8)
+		]).then(function (results) {
+			var newsItems = (results[0] && results[0].items) ? results[0].items.slice(0, 6) : [];
+			var finItems = (results[1] && results[1].items) ? results[1].items.slice(0, 6) : [];
+			setStatus('Live.');
+			setUpdated();
+			function rowHtml(item) {
+				var title = (item.title || '').trim() || 'Untitled';
+				var url = item.link || '#';
+				var pub = item.pubDate ? new Date(item.pubDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+				return '<li class="border-b border-gray-200 dark:border-gray-700 pb-1.5 last:border-b-0">' +
+					'<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>' +
+					(pub ? '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + pub + '</div>' : '') + '</li>';
+			}
+			var newsHtml = newsItems.length ? newsItems.map(rowHtml).join('') : '<li class="text-gray-500 dark:text-gray-400">No headlines.</li>';
+			var finHtml = finItems.length ? finItems.map(rowHtml).join('') : '<li class="text-gray-500 dark:text-gray-400">No finance headlines.</li>';
+			newsList.innerHTML = newsHtml;
+			financeList.innerHTML = finHtml;
+			window.__trendsWriteCache('live-breaking', newsHtml, 'Live.', { html2: finHtml });
+		}).catch(function () {
+			setStatus('Could not load. Open Google News instead.');
+		});
+	}
+	window.__trendsLoaders['live-breaking'] = load;
+})();
+
+(function () {
+	// Alerts: USGS earthquakes, GDACS disasters RSS, world/breaking news RSS
+	var eqList = document.getElementById('trends-alerts-earthquakes');
+	var disasterList = document.getElementById('trends-alerts-disasters');
+	var worldList = document.getElementById('trends-alerts-world');
+	var statusEl = document.getElementById('trends-alerts-status');
+	var updatedEl = document.getElementById('alerts-updated');
+	if (!eqList || !disasterList || !worldList || !statusEl) return;
+
+	function setStatus(t) { statusEl.textContent = t; }
+	function setUpdated() {
+		if (updatedEl) updatedEl.textContent = 'Updated at ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+	setStatus('Tap Load or scroll here to fetch.');
+
+	function load(forceRefresh) {
+		var optExtra = { listEl2: disasterList, statusEl2: null };
+		if (!forceRefresh && window.__trendsApplyCache('alerts', eqList, statusEl, optExtra)) {
+			if (updatedEl) updatedEl.textContent = 'Cached · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			return;
+		}
+		setStatus('Loading…');
+		var usgsUrl = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson';
+		var gdacsRss = 'https://www.gdacs.org/gdacsapi/rss.aspx';
+		var worldRss = 'https://news.google.com/rss/search?q=breaking+news+world+war+natural+disaster&hl=en-US&gl=US&ceid=US:en';
+		Promise.all([
+			fetch(usgsUrl).then(function (r) { return r.ok ? r.json() : null; }),
+			window.__trendsFetchRss(gdacsRss, 15),
+			window.__trendsFetchRss(worldRss, 8)
+		]).then(function (results) {
+			setStatus('Alerts loaded.');
+			setUpdated();
+			var eqData = results[0];
+			if (eqData && eqData.features && eqData.features.length) {
+				var features = eqData.features.slice(0, 10);
+				eqList.innerHTML = features.map(function (f) {
+					var p = f.properties || {};
+					var mag = p.mag != null ? p.mag : '—';
+					var place = (p.place || '').trim() || 'Unknown';
+					var time = p.time ? new Date(p.time).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+					var url = f.id ? 'https://earthquake.usgs.gov/earthquakes/eventpage/' + f.id : 'https://earthquake.usgs.gov/earthquakes/map/';
+					return '<li class="border-b border-gray-200 dark:border-gray-700 pb-1 last:border-b-0">' +
+						'<a href="' + url + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">M' + mag + ' · ' + place.replace(/</g, '&lt;') + '</a>' +
+						(time ? '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + time + '</div>' : '') + '</li>';
+				}).join('');
+			} else {
+				eqList.innerHTML = '<li class="text-gray-500 dark:text-gray-400">No significant earthquakes in the last 2.5 days.</li>';
+			}
+			var gdacsItems = (results[1] && results[1].items) ? results[1].items.slice(0, 8) : [];
+			if (gdacsItems.length) {
+				disasterList.innerHTML = gdacsItems.map(function (item) {
+					var title = (item.title || '').trim() || 'Alert';
+					var link = item.link || 'https://www.gdacs.org/';
+					return '<li class="border-b border-gray-200 dark:border-gray-700 pb-1 last:border-b-0">' +
+						'<a href="' + link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a></li>';
+				}).join('');
+			} else {
+				disasterList.innerHTML = '<li class="text-gray-500 dark:text-gray-400">No active GDACS alerts.</li>';
+			}
+			var worldItems = (results[2] && results[2].items) ? results[2].items.slice(0, 6) : [];
+			if (worldItems.length) {
+				worldList.innerHTML = worldItems.map(function (item) {
+					var title = (item.title || '').trim() || 'Untitled';
+					var link = item.link || '#';
+					var pub = item.pubDate ? new Date(item.pubDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+					return '<li class="border-b border-gray-200 dark:border-gray-700 pb-1 last:border-b-0">' +
+						'<a href="' + link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-medium text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>' +
+						(pub ? '<div class="text-[11px] text-gray-500 dark:text-gray-400">' + pub + '</div>' : '') + '</li>';
+				}).join('');
+			} else {
+				worldList.innerHTML = '<li class="text-gray-500 dark:text-gray-400">No headlines.</li>';
+			}
+			window.__trendsWriteCache('alerts', eqList.innerHTML, 'Alerts loaded.', { html2: disasterList.innerHTML });
+		}).catch(function () {
+			setStatus('Could not load alerts. Try USGS / GDACS directly.');
+		});
+	}
+	window.__trendsLoaders.alerts = load;
+})();
+
+(function () {
+	// TorrentFreak RSS (via our proxy) — load on tap or when section visible
 	var listEl = document.getElementById('trends-torrentfreak-list');
 	var statusEl = document.getElementById('trends-torrentfreak-status');
 	if (!listEl || !statusEl) return;
@@ -479,21 +757,19 @@
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('torrentfreak', listEl, statusEl)) return;
 		setStatus('Loading…');
-		var rssUrl = encodeURIComponent('https://torrentfreak.com/feed/');
-		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
-		fetch(apiUrl)
-			.then(function (r) { return r.ok ? r.json() : null; })
+		window.__trendsFetchRss('https://torrentfreak.com/feed/', 12)
 			.then(function (data) {
-				if (!data || !data.items || !data.items.length) {
+				var items = data && data.items ? data.items : null;
+				if (!items || !items.length) {
 					setStatus('No posts right now.');
 					return;
 				}
-				var items = data.items.slice(0, 10);
+				items = items.slice(0, 10);
 				setStatus('Showing ' + items.length + ' posts.');
 				var html = '';
 				items.forEach(function (item) {
 					var title = (item.title || '').trim() || 'Untitled';
-					var url = item.link || item.guid || '#';
+					var url = item.link || '#';
 					var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
 					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
 					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
@@ -511,7 +787,7 @@
 })();
 
 (function () {
-	// XDA Developers RSS — load on tap or when section visible
+	// XDA Developers RSS (via our proxy) — load on tap or when section visible
 	var listEl = document.getElementById('trends-xda-list');
 	var statusEl = document.getElementById('trends-xda-status');
 	if (!listEl || !statusEl) return;
@@ -524,21 +800,19 @@
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('xda', listEl, statusEl)) return;
 		setStatus('Loading…');
-		var rssUrl = encodeURIComponent('https://www.xda-developers.com/feed/');
-		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
-		fetch(apiUrl)
-			.then(function (r) { return r.ok ? r.json() : null; })
+		window.__trendsFetchRss('https://www.xda-developers.com/feed/', 12)
 			.then(function (data) {
-				if (!data || !data.items || !data.items.length) {
+				var items = data && data.items ? data.items : null;
+				if (!items || !items.length) {
 					setStatus('No posts right now.');
 					return;
 				}
-				var items = data.items.slice(0, 10);
+				items = items.slice(0, 10);
 				setStatus('Showing ' + items.length + ' posts.');
 				var html = '';
 				items.forEach(function (item) {
 					var title = (item.title || '').trim() || 'Untitled';
-					var url = item.link || item.guid || '#';
+					var url = item.link || '#';
 					var pub = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
 					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
 					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
@@ -578,8 +852,22 @@
 		var now = new Date();
 		var dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
 		var tvUrl = 'https://api.tvmaze.com/schedule?country=US&date=' + dateStr;
+
+		function fetchJikanSchedule(day) {
+			var url = 'https://api.jikan.moe/v4/schedules?filter=' + encodeURIComponent(day) + '&sfw=true&limit=25';
+			return fetch(url).then(function (r) {
+				if (r.status === 429) {
+					var ra = r.headers && (r.headers.get('Retry-After') || r.headers.get('retry-after')) || '';
+					var seconds = parseInt(String(ra || '').trim(), 10);
+					var wait = Number.isFinite(seconds) && seconds > 0 ? seconds : 3;
+					throw new Error('Jikan rate-limited. Retry in ~' + wait + 's.');
+				}
+				return r.ok ? r.json() : null;
+			});
+		}
+
 		Promise.all([
-			fetch('https://api.jikan.moe/v4/schedules?filter=' + today).then(function (r) { return r.ok ? r.json() : null; }),
+			fetchJikanSchedule(today),
 			fetch(tvUrl).then(function (r) { return r.ok ? r.json() : null; })
 		]).then(function (results) {
 			var data = results[0];
@@ -621,7 +909,7 @@
 			}
 			window.__trendsWriteCache('tv-schedule', animeList.innerHTML, animeStatus.textContent, { html2: tvList.innerHTML, status2: tvStatus.textContent });
 		}).catch(function () {
-			setAnimeStatus('Could not load schedule. Use MAL link below.');
+			setAnimeStatus('Could not load schedule (Jikan). Try again in a few seconds or use the MAL link below.');
 			setTvStatus('Could not load TVMaze. Try tvmaze.com/schedule.');
 		});
 	}
@@ -724,7 +1012,7 @@
 })();
 
 (function () {
-	// Medium/Towards Data Science RSS — load on tap or when section visible
+	// Medium/Towards Data Science RSS (via our proxy) — load on tap or when section visible
 	var listEl = document.getElementById('trends-medium-list');
 	var statusEl = document.getElementById('trends-medium-status');
 	if (!listEl || !statusEl) return;
@@ -737,21 +1025,19 @@
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('medium', listEl, statusEl)) return;
 		setStatus('Loading…');
-		var rssUrl = encodeURIComponent('https://towardsdatascience.com/feed');
-		var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + rssUrl + '&api_key=public&count=10';
-		fetch(apiUrl)
-			.then(function (r) { return r.ok ? r.json() : null; })
+		window.__trendsFetchRss('https://towardsdatascience.com/feed', 12)
 			.then(function (data) {
-				if (!data || !data.items || !Array.isArray(data.items) || data.items.length === 0) {
+				var items = data && data.items ? data.items : null;
+				if (!items || !Array.isArray(items) || items.length === 0) {
 					setStatus('No articles available right now.');
 					return;
 				}
-				var items = data.items.slice(0, 10);
+				items = items.slice(0, 10);
 				setStatus('Showing ' + items.length + ' latest articles.');
 				var html = '';
 				items.forEach(function (item) {
 					var title = (item.title || '').trim() || 'Untitled';
-					var url = item.link || item.guid || '#';
+					var url = item.link || '#';
 					var pubDate = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : '';
 					var author = item.author || '';
 					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
@@ -939,43 +1225,89 @@
 	}
 	setStatus('Tap Load or scroll here to fetch.');
 
+	function renderRepos(repos, note) {
+		if (!repos || !repos.length) {
+			setStatus('No trending repos available right now.');
+			return;
+		}
+		var top = repos.slice(0, 10);
+		setStatus((note ? note + ' · ' : '') + 'Showing ' + top.length + ' trending repositories.');
+		var html = '';
+		top.forEach(function (repo) {
+			var fullName = (repo.fullName || repo.name || '').trim();
+			var url = repo.url || '#';
+			var description = repo.description || '';
+			var stars = repo.stars || null;
+			var language = repo.language || '';
+			html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
+			html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + fullName.replace(/</g, '&lt;') + '</a>';
+			if (description) html += '<p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-1">' + description.replace(/</g, '&lt;').substring(0, 120) + (description.length > 120 ? '…' : '') + '</p>';
+			html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
+			if (stars != null) html += String(stars).toLocaleString() + ' stars';
+			if (language) html += (stars != null ? ' &middot; ' : '') + language;
+			html += '</div>';
+			html += '</li>';
+		});
+		listEl.innerHTML = html;
+		window.__trendsWriteCache('github', html, 'Showing ' + top.length + ' trending repositories.');
+	}
+
+	function fetchViaJinaTrendingHtml() {
+		// CORS-friendly HTML fetch via r.jina.ai; parse repo links from the page
+		return fetch('https://r.jina.ai/https://github.com/trending?since=daily')
+			.then(function (r) { return r.ok ? r.text() : null; })
+			.then(function (txt) {
+				if (!txt) return null;
+				var re = /href="\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)"/g;
+				var seen = {};
+				var out = [];
+				var m;
+				while ((m = re.exec(txt)) && out.length < 20) {
+					var owner = m[1], repo = m[2];
+					var full = owner + '/' + repo;
+					if (seen[full]) continue;
+					seen[full] = 1;
+					out.push({ fullName: full, url: 'https://github.com/' + full });
+				}
+				return out.length ? out : null;
+			});
+	}
+
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('github', listEl, statusEl)) return;
 		setStatus('Loading…');
 		fetch('https://githubtrending.lessx.xyz/trending?since=daily&language=&spoken_language_code=en')
 			.then(function (r) { return r.ok ? r.json() : null; })
 			.then(function (data) {
-				if (!data || !Array.isArray(data) || data.length === 0) {
-					setStatus('No trending repos available right now.');
+				if (data && Array.isArray(data) && data.length) {
+					var repos = data.map(function (repo) {
+						var name = repo.name || '';
+						var author = repo.author || '';
+						return {
+							fullName: (author ? author + '/' : '') + name,
+							url: repo.url || (author && name ? ('https://github.com/' + author + '/' + name) : 'https://github.com/trending'),
+							description: repo.description || '',
+							stars: repo.stars || null,
+							language: repo.language || ''
+						};
+					});
+					renderRepos(repos, 'API');
 					return;
 				}
-				var repos = data.slice(0, 10);
-				setStatus('Showing ' + repos.length + ' trending repositories.');
-				var html = '';
-				repos.forEach(function (repo) {
-					var name = repo.name || '';
-					var author = repo.author || '';
-					var description = repo.description || '';
-					var stars = repo.stars || 0;
-					var forks = repo.forks || 0;
-					var language = repo.language || '';
-					var url = repo.url || ('https://github.com/' + author + '/' + name);
-					var fullName = author ? author + '/' + name : name;
-					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
-					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + fullName.replace(/</g, '&lt;') + '</a>';
-					if (description) html += '<p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400 line-clamp-1">' + description.replace(/</g, '&lt;').substring(0, 120) + (description.length > 120 ? '…' : '') + '</p>';
-					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
-					html += stars.toLocaleString() + ' stars';
-					if (forks > 0) html += ' &middot; ' + forks.toLocaleString() + ' forks';
-					if (language) html += ' &middot; ' + language;
-					html += '</div>';
-					html += '</li>';
+				return fetchViaJinaTrendingHtml().then(function (repos) {
+					if (repos) renderRepos(repos, 'Fallback');
+					else setStatus('Could not load GitHub trending. Open github.com/trending instead.');
 				});
-				listEl.innerHTML = html;
-				window.__trendsWriteCache('github', html, 'Showing ' + repos.length + ' trending repositories.');
 			})
 			.catch(function () {
-				setStatus('Could not reach GitHub trending API. Try again later.');
+				fetchViaJinaTrendingHtml()
+					.then(function (repos) {
+						if (repos) renderRepos(repos, 'Fallback');
+						else setStatus('Could not load GitHub trending. Open github.com/trending instead.');
+					})
+					.catch(function () {
+						setStatus('Could not load GitHub trending. Open github.com/trending instead.');
+					});
 			});
 	}
 	window.__trendsLoaders.github = load;
@@ -1028,6 +1360,71 @@
 			});
 	}
 	window.__trendsLoaders.anime = load;
+
+	window.__trendsTriggerCounterUpdate = function () {
+		var categories = ['tech', 'news', 'entertainment', 'anime'];
+		var allCount = 0;
+
+		categories.forEach(function (cat) {
+			var btn = document.querySelector('.trends-filter-btn[data-trend-filter="' + cat + '"]');
+			if (!btn) return;
+			
+			var sections = document.querySelectorAll('#trends-sections-wrap section.trends-section[data-trend-category="' + cat + '"]');
+			var count = 0;
+			sections.forEach(function (sec) {
+				count += sec.querySelectorAll('li').length;
+			});
+			
+			var baseText = cat.charAt(0).toUpperCase() + cat.slice(1);
+			btn.textContent = baseText + ' (' + count + ')';
+			allCount += count;
+		});
+
+		var allBtn = document.querySelector('.trends-filter-btn[data-trend-filter="all"]');
+		if (allBtn) {
+			allBtn.textContent = 'All (' + allCount + ')';
+		}
+	};
+
+	// Input listener for trends filter search box
+	(function setupTrendsSearch() {
+		var searchInput = document.getElementById('trends-search-input');
+		if (!searchInput) return;
+
+		searchInput.addEventListener('input', function () {
+			var query = searchInput.value.toLowerCase().trim();
+			var sections = document.querySelectorAll('#trends-sections-wrap section.trends-section');
+			
+			sections.forEach(function (sec) {
+				var items = sec.querySelectorAll('li');
+				var visibleCount = 0;
+				
+				items.forEach(function (li) {
+					var text = li.textContent.toLowerCase();
+					if (text.indexOf(query) !== -1) {
+						li.style.display = '';
+						visibleCount++;
+					} else {
+						li.style.display = 'none';
+					}
+				});
+
+				// Dim section if query is set and no items matched
+				if (query && visibleCount === 0) {
+					sec.style.opacity = '0.35';
+				} else {
+					sec.style.opacity = '';
+				}
+			});
+		});
+	})();
+
+	// Trigger initial count calculations
+	setTimeout(function () {
+		if (typeof window.__trendsTriggerCounterUpdate === 'function') {
+			window.__trendsTriggerCounterUpdate();
+		}
+	}, 1000);
 })();
 
 // Analytics: track visits and time-on-page for Trends

@@ -475,6 +475,18 @@ body {
 .dark .resource-card-with-thumb .resource-card-thumb {
 	border-right-color: rgba(75, 85, 99, 0.5);
 }
+
+/* Resources: make tab bar feel like Notion on mobile */
+@media (max-width: 767px) {
+	#resource-root .tab-btn {
+		padding-top: 0.55rem;
+		padding-bottom: 0.55rem;
+		min-height: 44px;
+	}
+	.resource-gallery {
+		grid-template-columns: 1fr;
+	}
+}
 .resource-channel-embed-wrap.hidden {
 	display: none !important;
 }
@@ -2764,10 +2776,7 @@ body:has(#global-music-bar) {
 }
 
 /* Resources flyout (right side, like Dict but with subject/subsections) */
-#sidebar ~ #global-resources-toggle,
-#sidebar ~ #global-resources-flyout {
-	display: none !important;
-}
+/* Do NOT hide when sidebar exists: users expect this everywhere. */
 
 #global-resources-toggle {
 	position: fixed;

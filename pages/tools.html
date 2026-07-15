@@ -255,7 +255,34 @@
 		</div>
 	</footer>
 
-	<div id="global-music-bar">
+	<!-- Assistant (standalone version) -->
+	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center" aria-label="Open learning assistant">
+		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+	</button>
+	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
+	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant">
+		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+			<div>
+				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">FAQ + Wikipedia by default. Optional full chatbot (~80MB). Saved locally in your browser.</p>
+			</div>
+			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">&#10005;</button>
+		</div>
+		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-white dark:bg-gray-900"></div>
+		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+			<div class="flex gap-2">
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Ask anything…">
+				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">Send</button>
+			</div>
+			<div class="flex flex-wrap items-center gap-2 mt-3">
+				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800">Enable full chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-800">Clear chat</button>
+				<span id="assistant-mode-status" class="text-xs text-gray-500 dark:text-gray-400"></span>
+			</div>
+		</div>
+	</div>
+
+	<!-- <div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
 		<div class="global-music-source">
 			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
@@ -270,7 +297,7 @@
 		<button type="button" id="global-music-play" aria-label="Play">▶</button>
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
-	</div>
+	</div> -->
 	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
 	<div id="global-resources-flyout">
 		<div class="global-resources-header">
@@ -289,7 +316,7 @@
 		<div id="global-dict-body" class="global-dict-body"></div>
 		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
 	</div>
-	<button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<!-- <button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
 	<div id="global-yt-panel">
 		<div class="global-yt-panel-header">
 			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
@@ -305,13 +332,15 @@
 			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
 		</div>
 		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
-	</div>
+	</div> -->
 
 	<script src="../assets/js/nav-mobile.js" defer></script>
 	<script src="../assets/js/color-theme.js" defer></script>
 	<script src="../assets/js/theme.js" defer></script>
 	<script src="../assets/js/analytics.js" defer></script>
 	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/global-widgets.js" defer></script>
+	<script src="../assets/js/assistant.js" defer></script>
 	<script src="../assets/js/sidebar.js" defer></script>
 	<script src="../assets/js/tools.js" defer></script>
 	<script src="../assets/js/register-sw.js" defer></script>

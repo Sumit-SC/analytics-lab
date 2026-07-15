@@ -12,16 +12,18 @@
 	<script src="../assets/js/nav-data.js" defer></script>
 	<script src="../assets/js/nav-inject.js" defer></script>
 </head>
-<body class="page-docs bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="docs">
-	<nav class="app-bar bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 backdrop-blur-sm">
-		<div class="max-w-5xl mx-auto px-4 sm:px-6">
+<body class="page-playground bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-current-page="playground">
+	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
 				<a href="../index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
 				<div class="flex items-center gap-2">
-					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
-					<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
-					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
-					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle theme">🌙</button>
+					<button type="button" id="sidebar-mobile-toggle" class="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Open Resources menu">&#9776; Resources</button>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer"><span aria-hidden="true">&#9776;</span><span class="ml-1 text-sm font-medium">Menu</span></button>
+				<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
+				<button type="button" id="roadmap-toggle" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle Roadmap">Roadmap</button>
+					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs material-elevation-1">🌙</button>
 				</div>
 			</div>
 		</div>
@@ -32,9 +34,103 @@
 			<span class="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
 			<button type="button" class="nav-drawer-close" aria-label="Close menu">&#10005;</button>
 		</div>
-		<nav class="nav-drawer-links" data-nav-inject="drawer"></nav>
+		<nav class="nav-drawer-links" data-nav-inject="drawer">
+		</nav>
+		<button type="button" id="nav-drawer-roadmap" class="text-left w-full px-4 py-3 min-h-[44px] font-medium border-none bg-transparent cursor-pointer text-inherit border-l-[3px] border-transparent hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle Roadmap">Roadmap</button>
 	</div>
 
+	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
+	<div class="flex relative">
+		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
+			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources sidebar">
+				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
+				<span class="sidebar-toggle-vertical">Resources</span>
+			</button>
+			<div class="sidebar-content p-3">
+				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
+				<nav class="space-y-1 text-sm">
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
+							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
+							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
+							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
+							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
+							<li><a href="./resources.html?topic=oops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OOP</a></li>
+							<li><a href="./resources.html?topic=prompting" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Prompting</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
+							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
+							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
+							<li><a href="./resources.html?topic=data-visualization" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Visualization</a></li>
+							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization (Python)</a></li>
+							<li><a href="./resources.html?topic=product-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Product Analytics</a></li>
+							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
+							<li><a href="./resources.html?topic=time-series" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Time Series</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
+							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
+							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
+							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
+							<li><a href="./resources.html?topic=nlp" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NLP</a></li>
+							<li><a href="./resources.html?topic=computer-vision" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Computer Vision</a></li>
+							<li><a href="./resources.html?topic=opencv" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OpenCV</a></li>
+							<li><a href="./resources.html?topic=reinforcement-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Reinforcement Learning</a></li>
+							<li><a href="./resources.html?topic=feature-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Feature Engineering</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
+							<li><a href="./resources.html?topic=spark" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Apache Spark</a></li>
+							<li><a href="./resources.html?topic=streaming" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Streaming Data</a></li>
+							<li><a href="./resources.html?topic=data-warehousing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Warehousing</a></li>
+							<li><a href="./resources.html?topic=databases" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Databases</a></li>
+							<li><a href="./resources.html?topic=cloud-data" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Cloud Platforms</a></li>
+							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
+							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
+							<li><a href="./resources.html?topic=mlops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">MLOps</a></li>
+							<li><a href="./resources.html?topic=devops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">DevOps</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming Languages</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=r" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">R Programming</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=business-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Business Analytics</a></li>
+							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
+							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
+							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
+						</ul>
+					</div>
+					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Tools & Career</p>
+						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
+							<li><a href="./resources.html?topic=editors-ides" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Editors & IDEs</a></li>
+							<li><a href="./resources.html?topic=productivity-tools" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Productivity Tools</a></li>
+							<li><a href="./resources.html?topic=communication" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Communication</a></li>
+							<li><a href="./resources.html?topic=resume-interview" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Resume & Interview</a></li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</aside>
+	
 	<main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 		<header class="mb-8">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Docs &amp; Sitemap</h1>
@@ -51,7 +147,7 @@
 				<li><a href="./resources.html" class="text-primary hover:underline">Resources</a> — Courses, books, YouTube, GitHub, learning paths by topic</li>
 				<li><a href="./tools.html" class="text-primary hover:underline">Tools</a> — Word editors, notebook, backup/restore, PDF viewer</li>
 				<li><a href="./jobs.html" class="text-primary hover:underline">Jobs</a> — Job listings (playground-serveless / job-search-api), filters, Binder notebook</li>
-				<li><a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test</a> — Cloudflare, Vercel, Railway, project APIs health checks</li>
+				<li><a href="./test-analytics.html" class="text-primary hover:underline">System &amp; API test</a> — Cloudflare, Vercel, Koyeb, project APIs health checks</li>
 				<li><a href="./docs.html" class="text-primary hover:underline">Docs</a> — This page</li>
 			</ul>
 		</section>
@@ -82,7 +178,7 @@
 			<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 list-disc list-inside">
 				<li><strong class="text-gray-800 dark:text-gray-200">Cloudflare</strong> — Analytics Worker (health at <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">/health</code>), event ingest (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">/api/events</code>), D1-backed dashboard (Basic auth).</li>
 				<li><strong class="text-gray-800 dark:text-gray-200">Vercel</strong> — OMDb/CineMaterial proxy, jobs snapshot/cached APIs. Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">OMDB_PROXY_URL</code> in the site; test page uses it for OMDb and jobs checks. Testing ground: deploy <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">api/omdb.js</code> with <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">OMDB_API_KEY</code>.</li>
-				<li><strong class="text-gray-800 dark:text-gray-200">Railway</strong> — Job-search-api (scrapers, RSS, local UI). Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_PROXY_URL</code> to your Railway app URL for jobs; test page can ping health/root.</li>
+				<li><strong class="text-gray-800 dark:text-gray-200">Hugging Face (HF)</strong> — Job-search-api (scrapers, RSS, local UI). Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">JOB_SEARCH_API_BASE</code> in <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">jobs.html</code> to your Space URL; choose Backend → Hugging Face (HF) on the Jobs page.</li>
 				<li><strong class="text-gray-800 dark:text-gray-200">Project APIs</strong> — Quotable, Animechan, Open-Meteo, Dictionary, Jikan, Wikipedia, Hacker News, Inshorts, TVMaze, Picsum, GitHub trending, Dev.to, etc. Each has a <strong>Test</strong> button to check connectivity from the browser.</li>
 			</ul>
 			<p class="text-sm text-gray-600 dark:text-gray-400 mt-3">Analytics debug: <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">?analytics_debug=1</code> or <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">localStorage.setItem('analytics_debug','1')</code> and DevTools Console.</p>
@@ -105,8 +201,92 @@
 		</footer>
 	</main>
 
+	<!-- Assistant (standalone version) -->
+	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center" aria-label="Open learning assistant">
+		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+	</button>
+	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
+	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant">
+		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+			<div>
+				<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">FAQ + Wikipedia by default. Optional full chatbot (~80MB). Saved locally in your browser.</p>
+			</div>
+			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">&#10005;</button>
+		</div>
+		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-white dark:bg-gray-900"></div>
+		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+			<div class="flex gap-2">
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-500" placeholder="Ask anything…">
+				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90">Send</button>
+			</div>
+			<div class="flex flex-wrap items-center gap-2 mt-3">
+				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800">Enable full chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-800">Clear chat</button>
+				<span id="assistant-mode-status" class="text-xs text-gray-500 dark:text-gray-400"></span>
+			</div>
+		</div>
+	</div>
+
+	<!-- <div id="global-music-bar">
+		<div id="global-yt-player-wrap"></div>
+		<div class="global-music-source">
+			<button type="button" id="global-music-source-yt" class="global-music-source-btn active" aria-pressed="true" data-source="yt">YT</button>
+			<button type="button" id="global-music-source-spotify" class="global-music-source-btn" aria-pressed="false" data-source="spotify" title="Paste Spotify track/album/playlist URLs">Spotify</button>
+			<button type="button" id="global-music-source-saavn" class="global-music-source-btn" aria-pressed="false" data-source="saavn">JioSaavn</button>
+			<button type="button" id="global-music-source-radio" class="global-music-source-btn" aria-pressed="false" data-source="radio" title="Free internet radio (no API)">Radio</button>
+		</div>
+		<input id="global-music-input" type="text" placeholder="Paste YouTube URL or video ID" aria-label="YouTube URL or ID">
+		<button type="button" id="global-music-add" aria-label="Add and play">Add</button>
+		<span id="global-music-title">Paste YouTube URL or ID</span>
+		<button type="button" id="global-music-focus" class="global-music-yt-only" aria-label="Play focus mix">Focus mix</button>
+		<button type="button" id="global-music-play" aria-label="Play">▶</button>
+		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
+		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
+	</div> -->
+	<button type="button" id="global-resources-toggle" aria-label="Open resources">Resources</button>
+	<div id="global-resources-flyout">
+		<div class="global-resources-header">
+			<span>Resources</span>
+			<button type="button" id="global-resources-close" class="global-resources-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-resources-body"></div>
+	</div>
+	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
+	<div id="global-dict-flyout">
+		<div class="global-dict-header">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<button type="button" id="global-dict-search">Search</button>
+			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
+		</div>
+		<div id="global-dict-body" class="global-dict-body"></div>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+	</div>
+	<!-- <button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
+	<div id="global-yt-panel">
+		<div class="global-yt-panel-header">
+			<input id="global-yt-panel-input" type="text" placeholder="Paste YouTube URL or type search…" aria-label="YouTube URL or search query">
+			<button type="button" id="global-yt-panel-search">Search</button>
+			<label class="global-yt-panel-piped-label"><input type="checkbox" id="global-yt-panel-piped" aria-label="Use Piped for video"> Piped</label>
+			<button type="button" id="global-yt-panel-close" aria-label="Close panel">✕</button>
+		</div>
+		<div id="global-saavn-results" class="global-saavn-results" style="display:none;">
+			<p class="global-saavn-hint">Search in the bar above, or open this panel and use the search below.</p>
+			<ul id="global-saavn-list" class="global-saavn-list"></ul>
+		</div>
+		<div id="global-spotify-embed" class="global-spotify-embed" style="display:none;">
+			<p class="global-spotify-hint">Paste a Spotify URL above to embed a track, album, or playlist. You can also paste any Spotify link in the bottom bar — it auto-detects the source.</p>
+		</div>
+		<iframe id="global-yt-panel-iframe" title="YouTube video player" loading="lazy"></iframe>
+	</div> -->
+
 	<script src="../assets/js/nav-mobile.js" defer></script>
 	<script src="../assets/js/color-theme.js" defer></script>
 	<script src="../assets/js/theme.js" defer></script>
+	<script src="../assets/js/analytics.js" defer></script>
+	<script src="../assets/js/lazy-panels.js" defer></script>
+	<script src="../assets/js/global-widgets.js" defer></script>
+	<script src="../assets/js/assistant.js" defer></script>
+	<script src="../assets/js/register-sw.js" defer></script>
 </body>
 </html>

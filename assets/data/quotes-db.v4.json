@@ -97,6 +97,34 @@
           { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/5/5e/Fullmetal_Alchemist_vol1.jpg" },
           { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/26/Fullmetal_Alchemist_Logo.svg/800px-Fullmetal_Alchemist_Logo.svg.png" }
         ]
+      },
+      {
+        "text": "I am not going to run away. I never go back on my word. That is my nindo: my ninja way.",
+        "author": "Naruto Uzumaki",
+        "source": "Naruto",
+        "year": "2002",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0409591",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/9/94/NarutoCoverTankobon1.jpg/800px-NarutoCoverTankobon1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/NarutoUzumakiPart1.png/800px-NarutoUzumakiPart1.png" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/9/94/NarutoCoverTankobon1.jpg" }
+        ]
+      },
+      {
+        "text": "In this world, the one who has the most fun is the strongest.",
+        "author": "Asta",
+        "source": "Black Clover",
+        "year": "2017",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt7441658",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/1/11/Black_Clover_vol1.jpg/800px-Black_Clover_vol1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/1/11/Black_Clover_vol1.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/1/11/Black_Clover_vol1.jpg/800px-Black_Clover_vol1.jpg" }
+        ]
       }
     ],
     "kdrama": [
@@ -126,7 +154,7 @@
       {
         "text": "The past is the past. What matters is the present.",
         "author": "Kim Shin",
-        "source": "Guardian: The Lonely and Great God",
+        "source": "Goblin: The Lonely and Great God",
         "year": "2016",
         "isbn": "",
         "goodreads_id": "",
@@ -134,7 +162,7 @@
         "images": [
           { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" },
           { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" },
-          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Itaewon_Class.jpg/800px-Itaewon_Class.jpg" }
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" }
         ]
       },
       {
@@ -154,7 +182,7 @@
       {
         "text": "Don't run from your fate. Face it.",
         "author": "Ji Eun-tak",
-        "source": "Guardian: The Lonely and Great God",
+        "source": "Goblin: The Lonely and Great God",
         "year": "2016",
         "isbn": "",
         "goodreads_id": "",
@@ -162,7 +190,7 @@
         "images": [
           { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" },
           { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" },
-          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" }
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" }
         ]
       },
       {
@@ -177,6 +205,34 @@
           { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg" },
           { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/d/dd/Squid_Game.jpg" },
           { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/Squid_Game.jpg/800px-Squid_Game.jpg" }
+        ]
+      },
+      {
+        "text": "Time doesn't wait for anyone.",
+        "author": "Choi Ung",
+        "source": "Our Beloved Summer",
+        "year": "2021",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt13270424",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg/800px-Guardian_The_Lonely_and_Great_God_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Guardian_The_Lonely_and_Great_God_poster.jpg" }
+        ]
+      },
+      {
+        "text": "Let's only think about happy things.",
+        "author": "Yoon Se-ri",
+        "source": "Crash Landing on You",
+        "year": "2019",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt10850932",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/f/f0/Crash_Landing_on_You_main_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/3/3f/Crash_Landing_on_You_cast.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/9/9c/Crash_Landing_on_You_logo.png" }
         ]
       }
     ],
@@ -290,6 +346,34 @@
           { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/The_Great_Gatsby_Cover_1925_Retouched.jpg/800px-The_Great_Gatsby_Cover_1925_Retouched.jpg" },
           { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg" },
           { "type": "author_portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/F_Scott_Fitzgerald_1921.jpg/800px-F_Scott_Fitzgerald_1921.jpg" }
+        ]
+      },
+      {
+        "text": "The only way to do great work is to love what you do.",
+        "author": "Steve Jobs",
+        "source": "Stanford commencement (often cited)",
+        "year": "2005",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          { "type": "portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg" },
+          { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/olid/OL7353617M-L.jpg" },
+          { "type": "author_portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg" }
+        ]
+      },
+      {
+        "text": "The secret of getting ahead is getting started.",
+        "author": "Mark Twain",
+        "source": "Various (attributed)",
+        "year": "",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "",
+        "images": [
+          { "type": "cover", "url": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Mark_Twain%2C_Brady-Handy_photo_portrait%2C_Feb_7%2C_1871%2C_cropped.jpg" },
+          { "type": "alternate_cover", "url": "https://covers.openlibrary.org/b/olid/OL7353617M-L.jpg" },
+          { "type": "author_portrait", "url": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Mark_Twain%2C_Brady-Handy_photo_portrait%2C_Feb_7%2C_1871%2C_cropped.jpg" }
         ]
       }
     ],
@@ -429,6 +513,20 @@
           { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/0/03/Walter_White_S5B.png" },
           { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/1/1c/Breaking_Bad_season_5_DVD.jpg" }
         ]
+      },
+      {
+        "text": "Friends don't lie.",
+        "author": "Eleven",
+        "source": "Stranger Things",
+        "year": "2016",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt4574334",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/3/38/Stranger_Things_season_1.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/3/38/Stranger_Things_season_1.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/3/38/Stranger_Things_season_1.jpg/800px-Stranger_Things_season_1.jpg" }
+        ]
       }
     ],
     "movie": [
@@ -556,6 +654,34 @@
           { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/2/22/Titanic_poster.jpg" },
           { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/22/Titanic_poster.jpg/800px-Titanic_poster.jpg" }
         ]
+      },
+      {
+        "text": "There is no spoon.",
+        "author": "Spoon Boy",
+        "source": "The Matrix",
+        "year": "1999",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0133093",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c1/The_Matrix_Poster.jpg/800px-The_Matrix_Poster.jpg" }
+        ]
+      },
+      {
+        "text": "Do not go gentle into that good night.",
+        "author": "Professor Brand",
+        "source": "Interstellar",
+        "year": "2014",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt0816692",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/b/bc/Interstellar_film_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/Interstellar_film_poster.jpg/800px-Interstellar_film_poster.jpg" }
+        ]
       }
     ],
     "bollywood": [
@@ -580,6 +706,34 @@
             "type": "alternate",
             "url": "https://upload.wikimedia.org/wikipedia/en/3/35/Sholay_film_poster.jpg"
           }
+        ]
+      },
+      {
+        "text": "All is well.",
+        "author": "Ranchoddas Shamaldas Chanchad",
+        "source": "3 Idiots",
+        "year": "2009",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt1187043",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/3_idiots_poster.jpg/800px-3_idiots_poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/d/df/3_idiots_poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/3_idiots_poster.jpg/800px-3_idiots_poster.jpg" }
+        ]
+      },
+      {
+        "text": "Medals don't grow on trees. You have to earn them with your blood and sweat.",
+        "author": "Mahavir Singh Phogat",
+        "source": "Dangal",
+        "year": "2016",
+        "isbn": "",
+        "goodreads_id": "",
+        "imdb_id": "tt5074352",
+        "images": [
+          { "type": "poster", "url": "https://upload.wikimedia.org/wikipedia/en/9/99/Dangal_Poster.jpg" },
+          { "type": "still", "url": "https://upload.wikimedia.org/wikipedia/en/9/99/Dangal_Poster.jpg" },
+          { "type": "alternate", "url": "https://upload.wikimedia.org/wikipedia/en/thumb/9/99/Dangal_Poster.jpg/800px-Dangal_Poster.jpg" }
         ]
       }
     ],
