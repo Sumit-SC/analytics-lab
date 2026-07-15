@@ -608,7 +608,8 @@
 		if (!proxyUrl) return false;
 		var p = String(proxyUrl).toLowerCase();
 		return p.indexOf('koyeb.app') !== -1 || p.indexOf('railway.app') !== -1
-			|| p.indexOf('localhost') !== -1 || p.indexOf('127.0.0.1') !== -1;
+			|| p.indexOf('localhost') !== -1 || p.indexOf('127.0.0.1') !== -1
+			|| p.indexOf('hf.space') !== -1 || p.indexOf('jobs-proxy') !== -1;
 	}
 
 		// Setup API Backend: Koyeb (job-search-api) | Vercel
