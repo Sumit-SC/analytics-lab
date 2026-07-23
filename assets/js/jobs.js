@@ -620,15 +620,21 @@
 		} catch (eMigrate) { /* ignore */ }
 		var koyebRadio = document.getElementById('api-backend-koyeb');
 		var vercelRadio = document.getElementById('api-backend-vercel');
+		var rssjobsRadio = document.getElementById('api-backend-rssjobs');
 		var statusEl = document.getElementById('api-status');
 		var savedBackend = localStorage.getItem('job_tracker_api_backend') || 'vercel';
+		
 		if (savedBackend === 'vercel' && vercelRadio) vercelRadio.checked = true;
+		else if (savedBackend === 'rssjobs' && rssjobsRadio) rssjobsRadio.checked = true;
 		else if (koyebRadio) koyebRadio.checked = true;
-
+ 
 		function updateApiBackend(backend) {
 			if (backend === 'koyeb') {
 				window.JOB_PROXY_URL = getJobSearchApiBase();
 				if (statusEl) statusEl.textContent = '✓ Hugging Face';
+			} else if (backend === 'rssjobs') {
+				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+				if (statusEl) statusEl.textContent = '✓ RSSJobs (Direct)';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
 				if (statusEl) statusEl.textContent = '✓ Vercel';
@@ -638,10 +644,11 @@
 			applyBackendFormState(backend);
 			fetchAllJobs(false);
 		}
-
+ 
 		if (koyebRadio) koyebRadio.addEventListener('change', function () { if (koyebRadio.checked) updateApiBackend('koyeb'); });
 		if (vercelRadio) vercelRadio.addEventListener('change', function () { if (vercelRadio.checked) updateApiBackend('vercel'); });
-		updateApiBackend(savedBackend === 'vercel' ? 'vercel' : 'koyeb');
+		if (rssjobsRadio) rssjobsRadio.addEventListener('change', function () { if (rssjobsRadio.checked) updateApiBackend('rssjobs'); });
+		updateApiBackend(savedBackend);
 	}
 
 	// Koyeb (job-search-api): show full search config. Vercel: show vercel-search-section + sources panel.
@@ -1519,8 +1526,10 @@
 		var proxyUrl = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
 		var koyebRadio = document.getElementById('api-backend-koyeb');
 		var vercelRadio = document.getElementById('api-backend-vercel');
+		var rssjobsRadio = document.getElementById('api-backend-rssjobs');
 		var isKoyeb = (koyebRadio && koyebRadio.checked);
-		if (!proxyUrl && vercelRadio && vercelRadio.checked) proxyUrl = 'https://playground-serveless.vercel.app';
+		var isRssjobs = (rssjobsRadio && rssjobsRadio.checked);
+		if (!proxyUrl && (vercelRadio && vercelRadio.checked || rssjobsRadio && rssjobsRadio.checked)) proxyUrl = 'https://playground-serveless.vercel.app';
 		if (!proxyUrl && isKoyeb) proxyUrl = getJobSearchApiBase();
 		
 		var urlParams = new URLSearchParams(window.location.search);
@@ -1564,7 +1573,7 @@
 		(function renderLoadingFetchContext() {
 			var contextEl = document.getElementById('job-stats-context');
 			if (!contextEl) return;
-			var backendLabel = isKoyeb ? 'Hugging Face API' : 'Vercel snapshot';
+			var backendLabel = isKoyeb ? 'Hugging Face API' : (isRssjobs ? 'RSSJobs (Direct)' : 'Vercel snapshot');
 			var sp = buildSourcesParam();
 			var sourcesCount = sp ? sp.split(',').filter(Boolean).length : 0;
 			var sourcesLabel = sourcesCount > 0 ? String(sourcesCount) : 'default';
@@ -1583,8 +1592,8 @@
 
 		// Analytics: capture job search (Koyeb vs Vercel) so dashboard shows usage
 		if (typeof window.trackEvent === 'function') {
-			window.trackEvent('jobs_search_' + (isKoyeb ? 'koyeb' : 'vercel'), {
-				backend: isKoyeb ? 'koyeb' : 'vercel',
+			window.trackEvent('jobs_search_' + (isKoyeb ? 'koyeb' : (isRssjobs ? 'rssjobs' : 'vercel')), {
+				backend: isKoyeb ? 'koyeb' : (isRssjobs ? 'rssjobs' : 'vercel'),
 				query: query || null,
 				days: days || null,
 				limit: limit || null,
@@ -1594,6 +1603,41 @@
 		
 		var sourcesParam = buildSourcesParam();
 		
+		// If direct RSSJobs search is selected:
+		if (isRssjobs) {
+			var rssjobsApiUrl = proxyUrl 
+				? (proxyUrl + '/api/rssjobs?q=' + encodeURIComponent(query) + '&location=' + encodeURIComponent(location))
+				: ('/api/rssjobs?q=' + encodeURIComponent(query) + '&location=' + encodeURIComponent(location));
+			
+			fetchWithTimeout(rssjobsApiUrl, {}, 25000)
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					if (!data || !data.ok || !Array.isArray(data.jobs)) {
+						console.error('rssjobs fetch failed:', data);
+						if (errorEl) errorEl.classList.remove('hidden');
+						if (loadingEl) loadingEl.style.display = 'none';
+						return;
+					}
+					allJobs = [];
+					data.jobs.forEach(function (item) {
+						var job = normalizeJobFromApi(item);
+						if (job) allJobs.push(job);
+					});
+					if (!isActiveJobsRequest(requestId)) return;
+					processJobsData(data, requestId);
+					saveJobsToBrowserCache({
+						jobs: allJobs.slice(0),
+						sourceCounts: { 'rssjobs': allJobs.length },
+						sources: ['rssjobs']
+					});
+				})
+				.catch(function (err) {
+					console.error('rssjobs fetch error:', err);
+					if (loadingEl) loadingEl.style.display = 'none';
+				});
+			return;
+		}
+
 		// job-search-api: Use /refresh (POST) and /jobs (GET) endpoints
 		if (isKoyeb) {
 			if (forceRefresh) {
