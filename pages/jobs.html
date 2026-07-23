@@ -1,13 +1,16 @@
 <!DOCTYPE HTML>
 <html lang="en">
+
 <head>
 	<!-- Script order: tailwind-loader.js → main.css → (JOB_PROXY_URL) → page scripts (jobs.js). Do not reorder. -->
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<title>Job Tracker | Standalone Playground</title>
-	<meta name="description" content="Aggregate and track data science jobs from multiple sources. Match jobs with your skillset and manage applications." />
+	<meta name="description"
+		content="Aggregate and track data science jobs from multiple sources. Match jobs with your skillset and manage applications." />
 	<meta property="og:title" content="Job Tracker — Data Science Jobs Hub" />
-	<meta property="og:description" content="Track and match data science jobs from RemoteOK, Stack Overflow, GitHub, and more." />
+	<meta property="og:description"
+		content="Track and match data science jobs from RemoteOK, Stack Overflow, GitHub, and more." />
 	<script src="../assets/js/tailwind-loader.js" defer></script>
 	<!-- No Google Fonts: system font stack only (no external trackers) -->
 	<link rel="preconnect" href="https://remoteok.com">
@@ -26,7 +29,7 @@
 		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
 		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
 		var __isLocalhost = false;
-		try { __isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1'); } catch (e) {}
+		try { __isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1'); } catch (e) { }
 		// You can also override via query param: ?backend=http://localhost:8000
 		var __backendParam = '';
 		try { __backendParam = (new URLSearchParams(window.location.search)).get('backend') || ''; } catch (e) { __backendParam = ''; }
@@ -40,10 +43,12 @@
 		.job-card {
 			transition: all 0.2s ease;
 		}
+
 		.job-card:hover {
 			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 		}
+
 		.match-badge {
 			display: inline-flex;
 			align-items: center;
@@ -52,9 +57,22 @@
 			font-size: 0.75rem;
 			font-weight: 600;
 		}
-		.match-high { background-color: #10b981; color: white; }
-		.match-medium { background-color: #f59e0b; color: white; }
-		.match-low { background-color: #6b7280; color: white; }
+
+		.match-high {
+			background-color: #10b981;
+			color: white;
+		}
+
+		.match-medium {
+			background-color: #f59e0b;
+			color: white;
+		}
+
+		.match-low {
+			background-color: #6b7280;
+			color: white;
+		}
+
 		.status-badge {
 			display: inline-flex;
 			align-items: center;
@@ -63,11 +81,32 @@
 			font-size: 0.75rem;
 			font-weight: 500;
 		}
-		.status-new { background-color: #dbeafe; color: #1e40af; }
-		.status-applied { background-color: #fef3c7; color: #92400e; }
-		.status-interview { background-color: #ddd6fe; color: #5b21b6; }
-		.status-rejected { background-color: #fee2e2; color: #991b1b; }
-		.status-offer { background-color: #d1fae5; color: #065f46; }
+
+		.status-new {
+			background-color: #dbeafe;
+			color: #1e40af;
+		}
+
+		.status-applied {
+			background-color: #fef3c7;
+			color: #92400e;
+		}
+
+		.status-interview {
+			background-color: #ddd6fe;
+			color: #5b21b6;
+		}
+
+		.status-rejected {
+			background-color: #fee2e2;
+			color: #991b1b;
+		}
+
+		.status-offer {
+			background-color: #d1fae5;
+			color: #065f46;
+		}
+
 		.fetch-mode-chip {
 			display: inline-flex;
 			align-items: center;
@@ -77,40 +116,49 @@
 			font-size: .75rem;
 			font-weight: 600;
 			border: 1px solid rgba(148, 163, 184, 0.35);
-			background: rgba(255,255,255,0.65);
+			background: rgba(255, 255, 255, 0.65);
 		}
+
 		.dark .fetch-mode-chip {
 			background: rgba(15, 23, 42, 0.5);
 		}
+
 		.fetch-mode-chip.active {
 			background: color-mix(in srgb, var(--color-primary, #667eea) 16%, white);
 			border-color: color-mix(in srgb, var(--color-primary, #667eea) 45%, #94a3b8);
 			color: var(--color-primary, #667eea);
 		}
+
 		@media (hover: none) and (pointer: coarse) {
 			.job-card:hover {
 				transform: none;
 				box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
 			}
 		}
+
 		/* Job API UI embed toggle */
 		#railway-ui-embed-toggle-icon {
 			transition: transform 0.3s ease;
 		}
+
 		#railway-ui-embed-content {
 			transition: all 0.3s ease;
 		}
+
 		#railway-ui-embed-content.hidden {
 			display: none;
 		}
+
 		/* Backend sections: show/hide by class so buttons and form are always correct */
 		#vercel-search-section.hidden,
 		#job-search-config-section.hidden {
 			display: none !important;
 		}
+
 		#railway-ui-embed-iframe {
 			min-height: 600px;
 		}
+
 		@media (max-width: 768px) {
 			#railway-ui-embed-toggle {
 				min-height: 48px;
@@ -118,56 +166,74 @@
 				flex-wrap: wrap;
 				gap: 8px;
 			}
+
 			#railway-ui-embed-toggle h2 {
 				font-size: 1rem;
 			}
+
 			#railway-ui-embed-toggle p {
 				font-size: 0.75rem;
 			}
+
 			#railway-ui-embed-content .p-4 {
 				padding: 12px;
 			}
+
 			#railway-ui-embed-iframe {
 				min-height: 420px;
 				height: 60vh;
 			}
 		}
+
 		@media (max-width: 480px) {
 			#railway-ui-embed-iframe {
 				min-height: 360px;
 				height: 55vh;
 			}
 		}
+
 		/* Job tracker: mobile/tablet */
 		@media (max-width: 768px) {
-			main .space-y-6 > * { margin-bottom: 1rem; }
-			#job-tracker-main .grid { gap: 0.75rem; }
+			main .space-y-6>* {
+				margin-bottom: 1rem;
+			}
+
+			#job-tracker-main .grid {
+				gap: 0.75rem;
+			}
+
 			#job-tracker-main input[type="text"],
 			#job-tracker-main input[type="number"],
 			#job-tracker-main select {
 				min-height: 44px;
 				font-size: 16px;
 			}
+
 			#job-list {
 				gap: 0.75rem;
 			}
+
 			#job-list .job-card {
 				padding: 0.75rem 1rem;
 				min-width: 0;
 			}
+
 			#job-list .job-card h3,
 			#job-list .job-card .font-semibold {
 				font-size: 0.9375rem;
 				line-height: 1.35;
 			}
+
 			#job-detail-modal .rounded-xl {
 				max-height: 90vh;
 				overflow-y: auto;
 			}
+
 			#planner-form.grid {
 				grid-template-columns: 1fr;
 			}
 		}
+
 		@media (max-width: 480px) {
 			main {
 				padding-left: 0.75rem;
@@ -175,12 +241,17 @@
 				padding-top: 1rem;
 				padding-bottom: 1rem;
 			}
-			#job-tracker-main .flex-wrap.gap-4 { gap: 0.5rem; }
+
+			#job-tracker-main .flex-wrap.gap-4 {
+				gap: 0.5rem;
+			}
+
 			#job-sites-multiselect {
 				grid-template-columns: 1fr;
 				max-height: 200px;
 			}
 		}
+
 		/* Enhanced Form Styles */
 		input[type="range"] {
 			-webkit-appearance: none;
@@ -188,11 +259,13 @@
 			background: transparent;
 			cursor: pointer;
 		}
+
 		input[type="range"]::-webkit-slider-track {
 			background: #e5e7eb;
 			height: 8px;
 			border-radius: 4px;
 		}
+
 		input[type="range"]::-webkit-slider-thumb {
 			-webkit-appearance: none;
 			appearance: none;
@@ -204,15 +277,18 @@
 			cursor: pointer;
 			transition: all 0.2s;
 		}
+
 		input[type="range"]::-webkit-slider-thumb:hover {
 			transform: scale(1.1);
 			box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 		}
+
 		input[type="range"]::-moz-range-track {
 			background: #e5e7eb;
 			height: 8px;
 			border-radius: 4px;
 		}
+
 		input[type="range"]::-moz-range-thumb {
 			background: var(--color-primary, #667eea);
 			height: 20px;
@@ -222,9 +298,11 @@
 			cursor: pointer;
 			transition: all 0.2s;
 		}
+
 		input[type="range"]::-moz-range-thumb:hover {
 			transform: scale(1.1);
 		}
+
 		#job-sites-multiselect label {
 			display: flex;
 			align-items: center;
@@ -234,9 +312,11 @@
 			transition: all 0.2s;
 			font-size: 0.875rem;
 		}
+
 		#job-sites-multiselect label:hover {
 			background: rgba(102, 126, 234, 0.1);
 		}
+
 		#job-sites-multiselect input[type="checkbox"] {
 			width: 18px;
 			height: 18px;
@@ -246,16 +326,26 @@
 		}
 	</style>
 </head>
-<body class="page-jobs bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-page="jobs" data-current-page="jobs">
+
+<body class="page-jobs bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 antialiased" data-page="jobs"
+	data-current-page="jobs">
 	<nav class="app-bar bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6">
 			<div class="flex items-center justify-between py-3">
-				<a href="../index.html" class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone Playground</a>
+				<a href="../index.html"
+					class="font-extrabold text-lg tracking-tight text-gray-800 dark:text-gray-100 hover:text-primary">Standalone
+					Playground</a>
 				<div class="flex items-center gap-2">
-					<button type="button" class="nav-menu-btn" aria-label="Open menu" aria-controls="nav-drawer">&#9776;</button>
+					<button type="button" class="nav-menu-btn" aria-label="Open menu"
+						aria-controls="nav-drawer">&#9776;</button>
 					<div class="nav-links-inline flex items-center gap-2" data-nav-inject="main"></div>
-					<button type="button" id="color-theme-toggle" class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1" aria-label="Color theme" title="Color theme" style="background-color: var(--color-primary);"></button>
-					<button type="button" id="theme-toggle" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1" aria-label="Toggle theme">🌙</button>
+					<button type="button" id="color-theme-toggle"
+						class="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all material-elevation-1"
+						aria-label="Color theme" title="Color theme"
+						style="background-color: var(--color-primary);"></button>
+					<button type="button" id="theme-toggle"
+						class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 material-elevation-1"
+						aria-label="Toggle theme">🌙</button>
 				</div>
 			</div>
 		</div>
@@ -271,706 +361,904 @@
 
 	<div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/50 hidden" aria-hidden="true"></div>
 	<div class="flex relative">
-		<aside id="sidebar" class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
-			<button type="button" id="sidebar-toggle-btn" class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]" aria-label="Toggle Resources sidebar">
+		<aside id="sidebar"
+			class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/95 sticky top-[57px] self-start max-h-[calc(100vh-57px)] overflow-y-auto w-[280px] shadow-sm md:block sidebar-drawer">
+			<button type="button" id="sidebar-toggle-btn"
+				class="w-full py-3 px-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700/80 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center min-h-[3rem]"
+				aria-label="Toggle Resources sidebar">
 				<span class="sidebar-toggle-horizontal">&#9664; Close</span>
 				<span class="sidebar-toggle-vertical">Resources</span>
 			</button>
 			<div class="sidebar-content p-3">
-				<h3 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">Learn by topic</h3>
+				<h3
+					class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3 px-1 border-b border-gray-300 dark:border-gray-600 pb-2">
+					Learn by topic</h3>
 				<nav class="space-y-1 text-sm">
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming
+						</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=python" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a></li>
-							<li><a href="./resources.html?topic=sql" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a></li>
-							<li><a href="./resources.html?topic=git" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a></li>
-							<li><a href="./resources.html?topic=stats" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a></li>
-							<li><a href="./resources.html?topic=math" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a></li>
-							<li><a href="./resources.html?topic=oops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OOP</a></li>
-							<li><a href="./resources.html?topic=prompting" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Prompting</a></li>
+							<li><a href="./resources.html?topic=python"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Python</a>
+							</li>
+							<li><a href="./resources.html?topic=sql"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">SQL</a>
+							</li>
+							<li><a href="./resources.html?topic=git"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Git</a>
+							</li>
+							<li><a href="./resources.html?topic=stats"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Statistics</a>
+							</li>
+							<li><a href="./resources.html?topic=math"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Mathematics</a>
+							</li>
+							<li><a href="./resources.html?topic=oops"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OOP</a>
+							</li>
+							<li><a href="./resources.html?topic=prompting"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Prompting</a>
+							</li>
 						</ul>
 					</div>
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Analytics</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data
+							Analytics</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Analytics</a></li>
-							<li><a href="./resources.html?topic=pandas" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a></li>
-							<li><a href="./resources.html?topic=numpy" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a></li>
-							<li><a href="./resources.html?topic=data-visualization" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Visualization</a></li>
-							<li><a href="./resources.html?topic=matplotlib" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization (Python)</a></li>
-							<li><a href="./resources.html?topic=product-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Product Analytics</a></li>
-							<li><a href="./resources.html?topic=ab-testing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B Testing</a></li>
-							<li><a href="./resources.html?topic=time-series" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Time Series</a></li>
+							<li><a href="./resources.html?topic=data-analytics"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data
+									Analytics</a></li>
+							<li><a href="./resources.html?topic=pandas"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Pandas</a>
+							</li>
+							<li><a href="./resources.html?topic=numpy"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NumPy</a>
+							</li>
+							<li><a href="./resources.html?topic=data-visualization"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data
+									Visualization</a></li>
+							<li><a href="./resources.html?topic=matplotlib"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Visualization
+									(Python)</a></li>
+							<li><a href="./resources.html?topic=product-analytics"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Product
+									Analytics</a></li>
+							<li><a href="./resources.html?topic=ab-testing"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">A/B
+									Testing</a></li>
+							<li><a href="./resources.html?topic=time-series"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Time
+									Series</a></li>
 						</ul>
 					</div>
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science & ML</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Science
+							& ML</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-science" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Science</a></li>
-							<li><a href="./resources.html?topic=machine-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine Learning</a></li>
-							<li><a href="./resources.html?topic=deep-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep Learning</a></li>
-							<li><a href="./resources.html?topic=llms" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen AI</a></li>
-							<li><a href="./resources.html?topic=nlp" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NLP</a></li>
-							<li><a href="./resources.html?topic=computer-vision" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Computer Vision</a></li>
-							<li><a href="./resources.html?topic=opencv" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OpenCV</a></li>
-							<li><a href="./resources.html?topic=reinforcement-learning" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Reinforcement Learning</a></li>
-							<li><a href="./resources.html?topic=feature-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Feature Engineering</a></li>
+							<li><a href="./resources.html?topic=data-science"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data
+									Science</a></li>
+							<li><a href="./resources.html?topic=machine-learning"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Machine
+									Learning</a></li>
+							<li><a href="./resources.html?topic=deep-learning"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Deep
+									Learning</a></li>
+							<li><a href="./resources.html?topic=llms"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">LLMs & Gen
+									AI</a></li>
+							<li><a href="./resources.html?topic=nlp"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">NLP</a>
+							</li>
+							<li><a href="./resources.html?topic=computer-vision"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Computer
+									Vision</a></li>
+							<li><a href="./resources.html?topic=opencv"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">OpenCV</a>
+							</li>
+							<li><a href="./resources.html?topic=reinforcement-learning"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Reinforcement
+									Learning</a></li>
+							<li><a href="./resources.html?topic=feature-engineering"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Feature
+									Engineering</a></li>
 						</ul>
 					</div>
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data Engineering</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Data
+							Engineering</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=data-engineering" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Engineering</a></li>
-							<li><a href="./resources.html?topic=spark" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Apache Spark</a></li>
-							<li><a href="./resources.html?topic=streaming" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Streaming Data</a></li>
-							<li><a href="./resources.html?topic=data-warehousing" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data Warehousing</a></li>
-							<li><a href="./resources.html?topic=databases" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Databases</a></li>
-							<li><a href="./resources.html?topic=cloud-data" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Cloud Platforms</a></li>
-							<li><a href="./resources.html?topic=airflow" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a></li>
-							<li><a href="./resources.html?topic=dbt" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a></li>
-							<li><a href="./resources.html?topic=mlops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">MLOps</a></li>
-							<li><a href="./resources.html?topic=devops" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">DevOps</a></li>
+							<li><a href="./resources.html?topic=data-engineering"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data
+									Engineering</a></li>
+							<li><a href="./resources.html?topic=spark"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Apache
+									Spark</a></li>
+							<li><a href="./resources.html?topic=streaming"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Streaming
+									Data</a></li>
+							<li><a href="./resources.html?topic=data-warehousing"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Data
+									Warehousing</a></li>
+							<li><a href="./resources.html?topic=databases"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Databases</a>
+							</li>
+							<li><a href="./resources.html?topic=cloud-data"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Cloud
+									Platforms</a></li>
+							<li><a href="./resources.html?topic=airflow"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Airflow</a>
+							</li>
+							<li><a href="./resources.html?topic=dbt"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">dbt</a>
+							</li>
+							<li><a href="./resources.html?topic=mlops"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">MLOps</a>
+							</li>
+							<li><a href="./resources.html?topic=devops"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">DevOps</a>
+							</li>
 						</ul>
 					</div>
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming Languages</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Programming
+							Languages</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=r" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">R Programming</a></li>
+							<li><a href="./resources.html?topic=r"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">R
+									Programming</a></li>
 						</ul>
 					</div>
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business Intelligence</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Business
+							Intelligence</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=business-analytics" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Business Analytics</a></li>
-							<li><a href="./resources.html?topic=excel" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a></li>
-							<li><a href="./resources.html?topic=power-bi" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power BI</a></li>
-							<li><a href="./resources.html?topic=tableau" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a></li>
+							<li><a href="./resources.html?topic=business-analytics"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Business
+									Analytics</a></li>
+							<li><a href="./resources.html?topic=excel"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Excel</a>
+							</li>
+							<li><a href="./resources.html?topic=power-bi"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Power
+									BI</a></li>
+							<li><a href="./resources.html?topic=tableau"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Tableau</a>
+							</li>
 						</ul>
 					</div>
 					<div class="resource-group rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Tools & Career</p>
+						<p class="font-semibold text-gray-800 dark:text-gray-100 py-2 px-2 cursor-default">Tools &
+							Career</p>
 						<ul class="resource-sublist pl-3 pb-2 space-y-0.5">
-							<li><a href="./resources.html?topic=editors-ides" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Editors & IDEs</a></li>
-							<li><a href="./resources.html?topic=productivity-tools" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Productivity Tools</a></li>
-							<li><a href="./resources.html?topic=communication" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Communication</a></li>
-							<li><a href="./resources.html?topic=resume-interview" class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Resume & Interview</a></li>
+							<li><a href="./resources.html?topic=editors-ides"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Editors &
+									IDEs</a></li>
+							<li><a href="./resources.html?topic=productivity-tools"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Productivity
+									Tools</a></li>
+							<li><a href="./resources.html?topic=communication"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Communication</a>
+							</li>
+							<li><a href="./resources.html?topic=resume-interview"
+									class="text-gray-700 dark:text-gray-300 hover:text-primary block py-0.5">Resume &
+									Interview</a></li>
 						</ul>
 					</div>
 				</nav>
 			</div>
 		</aside>
 
-	<main class="flex-1 min-w-0 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-		<!-- job-search-api UI embed (Koyeb / FastAPI) -->
-		<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-			<button type="button" id="railway-ui-embed-toggle" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded="false" aria-controls="railway-ui-embed-content">
-				<div class="flex items-center gap-3">
-					<span class="text-lg">📦</span>
-					<div>
-						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Job search API UI</h2>
-						<p class="text-xs text-gray-500 dark:text-gray-400">Core API, RSSJobs, JobSpy — refresh, fetch, filter in one place</p>
-					</div>
-				</div>
-				<span class="text-gray-500 dark:text-gray-400 text-sm font-medium" id="railway-ui-embed-toggle-text">Click to expand</span>
-				<svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform" id="railway-ui-embed-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-				</svg>
-			</button>
-			<div id="railway-ui-embed-content" class="hidden border-t border-gray-200 dark:border-gray-700">
-				<div class="p-4 bg-gray-50 dark:bg-gray-900/50">
-					<div id="embed-blocked-banner" class="hidden mb-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm flex items-start justify-between gap-2">
-						<p class="flex-1">Embeds can be blocked by ad blockers or privacy extensions. If the panel below is blank, <strong>open in new tab</strong> below or whitelist this site in your extension.</p>
-						<button type="button" id="embed-blocked-banner-dismiss" class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50" aria-label="Dismiss">✕</button>
-					</div>
-					<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
-						Embedded UI from job-search-api (set <code class="text-[11px]">JOB_SEARCH_API_BASE</code> in the script above). <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Open in new tab</a>
-					</p>
-					<div class="relative">
-						<iframe 
-							id="railway-ui-embed-iframe"
-							src="about:blank"
-							width="100%" 
-							height="720" 
-							frameborder="0" 
-							class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-							title="Job search API UI">
-						</iframe>
-						<div id="railway-ui-embed-fallback" class="hidden absolute inset-0 rounded-lg border-2 border-dashed border-amber-400 dark:border-amber-600 bg-amber-50/95 dark:bg-amber-900/20 flex flex-col items-center justify-center p-6 text-center">
-							<p class="text-amber-800 dark:text-amber-200 font-medium mb-2">Embed may be blocked by an extension</p>
-							<p class="text-sm text-gray-700 dark:text-gray-300 mb-4">The panel above didn’t load. Use the button below to open the app in a new tab.</p>
-							<a id="railway-ui-embed-fallback-link" href="#" target="_blank" rel="noopener" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open job-search-api UI in new tab</a>
+		<main class="flex-1 min-w-0 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+			<!-- job-search-api UI embed (Koyeb / FastAPI) -->
+			<section
+				class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+				<button type="button" id="railway-ui-embed-toggle"
+					class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+					aria-expanded="false" aria-controls="railway-ui-embed-content">
+					<div class="flex items-center gap-3">
+						<span class="text-lg">📦</span>
+						<div>
+							<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Job search API UI</h2>
+							<p class="text-xs text-gray-500 dark:text-gray-400">Core API, RSSJobs, JobSpy — refresh,
+								fetch, filter in one place</p>
 						</div>
 					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Job hunt hub: aggregation + explore data analytics roles -->
-		<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-5" aria-labelledby="job-hunt-hub-title">
-			<h2 id="job-hunt-hub-title" class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
-				<span aria-hidden="true">🔍</span> Job hunt hub — data analytics
-			</h2>
-			<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">One place to explore roles: our aggregated list below plus learning paths and external boards.</p>
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-				<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-					<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Our aggregation</p>
-					<p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Jobs below are from 20+ sources (RemoteOK, Remotive, Indeed, Wellfound, Stack Overflow, Naukri, LinkedIn, etc.), ranked for analyst/BI roles.</p>
-					<a href="#jobs-list-anchor" class="text-xs font-semibold text-primary hover:underline">Scroll to job list ↓</a>
-				</div>
-				<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-					<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Learn & roadmap</p>
-					<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-						<li><a href="./resources.html?topic=data-analytics" class="text-primary hover:underline">Resources · Data Analytics</a></li>
-						<li><a href="./resources.html?topic=data-science" class="text-primary hover:underline">Resources · Data Science</a></li>
-						<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="text-primary hover:underline">roadmap.sh · Data Analyst</a></li>
-						<li><a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener" class="text-primary hover:underline">roadmap.sh · AI/Data Scientist</a></li>
-					</ul>
-				</div>
-				<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-					<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">External boards (data analytics)</p>
-					<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-						<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank" rel="noopener" class="text-primary hover:underline">Remotive · Data</a></li>
-						<li><a href="https://remotive.com/remote-jobs/software-dev/analytics" target="_blank" rel="noopener" class="text-primary hover:underline">Remotive · Analytics</a></li>
-						<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">We Work Remotely · Data</a></li>
-						<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">RemoteOK · Data analyst</a></li>
-						<li><a href="https://www.workatastartup.com/jobs" target="_blank" rel="noopener" class="text-primary hover:underline">Work at a Startup</a></li>
-						<li><a href="https://www.ycombinator.com/jobs" target="_blank" rel="noopener" class="text-primary hover:underline">Y Combinator · Jobs</a></li>
-						<li><a href="https://hireflair.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Hireflair</a></li>
-						<li><a href="https://www.instahyre.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Instahyre</a></li>
-						<li><a href="https://www.hirist.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Hirist (India)</a></li>
-						<li><a href="https://hiring.cafe/" target="_blank" rel="noopener" class="text-primary hover:underline">hiring.cafe</a></li>
-						<li><a href="https://www.xing.com/jobs" target="_blank" rel="noopener" class="text-primary hover:underline">Xing Jobs</a></li>
-						<li><a href="https://cutshort.io/" target="_blank" rel="noopener" class="text-primary hover:underline">Cutshort</a></li>
-						<li><a href="https://www.foundit.in/" target="_blank" rel="noopener" class="text-primary hover:underline">Foundit</a></li>
-						<li><a href="https://www.timesjobs.com/" target="_blank" rel="noopener" class="text-primary hover:underline">TimesJobs</a></li>
-						<li><a href="https://www.shine.com/" target="_blank" rel="noopener" class="text-primary hover:underline">Shine</a></li>
-						<li><a href="https://www.linkedin.com/jobs/search/?keywords=data%20analyst" target="_blank" rel="noopener" class="text-primary hover:underline">LinkedIn · Data analyst</a></li>
-						<li><a href="https://www.indeed.com/jobs?q=data+analyst&l=remote" target="_blank" rel="noopener" class="text-primary hover:underline">Indeed · Data analyst</a></li>
-						<li><a href="https://stackoverflow.com/jobs?q=data+analyst" target="_blank" rel="noopener" class="text-primary hover:underline">Stack Overflow Jobs</a></li>
-						<li><a href="https://www.naukri.com/data-analyst-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">Naukri (India)</a></li>
-						<li><a href="https://www.trueup.io/job-boards" target="_blank" rel="noopener" class="text-primary hover:underline">TrueUp · job boards</a></li>
-						<li><a href="https://rssjobs.app" target="_blank" rel="noopener" class="text-primary hover:underline">rssjobs.app · Create custom feed</a></li>
-					</ul>
-					<div class="mt-3">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Open current search on more boards</p>
-						<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Uses our backend to generate deep-links from your current query/location (works even when scraping is blocked).</p>
-						<div id="job-external-boards-dynamic" class="flex flex-wrap gap-2 text-xs">
-							<span class="text-[11px] text-gray-500 dark:text-gray-400">Loading…</span>
-						</div>
-					</div>
-				</div>
-				<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/30 p-3">
-					<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">TrueUp boards (data domain)</p>
-					<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">TrueUp blocks automated scraping (403/CAPTCHA), so we link to their official boards directly.</p>
-					<div class="flex flex-wrap gap-2 text-xs">
-						<a href="https://www.trueup.io/ai" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">AI</a>
-						<a href="https://www.trueup.io/fintech" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">FinTech</a>
-						<a href="https://www.trueup.io/climate" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Climate</a>
-						<a href="https://www.trueup.io/remote" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Remote</a>
-						<a href="https://www.trueup.io/unicorns" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Unicorns</a>
-						<a href="https://www.trueup.io/faang-plus" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">FAANG+</a>
-						<a href="https://www.trueup.io/elite-startups" target="_blank" rel="noopener" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Elite startups</a>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<header class="mb-6">
-			<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Intelligence Workspace</h1>
-			<p class="text-sm text-gray-600 dark:text-gray-400 max-w-3xl mb-4">
-				Portfolio-ready workspace to source, score, and track data and analytics roles from multiple boards in one view.
-			</p>
-			
-			<!-- API Backend: Koyeb (job-search-api) | Vercel -->
-			<div class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="koyeb" id="api-backend-koyeb" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-					<span class="text-sm text-gray-800 dark:text-gray-200">Hugging Face (HF)</span>
-				</label>
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel" class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
-					<span class="text-sm text-gray-800 dark:text-gray-200">Vercel</span>
-				</label>
-				<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
-				<span id="job-live-pill" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-					● Idle
-				</span>
-				<div class="flex items-center gap-2 ml-auto">
-					<span class="text-xs text-gray-500 dark:text-gray-400">Mode:</span>
-					<button type="button" id="fetch-profile-basic" class="fetch-mode-chip active" title="Reliable RSS/API profile. Faster and stable.">Basic</button>
-					<button type="button" id="fetch-profile-advanced" class="fetch-mode-chip" title="Broader crawl profile from backend. Slower, more coverage.">Advanced</button>
-				</div>
-			</div>
-			
-			<!-- Vercel search: role, location, days + Search button (visible only when Backend = Vercel) -->
-			<div id="vercel-search-section" class="hidden mb-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-				<h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
-					<span>🔍</span> Search (Vercel)
-				</h2>
-				<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Indeed, Stack Overflow, WorkingNomads and more. Location is used for Indeed/Stack Overflow.</p>
-				<div class="flex flex-wrap items-end gap-4">
-					<div>
-						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Role</label>
-						<select id="vercel-search-role" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[180px]">
-							<!-- Filled by JS from PRIMARY_ROLES -->
-						</select>
-					</div>
-					<div>
-						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Location</label>
-						<select id="vercel-search-location" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[140px]">
-							<!-- Filled by JS from PRIMARY_LOCATIONS -->
-						</select>
-					</div>
-					<div>
-						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Days old (max)</label>
-						<select id="vercel-search-days" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-							<option value="1">1</option>
-							<option value="3">3</option>
-							<option value="7" selected>7</option>
-							<option value="14">14</option>
-							<option value="30">30</option>
-						</select>
-					</div>
-					<div class="w-full md:w-auto md:max-w-[360px]">
-						<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">RSSJobs feed URL (optional)</label>
-						<input
-							id="job-rss-feed-url"
-							type="text"
-							placeholder="Paste rssjobs.app RSS feed URL"
-							class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-						/>
-						<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">This is only used in Vercel mode. Create a feed first at rssjobs.app.</p>
-					</div>
-					<button type="button" id="vercel-search-btn" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm shadow-sm transition-all">
-						Search Jobs
-					</button>
-				</div>
-			</div>
-
-			<!-- Sources panel: visible for BOTH backends -->
-			<div id="job-sources-panel" class="mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/30">
-				<details>
-					<summary class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 select-none">🌐 Active data sources <span class="text-xs text-gray-400">(click to expand)</span></summary>
-					<p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-2">Select sources to scrape. Unchecked sources are skipped by the API, reducing response time.</p>
-					<div id="job-sites-multiselect-global" class="max-h-48 overflow-y-auto p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-sm">
-						<!-- Populated by JS -->
-					</div>
-					<div class="flex gap-2 mt-2">
-						<button type="button" id="sources-select-all" class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Select All</button>
-						<button type="button" id="sources-select-defaults" class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Defaults</button>
-						<button type="button" id="sources-clear-all" class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Clear All</button>
-					</div>
-				</details>
-			</div>
-			
-			<div id="job-tracker-main">
-			<!-- Search Configuration: shown only when Backend = Koyeb (job-search-api) -->
-			<div id="job-search-config-section" class="mb-6 p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
-				<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
-					<span>⚙️</span> Search Configuration
-				</h2>
-				<p id="job-search-config-koyeb-hint" class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Hugging Face (job-search-api) uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per site</strong> only.</p>
-				<div class="flex items-center justify-between mb-3 md:hidden">
-					<span class="text-xs text-gray-500 dark:text-gray-400">Advanced filters (optional)</span>
-					<button type="button" id="job-advanced-toggle" class="px-3 py-1 rounded-full bg-primary/5 text-primary text-xs font-semibold">
-						Show advanced filters
-					</button>
-				</div>
-				<div id="job-search-advanced-body">
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
-					<!-- Search Term -->
-					<div class="md:col-span-2 lg:col-span-1">
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🔎 Search Term</label>
-						<input type="text" id="job-search-input" value="analyst" placeholder="e.g., analyst, data analyst, product analyst" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-					</div>
-					
-					<!-- Location -->
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">📍 Location</label>
-						<input type="text" id="job-location-input" value="Remote" list="job-location-suggestions" placeholder="e.g., Remote, Pune, Mumbai" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-						<datalist id="job-location-suggestions"></datalist>
-					</div>
-					
-					<!-- Country -->
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🌍 Country (for Indeed/Glassdoor)</label>
-						<select id="job-country-select" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-							<option value="USA">USA</option>
-							<option value="India">India</option>
-							<option value="UK">UK</option>
-							<option value="Canada">Canada</option>
-							<option value="Australia">Australia</option>
-							<option value="Germany">Germany</option>
-							<option value="France">France</option>
-						</select>
-					</div>
-					
-					<!-- Results Per Site Slider -->
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-							📊 Results per site: <span class="text-primary font-semibold" id="results-wanted-display">50</span>
-						</label>
-						<div class="flex items-center gap-3">
-							<input type="range" id="results-wanted-slider" min="10" max="200" step="10" value="50" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
-							<span class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">10-200</span>
-						</div>
-					</div>
-					
-					<!-- Days Old Slider -->
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-							⏰ Days old (max): <span class="text-primary font-semibold" id="days-old-display">7</span>
-						</label>
-						<div class="flex items-center gap-3">
-							<input type="range" id="days-old-slider" min="1" max="30" step="1" value="7" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
-							<span class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">1-30</span>
-						</div>
-					</div>
-
-					<!-- YOE filter (job-search-api supports server-side; Vercel ignores, UI filters locally where possible) -->
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-							🎯 Experience (YOE)
-						</label>
-						<div class="flex items-center gap-3">
-							<input type="number" id="job-yoe-min" min="0" max="20" value="1" class="w-20 px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" aria-label="Minimum years of experience">
-							<span class="text-xs text-gray-500 dark:text-gray-400">to</span>
-							<input type="number" id="job-yoe-max" min="0" max="20" value="3" class="w-20 px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all" aria-label="Maximum years of experience">
-							<span class="text-xs text-gray-500 dark:text-gray-400 flex-1">Default: 1–3</span>
-						</div>
-					</div>
-					
-					<!-- Job Type -->
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">💼 Job Type</label>
-						<select id="job-type-select" class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
-							<option value="">All types</option>
-							<option value="fulltime">Full-time</option>
-							<option value="parttime">Part-time</option>
-							<option value="contract">Contract</option>
-							<option value="internship">Internship</option>
-						</select>
-					</div>
-				</div>
-				
-				<!-- Job Sites Multi-Select (moved to global #job-sources-panel above) -->
-				<div class="mb-4 hidden">
-					<div id="job-sites-multiselect"></div>
-				</div>
-				
-				<!-- Checkboxes Row -->
-				<div class="flex flex-wrap items-center gap-4 mb-4">
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" id="job-remote-only" checked class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-						<span class="text-sm text-gray-700 dark:text-gray-300">🏠 Remote jobs only</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer" title="Enables slower Playwright-based sources like Naukri.">
-						<input type="checkbox" id="job-enable-headless" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-						<span class="text-sm text-gray-700 dark:text-gray-300">🧠 Headless scrapers (slow)</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="checkbox" id="job-linkedin-description" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-						<span class="text-sm text-gray-700 dark:text-gray-300">📄 LinkedIn: Fetch full descriptions (slower)</span>
-					</label>
-				</div>
-				</div>
-				
-				<!-- Action Buttons (Koyeb: Search Jobs; Clear Filters is below for both backends) -->
-				<div class="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-					<button type="button" id="job-refresh-btn" class="px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-						🔍 Search Jobs
-					</button>
-					<label class="inline-flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
-						<input type="checkbox" id="job-auto-refresh-toggle" class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-						<span id="job-auto-refresh-label">Auto-refresh (5m)</span>
-					</label>
-					<span id="job-last-refresh-text" class="text-xs text-gray-500 dark:text-gray-400">Last refresh: —</span>
-				</div>
-			</div>
-			
-			<!-- Quick Filters Row (visible for both Koyeb and Vercel) -->
-			<div class="quick-filters-row flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters:</span>
-				<select id="job-filter-source" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
-					<option value="all">All Sources</option>
-					<option value="remoteok">RemoteOK</option>
-					<option value="remotive">Remotive</option>
-					<option value="weworkremotely">We Work Remotely</option>
-					<option value="jobscollider">Jobscollider</option>
-					<option value="wellfound">Wellfound</option>
-					<option value="indeed">Indeed</option>
-					<option value="workingnomads">Working Nomads</option>
-					<option value="hirist">Hirist</option>
-					<option value="naukri">Naukri</option>
-					<option value="stackoverflow">Stack Overflow</option>
-					<option value="linkedin">LinkedIn</option>
-					<option value="trueup">TrueUp</option>
-				</select>
-				<select id="job-filter-match" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
-					<option value="all">All Matches</option>
-					<option value="high">High Match (80%+)</option>
-					<option value="medium">Medium Match (50-79%)</option>
-					<option value="low">Low Match (&lt;50%)</option>
-				</select>
-				<select id="job-filter-status" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
-					<option value="all">All Status</option>
-					<option value="new">New</option>
-					<option value="applied">Applied</option>
-					<option value="interview">Interview</option>
-					<option value="rejected">Rejected</option>
-					<option value="offer">Offer</option>
-				</select>
-				<select id="job-filter-role" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
-					<option value="all">All roles</option>
-					<option value="analyst">Analyst</option>
-					<option value="scientist">Scientist</option>
-					<option value="engineer">Engineer</option>
-				</select>
-				<label class="inline-flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
-					<input type="checkbox" id="job-filter-new-only" class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-					<span>New only</span>
-				</label>
-				<input
-					id="job-filter-exclude"
-					type="text"
-					class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[190px]"
-					placeholder="Exclude: sales, intern, marketing"
-					aria-label="Exclude keywords"
-				/>
-				<input
-					id="job-filter-tags"
-					type="text"
-					class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[160px]"
-					placeholder="Tags: sql, tableau"
-					aria-label="Tag filter"
-				/>
-				<select id="job-filter-tag-mode" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[110px]">
-					<option value="any">Tag match: Any</option>
-					<option value="all">Tag match: All</option>
-				</select>
-				<button type="button" id="job-clear-filters-btn" class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-sm">
-					Clear Filters
+					<span class="text-gray-500 dark:text-gray-400 text-sm font-medium"
+						id="railway-ui-embed-toggle-text">Click to expand</span>
+					<svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform"
+						id="railway-ui-embed-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+					</svg>
 				</button>
-				<div class="flex items-center gap-2 ml-auto w-full sm:w-auto">
-					<select
-						id="job-filter-preset-select"
-						class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
-						aria-label="Saved filter preset"
-					>
-						<option value="custom">Custom</option>
-					</select>
-					<input
-						id="job-filter-preset-name"
-						type="text"
-						class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[160px]"
-						placeholder="Preset name"
-						aria-label="Preset name"
-					/>
-					<button
-						type="button"
-						id="job-filter-preset-save"
-						class="px-3 py-1.5 text-xs rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-semibold transition-colors border border-primary/20"
-					>
-						Save
-					</button>
-				</div>
-			</div>
-			<div class="flex flex-col gap-2">
-				<div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-					<span id="job-stats-total">Loading jobs...</span>
-					<span id="job-stats-matched">—</span>
-					<span id="job-stats-applied">—</span>
-					<span id="job-stats-updated" class="text-xs text-gray-500 dark:text-gray-500">—</span>
-				</div>
-				<div class="text-xs text-gray-500 dark:text-gray-400">
-					<span id="job-stats-context">Feed: initializing...</span>
-				</div>
-				<div id="job-stats-diff" class="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-					<span class="font-semibold text-gray-700 dark:text-gray-300">Changes since last refresh:</span>
-					<span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-400/20">+<span id="job-diff-added">0</span> added</span>
-					<span class="px-2 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-300 border border-red-400/20">-<span id="job-diff-removed">0</span> removed</span>
-					<button type="button" id="job-diff-view-btn" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-900/30 text-gray-700 dark:text-gray-200 text-[11px] font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 hidden">View</button>
-				</div>
-				<div id="job-stats-sources" class="flex flex-wrap items-center gap-2 text-xs"></div>
-			</div>
-		</header>
-
-		<div id="job-new-banner" class="hidden mb-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-3">
-			<div class="flex flex-wrap items-center justify-between gap-2">
-				<p id="job-new-banner-text" class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">No new jobs yet.</p>
-				<div class="flex items-center gap-2">
-					<button type="button" id="job-new-banner-jump" class="px-2.5 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Jump to results</button>
-					<button type="button" id="job-new-banner-view" class="px-2.5 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40">View changes</button>
-				</div>
-			</div>
-		</div>
-
-		<div id="jobs-list-anchor">
-		<div id="job-loading" class="text-center py-12">
-			<p class="text-gray-500 dark:text-gray-400 mb-2">Loading jobs from multiple sources...</p>
-			<p class="text-xs text-gray-400 dark:text-gray-500" id="job-loading-detail">Fetching from RemoteOK, Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri...</p>
-		</div>
-
-		<div id="job-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display: none;">
-			<!-- Job cards will be inserted here -->
-		</div>
-
-		<div id="job-empty" class="text-center py-12 hidden">
-			<p class="text-gray-500 dark:text-gray-400">No jobs found matching your filters.</p>
-		</div>
-
-		<div id="job-error" class="text-center py-12 hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-			<p class="text-red-600 dark:text-red-400 font-semibold mb-2">Failed to load jobs</p>
-			<p class="text-sm text-red-500 dark:text-red-500" id="job-error-message"></p>
-			<button type="button" id="job-error-retry" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold">Retry</button>
-		</div>
-		</div>
-
-		<!-- Job quick view modal -->
-		<div id="job-detail-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="job-detail-title" aria-hidden="true">
-			<div class="absolute inset-0 bg-black/50" id="job-detail-backdrop"></div>
-			<div class="absolute inset-0 flex items-center justify-center p-4">
-				<div class="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
-					<div class="flex items-start justify-between gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
-						<div class="min-w-0">
-							<p class="text-xs text-gray-500 dark:text-gray-400" id="job-detail-source"></p>
-							<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate" id="job-detail-title">Job details</h3>
-							<p class="text-sm text-gray-600 dark:text-gray-400" id="job-detail-company"></p>
-							<p class="text-xs text-gray-500 dark:text-gray-500" id="job-detail-meta"></p>
+				<div id="railway-ui-embed-content" class="hidden border-t border-gray-200 dark:border-gray-700">
+					<div class="p-4 bg-gray-50 dark:bg-gray-900/50">
+						<div id="embed-blocked-banner"
+							class="hidden mb-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm flex items-start justify-between gap-2">
+							<p class="flex-1">Embeds can be blocked by ad blockers or privacy extensions. If the panel
+								below is blank, <strong>open in new tab</strong> below or whitelist this site in your
+								extension.</p>
+							<button type="button" id="embed-blocked-banner-dismiss"
+								class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50"
+								aria-label="Dismiss">✕</button>
 						</div>
-						<button type="button" id="job-detail-close" class="shrink-0 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-semibold" aria-label="Close job details">Close</button>
-					</div>
-					<div class="p-4">
-						<div class="flex flex-wrap gap-2 mb-3" id="job-detail-tags"></div>
-						<p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line" id="job-detail-description"></p>
-					</div>
-					<div class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800 flex-wrap">
-						<button type="button" id="job-detail-prep-interview" class="text-sm px-3 py-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 rounded-lg font-semibold transition-colors border border-amber-400/40">🎤 Prep for interview</button>
-						<button type="button" id="job-detail-copy-chatgpt" class="text-sm px-3 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 rounded-lg font-semibold transition-colors border border-emerald-400/40" title="Copy JD + prompt and open ChatGPT/Gemini">📋 Copy for ChatGPT / Gemini</button>
-						<button type="button" id="job-detail-add-planner" class="text-sm px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-semibold transition-colors">+ Planner</button>
-						<a id="job-detail-apply" href="#" target="_blank" rel="noopener" class="text-sm px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Apply</a>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Job diff modal: added/removed since last refresh (local browser only) -->
-		<div id="job-diff-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-label="Job changes since last refresh" aria-hidden="true">
-			<div class="absolute inset-0 bg-black/50" id="job-diff-backdrop"></div>
-			<div class="absolute inset-0 flex items-center justify-center p-4">
-				<div class="w-full max-w-3xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
-					<div class="flex items-start justify-between gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
-						<div class="min-w-0">
-							<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Changes since last refresh</h3>
-							<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">This compares the last successful load in this browser vs the current one (same query + selected sources).</p>
-						</div>
-						<button type="button" id="job-diff-close" class="shrink-0 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-semibold" aria-label="Close changes">Close</button>
-					</div>
-					<div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2">Added</p>
-							<ul id="job-diff-added-list" class="space-y-2 text-sm max-h-80 overflow-y-auto"></ul>
-						</div>
-						<div>
-							<p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">Removed</p>
-							<ul id="job-diff-removed-list" class="space-y-2 text-sm max-h-80 overflow-y-auto"></ul>
+						<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+							Embedded UI from job-search-api (set <code class="text-[11px]">JOB_SEARCH_API_BASE</code> in
+							the script above). <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener"
+								class="text-primary hover:underline font-medium">Open in new tab</a>
+						</p>
+						<div class="relative">
+							<iframe id="railway-ui-embed-iframe" src="about:blank" width="100%" height="720"
+								frameborder="0"
+								class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+								title="Job search API UI">
+							</iframe>
+							<div id="railway-ui-embed-fallback"
+								class="hidden absolute inset-0 rounded-lg border-2 border-dashed border-amber-400 dark:border-amber-600 bg-amber-50/95 dark:bg-amber-900/20 flex flex-col items-center justify-center p-6 text-center">
+								<p class="text-amber-800 dark:text-amber-200 font-medium mb-2">Embed may be blocked by
+									an extension</p>
+								<p class="text-sm text-gray-700 dark:text-gray-300 mb-4">The panel above didn’t load.
+									Use the button below to open the app in a new tab.</p>
+								<a id="railway-ui-embed-fallback-link" href="#" target="_blank" rel="noopener"
+									class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open
+									job-search-api UI in new tab</a>
+							</div>
 						</div>
 					</div>
-					<div class="p-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-						<span id="job-diff-meta">—</span>
-						<button type="button" id="job-diff-clear" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Reset diff</button>
+				</div>
+			</section>
+
+			<!-- Job hunt hub: aggregation + explore data analytics roles -->
+			<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-5"
+				aria-labelledby="job-hunt-hub-title">
+				<h2 id="job-hunt-hub-title"
+					class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+					<span aria-hidden="true">🔍</span> Job hunt hub — data analytics
+				</h2>
+				<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">One place to explore roles: our aggregated list
+					below plus learning paths and external boards.</p>
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					<div
+						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Our aggregation</p>
+						<p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Jobs below are from 20+ sources
+							(RemoteOK, Remotive, Indeed, Wellfound, Stack Overflow, Naukri, LinkedIn, etc.), ranked for
+							analyst/BI roles.</p>
+						<a href="#jobs-list-anchor" class="text-xs font-semibold text-primary hover:underline">Scroll to
+							job list ↓</a>
+					</div>
+					<div
+						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Learn & roadmap</p>
+						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+							<li><a href="./resources.html?topic=data-analytics"
+									class="text-primary hover:underline">Resources · Data Analytics</a></li>
+							<li><a href="./resources.html?topic=data-science"
+									class="text-primary hover:underline">Resources · Data Science</a></li>
+							<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener"
+									class="text-primary hover:underline">roadmap.sh · Data Analyst</a></li>
+							<li><a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener"
+									class="text-primary hover:underline">roadmap.sh · AI/Data Scientist</a></li>
+						</ul>
+					</div>
+					<div
+						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">External boards (data
+							analytics)</p>
+						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+							<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank"
+									rel="noopener" class="text-primary hover:underline">Remotive · Data</a></li>
+							<li><a href="https://remotive.com/remote-jobs/software-dev/analytics" target="_blank"
+									rel="noopener" class="text-primary hover:underline">Remotive · Analytics</a></li>
+							<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs"
+									target="_blank" rel="noopener" class="text-primary hover:underline">We Work Remotely
+									· Data</a></li>
+							<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener"
+									class="text-primary hover:underline">RemoteOK · Data analyst</a></li>
+							<li><a href="https://www.workatastartup.com/jobs" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Work at a Startup</a></li>
+							<li><a href="https://www.ycombinator.com/jobs" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Y Combinator · Jobs</a></li>
+							<li><a href="https://hireflair.com/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Hireflair</a></li>
+							<li><a href="https://www.instahyre.com/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Instahyre</a></li>
+							<li><a href="https://www.hirist.com/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Hirist (India)</a></li>
+							<li><a href="https://hiring.cafe/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">hiring.cafe</a></li>
+							<li><a href="https://www.xing.com/jobs" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Xing Jobs</a></li>
+							<li><a href="https://cutshort.io/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Cutshort</a></li>
+							<li><a href="https://www.foundit.in/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Foundit</a></li>
+							<li><a href="https://www.timesjobs.com/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">TimesJobs</a></li>
+							<li><a href="https://www.shine.com/" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Shine</a></li>
+							<li><a href="https://www.linkedin.com/jobs/search/?keywords=data%20analyst" target="_blank"
+									rel="noopener" class="text-primary hover:underline">LinkedIn · Data analyst</a></li>
+							<li><a href="https://www.indeed.com/jobs?q=data+analyst&l=remote" target="_blank"
+									rel="noopener" class="text-primary hover:underline">Indeed · Data analyst</a></li>
+							<li><a href="https://stackoverflow.com/jobs?q=data+analyst" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Stack Overflow Jobs</a></li>
+							<li><a href="https://www.naukri.com/data-analyst-jobs" target="_blank" rel="noopener"
+									class="text-primary hover:underline">Naukri (India)</a></li>
+							<li><a href="https://www.trueup.io/job-boards" target="_blank" rel="noopener"
+									class="text-primary hover:underline">TrueUp · job boards</a></li>
+							<li><a href="https://rssjobs.app" target="_blank" rel="noopener"
+									class="text-primary hover:underline">rssjobs.app · Create custom feed</a></li>
+						</ul>
+						<div class="mt-3">
+							<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Open current search
+								on more boards</p>
+							<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Uses our backend to generate
+								deep-links from your current query/location (works even when scraping is blocked).</p>
+							<div id="job-external-boards-dynamic" class="flex flex-wrap gap-2 text-xs">
+								<span class="text-[11px] text-gray-500 dark:text-gray-400">Loading…</span>
+							</div>
+						</div>
+					</div>
+					<div
+						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/30 p-3">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">TrueUp boards (data
+							domain)</p>
+						<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">TrueUp blocks automated scraping
+							(403/CAPTCHA), so we link to their official boards directly.</p>
+						<div class="flex flex-wrap gap-2 text-xs">
+							<a href="https://www.trueup.io/ai" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">AI</a>
+							<a href="https://www.trueup.io/fintech" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">FinTech</a>
+							<a href="https://www.trueup.io/climate" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Climate</a>
+							<a href="https://www.trueup.io/remote" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Remote</a>
+							<a href="https://www.trueup.io/unicorns" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Unicorns</a>
+							<a href="https://www.trueup.io/faang-plus" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">FAANG+</a>
+							<a href="https://www.trueup.io/elite-startups" target="_blank" rel="noopener"
+								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Elite
+								startups</a>
+						</div>
 					</div>
 				</div>
-			</div>
-		</div>
+			</section>
 
-		</div>
-		<!-- /#job-tracker-main -->
+			<header class="mb-6">
+				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Intelligence Workspace</h1>
+				<p class="text-sm text-gray-600 dark:text-gray-400 max-w-3xl mb-4">
+					Portfolio-ready workspace to source, score, and track data and analytics roles from multiple boards
+					in one view.
+				</p>
 
-		<!-- Application planner (Notion-style log, saved in this browser only) -->
-		<section class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
-			<header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-				<div>
-					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Application planner</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400 max-w-xl">
-						Lightweight, Notion-style log for the jobs you care about. Everything is stored locally in this browser (no backend).
-					</p>
-				</div>
-				<div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-					<label class="flex items-center gap-1">
-						<span>Search</span>
-						<input id="planner-search-input" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200" placeholder="Title, company, notes…">
+				<!-- API Backend: Koyeb (job-search-api) | Vercel -->
+				<div
+					class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
+					<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input type="radio" name="api-backend" value="koyeb" id="api-backend-koyeb"
+							class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+						<span class="text-sm text-gray-800 dark:text-gray-200">Hugging Face (HF)</span>
 					</label>
-					<label class="flex items-center gap-1">
-						<span>Status</span>
-						<select id="planner-filter-status" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200">
-							<option value="all">All</option>
-							<option value="idea">Idea</option>
-							<option value="todo">To apply</option>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel"
+							class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+							checked>
+						<span class="text-sm text-gray-800 dark:text-gray-200">Vercel</span>
+					</label>
+					<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
+					<span id="job-live-pill"
+						class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+						● Idle
+					</span>
+					<div class="flex items-center gap-2 ml-auto">
+						<span class="text-xs text-gray-500 dark:text-gray-400">Mode:</span>
+						<button type="button" id="fetch-profile-basic" class="fetch-mode-chip active"
+							title="Reliable RSS/API profile. Faster and stable.">Basic</button>
+						<button type="button" id="fetch-profile-advanced" class="fetch-mode-chip"
+							title="Broader crawl profile from backend. Slower, more coverage.">Advanced</button>
+					</div>
+				</div>
+
+				<!-- Vercel search: role, location, days + Search button (visible only when Backend = Vercel) -->
+				<div id="vercel-search-section"
+					class="hidden mb-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+					<h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
+						<span>🔍</span> Search (Vercel)
+					</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mb-4">RemoteOK, Remotive, WeWorkRemotely,
+						Jobscollider, Indeed, Stack Overflow, WorkingNomads and more. Location is used for Indeed/Stack
+						Overflow.</p>
+					<div class="flex flex-wrap items-end gap-4">
+						<div>
+							<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Role</label>
+							<select id="vercel-search-role"
+								class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[180px]">
+								<!-- Filled by JS from PRIMARY_ROLES -->
+							</select>
+						</div>
+						<div>
+							<label
+								class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Location</label>
+							<select id="vercel-search-location"
+								class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-w-[140px]">
+								<!-- Filled by JS from PRIMARY_LOCATIONS -->
+							</select>
+						</div>
+						<div>
+							<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Days old
+								(max)</label>
+							<select id="vercel-search-days"
+								class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+								<option value="1">1</option>
+								<option value="3">3</option>
+								<option value="7" selected>7</option>
+								<option value="14">14</option>
+								<option value="30">30</option>
+							</select>
+						</div>
+						<div class="w-full md:w-auto md:max-w-[360px]">
+							<label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">RSSJobs feed
+								URL (optional)</label>
+							<input id="job-rss-feed-url" type="text" placeholder="Paste rssjobs.app RSS feed URL"
+								class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+							<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">This is only used in Vercel
+								mode. Create a feed first at rssjobs.app.</p>
+						</div>
+						<button type="button" id="vercel-search-btn"
+							class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm shadow-sm transition-all">
+							Search Jobs
+						</button>
+					</div>
+				</div>
+
+				<!-- Sources panel: visible for BOTH backends -->
+				<div id="job-sources-panel"
+					class="mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/30">
+					<details>
+						<summary
+							class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 select-none">🌐
+							Active data sources <span class="text-xs text-gray-400">(click to expand)</span></summary>
+						<p class="text-xs text-gray-500 dark:text-gray-400 mt-2 mb-2">Select sources to scrape.
+							Unchecked sources are skipped by the API, reducing response time.</p>
+						<div id="job-sites-multiselect-global"
+							class="max-h-48 overflow-y-auto p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-sm">
+							<!-- Populated by JS -->
+						</div>
+						<div class="flex gap-2 mt-2">
+							<button type="button" id="sources-select-all"
+								class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Select
+								All</button>
+							<button type="button" id="sources-select-defaults"
+								class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Defaults</button>
+							<button type="button" id="sources-clear-all"
+								class="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300">Clear
+								All</button>
+						</div>
+					</details>
+				</div>
+
+				<div id="job-tracker-main">
+					<!-- Search Configuration: shown only when Backend = Koyeb (job-search-api) -->
+					<div id="job-search-config-section"
+						class="mb-6 p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 shadow-sm">
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
+							<span>⚙️</span> Search Configuration
+						</h2>
+						<p id="job-search-config-koyeb-hint"
+							class="text-xs text-gray-500 dark:text-gray-400 mb-4 hidden">Hugging Face (job-search-api)
+							uses <strong>Search term</strong>, <strong>Days</strong>, and <strong>Results per
+								site</strong> only.</p>
+						<div class="flex items-center justify-between mb-3 md:hidden">
+							<span class="text-xs text-gray-500 dark:text-gray-400">Advanced filters (optional)</span>
+							<button type="button" id="job-advanced-toggle"
+								class="px-3 py-1 rounded-full bg-primary/5 text-primary text-xs font-semibold">
+								Show advanced filters
+							</button>
+						</div>
+						<div id="job-search-advanced-body">
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
+								<!-- Search Term -->
+								<div class="md:col-span-2 lg:col-span-1">
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🔎
+										Search Term</label>
+									<input type="text" id="job-search-input" value="analyst"
+										placeholder="e.g., analyst, data analyst, product analyst"
+										class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+								</div>
+
+								<!-- Location -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">📍
+										Location</label>
+									<input type="text" id="job-location-input" value="Remote"
+										list="job-location-suggestions" placeholder="e.g., Remote, Pune, Mumbai"
+										class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+									<datalist id="job-location-suggestions"></datalist>
+								</div>
+
+								<!-- Country -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">🌍
+										Country (for Indeed/Glassdoor)</label>
+									<select id="job-country-select"
+										class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+										<option value="USA">USA</option>
+										<option value="India">India</option>
+										<option value="UK">UK</option>
+										<option value="Canada">Canada</option>
+										<option value="Australia">Australia</option>
+										<option value="Germany">Germany</option>
+										<option value="France">France</option>
+									</select>
+								</div>
+
+								<!-- Results Per Site Slider -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+										📊 Results per site: <span class="text-primary font-semibold"
+											id="results-wanted-display">50</span>
+									</label>
+									<div class="flex items-center gap-3">
+										<input type="range" id="results-wanted-slider" min="10" max="200" step="10"
+											value="50"
+											class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
+										<span
+											class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">10-200</span>
+									</div>
+								</div>
+
+								<!-- Days Old Slider -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+										⏰ Days old (max): <span class="text-primary font-semibold"
+											id="days-old-display">7</span>
+									</label>
+									<div class="flex items-center gap-3">
+										<input type="range" id="days-old-slider" min="1" max="30" step="1" value="7"
+											class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary">
+										<span
+											class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">1-30</span>
+									</div>
+								</div>
+
+								<!-- YOE filter (job-search-api supports server-side; Vercel ignores, UI filters locally where possible) -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+										🎯 Experience (YOE)
+									</label>
+									<div class="flex items-center gap-3">
+										<input type="number" id="job-yoe-min" min="0" max="20" value="1"
+											class="w-20 px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+											aria-label="Minimum years of experience">
+										<span class="text-xs text-gray-500 dark:text-gray-400">to</span>
+										<input type="number" id="job-yoe-max" min="0" max="20" value="3"
+											class="w-20 px-3 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+											aria-label="Maximum years of experience">
+										<span class="text-xs text-gray-500 dark:text-gray-400 flex-1">Default:
+											1–3</span>
+									</div>
+								</div>
+
+								<!-- Job Type -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">💼
+										Job Type</label>
+									<select id="job-type-select"
+										class="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+										<option value="">All types</option>
+										<option value="fulltime">Full-time</option>
+										<option value="parttime">Part-time</option>
+										<option value="contract">Contract</option>
+										<option value="internship">Internship</option>
+									</select>
+								</div>
+							</div>
+
+							<!-- Job Sites Multi-Select (moved to global #job-sources-panel above) -->
+							<div class="mb-4 hidden">
+								<div id="job-sites-multiselect"></div>
+							</div>
+
+							<!-- Checkboxes Row -->
+							<div class="flex flex-wrap items-center gap-4 mb-4">
+								<label class="flex items-center gap-2 cursor-pointer">
+									<input type="checkbox" id="job-remote-only" checked
+										class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+									<span class="text-sm text-gray-700 dark:text-gray-300">🏠 Remote jobs only</span>
+								</label>
+								<label class="flex items-center gap-2 cursor-pointer"
+									title="Enables slower Playwright-based sources like Naukri.">
+									<input type="checkbox" id="job-enable-headless"
+										class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+									<span class="text-sm text-gray-700 dark:text-gray-300">🧠 Headless scrapers
+										(slow)</span>
+								</label>
+								<label class="flex items-center gap-2 cursor-pointer">
+									<input type="checkbox" id="job-linkedin-description"
+										class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+									<span class="text-sm text-gray-700 dark:text-gray-300">📄 LinkedIn: Fetch full
+										descriptions (slower)</span>
+								</label>
+							</div>
+						</div>
+
+						<!-- Action Buttons (Koyeb: Search Jobs; Clear Filters is below for both backends) -->
+						<div
+							class="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+							<button type="button" id="job-refresh-btn"
+								class="px-6 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-white rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+								🔍 Search Jobs
+							</button>
+							<label
+								class="inline-flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+								<input type="checkbox" id="job-auto-refresh-toggle"
+									class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+								<span id="job-auto-refresh-label">Auto-refresh (5m)</span>
+							</label>
+							<span id="job-last-refresh-text" class="text-xs text-gray-500 dark:text-gray-400">Last
+								refresh: —</span>
+						</div>
+					</div>
+
+					<!-- Quick Filters Row (visible for both Koyeb and Vercel) -->
+					<div
+						class="quick-filters-row flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+						<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters:</span>
+						<select id="job-filter-source"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+							<option value="all">All Sources</option>
+							<option value="remoteok">RemoteOK</option>
+							<option value="remotive">Remotive</option>
+							<option value="weworkremotely">We Work Remotely</option>
+							<option value="jobscollider">Jobscollider</option>
+							<option value="wellfound">Wellfound</option>
+							<option value="indeed">Indeed</option>
+							<option value="workingnomads">Working Nomads</option>
+							<option value="hirist">Hirist</option>
+							<option value="naukri">Naukri</option>
+							<option value="stackoverflow">Stack Overflow</option>
+							<option value="linkedin">LinkedIn</option>
+							<option value="trueup">TrueUp</option>
+						</select>
+						<select id="job-filter-match"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+							<option value="all">All Matches</option>
+							<option value="high">High Match (80%+)</option>
+							<option value="medium">Medium Match (50-79%)</option>
+							<option value="low">Low Match (&lt;50%)</option>
+						</select>
+						<select id="job-filter-status"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+							<option value="all">All Status</option>
+							<option value="new">New</option>
 							<option value="applied">Applied</option>
 							<option value="interview">Interview</option>
-							<option value="offer">Offer</option>
 							<option value="rejected">Rejected</option>
+							<option value="offer">Offer</option>
 						</select>
-					</label>
-					<button type="button" id="planner-export-backup" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800" title="Exports planner + application statuses (recommended)">Backup JSON</button>
-					<button type="button" id="planner-export-json" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export JSON</button>
-					<button type="button" id="planner-export-csv" class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export CSV</button>
-				</div>
+						<select id="job-filter-role"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+							<option value="all">All roles</option>
+							<option value="analyst">Analyst</option>
+							<option value="scientist">Scientist</option>
+							<option value="engineer">Engineer</option>
+						</select>
+						<label
+							class="inline-flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+							<input type="checkbox" id="job-filter-new-only"
+								class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
+							<span>New only</span>
+						</label>
+						<input id="job-filter-exclude" type="text"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[190px]"
+							placeholder="Exclude: sales, intern, marketing" aria-label="Exclude keywords" />
+						<input id="job-filter-tags" type="text"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[160px]"
+							placeholder="Tags: sql, tableau" aria-label="Tag filter" />
+						<select id="job-filter-tag-mode"
+							class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[110px]">
+							<option value="any">Tag match: Any</option>
+							<option value="all">Tag match: All</option>
+						</select>
+						<button type="button" id="job-clear-filters-btn"
+							class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-sm">
+							Clear Filters
+						</button>
+						<div class="flex items-center gap-2 ml-auto w-full sm:w-auto">
+							<select id="job-filter-preset-select"
+								class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+								aria-label="Saved filter preset">
+								<option value="custom">Custom</option>
+							</select>
+							<input id="job-filter-preset-name" type="text"
+								class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary min-w-[160px]"
+								placeholder="Preset name" aria-label="Preset name" />
+							<button type="button" id="job-filter-preset-save"
+								class="px-3 py-1.5 text-xs rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-semibold transition-colors border border-primary/20">
+								Save
+							</button>
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+							<span id="job-stats-total">Loading jobs...</span>
+							<span id="job-stats-matched">—</span>
+							<span id="job-stats-applied">—</span>
+							<span id="job-stats-updated" class="text-xs text-gray-500 dark:text-gray-500">—</span>
+						</div>
+						<div class="text-xs text-gray-500 dark:text-gray-400">
+							<span id="job-stats-context">Feed: initializing...</span>
+						</div>
+						<div id="job-stats-diff"
+							class="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+							<span class="font-semibold text-gray-700 dark:text-gray-300">Changes since last
+								refresh:</span>
+							<span
+								class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-400/20">+<span
+									id="job-diff-added">0</span> added</span>
+							<span
+								class="px-2 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-300 border border-red-400/20">-<span
+									id="job-diff-removed">0</span> removed</span>
+							<button type="button" id="job-diff-view-btn"
+								class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-900/30 text-gray-700 dark:text-gray-200 text-[11px] font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 hidden">View</button>
+						</div>
+						<div id="job-stats-sources" class="flex flex-wrap items-center gap-2 text-xs"></div>
+					</div>
 			</header>
 
-			<!-- Summary row showing counts by status -->
-			<div id="planner-summary" class="flex flex-wrap items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
-				<span class="font-semibold text-gray-700 dark:text-gray-300">Summary:</span>
-				<span class="text-gray-600 dark:text-gray-400">
-					<span class="font-medium">Idea:</span> <span id="planner-count-idea" class="font-semibold text-primary">0</span>
-				</span>
-				<span class="text-gray-600 dark:text-gray-400">
-					<span class="font-medium">To apply:</span> <span id="planner-count-todo" class="font-semibold text-primary">0</span>
-				</span>
-				<span class="text-gray-600 dark:text-gray-400">
-					<span class="font-medium">Applied:</span> <span id="planner-count-applied" class="font-semibold text-primary">0</span>
-				</span>
-				<span class="text-gray-600 dark:text-gray-400">
-					<span class="font-medium">Interview:</span> <span id="planner-count-interview" class="font-semibold text-primary">0</span>
-				</span>
-				<span class="text-gray-600 dark:text-gray-400">
-					<span class="font-medium">Offer:</span> <span id="planner-count-offer" class="font-semibold text-primary">0</span>
-				</span>
-				<span class="text-gray-600 dark:text-gray-400">
-					<span class="font-medium">Rejected:</span> <span id="planner-count-rejected" class="font-semibold text-primary">0</span>
-				</span>
-				<span class="text-gray-600 dark:text-gray-400 ml-auto">
-					<span class="font-medium">Total:</span> <span id="planner-count-total" class="font-semibold text-primary">0</span>
-				</span>
+			<div id="job-new-banner"
+				class="hidden mb-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-3">
+				<div class="flex flex-wrap items-center justify-between gap-2">
+					<p id="job-new-banner-text" class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">No
+						new jobs yet.</p>
+					<div class="flex items-center gap-2">
+						<button type="button" id="job-new-banner-jump"
+							class="px-2.5 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Jump
+							to results</button>
+						<button type="button" id="job-new-banner-view"
+							class="px-2.5 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white/70 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40">View
+							changes</button>
+					</div>
+				</div>
 			</div>
 
-			<form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-				<div class="flex flex-col gap-1">
-					<label for="planner-title" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Role / title</label>
-					<input id="planner-title" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. Data Analyst – Product">
+			<div id="jobs-list-anchor">
+				<div id="job-loading" class="text-center py-12">
+					<p class="text-gray-500 dark:text-gray-400 mb-2">Loading jobs from multiple sources...</p>
+					<p class="text-xs text-gray-400 dark:text-gray-500" id="job-loading-detail">Fetching from RemoteOK,
+						Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri...</p>
 				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-company" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Company</label>
-					<input id="planner-company" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Company name">
+
+				<div id="job-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display: none;">
+					<!-- Job cards will be inserted here -->
 				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-link" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Job link (optional)</label>
-					<input id="planner-link" type="url" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="https://…">
+
+				<div id="job-empty" class="text-center py-12 hidden">
+					<p class="text-gray-500 dark:text-gray-400">No jobs found matching your filters.</p>
 				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-location" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Location / time zone</label>
-					<input id="planner-location" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. Remote – IST, Pune, EU only">
+
+				<div id="job-error"
+					class="text-center py-12 hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+					<p class="text-red-600 dark:text-red-400 font-semibold mb-2">Failed to load jobs</p>
+					<p class="text-sm text-red-500 dark:text-red-500" id="job-error-message"></p>
+					<button type="button" id="job-error-retry"
+						class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold">Retry</button>
 				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-source" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Source / search context</label>
-					<input id="planner-source" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. LinkedIn – 'data analyst remote'">
+			</div>
+
+			<!-- Job quick view modal -->
+			<div id="job-detail-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
+				aria-labelledby="job-detail-title" aria-hidden="true">
+				<div class="absolute inset-0 bg-black/50" id="job-detail-backdrop"></div>
+				<div class="absolute inset-0 flex items-center justify-center p-4">
+					<div
+						class="w-full max-w-2xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
+						<div
+							class="flex items-start justify-between gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
+							<div class="min-w-0">
+								<p class="text-xs text-gray-500 dark:text-gray-400" id="job-detail-source"></p>
+								<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate"
+									id="job-detail-title">Job details</h3>
+								<p class="text-sm text-gray-600 dark:text-gray-400" id="job-detail-company"></p>
+								<p class="text-xs text-gray-500 dark:text-gray-500" id="job-detail-meta"></p>
+							</div>
+							<button type="button" id="job-detail-close"
+								class="shrink-0 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-semibold"
+								aria-label="Close job details">Close</button>
+						</div>
+						<div class="p-4">
+							<div class="flex flex-wrap gap-2 mb-3" id="job-detail-tags"></div>
+							<p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line"
+								id="job-detail-description"></p>
+						</div>
+						<div
+							class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-800 flex-wrap">
+							<button type="button" id="job-detail-prep-interview"
+								class="text-sm px-3 py-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 rounded-lg font-semibold transition-colors border border-amber-400/40">🎤
+								Prep for interview</button>
+							<button type="button" id="job-detail-copy-chatgpt"
+								class="text-sm px-3 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 rounded-lg font-semibold transition-colors border border-emerald-400/40"
+								title="Copy JD + prompt and open ChatGPT/Gemini">📋 Copy for ChatGPT / Gemini</button>
+							<button type="button" id="job-detail-add-planner"
+								class="text-sm px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-semibold transition-colors">+
+								Planner</button>
+							<a id="job-detail-apply" href="#" target="_blank" rel="noopener"
+								class="text-sm px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-semibold">Apply</a>
+						</div>
+					</div>
 				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-status" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Status</label>
-					<select id="planner-status" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+			</div>
+
+			<!-- Job diff modal: added/removed since last refresh (local browser only) -->
+			<div id="job-diff-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
+				aria-label="Job changes since last refresh" aria-hidden="true">
+				<div class="absolute inset-0 bg-black/50" id="job-diff-backdrop"></div>
+				<div class="absolute inset-0 flex items-center justify-center p-4">
+					<div
+						class="w-full max-w-3xl rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
+						<div
+							class="flex items-start justify-between gap-4 p-4 border-b border-gray-200 dark:border-gray-800">
+							<div class="min-w-0">
+								<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Changes since last
+									refresh</h3>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">This compares the last
+									successful load in this browser vs the current one (same query + selected sources).
+								</p>
+							</div>
+							<button type="button" id="job-diff-close"
+								class="shrink-0 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-semibold"
+								aria-label="Close changes">Close</button>
+						</div>
+						<div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2">Added</p>
+								<ul id="job-diff-added-list" class="space-y-2 text-sm max-h-80 overflow-y-auto"></ul>
+							</div>
+							<div>
+								<p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">Removed</p>
+								<ul id="job-diff-removed-list" class="space-y-2 text-sm max-h-80 overflow-y-auto"></ul>
+							</div>
+						</div>
+						<div
+							class="p-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+							<span id="job-diff-meta">—</span>
+							<button type="button" id="job-diff-clear"
+								class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Reset
+								diff</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+	</div>
+	<!-- /#job-tracker-main -->
+
+	<!-- Application planner (Notion-style log, saved in this browser only) -->
+	<section class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
+		<header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+			<div>
+				<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Application planner</h2>
+				<p class="text-xs text-gray-500 dark:text-gray-400 max-w-xl">
+					Lightweight, Notion-style log for the jobs you care about. Everything is stored locally in this
+					browser (no backend).
+				</p>
+			</div>
+			<div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+				<label class="flex items-center gap-1">
+					<span>Search</span>
+					<input id="planner-search-input" type="text"
+						class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200"
+						placeholder="Title, company, notes…">
+				</label>
+				<label class="flex items-center gap-1">
+					<span>Status</span>
+					<select id="planner-filter-status"
+						class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200">
+						<option value="all">All</option>
 						<option value="idea">Idea</option>
 						<option value="todo">To apply</option>
 						<option value="applied">Applied</option>
@@ -978,93 +1266,218 @@
 						<option value="offer">Offer</option>
 						<option value="rejected">Rejected</option>
 					</select>
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-next-step" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Next step / follow-up date</label>
-					<input id="planner-next-step" type="date" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-applied-at" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Applied on (optional)</label>
-					<input id="planner-applied-at" type="date" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-priority" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Priority</label>
-					<select id="planner-priority" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-						<option value="medium">Medium</option>
-						<option value="high">High</option>
-						<option value="urgent">Urgent</option>
-						<option value="low">Low</option>
-					</select>
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-job-type" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Job type</label>
-					<select id="planner-job-type" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-						<option value="">Not set</option>
-						<option value="full-time">Full-time</option>
-						<option value="internship">Internship</option>
-						<option value="contract">Contract</option>
-						<option value="freelance">Freelance</option>
-					</select>
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-work-mode" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Work mode</label>
-					<select id="planner-work-mode" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-						<option value="">Not set</option>
-						<option value="remote">Remote</option>
-						<option value="hybrid">Hybrid</option>
-						<option value="on-site">On-site</option>
-					</select>
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-salary" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Salary / range (rough)</label>
-					<input id="planner-salary" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. 18–24 LPA, 60–70k EUR, N/A">
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-contact-name" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Contact person</label>
-					<input id="planner-contact-name" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Recruiter / hiring manager name">
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-contact-channel" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Contact channel</label>
-					<select id="planner-contact-channel" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-						<option value="">Not set</option>
-						<option value="linkedin">LinkedIn DM</option>
-						<option value="email">Email</option>
-						<option value="portal">Job portal</option>
-						<option value="referral">Referral</option>
-						<option value="other">Other</option>
-					</select>
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="planner-tags" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Tags</label>
-					<input id="planner-tags" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Comma-separated labels: e.g. product-analytics, SQL-heavy">
-				</div>
-				<div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
-					<label for="planner-outcome" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Outcome / reason (optional)</label>
-					<input id="planner-outcome" type="text" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="e.g. rejected (location mismatch), offer declined (comp)">
-				</div>
-				<div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
-					<label for="planner-notes" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Notes (interview log, penalties/grace time, etc.)</label>
-					<textarea id="planner-notes" rows="2" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200" placeholder="Short notes, who you talked to, next actions…"></textarea>
-				</div>
-				<div class="flex items-end">
-					<button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-semibold">Add to planner</button>
-				</div>
-			</form>
-
-			<div id="planner-empty" class="text-xs text-gray-500 dark:text-gray-400">
-				No planner entries yet. Add roles you actually want to track above.
+				</label>
+				<button type="button" id="planner-export-backup"
+					class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800"
+					title="Exports planner + application statuses (recommended)">Backup JSON</button>
+				<button type="button" id="planner-export-json"
+					class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export
+					JSON</button>
+				<button type="button" id="planner-export-csv"
+					class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800">Export
+					CSV</button>
 			</div>
-			<div id="planner-list" class="space-y-3 text-sm"></div>
-		</section>
+		</header>
+
+		<!-- Summary row showing counts by status -->
+		<div id="planner-summary"
+			class="flex flex-wrap items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
+			<span class="font-semibold text-gray-700 dark:text-gray-300">Summary:</span>
+			<span class="text-gray-600 dark:text-gray-400">
+				<span class="font-medium">Idea:</span> <span id="planner-count-idea"
+					class="font-semibold text-primary">0</span>
+			</span>
+			<span class="text-gray-600 dark:text-gray-400">
+				<span class="font-medium">To apply:</span> <span id="planner-count-todo"
+					class="font-semibold text-primary">0</span>
+			</span>
+			<span class="text-gray-600 dark:text-gray-400">
+				<span class="font-medium">Applied:</span> <span id="planner-count-applied"
+					class="font-semibold text-primary">0</span>
+			</span>
+			<span class="text-gray-600 dark:text-gray-400">
+				<span class="font-medium">Interview:</span> <span id="planner-count-interview"
+					class="font-semibold text-primary">0</span>
+			</span>
+			<span class="text-gray-600 dark:text-gray-400">
+				<span class="font-medium">Offer:</span> <span id="planner-count-offer"
+					class="font-semibold text-primary">0</span>
+			</span>
+			<span class="text-gray-600 dark:text-gray-400">
+				<span class="font-medium">Rejected:</span> <span id="planner-count-rejected"
+					class="font-semibold text-primary">0</span>
+			</span>
+			<span class="text-gray-600 dark:text-gray-400 ml-auto">
+				<span class="font-medium">Total:</span> <span id="planner-count-total"
+					class="font-semibold text-primary">0</span>
+			</span>
+		</div>
+
+		<form id="planner-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+			<div class="flex flex-col gap-1">
+				<label for="planner-title" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Role /
+					title</label>
+				<input id="planner-title" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="e.g. Data Analyst – Product">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-company"
+					class="text-xs font-semibold text-gray-600 dark:text-gray-300">Company</label>
+				<input id="planner-company" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="Company name">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-link" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Job link
+					(optional)</label>
+				<input id="planner-link" type="url"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="https://…">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-location" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Location /
+					time zone</label>
+				<input id="planner-location" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="e.g. Remote – IST, Pune, EU only">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-source" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Source /
+					search context</label>
+				<input id="planner-source" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="e.g. LinkedIn – 'data analyst remote'">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-status"
+					class="text-xs font-semibold text-gray-600 dark:text-gray-300">Status</label>
+				<select id="planner-status"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+					<option value="idea">Idea</option>
+					<option value="todo">To apply</option>
+					<option value="applied">Applied</option>
+					<option value="interview">Interview</option>
+					<option value="offer">Offer</option>
+					<option value="rejected">Rejected</option>
+				</select>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-next-step" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Next step
+					/ follow-up date</label>
+				<input id="planner-next-step" type="date"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-applied-at" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Applied
+					on (optional)</label>
+				<input id="planner-applied-at" type="date"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-priority"
+					class="text-xs font-semibold text-gray-600 dark:text-gray-300">Priority</label>
+				<select id="planner-priority"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+					<option value="medium">Medium</option>
+					<option value="high">High</option>
+					<option value="urgent">Urgent</option>
+					<option value="low">Low</option>
+				</select>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-job-type" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Job
+					type</label>
+				<select id="planner-job-type"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+					<option value="">Not set</option>
+					<option value="full-time">Full-time</option>
+					<option value="internship">Internship</option>
+					<option value="contract">Contract</option>
+					<option value="freelance">Freelance</option>
+				</select>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-work-mode" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Work
+					mode</label>
+				<select id="planner-work-mode"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+					<option value="">Not set</option>
+					<option value="remote">Remote</option>
+					<option value="hybrid">Hybrid</option>
+					<option value="on-site">On-site</option>
+				</select>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-salary" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Salary /
+					range (rough)</label>
+				<input id="planner-salary" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="e.g. 18–24 LPA, 60–70k EUR, N/A">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-contact-name" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Contact
+					person</label>
+				<input id="planner-contact-name" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="Recruiter / hiring manager name">
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-contact-channel"
+					class="text-xs font-semibold text-gray-600 dark:text-gray-300">Contact channel</label>
+				<select id="planner-contact-channel"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+					<option value="">Not set</option>
+					<option value="linkedin">LinkedIn DM</option>
+					<option value="email">Email</option>
+					<option value="portal">Job portal</option>
+					<option value="referral">Referral</option>
+					<option value="other">Other</option>
+				</select>
+			</div>
+			<div class="flex flex-col gap-1">
+				<label for="planner-tags" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Tags</label>
+				<input id="planner-tags" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="Comma-separated labels: e.g. product-analytics, SQL-heavy">
+			</div>
+			<div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
+				<label for="planner-outcome" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Outcome /
+					reason (optional)</label>
+				<input id="planner-outcome" type="text"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="e.g. rejected (location mismatch), offer declined (comp)">
+			</div>
+			<div class="flex flex-col gap-1 md:col-span-2 lg:col-span-3">
+				<label for="planner-notes" class="text-xs font-semibold text-gray-600 dark:text-gray-300">Notes
+					(interview log, penalties/grace time, etc.)</label>
+				<textarea id="planner-notes" rows="2"
+					class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-800 dark:text-gray-200"
+					placeholder="Short notes, who you talked to, next actions…"></textarea>
+			</div>
+			<div class="flex items-end">
+				<button type="submit"
+					class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm font-semibold">Add to
+					planner</button>
+			</div>
+		</form>
+
+		<div id="planner-empty" class="text-xs text-gray-500 dark:text-gray-400">
+			No planner entries yet. Add roles you actually want to track above.
+		</div>
+		<div id="planner-list" class="space-y-3 text-sm"></div>
+	</section>
 
 	</main>
 	</div>
 
 	<footer class="border-t border-gray-200 dark:border-gray-700 mt-12 py-6">
 		<div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-700 dark:text-gray-200 space-y-1">
-			<p>Standalone Playground · Job Tracker · <a href="https://telemetry.indevs.in" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
+			<p>Standalone Playground · Job Tracker · <a href="https://telemetry.indevs.in" target="_blank"
+					rel="noopener noreferrer" class="text-primary hover:underline">Status</a></p>
 			<p class="text-xs text-gray-500 dark:text-gray-400">© 2021–Present</p>
-			<p class="text-[11px] mt-2 text-gray-500 dark:text-gray-400">Credits: Jobs API (Vercel / Hugging Face), OMDb proxy. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
+			<p class="text-[11px] mt-2 text-gray-500 dark:text-gray-400">Credits: Jobs API (Vercel / Hugging Face), OMDb
+				proxy. <a href="./docs.html" class="text-primary hover:underline">Docs &amp; sitemap</a>.</p>
 		</div>
 	</footer>
 
@@ -1084,24 +1497,38 @@
 		<button type="button" id="global-music-pause" aria-label="Pause">⏸</button>
 		<button type="button" id="global-music-next" aria-label="Next">⏭</button>
 	</div> -->
-	<button type="button" id="assistant-btn" class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl flex items-center justify-center" aria-label="Assistant">
-		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+	<button type="button" id="assistant-btn"
+		class="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg hover:shadow-xl flex items-center justify-center"
+		aria-label="Assistant">
+		<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+			<path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z" />
+		</svg>
 	</button>
 	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
-	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Interview prep and assistant" aria-modal="true">
+	<div id="assistant-panel"
+		class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col"
+		role="dialog" aria-label="Interview prep and assistant" aria-modal="true">
 		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
 			<h3 class="font-semibold text-gray-800 dark:text-gray-100">Interview prep &amp; assistant</h3>
-			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close assistant">&#10005;</button>
+			<button type="button" id="assistant-close"
+				class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+				aria-label="Close assistant">&#10005;</button>
 		</div>
 		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"></div>
 		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
 			<div class="flex gap-2">
-				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm" placeholder="Ask anything or paste job details for interview prep…">
-				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium">Send</button>
+				<input type="text" id="assistant-input"
+					class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm"
+					placeholder="Ask anything or paste job details for interview prep…">
+				<button type="button" id="assistant-send"
+					class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium">Send</button>
 			</div>
 			<div class="flex flex-wrap gap-2 mt-3">
-				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold">Enable full chatbot (~80MB)</button>
-				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs">Clear</button>
+				<button type="button" id="assistant-enable-model"
+					class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold">Enable
+					full chatbot (~80MB)</button>
+				<button type="button" id="assistant-clear"
+					class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs">Clear</button>
 				<span id="assistant-mode-status" class="text-xs text-gray-500"></span>
 			</div>
 		</div>
@@ -1117,12 +1544,14 @@
 	<button type="button" id="global-dict-toggle" aria-label="Open dictionary">Dict</button>
 	<div id="global-dict-flyout">
 		<div class="global-dict-header">
-			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up" autocomplete="off">
+			<input id="global-dict-input" type="text" placeholder="Type a word…" aria-label="Word to look up"
+				autocomplete="off">
 			<button type="button" id="global-dict-search">Search</button>
 			<button type="button" id="global-dict-close" aria-label="Close">✕</button>
 		</div>
 		<div id="global-dict-body" class="global-dict-body"></div>
-		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google" style="display:none;">Search Google for more results</a>
+		<a id="global-dict-google" href="#" target="_blank" rel="noopener" class="global-dict-google"
+			style="display:none;">Search Google for more results</a>
 	</div>
 	<!-- <button type="button" id="global-yt-panel-toggle" aria-label="Open video feed">Video</button>
 	<div id="global-yt-panel">
@@ -1160,4 +1589,5 @@
 	<script src="../assets/js/jobs.js" defer></script>
 	<script src="../assets/js/register-sw.js" defer></script>
 </body>
+
 </html>

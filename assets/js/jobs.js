@@ -757,10 +757,7 @@
 	var EMBED_LOAD_TIMEOUT_MS = 8000;
 	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
 	function getJobSearchApiEmbedUrl() {
-		var proxy = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : '';
-		if (proxy && proxyUrlLooksLikeJobSearchApi(proxy)) return proxy + '/ui/';
-		var base = getJobSearchApiBase();
-		return base ? base + '/ui/' : '';
+		return 'https://job-search-api-w042.onrender.com/ui/';
 	}
 	function setupRailwayUiEmbedToggle() {
 		var fallbackLink = document.getElementById('railway-ui-embed-fallback-link');
