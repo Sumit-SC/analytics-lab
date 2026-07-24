@@ -631,9 +631,9 @@
 		function updateApiBackend(backend) {
 			if (backend === 'koyeb') {
 				window.JOB_PROXY_URL = getJobSearchApiBase();
-				if (statusEl) statusEl.textContent = '✓ Hugging Face';
+				if (statusEl) statusEl.textContent = '✓ Render Backend';
 			} else if (backend === 'rssjobs') {
-				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+				window.JOB_PROXY_URL = getJobSearchApiBase();
 				if (statusEl) statusEl.textContent = '✓ RSSJobs (Direct)';
 			} else {
 				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
@@ -650,14 +650,16 @@
 		if (rssjobsRadio) rssjobsRadio.addEventListener('change', function () { if (rssjobsRadio.checked) updateApiBackend('rssjobs'); });
 		updateApiBackend(savedBackend);
 	}
-
+ 
 	// Koyeb (job-search-api): show full search config. Vercel: show vercel-search-section + sources panel.
 	function applyBackendVisibility(backend) {
 		var searchConfig = document.getElementById('job-search-config-section');
 		var vercelSearch = document.getElementById('vercel-search-section');
+		var rssjobsSearch = document.getElementById('rssjobs-search-section');
 		var sourcesPanel = document.getElementById('job-sources-panel');
 		if (searchConfig) searchConfig.classList.toggle('hidden', backend !== 'koyeb');
 		if (vercelSearch) vercelSearch.classList.toggle('hidden', backend !== 'vercel');
+		if (rssjobsSearch) rssjobsSearch.classList.toggle('hidden', backend !== 'rssjobs');
 		if (sourcesPanel) sourcesPanel.classList.toggle('hidden', false);
 	}
 
@@ -968,6 +970,42 @@
 
 	// Setup event listeners
 	function setupEventListeners() {
+		var toggleBtn = document.getElementById('toggle-external-boards');
+		var collapsedDiv = document.getElementById('external-boards-collapsed');
+		if (toggleBtn && collapsedDiv) {
+			toggleBtn.addEventListener('click', function () {
+				if (collapsedDiv.classList.contains('hidden')) {
+					collapsedDiv.classList.remove('hidden');
+					toggleBtn.innerHTML = 'Less Boards 🔼';
+				} else {
+					collapsedDiv.classList.add('hidden');
+					toggleBtn.innerHTML = 'More Boards 🔽';
+				}
+			});
+		}
+
+		var rssjobsGenBtn = document.getElementById('rssjobs-generate-btn');
+		var rssjobsFetchBtn = document.getElementById('rssjobs-fetch-btn');
+		var rssjobsPreviewBox = document.getElementById('rssjobs-preview-box');
+		var rssjobsDirectLink = document.getElementById('rssjobs-direct-link');
+		if (rssjobsGenBtn && rssjobsPreviewBox && rssjobsDirectLink) {
+			rssjobsGenBtn.addEventListener('click', function () {
+				var kw = document.getElementById('rssjobs-keywords').value.trim() || 'data analyst';
+				var loc = document.getElementById('rssjobs-location').value.trim() || 'remote';
+				var directUrl = "https://rssjobs.app/feeds?keywords=" + encodeURIComponent(kw) + "&location=" + encodeURIComponent(loc);
+				rssjobsDirectLink.href = directUrl;
+				rssjobsDirectLink.textContent = directUrl;
+				rssjobsPreviewBox.classList.remove('hidden');
+			});
+		}
+		if (rssjobsFetchBtn) {
+			rssjobsFetchBtn.addEventListener('click', function () {
+				var kw = document.getElementById('rssjobs-keywords').value.trim() || 'data analyst';
+				var loc = document.getElementById('rssjobs-location').value.trim() || 'remote';
+				fetchRssJobsFromRssjobsApp(kw, loc);
+			});
+		}
+
 		var searchInput = document.getElementById('job-search-input');
 		var filterSource = document.getElementById('job-filter-source');
 		var filterMatch = document.getElementById('job-filter-match');
