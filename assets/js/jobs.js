@@ -1015,6 +1015,42 @@
 				fetchAllJobs(true); // Force refresh - triggers scraping
 			});
 		}
+		var notifyTgBtn = document.getElementById('job-notify-tg-btn');
+		if (notifyTgBtn) {
+			notifyTgBtn.addEventListener('click', function () {
+				var base = getJobSearchApiBase();
+				if (!base) {
+					alert('Cannot trigger Telegram notifications: No Render API base URL is set.');
+					return;
+				}
+				notifyTgBtn.disabled = true;
+				var oldText = notifyTgBtn.innerHTML;
+				notifyTgBtn.innerHTML = '⌛ Sending...';
+				fetch(base + '/api/notify-recent', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+				.then(function (res) {
+					return res.json().catch(function () { return { ok: false, error: 'Non-JSON response' }; });
+				})
+				.then(function (data) {
+					notifyTgBtn.disabled = false;
+					notifyTgBtn.innerHTML = oldText;
+					if (data && data.ok) {
+						alert('✅ Telegram Alert Sent! Successfully posted ' + (data.count || 0) + ' new jobs to your topics.');
+					} else {
+						alert('❌ Failed to send alerts: ' + ((data && data.error) || 'Unknown error'));
+					}
+				})
+				.catch(function (err) {
+					notifyTgBtn.disabled = false;
+					notifyTgBtn.innerHTML = oldText;
+					alert('❌ Network error: ' + err.message);
+				});
+			});
+		}
 	}
 
 	var JOB_FILTER_PRESETS_KEY = 'job_filter_presets_v1';
