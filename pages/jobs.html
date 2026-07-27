@@ -1189,18 +1189,64 @@
 			</div>
 
 			<div id="jobs-list-anchor">
-				<div id="job-loading" class="text-center py-12">
-					<p class="text-gray-500 dark:text-gray-400 mb-2">Loading jobs from multiple sources...</p>
-					<p class="text-xs text-gray-400 dark:text-gray-500" id="job-loading-detail">Fetching from RemoteOK,
-						Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri...</p>
+				<!-- Tab Controls -->
+				<div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+					<button type="button" id="tab-jobs-list" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-primary text-primary focus:outline-none transition-all">
+						📁 Job Listings
+					</button>
+					<button type="button" id="tab-jobs-stats" class="px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-all">
+						📊 Stats Dashboard
+					</button>
 				</div>
 
-				<div id="job-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display: none;">
-					<!-- Job cards will be inserted here -->
+				<!-- Panel: Job Listings -->
+				<div id="panel-jobs-list">
+					<div id="job-loading" class="text-center py-12">
+						<p class="text-gray-500 dark:text-gray-400 mb-2">Loading jobs from multiple sources...</p>
+						<p class="text-xs text-gray-400 dark:text-gray-500" id="job-loading-detail">Fetching from RemoteOK,
+							Remotive, WeWorkRemotely, Jobscollider, Wellfound, Indeed, WorkingNomads, Hirist, Naukri...</p>
+					</div>
+
+					<div id="job-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display: none;">
+						<!-- Job cards will be inserted here -->
+					</div>
+
+					<div id="job-empty" class="text-center py-12 hidden">
+						<p class="text-gray-500 dark:text-gray-400">No jobs found matching your filters.</p>
+					</div>
 				</div>
 
-				<div id="job-empty" class="text-center py-12 hidden">
-					<p class="text-gray-500 dark:text-gray-400">No jobs found matching your filters.</p>
+				<!-- Panel: Stats Dashboard -->
+				<div id="panel-jobs-stats" class="hidden space-y-6">
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+						<div class="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
+							<h4 class="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Scraped (24h)</h4>
+							<p id="stats-card-scraped" class="text-3xl font-extrabold mt-2 text-primary">0</p>
+						</div>
+						<div class="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
+							<h4 class="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">RSS Checks (24h)</h4>
+							<p id="stats-card-rss" class="text-3xl font-extrabold mt-2 text-primary">0</p>
+						</div>
+						<div class="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
+							<h4 class="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Scraper Success Rate</h4>
+							<p id="stats-card-success" class="text-3xl font-extrabold mt-2 text-primary">100%</p>
+						</div>
+					</div>
+
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+						<div class="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+							<h3 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-4">Jobs Distribution by Source</h3>
+							<div class="relative w-full h-[320px] flex items-center justify-center">
+								<canvas id="chart-jobs-source"></canvas>
+							</div>
+						</div>
+						<div class="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+							<h3 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-4">Jobs Distribution by Role Category</h3>
+							<div class="relative w-full h-[320px] flex items-center justify-center">
+								<canvas id="chart-jobs-role"></canvas>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<div id="job-error"
