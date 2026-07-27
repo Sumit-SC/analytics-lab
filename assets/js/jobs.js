@@ -309,6 +309,7 @@
 		setupEventListeners();
 		setupSavedFilterPresets();
 		setupAutoRefreshUi();
+		setupStatsDashboard();
 		if (!isMobileViewport()) {
 			fetchAllJobs();
 		} else {
@@ -4156,6 +4157,200 @@
 				openBtn.classList.add('hidden');
 			});
 		}
+	}
+
+	var chartsLoaded = false;
+	var sourceChart = null;
+	var roleChart = null;
+
+	function loadChartJs(callback) {
+		if (window.Chart) {
+			if (callback) callback();
+			return;
+		}
+		var s = document.createElement('script');
+		s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+		s.onload = function() {
+			if (callback) callback();
+		};
+		s.onerror = function() {
+			console.error('Failed to load Chart.js');
+		};
+		document.body.appendChild(s);
+	}
+
+	function setupStatsDashboard() {
+		var tabList = document.getElementById('tab-jobs-list');
+		var tabStats = document.getElementById('tab-jobs-stats');
+		var panelList = document.getElementById('panel-jobs-list');
+		var panelStats = document.getElementById('panel-jobs-stats');
+
+		if (!tabList || !tabStats || !panelList || !panelStats) return;
+
+		function switchTab(target) {
+			if (target === 'stats') {
+				tabList.className = 'px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-all';
+				tabStats.className = 'px-5 py-2.5 text-sm font-semibold border-b-2 border-primary text-primary focus:outline-none transition-all';
+				panelList.classList.add('hidden');
+				panelStats.classList.remove('hidden');
+				renderStatsDashboard();
+			} else {
+				tabStats.className = 'px-5 py-2.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-all';
+				tabList.className = 'px-5 py-2.5 text-sm font-semibold border-b-2 border-primary text-primary focus:outline-none transition-all';
+				panelStats.classList.add('hidden');
+				panelList.classList.remove('hidden');
+			}
+		}
+
+		tabList.addEventListener('click', function() { switchTab('list'); });
+		tabStats.addEventListener('click', function() { switchTab('stats'); });
+	}
+
+	function renderStatsDashboard() {
+		loadChartJs(function() {
+			fetchAndRenderChartData();
+		});
+	}
+
+	function fetchAndRenderChartData() {
+		var base = getJobSearchApiBase();
+		if (base) {
+			fetch(base + '/stats')
+				.then(function(r) { return r.json(); })
+				.then(function(data) {
+					if (data && data.ok) {
+						document.getElementById('stats-card-scraped').textContent = data.daily_scraped_jobs || '0';
+						document.getElementById('stats-card-rss').textContent = data.total_rss_checks_24h || '0';
+						document.getElementById('stats-card-success').textContent = data.success_rate_24h != null ? (data.success_rate_24h.toFixed(1) + '%') : '100%';
+					}
+				})
+				.catch(function(e) {
+					console.warn('Unable to query live stats from Go backend:', e);
+				})
+				.finally(function() {
+					buildLocalDataCharts();
+				});
+		} else {
+			buildLocalDataCharts();
+		}
+	}
+
+	function buildLocalDataCharts() {
+		var sourceCounts = {};
+		var roleCounts = {
+			'Data Analyst': 0,
+			'Data Engineer': 0,
+			'Data Scientist / AI': 0,
+			'Software Developer': 0,
+			'Other': 0
+		};
+
+		allJobs.forEach(function(j) {
+			var src = j.source || 'Other';
+			if (src.indexOf('jobspy_') === 0) src = src.replace('jobspy_', '');
+			sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+
+			var title = (j.title || '').toLowerCase();
+			if (title.indexOf('analyst') !== -1 || title.indexOf('bi') !== -1 || title.indexOf('tableau') !== -1) {
+				roleCounts['Data Analyst']++;
+			} else if (title.indexOf('engineer') !== -1 && (title.indexOf('data') !== -1 || title.indexOf('etl') !== -1 || title.indexOf('pipeline') !== -1)) {
+				roleCounts['Data Engineer']++;
+			} else if (title.indexOf('scientist') !== -1 || title.indexOf('ai') !== -1 || title.indexOf('ml') !== -1 || title.indexOf('learning') !== -1) {
+				roleCounts['Data Scientist / AI']++;
+			} else if (title.indexOf('developer') !== -1 || title.indexOf('software') !== -1 || title.indexOf('frontend') !== -1 || title.indexOf('backend') !== -1) {
+				roleCounts['Software Developer']++;
+			} else {
+				roleCounts['Other']++;
+			}
+		});
+
+		if (document.getElementById('stats-card-scraped').textContent === '0' || document.getElementById('stats-card-scraped').textContent === '-') {
+			document.getElementById('stats-card-scraped').textContent = allJobs.length;
+			document.getElementById('stats-card-rss').textContent = Object.keys(sourceCounts).length;
+		}
+
+		var sourceLabels = Object.keys(sourceCounts);
+		var sourceData = Object.values(sourceCounts);
+
+		var roleLabels = Object.keys(roleCounts);
+		var roleData = Object.values(roleCounts);
+
+		var isDark = document.documentElement.classList.contains('dark');
+		var textColor = isDark ? '#94a3b8' : '#475569';
+		var gridColor = isDark ? '#334155' : '#e2e8f0';
+
+		var ctxSource = document.getElementById('chart-jobs-source').getContext('2d');
+		if (sourceChart) sourceChart.destroy();
+		sourceChart = new Chart(ctxSource, {
+			type: 'doughnut',
+			data: {
+				labels: sourceLabels,
+				datasets: [{
+					data: sourceData,
+					backgroundColor: [
+						'#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'
+					],
+					borderWidth: isDark ? 2 : 1,
+					borderColor: isDark ? '#1e293b' : '#ffffff'
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: {
+							color: textColor
+						}
+					}
+				}
+			}
+		});
+
+		var ctxRole = document.getElementById('chart-jobs-role').getContext('2d');
+		if (roleChart) roleChart.destroy();
+		roleChart = new Chart(ctxRole, {
+			type: 'bar',
+			data: {
+				labels: roleLabels,
+				datasets: [{
+					label: 'Listings Count',
+					data: roleData,
+					backgroundColor: '#6366f1',
+					borderRadius: 6
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: false
+					}
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						ticks: {
+							precision: 0,
+							color: textColor
+						},
+						grid: {
+							color: gridColor
+						}
+					},
+					x: {
+						ticks: {
+							color: textColor
+						},
+						grid: {
+							display: false
+						}
+					}
+				}
+			}
+		});
 	}
 
 	// Initialize on DOM ready
