@@ -637,7 +637,7 @@
 				window.JOB_PROXY_URL = getJobSearchApiBase();
 				if (statusEl) statusEl.textContent = '✓ RSSJobs (Direct)';
 			} else {
-				window.JOB_PROXY_URL = 'https://playground-serveless.vercel.app';
+				window.JOB_PROXY_URL = 'https://job-search-backend-vercel.vercel.app';
 				if (statusEl) statusEl.textContent = '✓ Vercel';
 			}
 			localStorage.setItem('job_tracker_api_backend', backend);
@@ -1604,7 +1604,7 @@
 		var rssjobsRadio = document.getElementById('api-backend-rssjobs');
 		var isKoyeb = (koyebRadio && koyebRadio.checked);
 		var isRssjobs = (rssjobsRadio && rssjobsRadio.checked);
-		if (!proxyUrl && (vercelRadio && vercelRadio.checked || rssjobsRadio && rssjobsRadio.checked)) proxyUrl = 'https://playground-serveless.vercel.app';
+		if (!proxyUrl && (vercelRadio && vercelRadio.checked || rssjobsRadio && rssjobsRadio.checked)) proxyUrl = 'https://job-search-backend-vercel.vercel.app';
 		if (!proxyUrl && isKoyeb) proxyUrl = getJobSearchApiBase();
 		
 		var urlParams = new URLSearchParams(window.location.search);

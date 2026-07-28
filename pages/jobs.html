@@ -25,7 +25,7 @@
 		// job-search-api (FastAPI): Uses /jobs (cached) and /refresh (POST, scrapes fresh)
 		// Default to the secure Vercel backend proxy for private Hugging Face Space:
 		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://job-search-api-go.onrender.com';
-		// Default (Vercel): window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://playground-serveless.vercel.app';
+		// Default (Vercel): window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://job-search-backend-vercel.vercel.app';
 		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
 		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
 		var __isLocalhost = false;
@@ -36,7 +36,7 @@
 		if (__backendParam && typeof __backendParam === 'string') {
 			window.JOB_PROXY_URL = __backendParam.replace(/\/$/, '');
 		} else {
-			window.JOB_PROXY_URL = window.JOB_PROXY_URL || (__isLocalhost ? '' : 'https://playground-serveless.vercel.app');
+			window.JOB_PROXY_URL = window.JOB_PROXY_URL || (__isLocalhost ? '' : 'https://job-search-backend-vercel.vercel.app');
 		}
 	</script>
 	<style>
