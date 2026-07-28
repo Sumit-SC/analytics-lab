@@ -767,7 +767,7 @@
 	var EMBED_LOAD_TIMEOUT_MS = 8000;
 	var EMBED_BANNER_DISMISS_KEY = 'jobs_embed_banner_dismissed';
 	function getJobSearchApiEmbedUrl() {
-		return 'https://job-search-api-w042.onrender.com/ui/';
+		return 'https://job-search-api-go.onrender.com/ui/';
 	}
 	function setupRailwayUiEmbedToggle() {
 		var fallbackLink = document.getElementById('railway-ui-embed-fallback-link');
