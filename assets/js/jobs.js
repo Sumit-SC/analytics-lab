@@ -215,6 +215,15 @@
 		var timeoutId = setTimeout(function () { controller.abort(); }, timeoutMs);
 		var opts = Object.assign({}, options || {});
 		opts.signal = controller.signal;
+
+		// Automatically attach API Key header or query param if present in localStorage or URL
+		try {
+			var savedKey = localStorage.getItem('job_api_key') || new URLSearchParams(window.location.search).get('key');
+			if (savedKey) {
+				opts.headers = Object.assign({}, opts.headers || {}, { 'X-API-Key': savedKey });
+			}
+		} catch (e) {}
+
 		return fetch(url, opts).then(
 			function (r) {
 				clearTimeout(timeoutId);
@@ -602,13 +611,15 @@
 	
 		// Base URL for job-search-api (Koyeb, local, etc.) — set window.JOB_SEARCH_API_BASE in jobs.html
 	function getJobSearchApiBase() {
-		if (typeof window === 'undefined' || window.JOB_SEARCH_API_BASE == null || window.JOB_SEARCH_API_BASE === '') return '';
-		return String(window.JOB_SEARCH_API_BASE).replace(/\/$/, '');
+		if (typeof window !== 'undefined' && window.JOB_SEARCH_API_BASE) {
+			return String(window.JOB_SEARCH_API_BASE).replace(/\/$/, '');
+		}
+		return 'https://job-search-api-go.onrender.com';
 	}
 	function proxyUrlLooksLikeJobSearchApi(proxyUrl) {
 		if (!proxyUrl) return false;
 		var p = String(proxyUrl).toLowerCase();
-		return p.indexOf('koyeb.app') !== -1 || p.indexOf('railway.app') !== -1
+		return p.indexOf('koyeb.app') !== -1 || p.indexOf('railway.app') !== -1 || p.indexOf('onrender.com') !== -1
 			|| p.indexOf('localhost') !== -1 || p.indexOf('127.0.0.1') !== -1
 			|| p.indexOf('hf.space') !== -1 || p.indexOf('jobs-proxy') !== -1;
 	}
