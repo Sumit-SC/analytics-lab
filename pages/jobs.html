@@ -24,7 +24,8 @@
 		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
 		// job-search-api (FastAPI): Uses /jobs (cached) and /refresh (POST, scrapes fresh)
 		// Default to the secure Vercel backend proxy for private Hugging Face Space:
-		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://job-search-api-go.onrender.com';
+		// Default to live Koyeb deployment URL (theoretical-brigida-mitsu96-88a48b04.koyeb.app):
+		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://theoretical-brigida-mitsu96-88a48b04.koyeb.app';
 		// Default (Vercel): window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://job-search-backend-vercel.vercel.app';
 		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
 		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
@@ -692,8 +693,6 @@
 										class="text-primary hover:underline">Naukri (India)</a></li>
 								<li><a href="https://www.trueup.io/job-boards" target="_blank" rel="noopener"
 										class="text-primary hover:underline">TrueUp · job boards</a></li>
-								<li><a href="https://rssjobs.app" target="_blank" rel="noopener"
-										class="text-primary hover:underline">rssjobs.app · Create custom feed</a></li>
 							</ul>
 						</div>
 
@@ -1169,6 +1168,25 @@
 								class="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-900/30 text-gray-700 dark:text-gray-200 text-[11px] font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 hidden">View</button>
 						</div>
 						<div id="job-stats-sources" class="flex flex-wrap items-center gap-2 text-xs"></div>
+						<!-- Dynamic Interactive Analytics Dashboard Widget -->
+						<div id="job-analytics-chart-container" class="mt-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/50 shadow-sm">
+							<div class="flex items-center justify-between mb-3">
+								<h3 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+									<span>📊</span> Dynamic BI Job Analytics (Updates Live with Filters)
+								</h3>
+								<span id="chart-total-badge" class="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary">0 Active Listings</span>
+							</div>
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div>
+									<p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-2">Location Stream Distribution</p>
+									<div id="chart-location-bars" class="space-y-1.5 min-h-[100px]"></div>
+								</div>
+								<div>
+									<p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-2">Source Engine Breakdown</p>
+									<div id="chart-source-bars" class="space-y-1.5 min-h-[100px]"></div>
+								</div>
+							</div>
+						</div>
 					</div>
 			</header>
 
