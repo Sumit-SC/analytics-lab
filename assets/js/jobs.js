@@ -6,13 +6,16 @@
 		{ label: 'Analyst (any)', query: 'analyst' },
 		{ label: 'Data Analyst', query: 'data analyst' },
 		{ label: 'Senior Data Analyst', query: 'senior data analyst' },
+		{ label: 'Data Engineer', query: 'data engineer' },
+		{ label: 'Python Developer', query: 'python developer' },
+		{ label: 'Software Engineer', query: 'software engineer' },
 		{ label: 'Business Analyst', query: 'business analyst' },
 		{ label: 'Product Analyst', query: 'product analyst' },
 		{ label: 'BI / Business Intelligence', query: 'business intelligence analyst' },
 		{ label: 'Analytics Engineer', query: 'analytics engineer' },
 		{ label: 'Data Scientist', query: 'data scientist' },
 		{ label: 'Senior Data Scientist', query: 'senior data scientist' },
-		{ label: 'ML Engineer', query: 'machine learning engineer' },
+		{ label: 'ML / AI Engineer', query: 'machine learning engineer' },
 		{ label: 'Junior / Associate Data Scientist', query: 'junior data scientist' },
 		{ label: 'Decision Scientist', query: 'decision scientist' },
 		{ label: 'Financial Analyst', query: 'financial analyst' },
@@ -3668,7 +3671,7 @@
 		renderJobs();
 	}
 
-	// Update statistics
+	// Update statistics & BI analytics graphs
 	function updateStats() {
 		var totalEl = document.getElementById('job-stats-total');
 		var matchedEl = document.getElementById('job-stats-matched');
@@ -3685,6 +3688,60 @@
 			var appliedCount = filteredJobs.filter(function (j) { return applications[j.id] && applications[j.id] !== 'new'; }).length;
 			appliedEl.textContent = appliedCount + ' tracked';
 		}
+		renderDynamicAnalyticsCharts();
+	}
+
+	function renderDynamicAnalyticsCharts() {
+		var locContainer = document.getElementById('chart-location-bars');
+		var srcContainer = document.getElementById('chart-source-bars');
+		var badgeEl = document.getElementById('chart-total-badge');
+		if (!locContainer || !srcContainer) return;
+
+		if (badgeEl) badgeEl.textContent = filteredJobs.length + ' Active Listings';
+
+		if (!filteredJobs || filteredJobs.length === 0) {
+			locContainer.innerHTML = '<p class="text-xs text-gray-400">No matching data</p>';
+			srcContainer.innerHTML = '<p class="text-xs text-gray-400">No matching data</p>';
+			return;
+		}
+
+		var locCounts = {};
+		var srcCounts = {};
+		filteredJobs.forEach(function (j) {
+			var loc = String(j.location || 'Remote').trim();
+			var src = String(j.source || 'other').trim();
+			locCounts[loc] = (locCounts[loc] || 0) + 1;
+			srcCounts[src] = (srcCounts[src] || 0) + 1;
+		});
+
+		var maxCount = filteredJobs.length;
+
+		// Render Location distribution bars
+		var topLocs = Object.keys(locCounts).sort(function (a, b) { return locCounts[b] - locCounts[a]; }).slice(0, 5);
+		var locHtml = topLocs.map(function (loc) {
+			var cnt = locCounts[loc];
+			var pct = Math.round((cnt / maxCount) * 100);
+			return '<div class="text-xs">' +
+				'<div class="flex justify-between mb-0.5"><span class="font-medium text-gray-700 dark:text-gray-300">' + escapeHtml(loc) + '</span><span class="text-gray-500">' + cnt + ' (' + pct + '%)</span></div>' +
+				'<div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">' +
+				'<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: ' + pct + '%"></div>' +
+				'</div></div>';
+		}).join('');
+		locContainer.innerHTML = locHtml;
+
+		// Render Source distribution bars
+		var topSrcs = Object.keys(srcCounts).sort(function (a, b) { return srcCounts[b] - srcCounts[a]; }).slice(0, 5);
+		var srcHtml = topSrcs.map(function (src) {
+			var cnt = srcCounts[src];
+			var pct = Math.round((cnt / maxCount) * 100);
+			var label = sourceDisplayName(src);
+			return '<div class="text-xs">' +
+				'<div class="flex justify-between mb-0.5"><span class="font-medium text-gray-700 dark:text-gray-300">' + escapeHtml(label) + '</span><span class="text-gray-500">' + cnt + ' (' + pct + '%)</span></div>' +
+				'<div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">' +
+				'<div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: ' + pct + '%"></div>' +
+				'</div></div>';
+		}).join('');
+		srcContainer.innerHTML = srcHtml;
 	}
 	
 	// Friendly display name for source id (e.g. hiring_cafe -> Hiring.cafe)
@@ -3826,7 +3883,8 @@
 			}
 			sourceInfo += '</div>';
 			html += sourceInfo;
-			html += '<div class="flex items-center gap-2">';
+			html += '<div class="flex items-center gap-2 flex-wrap">';
+			html += '<button type="button" class="job-send-tg-btn text-xs px-2 py-1 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 rounded font-semibold transition-colors flex items-center gap-1" data-job-id="' + job.id + '" title="Share listing directly to Telegram">✈️ Telegram</button>';
 			html += '<button type="button" class="job-details-btn text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" data-job-id="' + job.id + '" title="Quick view">Details</button>';
 			html += '<button type="button" class="job-prep-chatgpt-btn text-xs px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Copy JD + prompt and open ChatGPT/Gemini">Prepare</button>';
 			html += '<button type="button" class="job-send-to-prep-btn text-xs px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Send JD to Interview Prep assistant for mock questions and tips">Interview Prep</button>';
@@ -3852,6 +3910,15 @@
 			applyFilters(); // Re-render to update stats
 		};
 		jobListEl.onclick = function (event) {
+			var tgBtn = event.target.closest('.job-send-tg-btn');
+			if (tgBtn) {
+				var tgJob = jobById[tgBtn.getAttribute('data-job-id')];
+				if (!tgJob) return;
+				var text = '📢 New Job Listing Found!\n\n💼 Role: ' + (tgJob.title || '') + '\n🏢 Company: ' + (tgJob.company || '') + '\n📍 Location: ' + (tgJob.location || '') + '\n\n🔗 Apply: ' + (tgJob.url || '');
+				var tgShareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(tgJob.url || '') + '&text=' + encodeURIComponent(text);
+				window.open(tgShareUrl, '_blank', 'noopener');
+				return;
+			}
 			var prepBtn = event.target.closest('.job-prep-chatgpt-btn');
 			if (prepBtn) {
 				var prepJob = jobById[prepBtn.getAttribute('data-job-id')];

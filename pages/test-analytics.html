@@ -8,10 +8,10 @@
         // ---- Service URL config ----
         // Vercel jobs control plane
         window.JOB_PROXY_URL        = window.JOB_PROXY_URL        || 'https://job-search-backend-vercel.vercel.app';
-        // Render — Go Bot + REST API
-        window.JOB_SEARCH_API_BASE  = window.JOB_SEARCH_API_BASE  || 'https://job-search-api-go.onrender.com';
-        // Render — Python (FastAPI) scraper
-        window.PYTHON_API_BASE      = window.PYTHON_API_BASE       || 'https://job-search-api-python.onrender.com';
+        // Koyeb — Unified Go + Python Container Engine
+        window.JOB_SEARCH_API_BASE  = window.JOB_SEARCH_API_BASE  || 'https://theoretical-brigida-mitsu96-88a48b04.koyeb.app';
+        // Koyeb — Python API
+        window.PYTHON_API_BASE      = window.PYTHON_API_BASE       || 'https://theoretical-brigida-mitsu96-88a48b04.koyeb.app';
         // playground-serveless OMDb proxy (separate legacy project)
         window.OMDB_PROXY_URL       = window.OMDB_PROXY_URL        || 'https://playground-serveless.vercel.app';
     </script>
@@ -56,7 +56,12 @@
     <!-- ───────────────────────── CLOUDFLARE ───────────────────────── -->
     <div class="section">
         <h2>☁️ Cloudflare — Analytics Worker &amp; D1 <span class="badge badge-cf">CF Worker</span></h2>
-        <p class="section-meta">Ingest + dashboard. Worker base: <span class="url-chip" id="cf-base">—</span></p>
+        <p class="section-meta">Ingest + dashboard. Worker base: 
+            <details style="display:inline-block;">
+                <summary style="cursor:pointer;" class="url-chip">👁️ Show / Hide Endpoint URL</summary>
+                <span class="url-chip" id="cf-base">—</span>
+            </details>
+        </p>
         <div class="api-row">
             <span class="api-name">Health check</span>
             <span class="api-desc">GET /health — uptime probe</span>
@@ -75,7 +80,12 @@
     <!-- ───────────────────────── VERCEL JOBS ───────────────────────── -->
     <div class="section">
         <h2>▲ Vercel — Jobs Control Plane <span class="badge badge-vercel">Vercel Serverless</span></h2>
-        <p class="section-meta">Jobs proxy, snapshot &amp; webhook router. Base: <span class="url-chip" id="vercel-jobs-base">—</span></p>
+        <p class="section-meta">Jobs proxy, snapshot &amp; webhook router. Base: 
+            <details style="display:inline-block;">
+                <summary style="cursor:pointer;" class="url-chip">👁️ Show / Hide Endpoint URL</summary>
+                <span class="url-chip" id="vercel-jobs-base">—</span>
+            </details>
+        </p>
         <div class="api-row">
             <span class="api-name">Jobs snapshot</span>
             <span class="api-desc">GET /api/jobs-snapshot — latest scraped jobs from Turso DB</span>
@@ -105,7 +115,12 @@
     <!-- ───────────────────────── VERCEL OMDB ───────────────────────── -->
     <div class="section">
         <h2>▲ Vercel — OMDb Proxy (playground-serveless) <span class="badge badge-vercel">Vercel Serverless</span></h2>
-        <p class="section-meta">OMDb / CineMaterial proxy. Base: <span class="url-chip" id="vercel-omdb-base">—</span></p>
+        <p class="section-meta">OMDb / CineMaterial proxy. Base: 
+            <details style="display:inline-block;">
+                <summary style="cursor:pointer;" class="url-chip">👁️ Show / Hide Endpoint URL</summary>
+                <span class="url-chip" id="vercel-omdb-base">—</span>
+            </details>
+        </p>
         <div class="api-row">
             <span class="api-name">OMDb proxy</span>
             <span class="api-desc">GET /api/omdb?t=Inception — movie search (needs OMDB_API_KEY env var)</span>
@@ -114,13 +129,18 @@
         </div>
     </div>
 
-    <!-- ───────────────────────── RENDER GO ───────────────────────── -->
+    <!-- ───────────────────────── KOYEB UNIFIED ENGINE ───────────────────────── -->
     <div class="section">
-        <h2>🐹 Render — Go Bot Engine <span class="badge badge-render">Render</span></h2>
-        <p class="section-meta">RSS scraper, Telegram bot, REST API, Turso DB. Base: <span class="url-chip" id="go-api-base">—</span></p>
+        <h2>🐳 Koyeb — 24/7 Unified Engine (Go + Python) <span class="badge badge-render">Koyeb</span></h2>
+        <p class="section-meta">RSS scraper, Telegram bot, REST API, Turso DB. Base: 
+            <details style="display:inline-block;">
+                <summary style="cursor:pointer;" class="url-chip">👁️ Show / Hide Endpoint URL</summary>
+                <span class="url-chip" id="go-api-base">—</span>
+            </details>
+        </p>
         <div class="api-row">
             <span class="api-name">Health</span>
-            <span class="api-desc">GET /health — Go service alive check</span>
+            <span class="api-desc">GET /health — Koyeb service health probe</span>
             <button onclick="testGoHealth()">Test</button>
             <span class="test-result" id="go-health-result">—</span>
         </div>
@@ -154,10 +174,15 @@
         </details>
     </div>
 
-    <!-- ───────────────────────── RENDER PYTHON ───────────────────────── -->
+    <!-- ───────────────────────── PYTHON SCRAPER API ───────────────────────── -->
     <div class="section">
-        <h2>🐍 Render — Python FastAPI Scraper <span class="badge badge-render">Render</span></h2>
-        <p class="section-meta">Python scraper service (JobSpy / RSS). Base: <span class="url-chip" id="python-api-base">—</span></p>
+        <h2>🐍 Koyeb — Python Scraper Subservice <span class="badge badge-render">Koyeb</span></h2>
+        <p class="section-meta">Python scraper subservice. Base: 
+            <details style="display:inline-block;">
+                <summary style="cursor:pointer;" class="url-chip">👁️ Show / Hide Endpoint URL</summary>
+                <span class="url-chip" id="python-api-base">—</span>
+            </details>
+        </p>
         <div class="api-row">
             <span class="api-name">Health / docs</span>
             <span class="api-desc">GET / → redirects to /docs (Swagger UI)</span>
