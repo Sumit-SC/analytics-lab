@@ -54,9 +54,10 @@
         See <a href="./docs.html">Docs</a> for full architecture details.</p>
 
     <!-- Top Action Toolbar -->
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
         <button onclick="runAllSystemTests()" style="padding: 10px 18px; font-weight: 600; font-size: 0.9rem; background: #2563eb; border-radius: 8px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">⚡ Run All Tests</button>
         <button onclick="toggleComprehensiveDiagnostics()" style="padding: 10px 18px; font-weight: 600; font-size: 0.9rem; background: #059669; border-radius: 8px; box-shadow: 0 2px 6px rgba(5,150,105,0.3);">📊 Comprehensive System Analysis &amp; Performance</button>
+        <a id="swagger-doc-btn" href="https://theoretical-brigida-mitsu96-88a48b04.koyeb.app/swagger/" target="_blank" rel="noopener" style="padding: 10px 18px; font-weight: 600; font-size: 0.9rem; background: #7c3aed; color: white; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 6px rgba(124,58,237,0.3); display: inline-flex; align-items: center; gap: 6px;">📖 Open Swagger API Testing Suite ↗</a>
     </div>
 
     <!-- Comprehensive Diagnostics Dashboard Widget -->
@@ -65,7 +66,28 @@
             <h2 style="margin: 0; font-size: 1.1rem; color: #065f46; border: none; padding: 0;">🚀 Comprehensive System Performance &amp; DB Diagnostics</h2>
             <span id="comp-status-badge" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 99px; background: #059669; color: white; font-weight: 600;">System Active</span>
         </div>
-        <p style="font-size: 0.82rem; color: #047857; margin-top: 0; margin-bottom: 15px;">Real-time analysis of Koyeb container RAM, Turso DB rows, RSS feed success rates, and Vercel proxy response times.</p>
+        <p style="font-size: 0.82rem; color: #047857; margin-top: 0; margin-bottom: 15px;">Real-time analysis of Koyeb container RAM, Turso DB rows, RSS feed success rates, and interactive stream filters.</p>
+
+        <!-- Interactive RSS Feed Filters & Breakdown Controls -->
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0; margin-bottom: 15px; display: flex; flex-wrap: wrap; items-center; gap: 12px;">
+            <div>
+                <label style="font-size: 0.75rem; font-weight: 600; color: #047857; display: block; margin-bottom: 4px;">RSS Feed Status Filter:</label>
+                <select id="comp-rss-filter" onchange="fetchComprehensiveStats()" style="padding: 6px 12px; font-size: 0.82rem; border: 1px solid #a7f3d0; border-radius: 6px; background: #f0fdf4;">
+                    <option value="all">All Feeds (650+ Matrix)</option>
+                    <option value="success">Success / OK Feeds Only</option>
+                    <option value="failed">Failed / Degraded Feeds Only</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size: 0.75rem; font-weight: 600; color: #047857; display: block; margin-bottom: 4px;">Stream Focus:</label>
+                <select id="comp-stream-filter" onchange="fetchComprehensiveStats()" style="padding: 6px 12px; font-size: 0.82rem; border: 1px solid #a7f3d0; border-radius: 6px; background: #f0fdf4;">
+                    <option value="all">All Streams (Role + City + Remote)</option>
+                    <option value="role">Role Streams Only</option>
+                    <option value="city">City Streams Only</option>
+                    <option value="remote">Remote Streams Only</option>
+                </select>
+            </div>
+        </div>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 15px;">
             <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #a7f3d0;">
