@@ -547,191 +547,74 @@
 		<main class="flex-1 min-w-0 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
 
-			<!-- job-search-api UI embed (Koyeb / FastAPI) -->
-			<section
-				class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-				<button type="button" id="railway-ui-embed-toggle"
-					class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-					aria-expanded="false" aria-controls="railway-ui-embed-content">
-					<div class="flex items-center gap-3">
-						<span class="text-lg">📦</span>
-						<div>
-							<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Job search API UI</h2>
-							<p class="text-xs text-gray-500 dark:text-gray-400">Core API, RSSJobs, JobSpy — refresh,
-								fetch, filter in one place</p>
+			<!-- Auxiliary Tools Container: Side-by-Side Collapsible Grid -->
+			<div id="auxiliary-tools-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 transition-all duration-300">
+				<!-- Left Section: Job Search API UI Embed (Starts Closed) -->
+				<section id="api-ui-embed-card" class="second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
+					<div class="flex items-center justify-between p-3.5 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
+						<button type="button" id="railway-ui-embed-toggle" class="flex items-center gap-2.5 text-left flex-1 hover:text-primary transition-colors" aria-expanded="false" aria-controls="railway-ui-embed-content">
+							<span class="text-base">📦</span>
+							<div>
+								<h2 class="text-sm font-bold text-gray-800 dark:text-gray-100">Job Search API UI</h2>
+								<p class="text-[11px] text-gray-500 dark:text-gray-400">Core API & Swagger Inspector</p>
+							</div>
+						</button>
+						<div class="flex items-center gap-2">
+							<button type="button" id="expand-api-ui-full" class="text-xs px-2.5 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium transition" title="Expand Full Width">↔️ Expand</button>
+							<span id="railway-ui-embed-toggle-text" class="text-xs text-gray-500 font-medium">Click to expand</span>
 						</div>
 					</div>
-					<span class="text-gray-500 dark:text-gray-400 text-sm font-medium"
-						id="railway-ui-embed-toggle-text">Click to expand</span>
-					<svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform"
-						id="railway-ui-embed-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-					</svg>
-				</button>
-				<div id="railway-ui-embed-content" class="hidden border-t border-gray-200 dark:border-gray-700">
-					<div class="p-4 bg-gray-50 dark:bg-gray-900/50">
-						<div id="embed-blocked-banner"
-							class="hidden mb-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm flex items-start justify-between gap-2">
-							<p class="flex-1">Embeds can be blocked by ad blockers or privacy extensions. If the panel
-								below is blank, <strong>open in new tab</strong> below or whitelist this site in your
-								extension.</p>
-							<button type="button" id="embed-blocked-banner-dismiss"
-								class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50"
-								aria-label="Dismiss">✕</button>
+					<div id="railway-ui-embed-content" class="hidden p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+						<div id="embed-blocked-banner" class="hidden mb-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm flex items-start justify-between gap-2">
+							<p class="flex-1">Embeds can be blocked by ad blockers or privacy extensions. If blank, open in new tab below.</p>
+							<button type="button" id="embed-blocked-banner-dismiss" class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50" aria-label="Dismiss">✕</button>
 						</div>
 						<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
-							Embedded UI from job-search-api (set <code class="text-[11px]">JOB_SEARCH_API_BASE</code> in
-							the script above). <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener"
-								class="text-primary hover:underline font-medium">Open in new tab</a>
+							Embedded UI from job-search-api. <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Open in new tab ↗</a>
 						</p>
 						<div class="relative">
-							<iframe id="railway-ui-embed-iframe" src="about:blank" width="100%" height="720"
-								frameborder="0"
-								class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-								title="Job search API UI">
-							</iframe>
-							<div id="railway-ui-embed-fallback"
-								class="hidden absolute inset-0 rounded-lg border-2 border-dashed border-amber-400 dark:border-amber-600 bg-amber-50/95 dark:bg-amber-900/20 flex flex-col items-center justify-center p-6 text-center">
-								<p class="text-amber-800 dark:text-amber-200 font-medium mb-2">Embed may be blocked by
-									an extension</p>
-								<p class="text-sm text-gray-700 dark:text-gray-300 mb-4">The panel above didn’t load.
-									Use the button below to open the app in a new tab.</p>
-								<a id="railway-ui-embed-fallback-link" href="#" target="_blank" rel="noopener"
-									class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90">Open
-									job-search-api UI in new tab</a>
+							<iframe id="railway-ui-embed-iframe" src="about:blank" width="100%" height="600" frameborder="0" class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800" title="Job search API UI"></iframe>
+						</div>
+					</div>
+				</section>
+
+				<!-- Right Section: Job Hunt Hub & External Boards (Starts Closed) -->
+				<section id="job-hunt-hub-card" class="second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
+					<div class="flex items-center justify-between p-3.5 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
+						<button type="button" id="job-hunt-hub-toggle" class="flex items-center gap-2.5 text-left flex-1 hover:text-primary transition-colors" aria-expanded="false" aria-controls="job-hunt-hub-content">
+							<span class="text-base">🔍</span>
+							<div>
+								<h2 class="text-sm font-bold text-gray-800 dark:text-gray-100">Job Hunt Hub & Learning Paths</h2>
+								<p class="text-[11px] text-gray-500 dark:text-gray-400">Roadmaps, TrueUp & 20+ Board Links</p>
 							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<!-- Job hunt hub: aggregation + explore data analytics roles -->
-			<section class="mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-5"
-				aria-labelledby="job-hunt-hub-title">
-				<h2 id="job-hunt-hub-title"
-					class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
-					<span aria-hidden="true">🔍</span> Job hunt hub — data analytics
-				</h2>
-				<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">One place to explore roles: our aggregated list
-					below plus learning paths and external boards.</p>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div
-						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Our aggregation</p>
-						<p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Jobs below are from 20+ sources
-							(RemoteOK, Remotive, Indeed, Wellfound, Stack Overflow, Naukri, LinkedIn, etc.), ranked for
-							analyst/BI roles.</p>
-						<a href="#jobs-list-anchor" class="text-xs font-semibold text-primary hover:underline">Scroll to
-							job list ↓</a>
-					</div>
-					<div
-						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Learn & roadmap</p>
-						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-							<li><a href="./resources.html?topic=data-analytics"
-									class="text-primary hover:underline">Resources · Data Analytics</a></li>
-							<li><a href="./resources.html?topic=data-science"
-									class="text-primary hover:underline">Resources · Data Science</a></li>
-							<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener"
-									class="text-primary hover:underline">roadmap.sh · Data Analyst</a></li>
-							<li><a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener"
-									class="text-primary hover:underline">roadmap.sh · AI/Data Scientist</a></li>
-						</ul>
-					</div>
-					<div
-						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">External boards (data
-							analytics)</p>
-						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-							<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank"
-									rel="noopener" class="text-primary hover:underline">Remotive · Data</a></li>
-							<li><a href="https://remotive.com/remote-jobs/software-dev/analytics" target="_blank"
-									rel="noopener" class="text-primary hover:underline">Remotive · Analytics</a></li>
-							<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs"
-									target="_blank" rel="noopener" class="text-primary hover:underline">We Work Remotely
-									· Data</a></li>
-							<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener"
-									class="text-primary hover:underline">RemoteOK · Data analyst</a></li>
-							<li><a href="https://hiring.cafe/" target="_blank" rel="noopener"
-									class="text-primary hover:underline">hiring.cafe</a></li>
-						</ul>
-						
-						<!-- Collapsible extra board links -->
-						<div id="external-boards-collapsed" class="hidden mt-1">
-							<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-								<li><a href="https://www.workatastartup.com/jobs" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Work at a Startup</a></li>
-								<li><a href="https://www.ycombinator.com/jobs" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Y Combinator · Jobs</a></li>
-								<li><a href="https://hireflair.com/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Hireflair</a></li>
-								<li><a href="https://www.instahyre.com/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Instahyre</a></li>
-								<li><a href="https://www.hirist.com/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Hirist (India)</a></li>
-								<li><a href="https://www.xing.com/jobs" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Xing Jobs</a></li>
-								<li><a href="https://cutshort.io/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Cutshort</a></li>
-								<li><a href="https://www.foundit.in/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Foundit</a></li>
-								<li><a href="https://www.timesjobs.com/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">TimesJobs</a></li>
-								<li><a href="https://www.shine.com/" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Shine</a></li>
-								<li><a href="https://www.linkedin.com/jobs/search/?keywords=data%20analyst" target="_blank"
-										rel="noopener" class="text-primary hover:underline">LinkedIn · Data analyst</a></li>
-								<li><a href="https://www.indeed.com/jobs?q=data+analyst&l=remote" target="_blank"
-										rel="noopener" class="text-primary hover:underline">Indeed · Data analyst</a></li>
-								<li><a href="https://stackoverflow.com/jobs?q=data+analyst" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Stack Overflow Jobs</a></li>
-								<li><a href="https://www.naukri.com/data-analyst-jobs" target="_blank" rel="noopener"
-										class="text-primary hover:underline">Naukri (India)</a></li>
-								<li><a href="https://www.trueup.io/job-boards" target="_blank" rel="noopener"
-										class="text-primary hover:underline">TrueUp · job boards</a></li>
-							</ul>
-						</div>
-
-						<button type="button" id="toggle-external-boards" class="mt-2 text-xs font-semibold text-primary hover:underline flex items-center gap-1 focus:outline-none">
-							<span>More Boards 🔽</span>
 						</button>
-
-						<div class="mt-3">
-							<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Open current search
-								on more boards</p>
-							<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Uses our backend to generate
-								deep-links from your current query/location (works even when scraping is blocked).</p>
-							<div id="job-external-boards-dynamic" class="flex flex-wrap gap-2 text-xs">
-								<span class="text-[11px] text-gray-500 dark:text-gray-400">Loading…</span>
+						<div class="flex items-center gap-2">
+							<button type="button" id="expand-hunt-hub-full" class="text-xs px-2.5 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium transition" title="Expand Full Width">↔️ Expand</button>
+							<span id="job-hunt-hub-toggle-text" class="text-xs text-gray-500 font-medium">Click to expand</span>
+						</div>
+					</div>
+					<div id="job-hunt-hub-content" class="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+							<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+								<p class="font-semibold text-gray-800 dark:text-gray-100 text-xs mb-1.5">Learn & Roadmap</p>
+								<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+									<li><a href="./resources.html?topic=data-analytics" class="text-primary hover:underline">Resources · Data Analytics</a></li>
+									<li><a href="./resources.html?topic=data-science" class="text-primary hover:underline">Resources · Data Science</a></li>
+									<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="text-primary hover:underline">roadmap.sh · Data Analyst</a></li>
+								</ul>
+							</div>
+							<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+								<p class="font-semibold text-gray-800 dark:text-gray-100 text-xs mb-1.5">External Boards</p>
+								<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+									<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank" rel="noopener" class="text-primary hover:underline">Remotive · Data</a></li>
+									<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">We Work Remotely · Data</a></li>
+									<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">RemoteOK · Data analyst</a></li>
+								</ul>
 							</div>
 						</div>
 					</div>
-					<div
-						class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/30 p-3">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">TrueUp boards (data
-							domain)</p>
-						<p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">TrueUp blocks automated scraping
-							(403/CAPTCHA), so we link to their official boards directly.</p>
-						<div class="flex flex-wrap gap-2 text-xs">
-							<a href="https://www.trueup.io/ai" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">AI</a>
-							<a href="https://www.trueup.io/fintech" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">FinTech</a>
-							<a href="https://www.trueup.io/climate" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Climate</a>
-							<a href="https://www.trueup.io/remote" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Remote</a>
-							<a href="https://www.trueup.io/unicorns" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Unicorns</a>
-							<a href="https://www.trueup.io/faang-plus" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">FAANG+</a>
-							<a href="https://www.trueup.io/elite-startups" target="_blank" rel="noopener"
-								class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 text-primary hover:underline">Elite
-								startups</a>
-						</div>
-					</div>
-				</div>
-			</section>
+				</section>
+			</div>
 
 			<header class="mb-6">
 				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Intelligence Workspace</h1>
@@ -1704,6 +1587,72 @@
 	<script src="../assets/js/assistant.js" defer></script>
 	<script src="../assets/js/jobs.js" defer></script>
 	<script src="../assets/js/register-sw.js" defer></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const apiCard = document.getElementById('api-ui-embed-card');
+			const huntCard = document.getElementById('job-hunt-hub-card');
+			
+			const apiToggle = document.getElementById('railway-ui-embed-toggle');
+			const apiContent = document.getElementById('railway-ui-embed-content');
+			const apiExpandBtn = document.getElementById('expand-api-ui-full');
+			
+			const huntToggle = document.getElementById('job-hunt-hub-toggle');
+			const huntContent = document.getElementById('job-hunt-hub-content');
+			const huntExpandBtn = document.getElementById('expand-hunt-hub-full');
+
+			if (apiToggle && apiContent) {
+				apiToggle.addEventListener('click', () => {
+					apiContent.classList.toggle('hidden');
+					const textEl = document.getElementById('railway-ui-embed-toggle-text');
+					if (textEl) textEl.textContent = apiContent.classList.contains('hidden') ? 'Click to expand' : 'Click to collapse';
+				});
+			}
+
+			if (huntToggle && huntContent) {
+				huntToggle.addEventListener('click', () => {
+					huntContent.classList.toggle('hidden');
+					const textEl = document.getElementById('job-hunt-hub-toggle-text');
+					if (textEl) textEl.textContent = huntContent.classList.contains('hidden') ? 'Click to expand' : 'Click to collapse';
+				});
+			}
+
+			if (apiExpandBtn && apiCard && huntCard) {
+				apiExpandBtn.addEventListener('click', (e) => {
+					e.stopPropagation();
+					if (apiCard.classList.contains('md:col-span-2')) {
+						apiCard.classList.remove('md:col-span-2');
+						huntCard.classList.remove('hidden');
+						apiExpandBtn.textContent = '↔️ Expand';
+					} else {
+						apiCard.classList.add('md:col-span-2');
+						huntCard.classList.add('hidden');
+						apiExpandBtn.textContent = '↔️ Split View';
+						if (apiContent.classList.contains('hidden')) {
+							apiContent.classList.remove('hidden');
+						}
+					}
+				});
+			}
+
+			if (huntExpandBtn && huntCard && apiCard) {
+				huntExpandBtn.addEventListener('click', (e) => {
+					e.stopPropagation();
+					if (huntCard.classList.contains('md:col-span-2')) {
+						huntCard.classList.remove('md:col-span-2');
+						apiCard.classList.remove('hidden');
+						huntExpandBtn.textContent = '↔️ Expand';
+					} else {
+						huntCard.classList.add('md:col-span-2');
+						apiCard.classList.add('hidden');
+						huntExpandBtn.textContent = '↔️ Split View';
+						if (huntContent.classList.contains('hidden')) {
+							huntContent.classList.remove('hidden');
+						}
+					}
+				});
+			}
+		});
+	</script>
 </body>
 
 </html>
