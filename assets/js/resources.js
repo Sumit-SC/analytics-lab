@@ -62,6 +62,7 @@
 
 			switchStudyTab(savedTab);
 		})();
+	var params = new URLSearchParams(window.location.search);
 	var initialTopic = (params.get('topic') || 'python').toLowerCase().replace(/[^a-z0-9-]/g, '');
 	var root = document.getElementById('resource-root');
 	var notFound = document.getElementById('resource-not-found');
@@ -1682,7 +1683,7 @@
 		initResourcePopup();
 
 	// NOTE: resources.html can be served at /pages/resources.html or /resources (rewrite). Fetch must work in both cases.
-	var jsonPaths = ['../assets/resources.json', './assets/resources.json'];
+	var jsonPaths = ['../assets/resources.json', '/assets/resources.json', './assets/resources.json', 'assets/resources.json'];
 	function tryFetch(idx) {
 		if (idx >= jsonPaths.length) {
 			showResourcesFallback();
