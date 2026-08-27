@@ -1665,6 +1665,7 @@
 			const viewFeed = document.getElementById('tab-view-feed');
 			const viewApi = document.getElementById('tab-view-api');
 			const viewHub = document.getElementById('tab-view-hub');
+			const plannerSec = document.getElementById('planner-section');
 
 			function switchTab(activeBtn, activeView) {
 				[btnFeed, btnApi, btnHub].forEach(btn => {
@@ -1681,6 +1682,13 @@
 				}
 				if (activeView) {
 					activeView.classList.remove('hidden');
+				}
+				if (plannerSec) {
+					if (activeView === viewFeed) {
+						plannerSec.classList.remove('hidden');
+					} else {
+						plannerSec.classList.add('hidden');
+					}
 				}
 			}
 

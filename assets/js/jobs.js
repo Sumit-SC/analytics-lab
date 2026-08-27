@@ -1464,6 +1464,18 @@
 
 	function safeLower(s) { return String(s || '').trim().toLowerCase(); }
 
+	function cleanText(str) {
+		if (!str) return '';
+		var txt = document.createElement('textarea');
+		txt.innerHTML = String(str);
+		var res = txt.value;
+		if (res.indexOf('&') !== -1) {
+			txt.innerHTML = res;
+			res = txt.value;
+		}
+		return res.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+	}
+
 	function normalizeJobKey(job) {
 		if (!job) return '';
 		var url = String(job.url || '').trim();
@@ -3827,15 +3839,17 @@
 			var statusClass = 'status-' + status;
 			var jobKey = normalizeJobKey(job);
 			var isNewSinceLastRefresh = !!(jobKey && latestAddedJobKeys[jobKey]);
-			var newCardClass = isNewSinceLastRefresh ? ' ring-2 ring-emerald-400/70 dark:ring-emerald-500/60' : '';
+			var cleanTitle = cleanText(job.title || 'Job Listing');
+			var cleanCompany = cleanText(job.company || 'Unknown');
+			var cleanLoc = cleanText(job.location || 'Remote');
 
 			html += '<div class="job-card group material-card rounded-xl border border-gray-200 dark:border-gray-700 p-4 material-elevation-1' + newCardClass + '">';
 			html += '<div class="flex items-start justify-between mb-2">';
 			html += '<div class="flex-1">';
 			html += '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">';
-			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-primary hover:underline">' + escapeHtml(job.title) + '</a>';
+			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-primary hover:underline">' + escapeHtml(cleanTitle) + '</a>';
 			html += '</h3>';
-			var companyLocation = escapeHtml(job.company) + ' &middot; ' + escapeHtml(job.location);
+			var companyLocation = escapeHtml(cleanCompany) + ' &middot; ' + escapeHtml(cleanLoc);
 			if (job.postedAgo && !job.dateFormatted) {
 				companyLocation += ' &middot; <span class="text-xs text-gray-500 dark:text-gray-500">' + escapeHtml(job.postedAgo) + '</span>';
 			}
@@ -3856,12 +3870,9 @@
 			html += '</div>';
 			html += '</div>';
 			if (job.description) {
-				var desc = job.description.substring(0, 200).replace(/<[^>]*>/g, '');
-				html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">' + escapeHtml(desc) + (job.description.length > 200 ? '…' : '') + '</p>';
-				// Quick preview on hover (desktop)
-				html += '<div class="hidden group-hover:block mt-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">';
-				html += '<p class="text-xs text-gray-600 dark:text-gray-300" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;">' + escapeHtml(desc) + (job.description.length > 200 ? '…' : '') + '</p>';
-				html += '</div>';
+				var cleanDesc = cleanText(job.description);
+				var truncatedDesc = cleanDesc.substring(0, 220);
+				html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">' + escapeHtml(truncatedDesc) + (cleanDesc.length > 220 ? '…' : '') + '</p>';
 			}
 			if (job.tags && job.tags.length > 0) {
 				html += '<div class="flex flex-wrap gap-1 mb-2">';
