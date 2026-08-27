@@ -347,62 +347,40 @@
 		.catch(function () { return null; });
 	}
 
-	var mainTabMode = (function () {
-		try { return localStorage.getItem(MODE_KEY) || 'basic_mode'; } catch (e) { return 'basic_mode'; }
+	var selectedModel = (function () {
+		try { return localStorage.getItem(MODE_KEY) || 'basic'; } catch (e) { return 'basic'; }
 	})();
 
-	var activeSubPill = (function () {
-		try { return localStorage.getItem('assistant_sub_pill_v1') || 'basic'; } catch (e) { return 'basic'; }
-	})();
-
-	var tabBasic = document.getElementById('tab-mode-basic');
-	var tabBot = document.getElementById('tab-mode-bot');
-
-	var subWrapBasic = document.getElementById('sub-pills-basic');
-	var subWrapBot = document.getElementById('sub-pills-bot');
-
-	var pillSubBasic = document.getElementById('pill-sub-basic');
-	var pillSubFlan = document.getElementById('pill-sub-flan');
-	var pillSubSmoll = document.getElementById('pill-sub-smoll');
-	var pillSubQwen = document.getElementById('pill-sub-qwen');
-
+	var modelSelectEl = document.getElementById('assistant-model-select');
 	var confirmedModels = {};
 
-	function update2TierUI() {
-		var activeTabClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition';
-		var inactiveTabClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition';
+	var MODEL_LABELS = {
+		'basic': '⚡ Basic Mode (0MB Download - Instant FAQ & API)',
+		'flan': '📦 Standard Local AI (LaMini Flan-T5 ~77MB)',
+		'smoll': '🚀 Advanced Local AI (SmollLM2 135M ~90MB)',
+		'qwen': '🏆 Pro Local AI (Qwen 1.5 0.5B ~250MB)'
+	};
 
-		var activePillClass = 'px-2.5 py-1 rounded-md font-bold bg-primary text-white shadow-sm transition';
-		var inactivePillClass = 'px-2.5 py-1 rounded-md font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition';
-
-		if (tabBasic) tabBasic.className = mainTabMode === 'basic_mode' ? activeTabClass : inactiveTabClass;
-		if (tabBot) tabBot.className = mainTabMode === 'bot_mode' ? activeTabClass : inactiveTabClass;
-
-		if (subWrapBasic) subWrapBasic.classList.toggle('hidden', mainTabMode !== 'basic_mode');
-		if (subWrapBot) subWrapBot.classList.toggle('hidden', mainTabMode !== 'bot_mode');
-
-		if (pillSubBasic) pillSubBasic.className = activeSubPill === 'basic' ? activePillClass : inactivePillClass;
-		if (pillSubFlan) pillSubFlan.className = activeSubPill === 'flan' ? activePillClass : inactivePillClass;
-		if (pillSubSmoll) pillSubSmoll.className = activeSubPill === 'smoll' ? activePillClass : inactivePillClass;
-		if (pillSubQwen) pillSubQwen.className = activePill === 'qwen' ? activePillClass : inactivePillClass;
-
+	function updateSelectUI() {
+		if (modelSelectEl) {
+			modelSelectEl.value = selectedModel;
+		}
 		var statusMap = {
 			'basic': '⚡ Basic Mode (0MB download, instant FAQ & API responses).',
 			'flan': '📦 Standard Mode: LaMini Flan-T5 77M (~77MB download).',
 			'smoll': '🚀 Advanced Mode: SmollLM2 135M (~90MB download). 2024 SOTA Chat.',
 			'qwen': '🏆 Pro Mode: Qwen 1.5 0.5B (~250MB download). SOTA Technical Model.'
 		};
-		setModeStatus(statusMap[activeSubPill] || 'Basic Mode.');
+		setModeStatus(statusMap[selectedModel] || 'Basic Mode.');
 	}
-	update2TierUI();
 
-	function promptModelDownload(modelId, label, repo) {
+	function promptModelDownload(modelId, label) {
 		var confirmWrap = document.createElement('div');
 		confirmWrap.className = 'my-3 p-3.5 rounded-xl border border-primary/40 bg-primary/5 dark:bg-primary/10 space-y-2.5';
 
 		var msg = document.createElement('p');
 		msg.className = 'text-xs text-gray-800 dark:text-gray-200 leading-relaxed font-semibold';
-		msg.textContent = '🤖 Would you like to download ' + label + '? This will enable in-browser offline text generation.';
+		msg.textContent = '🤖 Download & Enable ' + label + '? This will download ONNX model weights directly to your browser.';
 		confirmWrap.appendChild(msg);
 
 		var btnsRow = document.createElement('div');
@@ -415,9 +393,9 @@
 		btnYes.addEventListener('click', function () {
 			confirmedModels[modelId] = true;
 			confirmWrap.remove();
-			activeSubPill = modelId;
-			try { localStorage.setItem('assistant_sub_pill_v1', modelId); } catch (e) {}
-			update2TierUI();
+			selectedModel = modelId;
+			try { localStorage.setItem(MODE_KEY, modelId); } catch (e) {}
+			updateSelectUI();
 			ensureModelLoaded(modelId).catch(function () {});
 		});
 		btnsRow.appendChild(btnYes);
@@ -428,13 +406,9 @@
 		btnNo.textContent = '❌ Keep Basic Mode (0MB)';
 		btnNo.addEventListener('click', function () {
 			confirmWrap.remove();
-			activeSubPill = 'basic';
-			mainTabMode = 'basic_mode';
-			try {
-				localStorage.setItem(MODE_KEY, 'basic_mode');
-				localStorage.setItem('assistant_sub_pill_v1', 'basic');
-			} catch (e) {}
-			update2TierUI();
+			selectedModel = 'basic';
+			try { localStorage.setItem(MODE_KEY, 'basic'); } catch (e) {}
+			updateSelectUI();
 		});
 		btnsRow.appendChild(btnNo);
 
@@ -443,39 +417,28 @@
 		messagesEl.scrollTop = messagesEl.scrollHeight;
 	}
 
-	function selectSubPill(modelId, label, repo) {
-		if (modelId === 'basic') {
-			activeSubPill = 'basic';
-			mainTabMode = 'basic_mode';
-			try {
-				localStorage.setItem(MODE_KEY, 'basic_mode');
-				localStorage.setItem('assistant_sub_pill_v1', 'basic');
-			} catch (e) {}
-			update2TierUI();
-			return;
-		}
+	if (modelSelectEl) {
+		modelSelectEl.value = selectedModel;
+		modelSelectEl.addEventListener('change', function () {
+			var newModel = modelSelectEl.value;
+			if (newModel === 'basic') {
+				selectedModel = 'basic';
+				try { localStorage.setItem(MODE_KEY, 'basic'); } catch (e) {}
+				updateSelectUI();
+				return;
+			}
 
-		if (!confirmedModels[modelId] && !modelPipeline) {
-			promptModelDownload(modelId, label, repo);
-			return;
-		}
-
-		activeSubPill = modelId;
-		try { localStorage.setItem('assistant_sub_pill_v1', modelId); } catch (e) {}
-		update2TierUI();
-		ensureModelLoaded(modelId).catch(function () {});
+			if (!confirmedModels[newModel] && (!modelPipeline || selectedModelId !== newModel)) {
+				promptModelDownload(newModel, MODEL_LABELS[newModel] || newModel);
+			} else {
+				selectedModel = newModel;
+				try { localStorage.setItem(MODE_KEY, newModel); } catch (e) {}
+				updateSelectUI();
+				ensureModelLoaded(newModel).catch(function () {});
+			}
+		});
 	}
-
-	if (tabBasic) tabBasic.addEventListener('click', function () {
-		mainTabMode = 'basic_mode';
-		try { localStorage.setItem(MODE_KEY, 'basic_mode'); } catch (e) {}
-		update2TierUI();
-	});
-	if (tabBot) tabBot.addEventListener('click', function () {
-		mainTabMode = 'bot_mode';
-		try { localStorage.setItem(MODE_KEY, 'bot_mode'); } catch (e) {}
-		update2TierUI();
-	});
+	updateSelectUI();
 
 	var progressBarWrap = document.getElementById('model-progress-bar-wrap');
 	var progressBarLabel = document.getElementById('model-progress-bar-label');
@@ -503,27 +466,18 @@
 	(function checkSavedDownloadedModel() {
 		try {
 			var savedModel = localStorage.getItem('assistant_downloaded_model');
-			if (savedModel) {
+			if (savedModel && savedModel !== 'basic') {
 				confirmedModels[savedModel] = true;
-				activeSubPill = savedModel;
-				if (savedModel === 'smoll' || savedModel === 'qwen') {
-					mainTabMode = 'bot_mode';
-				} else if (savedModel === 'flan') {
-					mainTabMode = 'basic_mode';
-				}
-				update2TierUI();
-				setModeStatus('✅ Cached model ready (' + savedModel.toUpperCase() + '). Tap to chat.');
+				selectedModel = savedModel;
+				updateSelectUI();
+				setModeStatus('✅ Cached model ready (' + savedModel.toUpperCase() + '). Tap send to chat.');
 			}
 		} catch (e) {}
 	})();
 
-	if (pillSubBasic) pillSubBasic.addEventListener('click', function () { selectSubPill('basic', 'Basic Mode 0MB', ''); });
-	if (pillSubFlan) pillSubFlan.addEventListener('click', function () { selectSubPill('flan', 'Standard LaMini 77M', 'Xenova/LaMini-Flan-T5-77M'); });
-	if (pillSubSmoll) pillSubSmoll.addEventListener('click', function () { selectSubPill('smoll', 'Advanced SmollLM2 90M', 'onnx-community/SmollLM2-135M-Instruct'); });
-	if (pillSubQwen) pillSubQwen.addEventListener('click', function () { selectSubPill('qwen', 'Pro Qwen 250M', 'Xenova/Qwen1.5-0.5B-Chat'); });
-
 	async function ensureModelLoaded(modelId) {
-		var targetId = modelId || activeSubPill || 'flan';
+		var targetId = modelId || selectedModel || 'flan';
+		if (targetId === 'basic') return null;
 		if (modelPipeline && selectedModelId === targetId) return modelPipeline;
 		modelPipeline = null;
 		modelLoading = null;
@@ -632,9 +586,9 @@
 			return { role: it.role === 'user' ? 'user' : 'assistant', content: it.text || '' };
 		});
 
-		if (activeSubPill !== 'basic') {
-			add('assistant', 'Thinking… (' + activeSubPill.toUpperCase() + ')', text);
-			ensureModelLoaded()
+		if (selectedModel !== 'basic') {
+			add('assistant', 'Thinking… (' + selectedModel.toUpperCase() + ')', text);
+			ensureModelLoaded(selectedModel)
 				.then(async function (pipe) {
 					var systemPrompt = 'You are an expert interview coach and data science career mentor. Answer concisely, professionally, and provide concrete examples or actionable steps.';
 					var convo = 'System: ' + systemPrompt + '\n\n' + history.slice(-8).map(function (it) {

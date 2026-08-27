@@ -1585,32 +1585,17 @@
 					class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800 transition"
 					aria-label="Close assistant">&#10005;</button>
 			</div>
-			<!-- Tier 1: Main Mode Segmented Bar -->
-			<div class="flex items-center gap-1.5 p-1 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-xs">
-				<button type="button" id="tab-mode-basic" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition">
-					⚡ Basic Mode
-				</button>
-				<button type="button" id="tab-mode-bot" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition">
-					🤖 Bot AI Mode
-				</button>
-			</div>
-
-			<!-- Tier 2 Sub-Pills for Basic Mode (Basic 0MB | Standard 77MB) -->
-			<div id="sub-pills-basic" class="flex items-center justify-between gap-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700/60 text-[11px]">
-				<span class="text-gray-500 font-semibold">Engine:</span>
-				<div class="flex items-center gap-1">
-					<button type="button" id="pill-sub-basic" class="px-2.5 py-1 rounded-md font-bold bg-primary text-white shadow-sm transition" title="0MB download. Instant FAQ & Backend API responses.">⚡ Basic (0MB)</button>
-					<button type="button" id="pill-sub-flan" class="px-2.5 py-1 rounded-md font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="LaMini Flan-T5 77M (~77MB ONNX, 512 context). Tap to download.">📦 Standard (77M)</button>
-				</div>
-			</div>
-
-			<!-- Tier 2 Sub-Pills for Bot AI Mode (Advanced 90MB | Pro 250MB) -->
-			<div id="sub-pills-bot" class="hidden flex items-center justify-between gap-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700/60 text-[11px]">
-				<span class="text-gray-500 font-semibold">LLM Model:</span>
-				<div class="flex items-center gap-1">
-					<button type="button" id="pill-sub-smoll" class="px-2.5 py-1 rounded-md font-bold bg-primary text-white shadow-sm transition" title="SmollLM2 135M (~90MB ONNX, 2K context). Tap to download.">🚀 Advanced (90M)</button>
-					<button type="button" id="pill-sub-qwen" class="px-2.5 py-1 rounded-md font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="Qwen 1.5 0.5B (~250MB ONNX, 4K context). Tap to download.">🏆 Pro (250M)</button>
-				</div>
+			<!-- Unified Model Selector Dropdown -->
+			<div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80">
+				<label for="assistant-model-select" class="text-xs font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1.5 whitespace-nowrap">
+					<span>⚙️ AI Model:</span>
+				</label>
+				<select id="assistant-model-select" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-xs font-bold text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-sm">
+					<option value="basic">⚡ Basic Mode (0MB Download - Instant FAQ &amp; API)</option>
+					<option value="flan">📦 Standard Local AI — LaMini Flan-T5 (~77MB ONNX, 512 context)</option>
+					<option value="smoll">🚀 Advanced Local AI — SmollLM2 135M (~90MB ONNX, 2K context)</option>
+					<option value="qwen">🏆 Pro Local AI — Qwen 1.5 0.5B (~250MB ONNX, 4K context)</option>
+				</select>
 			</div>
 
 			<!-- Visual Download Progress Bar -->
