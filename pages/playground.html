@@ -254,28 +254,32 @@
 					</div>
 				</div>
 
-				<section class="mb-10 material-card rounded-xl border-2 border-gray-200 dark:border-gray-600 p-4 sm:p-6 material-elevation-2 space-y-3">
+				<section id="code-agent-section" class="mb-10 material-card rounded-xl border-2 border-gray-200 dark:border-gray-600 p-4 sm:p-6 material-elevation-2 space-y-3 transition-all duration-300">
 					<div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
 						<div>
 							<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-								<span>Run Code &amp; AI Debugger</span>
+								<span>Run Code &amp; AI Agent Studio</span>
 								<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">Qwen 2.5 Coder 8K</span>
 							</h2>
-							<p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Python (Pyodide), JavaScript, SQL (sql.js) + In-Browser AI Debugger &amp; Code Assistant.</p>
+							<p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Python (Pyodide), JavaScript, SQL (sql.js) + On-The-Fly AI Code Agent Switcher.</p>
 						</div>
 						<div class="flex flex-wrap items-center gap-2 text-xs">
-							<label for="playground-model-select" class="font-bold text-gray-700 dark:text-gray-300">AI Model:</label>
+							<label for="playground-model-select" class="font-bold text-gray-700 dark:text-gray-300">AI Agent:</label>
 							<select id="playground-model-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
-								<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K)</option>
 								<option value="qwen25coder">🏆 Pro Coder (Qwen 2.5 Coder 290MB, 8K)</option>
+								<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K)</option>
+								<option value="qwen">🧠 Logic Agent (Qwen 1.5 250MB, 4K)</option>
 								<option value="flan">⚡ Instant FAQ (LaMini 77MB, 512)</option>
 							</select>
 							<label for="lang" class="font-bold text-gray-700 dark:text-gray-300">Language:</label>
 							<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2.5 py-1.5 font-semibold">
-								<option value="python">Python</option>
-								<option value="javascript">JavaScript</option>
+								<option value="python">Python (Pyodide)</option>
+								<option value="javascript">JavaScript (V8)</option>
 								<option value="sql">SQL (SQLite)</option>
 							</select>
+							<button type="button" id="studio-expand-btn" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow flex items-center gap-1" title="Toggle Large Studio View">
+								<span>🗖 Expand Studio</span>
+							</button>
 						</div>
 					</div>
 
@@ -291,7 +295,7 @@
 
 					<div class="code-editor-wrap dark:border-gray-700 dark:bg-gray-900">
 						<div id="line-nums" class="code-line-nums" aria-hidden="true">1</div>
-						<textarea id="code" class="text-gray-800 dark:text-gray-200" spellcheck="false" placeholder="print('Hello')"></textarea>
+						<textarea id="code" class="text-gray-800 dark:text-gray-200 min-h-[220px]" spellcheck="false" placeholder="print('Hello World')"></textarea>
 					</div>
 
 					<div id="sql-actions" class="hidden mt-3 flex flex-wrap items-center gap-2">
