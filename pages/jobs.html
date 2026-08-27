@@ -547,74 +547,60 @@
 		<main class="flex-1 min-w-0 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
 
-			<!-- Auxiliary Tools Container: Side-by-Side Collapsible Grid -->
-			<div id="auxiliary-tools-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 transition-all duration-300">
-				<!-- Left Section: Job Search API UI Embed (Starts Closed) -->
-				<section id="api-ui-embed-card" class="second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
-					<div class="flex items-center justify-between p-3.5 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
-						<button type="button" id="railway-ui-embed-toggle" class="flex items-center gap-2.5 text-left flex-1 hover:text-primary transition-colors" aria-expanded="false" aria-controls="railway-ui-embed-content">
-							<span class="text-base">📦</span>
-							<div>
-								<h2 class="text-sm font-bold text-gray-800 dark:text-gray-100">Job Search API UI</h2>
-								<p class="text-[11px] text-gray-500 dark:text-gray-400">Core API & Swagger Inspector</p>
-							</div>
-						</button>
-						<div class="flex items-center gap-2">
-							<button type="button" id="expand-api-ui-full" class="text-xs px-2.5 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium transition" title="Expand Full Width">↔️ Expand</button>
-							<span id="railway-ui-embed-toggle-text" class="text-xs text-gray-500 font-medium">Click to expand</span>
-						</div>
-					</div>
-					<div id="railway-ui-embed-content" class="hidden p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
-						<div id="embed-blocked-banner" class="hidden mb-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm flex items-start justify-between gap-2">
-							<p class="flex-1">Embeds can be blocked by ad blockers or privacy extensions. If blank, open in new tab below.</p>
-							<button type="button" id="embed-blocked-banner-dismiss" class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50" aria-label="Dismiss">✕</button>
-						</div>
-						<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
-							Embedded UI from job-search-api. <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Open in new tab ↗</a>
-						</p>
-						<div class="relative">
-							<iframe id="railway-ui-embed-iframe" src="about:blank" width="100%" height="600" frameborder="0" class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800" title="Job search API UI"></iframe>
-						</div>
-					</div>
-				</section>
-
-				<!-- Right Section: Job Hunt Hub & External Boards (Starts Closed) -->
-				<section id="job-hunt-hub-card" class="second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
-					<div class="flex items-center justify-between p-3.5 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
-						<button type="button" id="job-hunt-hub-toggle" class="flex items-center gap-2.5 text-left flex-1 hover:text-primary transition-colors" aria-expanded="false" aria-controls="job-hunt-hub-content">
-							<span class="text-base">🔍</span>
-							<div>
-								<h2 class="text-sm font-bold text-gray-800 dark:text-gray-100">Job Hunt Hub & Learning Paths</h2>
-								<p class="text-[11px] text-gray-500 dark:text-gray-400">Roadmaps, TrueUp & 20+ Board Links</p>
-							</div>
-						</button>
-						<div class="flex items-center gap-2">
-							<button type="button" id="expand-hunt-hub-full" class="text-xs px-2.5 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium transition" title="Expand Full Width">↔️ Expand</button>
-							<span id="job-hunt-hub-toggle-text" class="text-xs text-gray-500 font-medium">Click to expand</span>
-						</div>
-					</div>
-					<div id="job-hunt-hub-content" class="hidden p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
-						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-							<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-								<p class="font-semibold text-gray-800 dark:text-gray-100 text-xs mb-1.5">Learn & Roadmap</p>
-								<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-									<li><a href="./resources.html?topic=data-analytics" class="text-primary hover:underline">Resources · Data Analytics</a></li>
-									<li><a href="./resources.html?topic=data-science" class="text-primary hover:underline">Resources · Data Science</a></li>
-									<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="text-primary hover:underline">roadmap.sh · Data Analyst</a></li>
-								</ul>
-							</div>
-							<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
-								<p class="font-semibold text-gray-800 dark:text-gray-100 text-xs mb-1.5">External Boards</p>
-								<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-									<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank" rel="noopener" class="text-primary hover:underline">Remotive · Data</a></li>
-									<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">We Work Remotely · Data</a></li>
-									<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener" class="text-primary hover:underline">RemoteOK · Data analyst</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</section>
+			<!-- Segmented Tab Switcher Bar -->
+			<div class="flex flex-wrap items-center gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
+				<button type="button" id="tab-btn-feed" class="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white shadow-sm transition-all flex items-center gap-2">
+					<span>💼</span> Live Job Feed
+				</button>
+				<button type="button" id="tab-btn-api" class="px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2">
+					<span>📦</span> API Inspector
+				</button>
+				<button type="button" id="tab-btn-hub" class="px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2">
+					<span>📚</span> Learning & Board Hub
+				</button>
 			</div>
+
+			<!-- Tab 2 Container: Job Search API UI Embed (Hidden by default) -->
+			<section id="tab-view-api" class="hidden mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm p-4">
+				<div id="embed-blocked-banner" class="hidden mb-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm flex items-start justify-between gap-2">
+					<p class="flex-1">Embeds can be blocked by ad blockers. If blank, open in new tab below.</p>
+					<button type="button" id="embed-blocked-banner-dismiss" class="shrink-0 p-1 rounded hover:bg-amber-200/50 dark:hover:bg-amber-800/50" aria-label="Dismiss">✕</button>
+				</div>
+				<p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+					Embedded Swagger API Inspector. <a id="job-api-ui-open-tab" href="#" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Open in new tab ↗</a>
+				</p>
+				<iframe id="railway-ui-embed-iframe" src="about:blank" width="100%" height="700" frameborder="0" class="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800" title="Job search API UI"></iframe>
+			</section>
+
+			<!-- Tab 3 Container: Job Hunt Hub & Learning Paths (Hidden by default) -->
+			<section id="tab-view-hub" class="hidden mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm space-y-4">
+				<h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+					<span>📚</span> Learning Paths & External Boards
+				</h2>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Learn & Roadmap</p>
+						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
+							<li><a href="./resources.html?topic=data-analytics" class="text-primary hover:underline font-medium">Resources · Data Analytics</a></li>
+							<li><a href="./resources.html?topic=data-science" class="text-primary hover:underline font-medium">Resources · Data Science</a></li>
+							<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">roadmap.sh · Data Analyst</a></li>
+							<li><a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">roadmap.sh · AI/Data Scientist</a></li>
+						</ul>
+					</div>
+					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
+						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">External Tech Boards</p>
+						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
+							<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Remotive · Data</a></li>
+							<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">We Work Remotely · Data</a></li>
+							<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">RemoteOK · Data analyst</a></li>
+							<li><a href="https://hiring.cafe/" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">hiring.cafe</a></li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<!-- Tab 1 Container: Main Live Job Feed & Search Controls -->
+			<div id="tab-view-feed" class="space-y-6">
 
 			<header class="mb-6">
 				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Job Intelligence Workspace</h1>
@@ -1466,6 +1452,7 @@
 		</div>
 		<div id="planner-list" class="space-y-3 text-sm"></div>
 	</section>
+	</div>
 
 	</main>
 	</div>
@@ -1589,68 +1576,35 @@
 	<script src="../assets/js/register-sw.js" defer></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', () => {
-			const apiCard = document.getElementById('api-ui-embed-card');
-			const huntCard = document.getElementById('job-hunt-hub-card');
-			
-			const apiToggle = document.getElementById('railway-ui-embed-toggle');
-			const apiContent = document.getElementById('railway-ui-embed-content');
-			const apiExpandBtn = document.getElementById('expand-api-ui-full');
-			
-			const huntToggle = document.getElementById('job-hunt-hub-toggle');
-			const huntContent = document.getElementById('job-hunt-hub-content');
-			const huntExpandBtn = document.getElementById('expand-hunt-hub-full');
+			const btnFeed = document.getElementById('tab-btn-feed');
+			const btnApi = document.getElementById('tab-btn-api');
+			const btnHub = document.getElementById('tab-btn-hub');
 
-			if (apiToggle && apiContent) {
-				apiToggle.addEventListener('click', () => {
-					apiContent.classList.toggle('hidden');
-					const textEl = document.getElementById('railway-ui-embed-toggle-text');
-					if (textEl) textEl.textContent = apiContent.classList.contains('hidden') ? 'Click to expand' : 'Click to collapse';
-				});
-			}
+			const viewFeed = document.getElementById('tab-view-feed');
+			const viewApi = document.getElementById('tab-view-api');
+			const viewHub = document.getElementById('tab-view-hub');
 
-			if (huntToggle && huntContent) {
-				huntToggle.addEventListener('click', () => {
-					huntContent.classList.toggle('hidden');
-					const textEl = document.getElementById('job-hunt-hub-toggle-text');
-					if (textEl) textEl.textContent = huntContent.classList.contains('hidden') ? 'Click to expand' : 'Click to collapse';
-				});
-			}
-
-			if (apiExpandBtn && apiCard && huntCard) {
-				apiExpandBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					if (apiCard.classList.contains('md:col-span-2')) {
-						apiCard.classList.remove('md:col-span-2');
-						huntCard.classList.remove('hidden');
-						apiExpandBtn.textContent = '↔️ Expand';
-					} else {
-						apiCard.classList.add('md:col-span-2');
-						huntCard.classList.add('hidden');
-						apiExpandBtn.textContent = '↔️ Split View';
-						if (apiContent.classList.contains('hidden')) {
-							apiContent.classList.remove('hidden');
-						}
+			function switchTab(activeBtn, activeView) {
+				[btnFeed, btnApi, btnHub].forEach(btn => {
+					if (btn) {
+						btn.className = 'px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2';
 					}
 				});
+				[viewFeed, viewApi, viewHub].forEach(v => {
+					if (v) v.classList.add('hidden');
+				});
+
+				if (activeBtn) {
+					activeBtn.className = 'px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white shadow-sm transition-all flex items-center gap-2';
+				}
+				if (activeView) {
+					activeView.classList.remove('hidden');
+				}
 			}
 
-			if (huntExpandBtn && huntCard && apiCard) {
-				huntExpandBtn.addEventListener('click', (e) => {
-					e.stopPropagation();
-					if (huntCard.classList.contains('md:col-span-2')) {
-						huntCard.classList.remove('md:col-span-2');
-						apiCard.classList.remove('hidden');
-						huntExpandBtn.textContent = '↔️ Expand';
-					} else {
-						huntCard.classList.add('md:col-span-2');
-						apiCard.classList.add('hidden');
-						huntExpandBtn.textContent = '↔️ Split View';
-						if (huntContent.classList.contains('hidden')) {
-							huntContent.classList.remove('hidden');
-						}
-					}
-				});
-			}
+			if (btnFeed) btnFeed.addEventListener('click', () => switchTab(btnFeed, viewFeed));
+			if (btnApi) btnApi.addEventListener('click', () => switchTab(btnApi, viewApi));
+			if (btnHub) btnHub.addEventListener('click', () => switchTab(btnHub, viewHub));
 		});
 	</script>
 </body>
