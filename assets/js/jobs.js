@@ -3839,6 +3839,7 @@
 			var statusClass = 'status-' + status;
 			var jobKey = normalizeJobKey(job);
 			var isNewSinceLastRefresh = !!(jobKey && latestAddedJobKeys[jobKey]);
+			var newCardClass = isNewSinceLastRefresh ? ' ring-2 ring-emerald-500/50' : '';
 			var cleanTitle = cleanText(job.title || 'Job Listing');
 			var cleanCompany = cleanText(job.company || 'Unknown');
 			var cleanLoc = cleanText(job.location || 'Remote');
