@@ -435,8 +435,13 @@
 		if (duckduckgoResultsWrap && states['duckduckgo-results-wrap']) duckduckgoResultsWrap.classList.toggle('collapsed', states['duckduckgo-results-wrap']);
 	}
 	function showFrame() {
-		if (frameWrap && frame && frameWrap.classList.contains('hidden')) {
+		if (frameWrap) {
 			frameWrap.classList.remove('hidden');
+			frameWrap.classList.remove('collapsed');
+			var content = document.getElementById('docs-frame-content');
+			if (content) content.classList.remove('hidden');
+			var minBtn = document.getElementById('docs-frame-minimize');
+			if (minBtn) minBtn.textContent = '−';
 		}
 	}
 	function showGitHubResults() {
