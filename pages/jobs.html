@@ -1613,7 +1613,10 @@
 			</div>
 			<div class="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
 				<span id="assistant-mode-status">⚡ Basic Mode (0MB download, instant).</span>
-				<button type="button" id="assistant-clear" class="px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition">Clear</button>
+				<div class="flex items-center gap-1.5">
+					<button type="button" id="assistant-clear-cache" class="px-2 py-0.5 rounded border border-rose-300 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs font-medium hover:bg-rose-100 transition" title="Purge downloaded ONNX model binaries from browser storage & free space">🗑️ Clear Model Cache</button>
+					<button type="button" id="assistant-clear" class="px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition">Clear Chat</button>
+				</div>
 			</div>
 		</div>
 	</div>
