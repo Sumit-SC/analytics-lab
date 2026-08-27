@@ -183,13 +183,13 @@
 
 			<!-- Tech mode: DevDocs panel (visible) + GitHub results panel + code runner, JupyterLite, quick launch -->
 			<div id="playground-content-tech">
-				<!-- DevDocs panel: always visible on tech side (no longer hidden) -->
-				<div id="docs-frame-wrap" class="mb-8 mt-0 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+				<!-- DevDocs panel: closed by default -->
+				<div id="docs-frame-wrap" class="hidden mb-8 mt-0 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
 					<div class="px-3 py-2 text-xs text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
 						<span>DevDocs · Enable Python / SQL / Pandas in DevDocs for best results.</span>
-						<button type="button" id="docs-frame-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">−</button>
+						<button type="button" id="docs-frame-minimize" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-semibold" aria-label="Minimize">+</button>
 					</div>
-					<div id="docs-frame-content">
+					<div id="docs-frame-content" class="hidden">
 						<iframe id="docs-frame" title="DevDocs" class="w-full h-[420px] bg-white dark:bg-gray-900" loading="lazy" src="https://devdocs.io/"></iframe>
 					</div>
 				</div>
@@ -266,10 +266,11 @@
 						<div class="flex flex-wrap items-center gap-2 text-xs">
 							<label for="playground-model-select" class="font-bold text-gray-700 dark:text-gray-300">AI Agent:</label>
 							<select id="playground-model-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
-								<option value="qwen25coder">🏆 Pro Coder (Qwen 2.5 Coder 290MB, 8K)</option>
+								<option value="basic" selected>⚡ Basic Mode (0MB - Instant FAQ)</option>
 								<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K)</option>
+								<option value="qwen25coder">🏆 Pro Coder (Qwen 2.5 Coder 290MB, 8K)</option>
 								<option value="qwen">🧠 Logic Agent (Qwen 1.5 250MB, 4K)</option>
-								<option value="flan">⚡ Instant FAQ (LaMini 77MB, 512)</option>
+								<option value="flan">📦 Standard Local AI (LaMini 77MB, 512)</option>
 							</select>
 							<label for="lang" class="font-bold text-gray-700 dark:text-gray-300">Language:</label>
 							<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2.5 py-1.5 font-semibold">

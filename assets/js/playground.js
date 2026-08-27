@@ -27,7 +27,8 @@
 		if (contentNontech) contentNontech.classList.toggle('hidden', isTech);
 		if (hubTech) hubTech.classList.toggle('hidden', !isTech);
 		if (hubNontech) hubNontech.classList.toggle('hidden', isTech);
-		if (docsWrap) docsWrap.classList.toggle('hidden', !isTech);
+		// DevDocs panel remains hidden by default until explicitly searched or opened
+		if (docsWrap) docsWrap.classList.add('hidden');
 		var searchHistWrap = document.getElementById('hub-search-history');
 		if (searchHistWrap) searchHistWrap.classList.toggle('hidden', !isTech);
 		var githubResultsWrap = document.getElementById('github-results-wrap');
@@ -1075,6 +1076,17 @@
 	if (pgModelSelect) {
 		pgModelSelect.addEventListener('change', function () {
 			var m = pgModelSelect.value;
+			if (m === 'basic') return;
+			var assistantPanel = document.getElementById('assistant-panel');
+			var assistantOverlay = document.getElementById('assistant-overlay');
+			if (assistantPanel) {
+				assistantPanel.classList.remove('hidden');
+				assistantPanel.setAttribute('aria-hidden', 'false');
+			}
+			if (assistantOverlay) {
+				assistantOverlay.classList.remove('hidden');
+				assistantOverlay.setAttribute('aria-hidden', 'false');
+			}
 			var assistantSelect = document.getElementById('assistant-model-select');
 			if (assistantSelect) {
 				assistantSelect.value = m;
