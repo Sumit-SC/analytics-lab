@@ -1586,15 +1586,15 @@
 					aria-label="Close assistant">&#10005;</button>
 			</div>
 			<!-- Unified Model Selector Dropdown -->
-			<div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80">
-				<label for="assistant-model-select" class="text-xs font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1.5 whitespace-nowrap">
-					<span>⚙️ AI Model:</span>
+			<div class="flex items-center gap-2 p-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 min-w-0 max-w-full overflow-hidden">
+				<label for="assistant-model-select" class="text-xs font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1 shrink-0">
+					<span>⚙️ Model:</span>
 				</label>
-				<select id="assistant-model-select" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-xs font-bold text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-sm">
-					<option value="basic">⚡ Basic Mode (0MB Download - Instant FAQ &amp; API)</option>
-					<option value="flan">📦 Standard Local AI — LaMini Flan-T5 (~77MB ONNX, 512 context)</option>
-					<option value="smoll">🚀 Advanced Local AI — SmollLM2 135M (~90MB ONNX, 2K context)</option>
-					<option value="qwen">🏆 Pro Local AI — Qwen 1.5 0.5B (~250MB ONNX, 4K context)</option>
+				<select id="assistant-model-select" class="flex-1 min-w-0 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-xs font-bold text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-sm truncate">
+					<option value="basic">⚡ Basic Mode (0MB - Instant FAQ &amp; API)</option>
+					<option value="flan">📦 Standard Local AI (LaMini 77MB)</option>
+					<option value="smoll">🚀 Advanced Local AI (SmollLM2 90MB)</option>
+					<option value="qwen">🏆 Pro Local AI (Qwen 250MB)</option>
 				</select>
 			</div>
 
