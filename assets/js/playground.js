@@ -1086,10 +1086,12 @@
 			var assistantOverlay = document.getElementById('assistant-overlay');
 			if (assistantPanel) {
 				assistantPanel.classList.remove('hidden');
+				assistantPanel.classList.add('open');
 				assistantPanel.setAttribute('aria-hidden', 'false');
 			}
 			if (assistantOverlay) {
 				assistantOverlay.classList.remove('hidden');
+				assistantOverlay.classList.add('show');
 				assistantOverlay.setAttribute('aria-hidden', 'false');
 			}
 			var assistantSelect = document.getElementById('assistant-model-select');
