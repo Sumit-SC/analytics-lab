@@ -475,6 +475,39 @@
 		} catch (e) {}
 	})();
 
+	var activeDownloadCard = null;
+
+	function createOrUpdateDownloadCard(label, fileName, pct) {
+		if (!activeDownloadCard || !document.body.contains(activeDownloadCard)) {
+			activeDownloadCard = document.createElement('div');
+			activeDownloadCard.className = 'my-3 p-3.5 rounded-xl border border-primary/40 bg-primary/10 space-y-2 font-sans shadow-md';
+			messagesEl.appendChild(activeDownloadCard);
+		}
+
+		var percentNum = Math.min(100, Math.max(0, Math.round(pct || 0)));
+		var isDone = percentNum >= 100;
+
+		var html = '<div class="flex items-center justify-between text-xs font-bold text-gray-800 dark:text-gray-100">';
+		html += '<span>' + (isDone ? '🎉 Model Ready!' : '📥 Downloading ' + escapeHtml(label)) + '</span>';
+		html += '<span class="text-primary font-extrabold text-sm">' + percentNum + '%</span>';
+		html += '</div>';
+
+		if (fileName && !isDone) {
+			html += '<p class="text-[11px] text-gray-600 dark:text-gray-400 font-mono truncate">File: ' + escapeHtml(fileName) + '</p>';
+		}
+
+		html += '<div class="w-full bg-gray-200 dark:bg-gray-700 h-2.5 rounded-full overflow-hidden shadow-inner mt-1.5">';
+		html += '<div class="bg-primary h-full transition-all duration-200 rounded-full" style="width: ' + percentNum + '%"></div>';
+		html += '</div>';
+
+		if (isDone) {
+			html += '<p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold pt-1">✅ Loaded into browser WebAssembly. You can now chat offline!</p>';
+		}
+
+		activeDownloadCard.innerHTML = html;
+		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
 	async function ensureModelLoaded(modelId) {
 		var targetId = modelId || selectedModel || 'flan';
 		if (targetId === 'basic') return null;
@@ -499,6 +532,7 @@
 
 			setModeStatus('⌛ Initializing ' + label + '…');
 			updateProgressBar(0, 'Initializing ' + label + '…');
+			createOrUpdateDownloadCard(label, 'Starting connection to CDN…', 0);
 
 			try {
 				var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
@@ -507,31 +541,46 @@
 				modelPipeline = await mod.pipeline(task, modelRepo, {
 					quantized: true,
 					progress_callback: function (info) {
-						if (info && info.status === 'progress' && info.total) {
-							var pct = Math.round((info.loaded / info.total) * 100);
-							var fileName = (info.file || '').split('/').pop();
-							setModeStatus('📥 Downloading ' + fileName + ': ' + pct + '%');
+						if (!info) return;
+						var pct = 0;
+						if (typeof info.progress === 'number') {
+							pct = info.progress <= 1 ? info.progress * 100 : info.progress;
+						} else if (info.loaded && info.total) {
+							pct = (info.loaded / info.total) * 100;
+						}
+
+						var fileName = (info.file || '').split('/').pop();
+
+						if (info.status === 'progress' || info.status === 'downloading') {
+							setModeStatus('📥 Downloading ' + fileName + ': ' + Math.round(pct) + '%');
 							updateProgressBar(pct, 'Downloading ' + fileName + '…');
-						} else if (info && info.status === 'initiate') {
-							var fName = (info.file || '').split('/').pop();
-							setModeStatus('📥 Starting download: ' + fName + '…');
-							updateProgressBar(0, 'Starting download: ' + fName + '…');
-						} else if (info && info.status === 'done') {
+							createOrUpdateDownloadCard(label, fileName, pct);
+						} else if (info.status === 'initiate') {
+							setModeStatus('📥 Starting download: ' + fileName + '…');
+							updateProgressBar(0, 'Starting download: ' + fileName + '…');
+							createOrUpdateDownloadCard(label, fileName, 0);
+						} else if (info.status === 'done') {
 							setModeStatus('⚡ Processing model weights into WebAssembly…');
 							updateProgressBar(99, 'Loading weights into WebAssembly…');
+							createOrUpdateDownloadCard(label, 'Processing WebAssembly…', 99);
 						}
 					}
 				});
 
 				selectedModelId = targetId;
+				selectedModel = targetId;
+				try { localStorage.setItem(MODE_KEY, targetId); } catch (e) {}
+				updateSelectUI();
+
 				updateProgressBar(100, 'Model ready!');
+				createOrUpdateDownloadCard(label, 'Complete', 100);
 				setModeStatus('✅ Bot Ready (' + targetId.toUpperCase() + ').');
 
 				try {
 					localStorage.setItem('assistant_downloaded_model', targetId);
 				} catch (e) {}
 
-				var greetMsg = '🎉 ' + label + ' downloaded & loaded into browser WebAssembly!\n\nHi there! I am your offline AI interview coach. Ask me any question, paste a job description, or request mock interview practice!';
+				var greetMsg = '🎉 ' + label + ' downloaded & ready in WebAssembly!\n\nHi there! I am your offline AI interview coach. Ask me any question or paste a job description to begin!';
 				add('assistant', greetMsg, null);
 				push({ role: 'assistant', text: greetMsg });
 
