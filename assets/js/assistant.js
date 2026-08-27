@@ -456,6 +456,25 @@
 		return modelLoading;
 	}
 
+	var clearCacheBtn = document.getElementById('assistant-clear-cache');
+	if (clearCacheBtn) {
+		clearCacheBtn.addEventListener('click', function () {
+			modelPipeline = null;
+			modelLoading = null;
+			if (typeof window !== 'undefined' && window.caches) {
+				window.caches.keys().then(function (names) {
+					names.forEach(function (name) {
+						if (name.indexOf('transformers') !== -1 || name.indexOf('onnx') !== -1) {
+							window.caches.delete(name);
+						}
+					});
+				}).catch(function () {});
+			}
+			setModeStatus('🗑️ Model Cache Purged! Disk space freed.');
+			add('assistant', '🗑️ Model storage cache purged from browser. Any future LLM selection will download fresh on-demand.', null);
+		});
+	}
+
 	if (clearBtn) {
 		clearBtn.addEventListener('click', function () {
 			clearAll();
