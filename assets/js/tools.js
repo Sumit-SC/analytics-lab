@@ -335,6 +335,7 @@
 	// ----------------------------------------------------
 	// 🤖 AI Coding & Live Debugger Sandbox Engine
 	// ----------------------------------------------------
+	var modelSelect = document.getElementById('coder-model-select');
 	var langSelect = document.getElementById('coder-lang-select');
 	var fileInput = document.getElementById('coder-file-input');
 	var filenameLabel = document.getElementById('coder-filename-label');
@@ -347,6 +348,25 @@
 	var btnClear = document.getElementById('coder-btn-clear');
 	var btnConsoleClear = document.getElementById('coder-console-clear');
 	var statusLabel = document.getElementById('coder-ai-status');
+
+	if (modelSelect) {
+		modelSelect.addEventListener('change', function () {
+			var m = modelSelect.value;
+			var assistantSelect = document.getElementById('assistant-model-select');
+			if (assistantSelect) {
+				assistantSelect.value = m;
+				assistantSelect.dispatchEvent(new Event('change'));
+			}
+			if (statusLabel) {
+				var labels = {
+					smoll: 'Lite Tutor (~90MB, 2K Context) Active',
+					qwen25coder: 'Pro Coder (~290MB, 8K Context) Active',
+					flan: 'Instant FAQ (~77MB, 512 Tokens) Active'
+				};
+				statusLabel.textContent = labels[m] || 'Model Selected';
+			}
+		});
+	}
 
 	if (langSelect && inputCode) {
 		langSelect.addEventListener('change', function () {
