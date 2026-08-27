@@ -107,7 +107,7 @@
 	window.__trendsRssProxyBase = configuredTrendsProxy || 'https://playground-serveless.vercel.app/api/rss';
 	function fetchJsonWithTimeout(url, timeoutMs) {
 		var controller = new AbortController();
-		var t = setTimeout(function () { controller.abort(); }, timeoutMs || 12000);
+		var t = setTimeout(function () { controller.abort(); }, timeoutMs || 8000);
 		return fetch(url, { signal: controller.signal }).then(function (r) {
 			clearTimeout(t);
 			return r.ok ? r.json() : null;
@@ -116,12 +116,44 @@
 			return null;
 		});
 	}
+
 	window.__trendsFetchRss = function (feedUrl, count) {
-		var u = window.__trendsRssProxyBase + '?url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(count || 10));
-		var rss2json = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(count || 10));
-		return fetchJsonWithTimeout(u, 12000).then(function (primary) {
+		var limit = count || 10;
+		var u = window.__trendsRssProxyBase + '?url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(limit));
+		var rss2json = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl) + '&count=' + encodeURIComponent(String(limit));
+		var allOrigins = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl);
+
+		function parseXmlToItems(xmlText) {
+			try {
+				var parser = new DOMParser();
+				var xmlDoc = parser.parseFromString(xmlText, "text/xml");
+				var items = xmlDoc.querySelectorAll("item");
+				var result = [];
+				items.forEach(function (node, idx) {
+					if (idx >= limit) return;
+					var titleNode = node.querySelector("title");
+					var linkNode = node.querySelector("link");
+					var pubNode = node.querySelector("pubDate");
+					var title = titleNode ? titleNode.textContent : "";
+					var link = linkNode ? linkNode.textContent : "";
+					var pubDate = pubNode ? pubNode.textContent : "";
+					if (title) result.push({ title: title, link: link, pubDate: pubDate });
+				});
+				return result.length ? { items: result } : null;
+			} catch (e) {
+				return null;
+			}
+		}
+
+		return fetchJsonWithTimeout(u, 5000).then(function (primary) {
 			if (primary && Array.isArray(primary.items) && primary.items.length) return primary;
-			return fetchJsonWithTimeout(rss2json, 12000);
+			return fetchJsonWithTimeout(rss2json, 5000);
+		}).then(function (res) {
+			if (res && Array.isArray(res.items) && res.items.length) return res;
+			return fetchJsonWithTimeout(allOrigins, 6000).then(function (ao) {
+				if (ao && ao.contents) return parseXmlToItems(ao.contents);
+				return null;
+			});
 		});
 	};
 
@@ -164,9 +196,12 @@
 	setTimeout(function () {
 		injectLoadButtons();
 		observeSections();
-		// Eager-load key sections so page doesn't feel static on first open.
-		['live-breaking', 'alerts', 'hn', 'google-news', 'inshorts', 'wiki', 'devto', 'github'].forEach(function (id) {
-			if (window.__trendsLoaders[id]) window.runTrendsLoader(id, false);
+		// Eagerly trigger load for ALL sections on page load so cards never stay blank
+		var allSectionIds = ['live-breaking', 'alerts', 'hn', 'google-news', 'inshorts', 'wiki', 'devto', 'github', 'medium', 'visualcapitalist', 'reddit-ds', 'reddit-ml', 'torrentfreak', 'xda', 'visual', 'tv-schedule', 'anime'];
+		allSectionIds.forEach(function (id) {
+			if (window.__trendsLoaders[id]) {
+				window.runTrendsLoader(id, false);
+			}
 		});
 
 		// Region selector wiring
@@ -176,18 +211,16 @@
 			regionSelect.addEventListener('change', function () {
 				setNewsRegion(regionSelect.value);
 				try {
-					// Clear cached news-related sections so next load uses the new region
 					['google-news', 'inshorts', 'live-breaking'].forEach(function (id) {
 						sessionStorage.removeItem(TRENDS_CACHE_PREFIX + id);
 					});
 				} catch (e) {}
-				// Force refresh visible news sections immediately
 				['google-news', 'inshorts', 'live-breaking'].forEach(function (id) {
 					if (window.__trendsLoaders[id]) window.runTrendsLoader(id, true);
 				});
 			});
 		}
-	}, 0);
+	}, 100);
 })();
 
 (function () {
