@@ -432,6 +432,7 @@
 	};
 
 	function promptModelDownload(modelId) {
+		window.promptModelDownload = promptModelDownload;
 		var spec = MODEL_SPECS[modelId] || {
 			name: MODEL_LABELS[modelId] || modelId,
 			size: '~100 MB - 300 MB',
