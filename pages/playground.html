@@ -254,25 +254,46 @@
 					</div>
 				</div>
 
-				<section class="mb-10 material-card rounded-xl border-2 border-gray-200 dark:border-gray-600 p-4 sm:p-6 material-elevation-2">
-					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Run code in the browser</h2>
-					<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Python (Pyodide), JavaScript, SQL (sql.js).</p>
-					<div class="flex flex-wrap items-center gap-3 mb-2">
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Language:</label>
-						<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-3 py-1.5 text-sm font-medium">
-							<option value="python">Python</option>
-							<option value="javascript">JavaScript</option>
-							<option value="sql">SQL (SQLite)</option>
-						</select>
+				<section class="mb-10 material-card rounded-xl border-2 border-gray-200 dark:border-gray-600 p-4 sm:p-6 material-elevation-2 space-y-3">
+					<div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+						<div>
+							<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+								<span>Run Code &amp; AI Debugger</span>
+								<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">Qwen 2.5 Coder 8K</span>
+							</h2>
+							<p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Python (Pyodide), JavaScript, SQL (sql.js) + In-Browser AI Debugger &amp; Code Assistant.</p>
+						</div>
+						<div class="flex flex-wrap items-center gap-2 text-xs">
+							<label for="playground-model-select" class="font-bold text-gray-700 dark:text-gray-300">AI Model:</label>
+							<select id="playground-model-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
+								<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K)</option>
+								<option value="qwen25coder">🏆 Pro Coder (Qwen 2.5 Coder 290MB, 8K)</option>
+								<option value="flan">⚡ Instant FAQ (LaMini 77MB, 512)</option>
+							</select>
+							<label for="lang" class="font-bold text-gray-700 dark:text-gray-300">Language:</label>
+							<select id="lang" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2.5 py-1.5 font-semibold">
+								<option value="python">Python</option>
+								<option value="javascript">JavaScript</option>
+								<option value="sql">SQL (SQLite)</option>
+							</select>
+						</div>
 					</div>
+
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<div class="flex flex-wrap items-center gap-2">
+							<button type="button" id="run" class="material-button px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold material-elevation-2">▶ Run Code Live</button>
+							<button type="button" id="playground-btn-debug" class="px-3 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow transition">🛠️ AI Fix &amp; Debug</button>
+							<button type="button" id="playground-btn-optimize" class="px-3 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow transition">⚡ Optimize Code</button>
+							<button type="button" id="playground-btn-test" class="px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow transition">🧪 Generate Tests</button>
+						</div>
+						<span id="status" class="text-xs text-gray-500 dark:text-gray-400"></span>
+					</div>
+
 					<div class="code-editor-wrap dark:border-gray-700 dark:bg-gray-900">
 						<div id="line-nums" class="code-line-nums" aria-hidden="true">1</div>
 						<textarea id="code" class="text-gray-800 dark:text-gray-200" spellcheck="false" placeholder="print('Hello')"></textarea>
 					</div>
-					<div class="flex items-center gap-2 mt-2">
-						<button type="button" id="run" class="material-button px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium material-elevation-2">Run</button>
-						<span id="status" class="text-xs text-gray-500 dark:text-gray-400"></span>
-					</div>
+
 					<div id="sql-actions" class="hidden mt-3 flex flex-wrap items-center gap-2">
 						<button type="button" id="sql-reset" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold">Reset DB</button>
 						<button type="button" id="sql-sample" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs font-semibold">Load sample data</button>

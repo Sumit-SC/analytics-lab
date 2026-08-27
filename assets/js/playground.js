@@ -1065,4 +1065,59 @@
 			sendBtn.click();
 		}
 	});
+
+	// AI Debugger & Code Actions on Playground
+	var pgModelSelect = document.getElementById('playground-model-select');
+	var pgBtnDebug = document.getElementById('playground-btn-debug');
+	var pgBtnOptimize = document.getElementById('playground-btn-optimize');
+	var pgBtnTest = document.getElementById('playground-btn-test');
+
+	if (pgModelSelect) {
+		pgModelSelect.addEventListener('change', function () {
+			var m = pgModelSelect.value;
+			var assistantSelect = document.getElementById('assistant-model-select');
+			if (assistantSelect) {
+				assistantSelect.value = m;
+				assistantSelect.dispatchEvent(new Event('change'));
+			}
+		});
+	}
+
+	function triggerPlaygroundAiAction(promptPrefix) {
+		var langEl = document.getElementById('lang');
+		var lang = langEl ? langEl.value : 'python';
+		var codeEl = document.getElementById('code');
+		var code = (codeEl ? codeEl.value : '').trim();
+		var outEl = document.getElementById('out');
+		var consoleText = (outEl ? outEl.textContent : '').trim();
+
+		if (!code) {
+			window.alert('Please enter or paste code in the editor first!');
+			return;
+		}
+
+		var fullPrompt = promptPrefix + '\n\nLanguage: ' + lang.toUpperCase() + '\nCode:\n```' + lang + '\n' + code + '\n```\n\nConsole output / Error:\n' + consoleText + '\n\nPlease analyze, debug, and provide the updated code with explanations.';
+
+		if (typeof window.openAssistantWithMessage === 'function') {
+			window.openAssistantWithMessage(fullPrompt);
+		} else {
+			window.prompt('Copy this prompt for AI Coding Agent:', fullPrompt);
+		}
+	}
+
+	if (pgBtnDebug) {
+		pgBtnDebug.addEventListener('click', function () {
+			triggerPlaygroundAiAction('🛠️ Help me debug and fix syntax/logic errors in this code block:');
+		});
+	}
+	if (pgBtnOptimize) {
+		pgBtnOptimize.addEventListener('click', function () {
+			triggerPlaygroundAiAction('⚡ Help me optimize performance, memory efficiency, and vectorization for this code:');
+		});
+	}
+	if (pgBtnTest) {
+		pgBtnTest.addEventListener('click', function () {
+			triggerPlaygroundAiAction('🧪 Generate comprehensive unit tests (pytest / unittest / Jest) for this code:');
+		});
+	}
 })();
