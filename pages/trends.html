@@ -266,6 +266,42 @@
 				<ul id="trends-github-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
 			</section>
 
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="aim">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Analytics India Magazine (AIM)</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">AI news, LLM research &amp; data engineering updates.</p>
+					</div>
+					<a href="https://analyticsindiamag.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Open AIM ↗</a>
+				</div>
+				<p id="trends-aim-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-aim-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="microsoft">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Microsoft Learn &amp; Azure News</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Official Microsoft AI, Fabric &amp; Cloud architecture updates.</p>
+					</div>
+					<a href="https://learn.microsoft.com/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">MS Learn ↗</a>
+				</div>
+				<p id="trends-microsoft-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-microsoft-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
+			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="tableau">
+				<div class="flex items-center justify-between mb-2">
+					<div>
+						<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Tableau Public &amp; Viz Gallery</h2>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Featured community data visualizations &amp; dashboard designs.</p>
+					</div>
+					<a href="https://public.tableau.com/en-us/s/gallery" target="_blank" rel="noopener" class="text-xs text-primary hover:underline">Tableau Viz ↗</a>
+				</div>
+				<p id="trends-tableau-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading…</p>
+				<ul id="trends-tableau-list" class="space-y-2 text-sm text-gray-800 dark:text-gray-100"></ul>
+			</section>
+
 			<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="tech" data-trend-section-id="torrentfreak">
 				<div class="flex items-center justify-between mb-2">
 					<div>
@@ -385,6 +421,24 @@
 					</ul>
 				</div>
 			</div>
+		</section>
+
+		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" id="trends-movies-section" data-trend-category="entertainment" data-trend-section-id="movies">
+			<div class="flex items-center justify-between mb-2">
+				<div>
+					<h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+						<span>🎬 Trending Movies, Series &amp; Posters</span>
+					</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Live IMDb / OMDb poster grid &amp; top releases.</p>
+				</div>
+				<a href="https://www.imdb.com/chart/moviemeter/" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-medium">IMDb Meter ↗</a>
+			</div>
+			<div class="flex flex-wrap gap-2 mb-3">
+				<input type="text" id="trends-movie-input" class="flex-1 min-w-[140px] px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-xs focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Search any movie or show (e.g. Inception, Dark)…">
+				<button type="button" id="trends-movie-btn" class="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 font-bold text-xs transition-colors">Search OMDb</button>
+			</div>
+			<p id="trends-movies-status" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Loading trending movie posters…</p>
+			<div id="trends-movies-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs"></div>
 		</section>
 
 		<section class="trends-section material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1" data-trend-category="entertainment" data-trend-section-id="actor-search">

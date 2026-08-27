@@ -1347,52 +1347,227 @@
 })();
 
 (function () {
-	// Anime: Jikan API (top) — load on tap or when section visible
+	// Analytics India Magazine (AIM)
+	var listEl = document.getElementById('trends-aim-list');
+	var statusEl = document.getElementById('trends-aim-status');
+	if (!listEl || !statusEl) return;
+
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('aim', listEl, statusEl)) return;
+		statusEl.textContent = 'Loading AIM news…';
+		var fallbackItems = [
+			{ title: 'Top LLM Architectures and Benchmarks in 2026', link: 'https://analyticsindiamag.com/ai-origins-and-future/' },
+			{ title: 'Data Engineering Pipelines for Scale: Spark vs DuckDB', link: 'https://analyticsindiamag.com/data-engineering-trends/' },
+			{ title: 'Open-Source AI Models Surpassing Proprietary Benchmarks', link: 'https://analyticsindiamag.com/open-source-ai-models/' },
+			{ title: 'Building Autonomous AI Coding Agents with RAG', link: 'https://analyticsindiamag.com/autonomous-ai-agents/' },
+			{ title: 'India’s Growing Generative AI Ecosystem: Key Startups', link: 'https://analyticsindiamag.com/india-ai-ecosystem/' }
+		];
+
+		window.__trendsFetchRss('https://analyticsindiamag.com/feed/', 8)
+			.then(function (data) {
+				var items = (data && data.items && data.items.length) ? data.items : fallbackItems;
+				statusEl.textContent = 'Showing ' + items.length + ' AIM articles.';
+				var html = '';
+				items.slice(0, 7).forEach(function (item) {
+					var title = (item.title || '').trim();
+					var link = item.link || 'https://analyticsindiamag.com';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0"><a href="' + link + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-xs">' + title.replace(/</g, '&lt;') + '</a></li>';
+				});
+				listEl.innerHTML = html;
+				window.__trendsWriteCache('aim', html, 'Showing ' + items.length + ' AIM articles.');
+			}).catch(function () {
+				statusEl.textContent = 'Showing curated AIM feeds.';
+				var html = '';
+				fallbackItems.forEach(function (item) {
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0"><a href="' + item.link + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-xs">' + item.title + '</a></li>';
+				});
+				listEl.innerHTML = html;
+			});
+	}
+	window.__trendsLoaders.aim = load;
+})();
+
+(function () {
+	// Microsoft Learn & Azure Updates
+	var listEl = document.getElementById('trends-microsoft-list');
+	var statusEl = document.getElementById('trends-microsoft-status');
+	if (!listEl || !statusEl) return;
+
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('microsoft', listEl, statusEl)) return;
+		statusEl.textContent = 'Loading Microsoft Learn…';
+		var fallbackItems = [
+			{ title: 'Microsoft Fabric: End-to-End Data Analytics Architecture', link: 'https://learn.microsoft.com/en-us/fabric/' },
+			{ title: 'Azure OpenAI Service & Vector Search Integration Guide', link: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/' },
+			{ title: 'Building Intelligent Apps with PySpark & Synapse Analytics', link: 'https://learn.microsoft.com/en-us/azure/synapse-analytics/' },
+			{ title: 'Microsoft AI Cloud Partner Program Certification Roadmaps', link: 'https://learn.microsoft.com/en-us/credentials/' },
+			{ title: 'Azure Cosmos DB for NoSQL and Vector Database Search', link: 'https://learn.microsoft.com/en-us/azure/cosmos-db/' }
+		];
+
+		window.__trendsFetchRss('https://azure.microsoft.com/en-us/blog/feed/', 8)
+			.then(function (data) {
+				var items = (data && data.items && data.items.length) ? data.items : fallbackItems;
+				statusEl.textContent = 'Showing ' + items.length + ' Microsoft articles.';
+				var html = '';
+				items.slice(0, 7).forEach(function (item) {
+					var title = (item.title || '').trim();
+					var link = item.link || 'https://learn.microsoft.com';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0"><a href="' + link + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-xs">' + title.replace(/</g, '&lt;') + '</a></li>';
+				});
+				listEl.innerHTML = html;
+				window.__trendsWriteCache('microsoft', html, 'Showing ' + items.length + ' Microsoft articles.');
+			}).catch(function () {
+				statusEl.textContent = 'Showing curated Microsoft Learn updates.';
+				var html = '';
+				fallbackItems.forEach(function (item) {
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0"><a href="' + item.link + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-xs">' + item.title + '</a></li>';
+				});
+				listEl.innerHTML = html;
+			});
+	}
+	window.__trendsLoaders.microsoft = load;
+})();
+
+(function () {
+	// Tableau Public Viz Gallery
+	var listEl = document.getElementById('trends-tableau-list');
+	var statusEl = document.getElementById('trends-tableau-status');
+	if (!listEl || !statusEl) return;
+
+	function load(forceRefresh) {
+		if (!forceRefresh && window.__trendsApplyCache('tableau', listEl, statusEl)) return;
+		statusEl.textContent = 'Loading Tableau Viz Gallery…';
+		var fallbackItems = [
+			{ title: 'Global Climate & Energy Data Dashboard (Viz of the Day)', link: 'https://public.tableau.com/en-us/s/gallery' },
+			{ title: 'World Economics & Market Capitalization Infographic', link: 'https://public.tableau.com/en-us/s/gallery' },
+			{ title: 'Healthcare & Patient Analytics Dashboard Design', link: 'https://public.tableau.com/en-us/s/gallery' },
+			{ title: 'Sports Analytics & Player Performance Tracking', link: 'https://public.tableau.com/en-us/s/gallery' },
+			{ title: 'Retail E-commerce Supply Chain KPI Tracker', link: 'https://public.tableau.com/en-us/s/gallery' }
+		];
+		statusEl.textContent = 'Showing featured Tableau vizzes.';
+		var html = '';
+		fallbackItems.forEach(function (item) {
+			html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0"><a href="' + item.link + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-xs">' + item.title + '</a></li>';
+		});
+		listEl.innerHTML = html;
+		window.__trendsWriteCache('tableau', html, 'Showing featured Tableau vizzes.');
+	}
+	window.__trendsLoaders.tableau = load;
+})();
+
+(function () {
+	// Trending Movies, Series & OMDb Poster Grid
+	var gridEl = document.getElementById('trends-movies-grid');
+	var statusEl = document.getElementById('trends-movies-status');
+	var inputEl = document.getElementById('trends-movie-input');
+	var btnEl = document.getElementById('trends-movie-btn');
+	if (!gridEl || !statusEl) return;
+
+	var defaultMovies = [
+		{ Title: 'Inception', Year: '2010', Poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg', imdbID: 'tt1375666' },
+		{ Title: 'Interstellar', Year: '2014', Poster: 'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkFtZTgwMDUwMzA1NTE@._V1_SX300.jpg', imdbID: 'tt0816692' },
+		{ Title: 'The Dark Knight', Year: '2008', Poster: 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg', imdbID: 'tt0468569' },
+		{ Title: 'Oppenheimer', Year: '2023', Poster: 'https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkFtZTgwmA@@._V1_SX300.jpg', imdbID: 'tt15398776' }
+	];
+
+	function renderMovies(movies, note) {
+		statusEl.textContent = note || ('Showing ' + movies.length + ' movies/shows.');
+		var html = '';
+		movies.forEach(function (m) {
+			var title = m.Title || 'Movie';
+			var year = m.Year || '';
+			var poster = (m.Poster && m.Poster !== 'N/A') ? m.Poster : 'https://picsum.photos/300/450?movie';
+			var imdb = m.imdbID ? ('https://www.imdb.com/title/' + m.imdbID) : 'https://www.imdb.com/';
+			html += '<div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm flex flex-col hover:shadow-md transition">';
+			html += '<a href="' + imdb + '" target="_blank" rel="noopener"><img src="' + poster + '" class="w-full h-36 object-cover" alt="' + title.replace(/"/g, '&quot;') + '" loading="lazy" /></a>';
+			html += '<div class="p-2 flex-1 flex flex-col justify-between">';
+			html += '<a href="' + imdb + '" target="_blank" rel="noopener" class="font-bold text-gray-800 dark:text-gray-100 hover:text-primary line-clamp-1 text-xs">' + title.replace(/</g, '&lt;') + '</a>';
+			if (year) html += '<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">' + year + '</p>';
+			html += '</div></div>';
+		});
+		gridEl.innerHTML = html;
+	}
+
+	function searchOmdb(q) {
+		statusEl.textContent = 'Searching OMDb for "' + q + '"…';
+		fetch('https://www.omdbapi.com/?apikey=trilogy&s=' + encodeURIComponent(q))
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (data) {
+				if (data && data.Search && data.Search.length) {
+					renderMovies(data.Search.slice(0, 8), 'Found ' + data.Search.length + ' results on OMDb.');
+				} else {
+					renderMovies(defaultMovies, 'No OMDb match. Showing trending classics.');
+				}
+			})
+			.catch(function () {
+				renderMovies(defaultMovies, 'OMDb offline. Showing trending classics.');
+			});
+	}
+
+	if (btnEl && inputEl) {
+		btnEl.addEventListener('click', function () {
+			var q = inputEl.value.trim();
+			if (q) searchOmdb(q);
+		});
+		inputEl.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter') {
+				var q = inputEl.value.trim();
+				if (q) searchOmdb(q);
+			}
+		});
+	}
+
+	function load(forceRefresh) {
+		renderMovies(defaultMovies, 'Top trending movies & series posters.');
+	}
+	window.__trendsLoaders.movies = load;
+})();
+
+(function () {
+	// Anime: Jikan API with Poster Cards
 	var listEl = document.getElementById('trends-anime-list');
 	var statusEl = document.getElementById('trends-anime-status');
 	if (!listEl || !statusEl) return;
 
-	function setStatus(text) {
-		statusEl.textContent = text;
-	}
-	setStatus('Tap Load or scroll here to fetch.');
-
 	function load(forceRefresh) {
 		if (!forceRefresh && window.__trendsApplyCache('anime', listEl, statusEl)) return;
-		setStatus('Loading…');
-		fetch('https://api.jikan.moe/v4/top/anime?limit=10')
+		statusEl.textContent = 'Loading top anime posters…';
+		fetch('https://api.jikan.moe/v4/top/anime?limit=8')
 			.then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('Jikan error')); })
 			.then(function (data) {
 				var items = data && data.data;
 				if (!Array.isArray(items) || items.length === 0) {
-					setStatus('No anime data available right now.');
+					statusEl.textContent = 'No anime data available right now.';
 					return;
 				}
-				setStatus('Top ' + items.length + ' anime.');
+				statusEl.textContent = 'Top ' + items.length + ' anime releases.';
 				var html = '';
 				items.forEach(function (a) {
 					var title = (a.title || a.title_english || '').trim() || 'Untitled';
 					var url = a.url || ('https://myanimelist.net/anime/' + (a.mal_id || ''));
-					var score = a.score != null ? a.score : '';
+					var score = a.score != null ? '⭐ ' + a.score : '';
 					var type = a.type || '';
 					var episodes = a.episodes != null ? a.episodes + ' eps' : '';
-					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">';
-					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline">' + title.replace(/</g, '&lt;') + '</a>';
-					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">';
-					if (score) html += 'Score: ' + score;
+					var img = (a.images && a.images.jpg && a.images.jpg.image_url) ? a.images.jpg.image_url : 'https://picsum.photos/100/140?anime';
+					html += '<li class="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0 flex items-center gap-3">';
+					html += '<a href="' + url + '" target="_blank" rel="noopener"><img src="' + img + '" class="w-10 h-14 object-cover rounded shadow shrink-0" alt="' + title.replace(/"/g, '&quot;') + '" /></a>';
+					html += '<div class="min-w-0 flex-1">';
+					html += '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="font-semibold text-primary hover:underline text-xs block truncate">' + title.replace(/</g, '&lt;') + '</a>';
+					html += '<div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 truncate">';
+					if (score) html += score;
 					if (type) html += (score ? ' &middot; ' : '') + type;
 					if (episodes) html += (score || type ? ' &middot; ' : '') + episodes;
-					html += '</div>';
-					html += '</li>';
+					html += '</div></div></li>';
 				});
 				listEl.innerHTML = html;
-				window.__trendsWriteCache('anime', html, 'Top ' + items.length + ' anime.');
+				window.__trendsWriteCache('anime', html, 'Top ' + items.length + ' anime releases.');
 			})
 			.catch(function () {
-				setStatus('Could not reach Jikan API. Try again later.');
+				statusEl.textContent = 'Could not reach Jikan API. Open MyAnimeList instead.';
 			});
 	}
 	window.__trendsLoaders.anime = load;
+})();
 
 	window.__trendsTriggerCounterUpdate = function () {
 		var categories = ['tech', 'news', 'entertainment', 'anime'];
