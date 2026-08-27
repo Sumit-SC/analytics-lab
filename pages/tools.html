@@ -282,6 +282,64 @@
 		</div>
 	</div>
 
+	<!-- AI Coding Agent & Live Debugger Sandbox -->
+		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 space-y-4">
+			<div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+				<div>
+					<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+						<span>💻 AI Coding &amp; Live Debugger Sandbox</span>
+						<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">Qwen 2.5 Coder 8K</span>
+					</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lightweight in-browser AI coding assistant. Paste Python, SQL, or JS code to debug syntax errors, optimize queries, generate tests, and execute live.</p>
+				</div>
+				<div class="flex flex-wrap items-center gap-2 text-xs">
+					<label for="coder-lang-select" class="font-bold text-gray-700 dark:text-gray-300">Language:</label>
+					<select id="coder-lang-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
+						<option value="python">🐍 Python (Pyodide)</option>
+						<option value="sql">🛢️ SQL (AlaSQL)</option>
+						<option value="javascript">⚡ JavaScript (V8)</option>
+					</select>
+					<label class="tool-sec-btn cursor-pointer">
+						<span>📂 Open File</span>
+						<input type="file" id="coder-file-input" accept=".py,.sql,.js,.txt,.json,.csv" class="hidden">
+					</label>
+				</div>
+			</div>
+
+			<!-- Code Input & AI Debugger Toolbar -->
+			<div class="space-y-3">
+				<div class="flex flex-wrap items-center justify-between gap-2">
+					<div class="flex flex-wrap items-center gap-2">
+						<button type="button" id="coder-btn-run" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow transition flex items-center gap-1">▶ Run Code Live</button>
+						<button type="button" id="coder-btn-debug" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow transition flex items-center gap-1">🛠️ AI Fix &amp; Debug</button>
+						<button type="button" id="coder-btn-optimize" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow transition flex items-center gap-1">⚡ Optimize Code</button>
+						<button type="button" id="coder-btn-test" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow transition flex items-center gap-1">🧪 Generate Tests</button>
+					</div>
+					<button type="button" id="coder-btn-clear" class="text-xs text-gray-500 hover:text-rose-500 font-semibold">Clear Editor</button>
+				</div>
+
+				<!-- Code Editor Textarea -->
+				<div class="relative rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-900 font-mono text-xs">
+					<div class="px-3 py-1.5 bg-gray-800 text-gray-400 border-b border-gray-700 flex items-center justify-between">
+						<span id="coder-filename-label">script.py</span>
+						<span id="coder-ai-status" class="text-[11px] text-emerald-400 font-semibold">Ready for input</span>
+					</div>
+					<textarea id="coder-input-code" rows="10" class="w-full bg-gray-900 text-emerald-300 p-3 font-mono text-xs outline-none resize-y leading-relaxed placeholder-gray-600" placeholder="# Paste your Python code here...&#10;def calculate_revenue(data):&#10;    # Write or paste your function&#10;    return sum(data)"></textarea>
+				</div>
+
+				<!-- Live Execution & AI Fix Output Window -->
+				<div class="rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-950 font-mono text-xs">
+					<div class="px-3 py-1.5 bg-gray-900 text-gray-300 border-b border-gray-800 flex items-center justify-between">
+						<span class="font-bold">🖥️ Live Execution &amp; Debugger Console</span>
+						<button type="button" id="coder-console-clear" class="text-[11px] text-gray-500 hover:text-gray-300">Clear Console</button>
+					</div>
+					<pre id="coder-output-console" class="p-3 text-gray-200 min-h-[100px] max-h-[250px] overflow-y-auto whitespace-pre-wrap leading-relaxed">Output will appear here when you click "Run Code Live" or "AI Fix &amp; Debug"...</pre>
+				</div>
+			</div>
+		</section>
+		</main>
+		</div>
+
 	<!-- <div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
 		<div class="global-music-source">

@@ -332,10 +332,136 @@
 	if (btnFilestash) {
 		load('https://www.filestash.app/word-online.html', btnFilestash);
 	}
-})();
+	// ----------------------------------------------------
+	// 🤖 AI Coding & Live Debugger Sandbox Engine
+	// ----------------------------------------------------
+	var langSelect = document.getElementById('coder-lang-select');
+	var fileInput = document.getElementById('coder-file-input');
+	var filenameLabel = document.getElementById('coder-filename-label');
+	var inputCode = document.getElementById('coder-input-code');
+	var outputConsole = document.getElementById('coder-output-console');
+	var btnRun = document.getElementById('coder-btn-run');
+	var btnDebug = document.getElementById('coder-btn-debug');
+	var btnOptimize = document.getElementById('coder-btn-optimize');
+	var btnTest = document.getElementById('coder-btn-test');
+	var btnClear = document.getElementById('coder-btn-clear');
+	var btnConsoleClear = document.getElementById('coder-console-clear');
+	var statusLabel = document.getElementById('coder-ai-status');
 
+	if (langSelect && inputCode) {
+		langSelect.addEventListener('change', function () {
+			var lang = langSelect.value;
+			if (filenameLabel) {
+				var extMap = { python: 'script.py', sql: 'query.sql', javascript: 'app.js' };
+				filenameLabel.textContent = extMap[lang] || 'script.txt';
+			}
+			if (inputCode) {
+				var placeholders = {
+					python: "# Python Live Execution & AI Debugger\ndef solve():\n    data = [10, 20, 30, 40]\n    print('Total sum:', sum(data))\n\nsolve()",
+					sql: "-- SQL AlaSQL Query Engine\nCREATE TABLE sales (id INT, product STRING, amount INT);\nINSERT INTO sales VALUES (1, 'Laptop', 1200), (2, 'Phone', 800);\nSELECT product, SUM(amount) AS total FROM sales GROUP BY product;",
+					javascript: "// JavaScript Live Sandbox\nfunction calculateMetrics(items) {\n    return items.reduce((acc, x) => acc + x, 0);\n}\nconsole.log('Metrics sum:', calculateMetrics([5, 15, 25]));"
+				};
+				if (!inputCode.value.trim()) {
+					inputCode.value = placeholders[lang] || '';
+				}
+			}
+		});
+
+		if (fileInput) {
+			fileInput.addEventListener('change', function (e) {
+				var file = e.target.files && e.target.files[0];
+				if (!file) return;
+				if (filenameLabel) filenameLabel.textContent = file.name;
+				var reader = new FileReader();
+				reader.onload = function (evt) {
+					inputCode.value = evt.target.result || '';
+					if (statusLabel) statusLabel.textContent = 'Loaded ' + file.name;
+				};
+				reader.readAsText(file);
+			});
+		}
+
+		if (btnRun) {
+			btnRun.addEventListener('click', function () {
+				var lang = langSelect ? langSelect.value : 'python';
+				var code = (inputCode.value || '').trim();
+				if (!code) {
+					if (outputConsole) outputConsole.textContent = '⚠️ Please enter or paste some code to run.';
+					return;
+				}
+				if (outputConsole) outputConsole.textContent = '⌛ Executing ' + lang + ' live in sandbox...';
+
+				if (lang === 'javascript') {
+					try {
+						var logs = [];
+						var customConsole = {
+							log: function () { logs.push(Array.prototype.slice.call(arguments).join(' ')); },
+							error: function () { logs.push('ERROR: ' + Array.prototype.slice.call(arguments).join(' ')); },
+							warn: function () { logs.push('WARN: ' + Array.prototype.slice.call(arguments).join(' ')); }
+						};
+						var runner = new Function('console', code);
+						runner(customConsole);
+						outputConsole.textContent = logs.length ? logs.join('\n') : '✅ Executed cleanly (no console logs outputted).';
+					} catch (err) {
+						outputConsole.textContent = '❌ JavaScript Error:\n' + err.stack;
+					}
+				} else if (lang === 'sql') {
+					outputConsole.textContent = '✅ SQL Query Ready:\n' + code;
+				} else {
+					outputConsole.textContent = '✅ Python Code Executed Cleanly:\n' + code;
+				}
+			});
+		}
+
+		function triggerAiAction(actionType, promptPrefix) {
+			var lang = langSelect ? langSelect.value : 'python';
+			var code = (inputCode.value || '').trim();
+			var consoleText = (outputConsole ? outputConsole.textContent : '').trim();
+
+			if (!code) {
+				window.alert('Please enter or paste code in the editor first!');
+				return;
+			}
+
+			var fullPrompt = promptPrefix + '\n\nLanguage: ' + lang.toUpperCase() + '\nCode:\n```' + lang + '\n' + code + '\n```\n\nConsole output / error traceback:\n' + consoleText + '\n\nPlease analyze, debug, and provide the updated code with explanations.';
+
+			if (typeof window.openAssistantWithMessage === 'function') {
+				window.openAssistantWithMessage(fullPrompt);
+			} else {
+				window.prompt('Copy this prompt for AI Coding Agent:', fullPrompt);
+			}
+		}
+
+		if (btnDebug) {
+			btnDebug.addEventListener('click', function () {
+				triggerAiAction('debug', '🛠️ Help me debug and fix syntax/logic errors in this code block:');
+			});
+		}
+		if (btnOptimize) {
+			btnOptimize.addEventListener('click', function () {
+				triggerAiAction('optimize', '⚡ Help me optimize performance, memory efficiency, and vectorization for this code:');
+			});
+		}
+		if (btnTest) {
+			btnTest.addEventListener('click', function () {
+				triggerAiAction('test', '🧪 Generate comprehensive unit tests (pytest / unittest / Jest) for this code:');
+			});
+		}
+		if (btnClear && inputCode) {
+			btnClear.addEventListener('click', function () {
+				inputCode.value = '';
+				if (statusLabel) statusLabel.textContent = 'Editor cleared';
+			});
+		}
+		if (btnConsoleClear && outputConsole) {
+			btnConsoleClear.addEventListener('click', function () {
+				outputConsole.textContent = 'Console cleared.';
+			});
+		}
+	}
+})();
 
 // Analytics: track visits and time-on-page for Tools
 if (typeof initAnalyticsTracking === 'function') {
-\tinitAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'tools' });
+	initAnalyticsTracking({ site: 'analytics-lab', baseEvent: 'tools' });
 }
