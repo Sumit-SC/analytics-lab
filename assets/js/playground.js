@@ -1120,4 +1120,29 @@
 			triggerPlaygroundAiAction('🧪 Generate comprehensive unit tests (pytest / unittest / Jest) for this code:');
 		});
 	}
+
+	// Full-screen Large Studio View Toggle
+	var studioExpandBtn = document.getElementById('studio-expand-btn');
+	var codeAgentSection = document.getElementById('code-agent-section');
+	var codeTextarea = document.getElementById('code');
+
+	if (studioExpandBtn && codeAgentSection) {
+		var isExpanded = false;
+		studioExpandBtn.addEventListener('click', function () {
+			isExpanded = !isExpanded;
+			if (isExpanded) {
+				codeAgentSection.classList.add('fixed', 'inset-4', 'z-50', 'bg-white', 'dark:bg-gray-900', 'overflow-y-auto', 'shadow-2xl', 'border-primary', 'p-6');
+				codeAgentSection.classList.remove('mb-10');
+				if (codeTextarea) codeTextarea.style.minHeight = '420px';
+				studioExpandBtn.innerHTML = '<span>🗗 Collapse Studio</span>';
+				studioExpandBtn.className = 'px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold transition shadow flex items-center gap-1';
+			} else {
+				codeAgentSection.classList.remove('fixed', 'inset-4', 'z-50', 'bg-white', 'dark:bg-gray-900', 'overflow-y-auto', 'shadow-2xl', 'border-primary', 'p-6');
+				codeAgentSection.classList.add('mb-10');
+				if (codeTextarea) codeTextarea.style.minHeight = '220px';
+				studioExpandBtn.innerHTML = '<span>🗖 Expand Studio</span>';
+				studioExpandBtn.className = 'px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow flex items-center gap-1';
+			}
+		});
+	}
 })();
