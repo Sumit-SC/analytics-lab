@@ -25,19 +25,21 @@
 	var STORAGE_KEY = 'standalone_assistant_history_v1';
 	var MODE_KEY = 'standalone_assistant_mode_v1';
 	var history = [];
-	var mode = (function () {
-		try {
-			return localStorage.getItem(MODE_KEY) || 'light';
-		} catch (e) {
-			return 'light';
-		}
-	})();
+	function escapeHtml(str) {
+		if (str == null) return '';
+		return String(str)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
 
 	var modelPipeline = null;
 	var modelLoading = null;
 
 	function setModeStatus(t) {
-		if (modeStatus) modeStatus.textContent = t || (mode === 'model' ? 'Full chatbot enabled.' : 'Light mode.');
+		if (modeStatus) modeStatus.textContent = t || '⚡ Basic Mode (0MB download, instant).';
 	}
 	setModeStatus();
 
@@ -421,20 +423,14 @@
 		modelSelectEl.value = selectedModel;
 		modelSelectEl.addEventListener('change', function () {
 			var newModel = modelSelectEl.value;
-			if (newModel === 'basic') {
-				selectedModel = 'basic';
-				try { localStorage.setItem(MODE_KEY, 'basic'); } catch (e) {}
-				updateSelectUI();
-				return;
-			}
+			selectedModel = newModel;
+			try { localStorage.setItem(MODE_KEY, newModel); } catch (e) {}
+			updateSelectUI();
 
-			if (!confirmedModels[newModel] && (!modelPipeline || selectedModelId !== newModel)) {
-				promptModelDownload(newModel, MODEL_LABELS[newModel] || newModel);
-			} else {
-				selectedModel = newModel;
-				try { localStorage.setItem(MODE_KEY, newModel); } catch (e) {}
-				updateSelectUI();
-				ensureModelLoaded(newModel).catch(function () {});
+			if (newModel !== 'basic') {
+				ensureModelLoaded(newModel).catch(function (err) {
+					console.error('Failed to load selected model:', err);
+				});
 			}
 		});
 	}
