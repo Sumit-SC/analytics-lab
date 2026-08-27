@@ -378,22 +378,75 @@
 		setModeStatus(statusMap[selectedModel] || 'Basic Mode.');
 	}
 
-	function promptModelDownload(modelId, label) {
-		var confirmWrap = document.createElement('div');
-		confirmWrap.className = 'my-3 p-3.5 rounded-xl border border-primary/40 bg-primary/5 dark:bg-primary/10 space-y-2.5';
+	var MODEL_SPECS = {
+		'flan': {
+			name: 'Standard LaMini Flan-T5',
+			size: '~77 MB',
+			ram: '~180 MB – 250 MB',
+			context: '512 Tokens',
+			speed: '⚡ Lightning Fast'
+		},
+		'smoll': {
+			name: 'Advanced SmollLM2 135M',
+			size: '~90 MB',
+			ram: '~220 MB – 320 MB',
+			context: '2,048 Tokens (2K)',
+			speed: '🚀 Fast & Precise'
+		},
+		'qwen': {
+			name: 'Pro Qwen 1.5 0.5B',
+			size: '~250 MB',
+			ram: '~400 MB – 550 MB',
+			context: '4,096 Tokens (4K)',
+			speed: '🏆 Technical SOTA'
+		},
+		'smoll360': {
+			name: 'Ultra 8K Qwen 2.5 0.5B',
+			size: '~290 MB',
+			ram: '~450 MB – 600 MB',
+			context: '8,192 Tokens (8K)',
+			speed: '🦙 Long Context SOTA'
+		}
+	};
 
-		var msg = document.createElement('p');
-		msg.className = 'text-xs text-gray-800 dark:text-gray-200 leading-relaxed font-semibold';
-		msg.textContent = '🤖 Download & Enable ' + label + '? This will download ONNX model weights directly to your browser.';
-		confirmWrap.appendChild(msg);
+	function promptModelDownload(modelId) {
+		var spec = MODEL_SPECS[modelId] || {
+			name: MODEL_LABELS[modelId] || modelId,
+			size: '~100 MB - 300 MB',
+			ram: '~300 MB - 600 MB',
+			context: '2,048 Tokens',
+			speed: 'Standard'
+		};
+
+		var confirmWrap = document.createElement('div');
+		confirmWrap.className = 'my-3 p-4 rounded-xl border border-primary/40 bg-primary/5 dark:bg-primary/10 space-y-2.5 font-sans shadow-md';
+
+		var title = document.createElement('h4');
+		title.className = 'text-xs font-bold text-gray-800 dark:text-gray-100 flex items-center gap-1.5';
+		title.innerHTML = '<span>🤖 Confirm Model Download &amp; Hardware Resources</span>';
+		confirmWrap.appendChild(title);
+
+		var specList = document.createElement('div');
+		specList.className = 'space-y-1 text-[11px] text-gray-700 dark:text-gray-300 font-medium';
+		specList.innerHTML =
+			'<p><strong>Model:</strong> ' + escapeHtml(spec.name) + '</p>' +
+			'<p><strong>📥 Download Size:</strong> <span class="text-primary font-bold">' + escapeHtml(spec.size) + '</span> (stored in browser cache)</p>' +
+			'<p><strong>🧠 Est. RAM Footprint:</strong> <span class="text-amber-600 dark:text-amber-400 font-bold">' + escapeHtml(spec.ram) + '</span> WebAssembly RAM</p>' +
+			'<p><strong>⚡ Context Window:</strong> ' + escapeHtml(spec.context) + '</p>';
+		confirmWrap.appendChild(specList);
+
+		var promptText = document.createElement('p');
+		promptText.className = 'text-[11px] text-gray-600 dark:text-gray-400 italic pt-0.5';
+		promptText.textContent = 'Do you want to proceed with downloading and initializing this local model?';
+		confirmWrap.appendChild(promptText);
 
 		var btnsRow = document.createElement('div');
-		btnsRow.className = 'flex flex-wrap items-center gap-2';
+		btnsRow.className = 'flex flex-wrap items-center gap-2 pt-1';
 
 		var btnYes = document.createElement('button');
 		btnYes.type = 'button';
 		btnYes.className = 'px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold shadow hover:bg-primary/90 transition';
-		btnYes.textContent = '✅ Download & Enable (' + label + ')';
+		btnYes.textContent = '✅ Yes, Download & Enable (' + spec.size + ')';
 		btnYes.addEventListener('click', function () {
 			confirmedModels[modelId] = true;
 			confirmWrap.remove();
@@ -407,7 +460,7 @@
 		var btnNo = document.createElement('button');
 		btnNo.type = 'button';
 		btnNo.className = 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition';
-		btnNo.textContent = '❌ Keep Basic Mode (0MB)';
+		btnNo.textContent = '❌ Cancel (Keep Basic 0MB)';
 		btnNo.addEventListener('click', function () {
 			confirmWrap.remove();
 			selectedModel = 'basic';
@@ -425,14 +478,20 @@
 		modelSelectEl.value = selectedModel;
 		modelSelectEl.addEventListener('change', function () {
 			var newModel = modelSelectEl.value;
-			selectedModel = newModel;
-			try { localStorage.setItem(MODE_KEY, newModel); } catch (e) {}
-			updateSelectUI();
+			if (newModel === 'basic') {
+				selectedModel = 'basic';
+				try { localStorage.setItem(MODE_KEY, 'basic'); } catch (e) {}
+				updateSelectUI();
+				return;
+			}
 
-			if (newModel !== 'basic') {
-				ensureModelLoaded(newModel).catch(function (err) {
-					console.error('Failed to load selected model:', err);
-				});
+			if (!confirmedModels[newModel] && (!modelPipeline || selectedModelId !== newModel)) {
+				promptModelDownload(newModel);
+			} else {
+				selectedModel = newModel;
+				try { localStorage.setItem(MODE_KEY, newModel); } catch (e) {}
+				updateSelectUI();
+				ensureModelLoaded(newModel).catch(function () {});
 			}
 		});
 	}
@@ -633,6 +692,9 @@
 	var clearCacheBtn = document.getElementById('assistant-clear-cache');
 	if (clearCacheBtn) {
 		clearCacheBtn.addEventListener('click', function () {
+			var confirmPurge = window.confirm('⚠️ Are you sure you want to clear the downloaded AI model cache?\n\nThis will delete all cached ONNX model binaries (~77MB - 290MB) from browser storage to free up disk space.');
+			if (!confirmPurge) return;
+
 			modelPipeline = null;
 			modelLoading = null;
 			if (typeof window !== 'undefined' && window.caches) {
@@ -647,7 +709,7 @@
 			try { localStorage.removeItem('assistant_downloaded_model'); } catch (e) {}
 			updateCacheStatusBadge();
 			setModeStatus('🗑️ Model Cache Purged! Disk space freed.');
-			add('assistant', '🗑️ Model storage cache purged from browser. Any future LLM selection will download fresh on-demand.', null);
+			add('assistant', '🗑️ Model storage cache purged from browser. Any future LLM selection will prompt for confirmation on-demand.', null);
 		});
 	}
 
