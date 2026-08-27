@@ -434,24 +434,46 @@
 		modelLoading = (async function () {
 			var modelRepo = 'Xenova/LaMini-Flan-T5-77M';
 			var task = 'text2text-generation';
-			var label = 'Standard LaMini-Flan-T5 (~77MB)';
+			var label = 'Standard LaMini-Flan-T5 (77MB)';
 
 			if (targetId === 'smoll') {
-				modelRepo = 'onnx-community/SmollLM2-135M-Instruct';
+				modelRepo = 'Xenova/Qwen1.5-0.5B-Chat';
 				task = 'text-generation';
-				label = 'Advanced SmollLM2 135M (~90MB)';
+				label = 'Advanced Qwen 0.5B (250MB)';
 			} else if (targetId === 'llama') {
-				modelRepo = 'onnx-community/Llama-3.2-1B-Instruct';
-				task = 'text-generation';
-				label = 'Pro Llama 3.2 1B 8K (~450MB)';
+				modelRepo = 'Xenova/LaMini-Flan-T5-77M';
+				task = 'text2text-generation';
+				label = 'Standard LaMini-Flan-T5 (77MB)';
 			}
 
-			setModeStatus('Downloading ' + label + '…');
-			var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-			modelPipeline = await mod.pipeline(task, modelRepo);
-			selectedModelId = targetId;
-			setModeStatus('Chatbot Ready (' + targetId.toUpperCase() + ').');
-			return modelPipeline;
+			setModeStatus('⌛ Initializing ' + label + '…');
+			try {
+				var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+				mod.env.allowLocalModels = false;
+				
+				modelPipeline = await mod.pipeline(task, modelRepo, {
+					quantized: true,
+					progress_callback: function (info) {
+						if (info && info.status === 'progress' && info.total) {
+							var pct = Math.round((info.loaded / info.total) * 100);
+							var fileName = (info.file || '').split('/').pop();
+							setModeStatus('📥 Downloading ' + fileName + ': ' + pct + '%');
+						} else if (info && info.status === 'initiate') {
+							var fName = (info.file || '').split('/').pop();
+							setModeStatus('📥 Starting download: ' + fName + '…');
+						} else if (info && info.status === 'done') {
+							setModeStatus('⚡ Processing model weights into WebAssembly…');
+						}
+					}
+				});
+				selectedModelId = targetId;
+				setModeStatus('✅ Bot Ready (' + targetId.toUpperCase() + ').');
+				return modelPipeline;
+			} catch (err) {
+				console.error('Model download error:', err);
+				setModeStatus('❌ Model download failed. Using fallback FAQ/API.');
+				throw err;
+			}
 		})();
 		return modelLoading;
 	}
