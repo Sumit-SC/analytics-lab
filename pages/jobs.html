@@ -1585,21 +1585,20 @@
 					class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800 transition"
 					aria-label="Close assistant">&#10005;</button>
 			</div>
-			<!-- Top Engine Switcher: Basic (0MB) | Bot Mode (Local AI) -->
-			<div class="flex items-center gap-1.5 p-1 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-xs">
-				<button type="button" id="toggle-engine-basic" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition">
+			<!-- Always-Visible Model Selector Pill Bar -->
+			<div class="flex items-center gap-1 p-1 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-[11px] overflow-x-auto">
+				<button type="button" id="model-pill-basic" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition whitespace-nowrap" title="0MB download. Instant FAQ & Backend API responses.">
 					⚡ Basic (0MB)
 				</button>
-				<button type="button" id="toggle-engine-bot" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition">
-					🤖 Bot Mode (Local AI)
+				<button type="button" id="model-pill-flan" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap" title="LaMini Flan-T5 77M (~77MB download, 512 context). Fast CPU execution.">
+					Standard (77M)
 				</button>
-			</div>
-			<!-- Local AI Sub-Model Selector (Visible in Bot Mode) -->
-			<div id="local-ai-sub-selector" class="hidden flex items-center justify-between gap-1 pt-1.5 border-t border-gray-200 dark:border-gray-700/60 text-[11px]">
-				<span class="text-gray-500 font-medium">Model:</span>
-				<button type="button" id="model-sub-flan" class="px-2 py-1 rounded-md font-semibold bg-primary text-white shadow-sm transition" title="LaMini Flan-T5 77M (~77MB, 512 context). Fast CPU.">Standard (77M)</button>
-				<button type="button" id="model-sub-smoll" class="px-2 py-1 rounded-md font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="SmollLM2 135M (~90MB, 2K context). 2024 SOTA Chat.">Advanced (135M)</button>
-				<button type="button" id="model-sub-llama" class="px-2 py-1 rounded-md font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="Llama 3.2 1B (~450MB, 8K context). Runs in 400-500MB RAM.">Pro (Llama 8K)</button>
+				<button type="button" id="model-pill-smoll" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap" title="SmollLM2 135M (~90MB download, 2K context). 2024 SOTA Chat.">
+					Advanced (135M)
+				</button>
+				<button type="button" id="model-pill-qwen" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap" title="Qwen 1.5 0.5B (~250MB download, 4K context). SOTA Technical Model.">
+					Pro (250M)
+				</button>
 			</div>
 		</div>
 		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"></div>
