@@ -397,20 +397,59 @@
 	<div id="assistant-overlay" class="fixed inset-0 bg-black/30 z-40" aria-hidden="true"></div>
 	<div id="assistant-panel" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col" role="dialog" aria-label="Learning assistant" aria-hidden="true" aria-modal="true">
 		<div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-			<h3 class="font-semibold text-gray-800 dark:text-gray-100">Learning assistant</h3>
-			<button type="button" id="assistant-close" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">&#10005;</button>
+			<div>
+				<h3 class="font-bold text-gray-800 dark:text-gray-100 flex items-center gap-1.5 text-base">
+					<span>🤖 AI Assistant &amp; Code Tutor</span>
+				</h3>
+				<p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Instant FAQ &amp; Web API active. Local LLM models are optional &amp; strictly downloaded on-demand.</p>
+			</div>
+			<button type="button" id="assistant-close" class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800 transition" aria-label="Close assistant">&#10005;</button>
 		</div>
+
+		<!-- Unified Model Selector Dropdown -->
+		<div class="flex items-center gap-2 p-2 mx-3 mt-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 min-w-0 max-w-full overflow-hidden">
+			<label for="assistant-model-select" class="text-xs font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1 shrink-0">
+				<span>⚙️ Model:</span>
+			</label>
+			<select id="assistant-model-select" class="flex-1 min-w-0 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-xs font-bold text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-primary cursor-pointer shadow-sm truncate">
+				<option value="basic">⚡ Basic Mode (0MB - Instant FAQ &amp; API)</option>
+				<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K Tokens)</option>
+				<option value="qwen25coder">💻 Pro 8K Coder (Qwen 2.5 Coder 290MB, 8K Tokens)</option>
+				<option value="flan">📦 Standard Local AI (LaMini 77MB, 512 Tokens)</option>
+				<option value="qwen">🏆 Pro Local AI (Qwen 250MB, 4K Tokens)</option>
+				<option value="smoll360">🦙 Ultra 8K (Qwen 2.5 0.5B 290MB, 8K Tokens)</option>
+			</select>
+		</div>
+
+		<!-- Permanent Model Cache & Storage Status Badge -->
+		<div id="assistant-cache-badge" class="flex items-center justify-between mx-3 mt-2 px-2.5 py-1.5 rounded-lg bg-gray-100/80 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/60 text-[11px] font-medium text-gray-600 dark:text-gray-300">
+			<span>💾 Storage Status:</span>
+			<span id="assistant-cache-state" class="font-bold text-gray-500 dark:text-gray-400">⚪ No model cached (Basic 0MB active)</span>
+		</div>
+
+		<!-- Progress Bar -->
+		<div id="model-progress-bar-wrap" class="hidden mx-3 mt-2 p-2 rounded-lg bg-primary/5 border border-primary/20 space-y-1">
+			<div class="flex items-center justify-between text-[11px] font-bold text-primary">
+				<span id="model-progress-bar-label">Downloading Model…</span>
+				<span id="model-progress-bar-percent">0%</span>
+			</div>
+			<div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+				<div id="model-progress-bar-fill" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+			</div>
+		</div>
+
 		<div id="assistant-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"></div>
-		<div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+
+		<div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 space-y-2">
 			<div class="flex gap-2">
-				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm" placeholder="Ask anything…">
-				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium">Send</button>
+				<input type="text" id="assistant-input" class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-800 dark:text-gray-200" placeholder="Ask anything or request code debug…">
+				<button type="button" id="assistant-send" class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow hover:bg-primary/90 transition">Send</button>
 			</div>
-			<div class="flex flex-wrap gap-2 mt-3">
-				<button type="button" id="assistant-enable-model" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold">Enable chatbot (~80MB)</button>
-				<button type="button" id="assistant-clear" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs">Clear</button>
-				<span id="assistant-mode-status" class="text-xs text-gray-500"></span>
+			<div class="flex items-center justify-between text-xs pt-1">
+				<button type="button" id="assistant-clear" class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-semibold">Clear Chat</button>
+				<button type="button" id="assistant-clear-cache" class="text-xs text-rose-600 dark:text-rose-400 font-bold hover:underline">🗑️ Clear Model Cache</button>
 			</div>
+			<p id="assistant-mode-status" class="text-[11px] text-gray-500 dark:text-gray-400 truncate"></p>
 		</div>
 	</div>
 
