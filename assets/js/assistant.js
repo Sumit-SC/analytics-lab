@@ -347,15 +347,27 @@
 		.catch(function () { return null; });
 	}
 
-	async function ensureModelLoaded() {
-		if (modelPipeline) return modelPipeline;
-		if (modelLoading) return modelLoading;
+	var SELECTED_MODEL_KEY = 'standalone_assistant_model_id_v1';
+	var selectedModelId = (function () {
+		try { return localStorage.getItem(SELECTED_MODEL_KEY) || 'LaMini-77M'; } catch (e) { return 'LaMini-77M'; }
+	})();
+
+	async function ensureModelLoaded(modelId) {
+		var targetId = modelId || selectedModelId || 'LaMini-77M';
+		if (modelPipeline && selectedModelId === targetId) return modelPipeline;
+		modelPipeline = null;
+		modelLoading = null;
+		
 		modelLoading = (async function () {
-			setModeStatus('Downloading instruction model (~77MB)…');
+			var modelRepo = targetId === 'SmollLM2-135M' ? 'onnx-community/SmollLM2-135M-Instruct' : 'Xenova/LaMini-Flan-T5-77M';
+			var modelLabel = targetId === 'SmollLM2-135M' ? 'SmollLM2 135M Instruct (~90MB)' : 'LaMini-Flan-T5 (~77MB)';
+			setModeStatus('Downloading ' + modelLabel + '…');
 			var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-			// LaMini-Flan-T5-77M is instruction-tuned specifically for chat, Q&A, and interview advice
-			modelPipeline = await mod.pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-77M');
-			setModeStatus('Full Chatbot Ready (LaMini Instruct).');
+			var task = targetId === 'SmollLM2-135M' ? 'text-generation' : 'text2text-generation';
+			modelPipeline = await mod.pipeline(task, modelRepo);
+			selectedModelId = targetId;
+			try { localStorage.setItem(SELECTED_MODEL_KEY, targetId); } catch (e) {}
+			setModeStatus('Full Chatbot Ready (' + targetId + ').');
 			return modelPipeline;
 		})();
 		return modelLoading;
