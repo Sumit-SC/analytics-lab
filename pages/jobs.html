@@ -573,28 +573,110 @@
 			</section>
 
 			<!-- Tab 3 Container: Job Hunt Hub & Learning Paths (Hidden by default) -->
-			<section id="tab-view-hub" class="hidden mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm space-y-4">
-				<h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-					<span>📚</span> Learning Paths & External Boards
-				</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">Learn & Roadmap</p>
-						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
-							<li><a href="./resources.html?topic=data-analytics" class="text-primary hover:underline font-medium">Resources · Data Analytics</a></li>
-							<li><a href="./resources.html?topic=data-science" class="text-primary hover:underline font-medium">Resources · Data Science</a></li>
-							<li><a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">roadmap.sh · Data Analyst</a></li>
-							<li><a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">roadmap.sh · AI/Data Scientist</a></li>
-						</ul>
+			<section id="tab-view-hub" class="hidden mb-6 second-brain-card border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm space-y-6">
+				<div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
+					<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+						<span>🔍</span> Job Hunt Hub & Ecosystem Links
+					</h2>
+					<span class="text-xs text-gray-500 dark:text-gray-400">Roadmaps, Deep-Links & 20+ Board Portals</span>
+				</div>
+
+				<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+					<!-- Box 1: Our Aggregation Engine -->
+					<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/40 p-4 space-y-3">
+						<div class="flex items-center gap-2">
+							<span class="text-lg">📊</span>
+							<h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">Unified Aggregation Engine</h3>
+						</div>
+						<p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+							Our backend scans 20+ sources (RemoteOK, Remotive, Indeed, Wellfound, Naukri, LinkedIn, GoodJobs, HiringCafe, Enterprise ATS) and ranks analyst/engineering listings automatically.
+						</p>
+						<button type="button" onclick="document.getElementById('tab-btn-feed').click()" class="w-full py-2 px-3 bg-primary text-white text-xs font-semibold rounded-lg shadow-sm hover:opacity-90 transition flex items-center justify-center gap-2">
+							<span>💼</span> Switch to Live Job Feed
+						</button>
 					</div>
-					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
-						<p class="font-semibold text-gray-800 dark:text-gray-100 text-sm mb-2">External Tech Boards</p>
-						<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5">
-							<li><a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">Remotive · Data</a></li>
-							<li><a href="https://weworkremotely.com/categories/remote-data-analysis-jobs" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">We Work Remotely · Data</a></li>
-							<li><a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">RemoteOK · Data analyst</a></li>
-							<li><a href="https://hiring.cafe/" target="_blank" rel="noopener" class="text-primary hover:underline font-medium">hiring.cafe</a></li>
-						</ul>
+
+					<!-- Box 2: Learn & Roadmap -->
+					<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/40 p-4 space-y-3">
+						<div class="flex items-center gap-2">
+							<span class="text-lg">🗺️</span>
+							<h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">Learn & Career Roadmaps</h3>
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+							<a href="./resources.html?topic=data-analytics" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-semibold hover:border-primary transition flex items-center gap-1.5">
+								<span>📘</span> Analytics Path
+							</a>
+							<a href="./resources.html?topic=data-science" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-semibold hover:border-primary transition flex items-center gap-1.5">
+								<span>🔬</span> Data Science
+							</a>
+							<a href="https://roadmap.sh/data-analyst" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-semibold hover:border-primary transition flex items-center gap-1.5">
+								<span>🗺️</span> Data Analyst
+							</a>
+							<a href="https://roadmap.sh/ai-data-scientist" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-primary font-semibold hover:border-primary transition flex items-center gap-1.5">
+								<span>🤖</span> AI/Data Scientist
+							</a>
+						</div>
+					</div>
+
+					<!-- Box 3: TrueUp Category Boards -->
+					<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/40 p-4 space-y-3">
+						<div class="flex items-center gap-2">
+							<span class="text-lg">🏆</span>
+							<h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">TrueUp Domain Boards</h3>
+						</div>
+						<p class="text-[11px] text-gray-500 dark:text-gray-400">Direct portal links to specialized TrueUp tech hubs:</p>
+						<div class="flex flex-wrap gap-1.5 text-xs">
+							<a href="https://www.trueup.io/ai" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">🤖 AI</a>
+							<a href="https://www.trueup.io/fintech" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">💳 FinTech</a>
+							<a href="https://www.trueup.io/climate" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">🌿 Climate</a>
+							<a href="https://www.trueup.io/remote" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">🌐 Remote</a>
+							<a href="https://www.trueup.io/unicorns" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">🦄 Unicorns</a>
+							<a href="https://www.trueup.io/faang-plus" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">⭐ FAANG+</a>
+							<a href="https://www.trueup.io/elite-startups" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-primary font-medium transition">⚡ Elite Startups</a>
+						</div>
+					</div>
+				</div>
+
+				<!-- Full Width Box 4: 20+ External Board Action Buttons -->
+				<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/40 p-4 space-y-3">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<span class="text-lg">🌐</span>
+							<h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">20+ External Tech & Job Boards</h3>
+						</div>
+						<span class="text-xs text-gray-500">Direct portal buttons</span>
+					</div>
+					<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
+						<a href="https://remotive.com/remote-jobs/software-dev/data" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Remotive Data</a>
+						<a href="https://weworkremotely.com/categories/remote-data-analysis-jobs" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">WeWorkRemotely</a>
+						<a href="https://remoteok.com/remote-data-analyst-jobs" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">RemoteOK</a>
+						<a href="https://hiring.cafe/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">hiring.cafe</a>
+						<a href="https://www.workatastartup.com/jobs" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Work at Startup</a>
+						<a href="https://www.ycombinator.com/jobs" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Y Combinator</a>
+						<a href="https://hireflair.com/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Hireflair</a>
+						<a href="https://www.instahyre.com/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Instahyre</a>
+						<a href="https://www.hirist.com/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Hirist India</a>
+						<a href="https://cutshort.io/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Cutshort</a>
+						<a href="https://www.foundit.in/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Foundit</a>
+						<a href="https://www.shine.com/" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Shine</a>
+						<a href="https://www.linkedin.com/jobs/search/?keywords=data%20analyst" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">LinkedIn</a>
+						<a href="https://www.indeed.com/jobs?q=data+analyst&l=remote" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Indeed</a>
+						<a href="https://stackoverflow.com/jobs?q=data+analyst" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Stack Overflow</a>
+						<a href="https://www.naukri.com/data-analyst-jobs" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Naukri India</a>
+						<a href="https://www.xing.com/jobs" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">Xing Jobs</a>
+						<a href="https://www.trueup.io/job-boards" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-primary hover:text-primary transition font-medium text-center">TrueUp Boards</a>
+					</div>
+				</div>
+
+				<!-- Full Width Box 5: Dynamic Search Deep-Links -->
+				<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/40 p-4 space-y-3">
+					<div class="flex items-center gap-2">
+						<span class="text-lg">🎯</span>
+						<h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">Open Current Query on External Boards</h3>
+					</div>
+					<p class="text-xs text-gray-500 dark:text-gray-400">Generates instant deep-links from your active search keyword & location filters:</p>
+					<div id="job-external-boards-dynamic" class="flex flex-wrap gap-2 text-xs">
+						<span class="text-xs text-gray-500 dark:text-gray-400">Loading deep-links...</span>
 					</div>
 				</div>
 			</section>
