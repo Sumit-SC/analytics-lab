@@ -126,119 +126,152 @@
 			<p class="text-sm text-gray-600 dark:text-gray-400">Notion-like second brain: JS libs + free APIs only. View, search, edit on the fly — export as .txt, .md, .html, or .json. No server; pre-made services.</p>
 		</header>
 
-		<!-- Embedded online Word editors (external services in an iframe) -->
-		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
-			<div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+		<!-- Native Microsoft Office / Libre Style Document & Spreadsheet Suite -->
+		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 space-y-4">
+			<div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
 				<div>
-					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Online Word editor (embedded)</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400">Full Word-style experiences from free web tools, shown inside this page. Your documents stay with those providers.</p>
+					<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+						<span>📄 Document, Spreadsheet &amp; PDF Studio</span>
+						<span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-semibold">Office &amp; PDF Native</span>
+					</h2>
+					<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lightweight Word editor, Excel spreadsheet grid, and PDF viewer. Runs 100% in-browser with zero resource strain.</p>
 				</div>
-				<div class="flex flex-wrap items-center gap-2 text-xs">
-					<button type="button" id="word-embed-filestash" class="tool-btn">Filestash Word</button>
-					<button type="button" id="word-embed-onlineocr" class="tool-sec-btn">OnlineOCR Word</button>
-					<a href="https://www.office.com/launch/word" target="_blank" rel="noopener" class="tool-sec-btn">Open Word Online ↗</a>
-					<a href="https://docs.google.com/document/create" target="_blank" rel="noopener" class="tool-sec-btn">Open Google Docs ↗</a>
+				<div class="flex flex-wrap items-center gap-1.5 text-xs">
+					<button type="button" id="tool-tab-word" class="px-3 py-1.5 rounded-lg bg-primary text-white font-semibold shadow transition flex items-center gap-1">📝 Word Editor</button>
+					<button type="button" id="tool-tab-excel" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 transition flex items-center gap-1">📊 Excel Grid</button>
+					<button type="button" id="tool-tab-pdf" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 transition flex items-center gap-1">📄 PDF Reader</button>
+					<button type="button" id="tool-tab-notes" class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 transition flex items-center gap-1">✍️ Scratch Notes</button>
 				</div>
 			</div>
-			<div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 overflow-hidden">
-				<div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
-					<span>These editors are external services (Filestash, OnlineOCR). Use them for full document formatting; close the tab when you’re done.</span>
-					<span class="hidden sm:inline">If the frame looks blank or blocked, use the ↗ links instead.</span>
-				</div>
-				<iframe id="word-embed-frame" title="Online Word editor" loading="lazy" class="w-full min-h-[280px] h-[50vh] sm:h-[520px] max-h-[80vh] bg-white dark:bg-gray-900 border-0"></iframe>
-			</div>
-		</section>
 
-		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
-			<div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-				<div>
-					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Notebook / scratch notes</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400">Quick in-browser notes — export as .txt, .md, or .html. For a full Word-style doc, use the embedded editor above.</p>
-				</div>
-				<div class="flex flex-wrap items-center gap-2"></div>
-			</div>
-				<div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-					<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-						<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Offline‑ready
-					</span>
-				</div>
-
-			<div class="flex flex-col lg:flex-row gap-4">
-				<div class="flex-1 space-y-2">
-					<div class="flex flex-wrap items-center gap-2 mb-1 text-xs">
-						<div class="inline-flex flex-wrap gap-1">
-							<button type="button" class="tool-btn" data-cmd="bold"><span class="font-bold">B</span></button>
-							<button type="button" class="tool-btn" data-cmd="italic"><span class="italic">I</span></button>
-							<button type="button" class="tool-btn" data-cmd="underline"><span class="underline">U</span></button>
-							<button type="button" class="tool-btn" data-cmd="insertUnorderedList">• List</button>
-							<button type="button" class="tool-btn" data-cmd="formatBlock" data-arg="h2">H2</button>
-							<button type="button" class="tool-btn" data-cmd="formatBlock" data-arg="p">Normal</button>
-						</div>
-						<div class="flex-1"></div>
-						<div class="inline-flex flex-wrap items-center gap-2">
-							<label class="text-[11px] text-gray-500 dark:text-gray-400">Download as:</label>
-							<select id="doc-download-format" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs" aria-label="Download format">
-								<option value="txt">.txt</option>
-								<option value="md">.md</option>
-								<option value="html">.html</option>
-								<option value="pdf">PDF (print)</option>
-							</select>
-							<button type="button" id="doc-download-btn" class="tool-sec-btn">Download</button>
-							<label class="tool-sec-btn cursor-pointer">
-								<span>Open .txt/.md</span>
-								<input type="file" id="doc-open-file" accept=".txt,.md,.text" class="hidden">
-							</label>
-						</div>
+			<!-- TAB 1: Word Document Editor -->
+			<div id="tool-view-word" class="space-y-3">
+				<div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-gray-100 dark:bg-gray-800/80 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
+					<div class="flex flex-wrap items-center gap-1">
+						<button type="button" class="tool-btn font-bold px-2 py-1 bg-white dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-700" data-cmd="bold" title="Bold">B</button>
+						<button type="button" class="tool-btn italic px-2 py-1 bg-white dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-700" data-cmd="italic" title="Italic">I</button>
+						<button type="button" class="tool-btn underline px-2 py-1 bg-white dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-700" data-cmd="underline" title="Underline">U</button>
+						<span class="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-1"></span>
+						<button type="button" class="tool-btn px-2 py-1 bg-white dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-700" data-cmd="insertUnorderedList">• Bullet List</button>
+						<button type="button" class="tool-btn px-2 py-1 bg-white dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-700" data-cmd="insertOrderedList">1. Numbered</button>
+						<button type="button" class="tool-btn px-2 py-1 bg-white dark:bg-gray-900 rounded border border-gray-300 dark:border-gray-700" data-cmd="formatBlock" data-arg="h2">H2 Heading</button>
 					</div>
+					<div class="flex flex-wrap items-center gap-2">
+						<a href="https://www.office.com/launch/word" target="_blank" rel="noopener" class="px-2.5 py-1 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition">MS Word Online ↗</a>
+						<a href="https://docs.google.com/document/create" target="_blank" rel="noopener" class="px-2.5 py-1 bg-emerald-600 text-white rounded font-semibold hover:bg-emerald-700 transition">Google Docs ↗</a>
+						<label class="tool-sec-btn cursor-pointer px-2.5 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold">
+							<span>Open File</span>
+							<input type="file" id="doc-open-file" accept=".txt,.md,.text,.html,.doc,.docx" class="hidden">
+						</label>
+					</div>
+				</div>
 
-					<div id="doc-editor" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 min-h-[260px] max-h-[520px] overflow-auto px-3 py-2 text-sm leading-relaxed outline-none" contenteditable="true" spellcheck="true"></div>
-					<p class="text-[11px] text-gray-500 dark:text-gray-500">Notes are saved automatically in this browser only. Use Download or Backup below to keep copies.</p>
+				<div id="doc-editor" class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 min-h-[320px] max-h-[550px] overflow-auto p-4 text-sm leading-relaxed outline-none shadow-inner" contenteditable="true" spellcheck="true"></div>
 
-					<!-- Optional backup/restore (temp use; no server) -->
-					<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-						<p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Optional: backup / restore</p>
-						<div class="flex flex-wrap items-center gap-2 mb-2">
-							<button type="button" id="doc-backup-now" class="tool-sec-btn">Backup now (.json)</button>
-							<label class="tool-sec-btn cursor-pointer">
-								<span>Restore from file</span>
-								<input type="file" id="doc-restore-file" accept=".json,application/json" class="hidden">
-							</label>
-							<span class="text-[11px] text-gray-500 dark:text-gray-500">Only if you want to keep a copy — notes + to-dos + timer log.</span>
-						</div>
-						<div class="flex flex-wrap items-center gap-2">
-							<label class="text-[11px] text-gray-600 dark:text-gray-400">Restore from local backup:</label>
-							<select id="doc-restore-backup" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs">
-								<option value="">— Choose one —</option>
-							</select>
-							<button type="button" id="doc-restore-backup-btn" class="tool-sec-btn text-xs">Restore</button>
-						</div>
-						<p id="doc-backup-status" class="text-[11px] text-green-600 dark:text-green-400 mt-1 hidden"></p>
+				<div class="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-gray-500 dark:text-gray-400">
+					<span>Saved automatically in browser cache.</span>
+					<div class="flex items-center gap-2">
+						<label for="doc-download-format">Export format:</label>
+						<select id="doc-download-format" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs text-gray-800 dark:text-gray-200 font-semibold">
+							<option value="txt">.txt text</option>
+							<option value="md">.md markdown</option>
+							<option value="html">.html document</option>
+						</select>
+						<button type="button" id="doc-download-btn" class="px-3 py-1 bg-primary text-white rounded font-bold hover:bg-primary/90 transition">Download</button>
 					</div>
 				</div>
 			</div>
-		</section>
 
-		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1">
-			<div class="flex items-center justify-between mb-3">
-				<div>
-					<h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">PDF viewer</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400">Open local PDFs in a resizable viewer. Files stay on your device.</p>
+			<!-- TAB 2: Excel & CSV Spreadsheet Grid -->
+			<div id="tool-view-excel" class="hidden space-y-3">
+				<div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-gray-100 dark:bg-gray-800/80 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
+					<div class="flex flex-wrap items-center gap-2">
+						<button type="button" id="excel-btn-add-row" class="px-2.5 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold hover:bg-gray-50">+ Add Row</button>
+						<button type="button" id="excel-btn-add-col" class="px-2.5 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold hover:bg-gray-50">+ Add Column</button>
+						<button type="button" id="excel-btn-clear" class="px-2.5 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold hover:bg-gray-50 text-rose-600">Clear Grid</button>
+					</div>
+					<div class="flex flex-wrap items-center gap-2">
+						<a href="https://www.office.com/launch/excel" target="_blank" rel="noopener" class="px-2.5 py-1 bg-emerald-700 text-white rounded font-semibold hover:bg-emerald-800 transition">MS Excel Online ↗</a>
+						<a href="https://docs.google.com/spreadsheets/create" target="_blank" rel="noopener" class="px-2.5 py-1 bg-green-600 text-white rounded font-semibold hover:bg-green-700 transition">Google Sheets ↗</a>
+						<label class="tool-sec-btn cursor-pointer px-2.5 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold">
+							<span>Import CSV</span>
+							<input type="file" id="excel-file-input" accept=".csv,.txt" class="hidden">
+						</label>
+						<button type="button" id="excel-btn-export-csv" class="px-3 py-1 bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700 transition">Export .CSV</button>
+					</div>
+				</div>
+
+				<div class="rounded-xl border border-gray-300 dark:border-gray-700 overflow-x-auto bg-white dark:bg-gray-900 max-h-[420px]">
+					<table id="excel-table-grid" class="w-full text-xs text-left border-collapse font-mono">
+						<thead>
+							<tr class="bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700">
+								<th class="p-2 border-r border-gray-300 dark:border-gray-700 w-10 text-center">#</th>
+								<th class="p-2 border-r border-gray-300 dark:border-gray-700 min-w-[120px]">A (Name)</th>
+								<th class="p-2 border-r border-gray-300 dark:border-gray-700 min-w-[120px]">B (Role)</th>
+								<th class="p-2 border-r border-gray-300 dark:border-gray-700 min-w-[120px]">C (Metric)</th>
+								<th class="p-2 min-w-[120px]">D (Value)</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+							<tr>
+								<td class="p-2 bg-gray-100 dark:bg-gray-800/60 font-bold text-center border-r border-gray-200 dark:border-gray-700">1</td>
+								<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true">Data Analyst</td>
+								<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true">Analytics</td>
+								<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true">Match Rate</td>
+								<td class="p-2 outline-none" contenteditable="true">95%</td>
+							</tr>
+							<tr>
+								<td class="p-2 bg-gray-100 dark:bg-gray-800/60 font-bold text-center border-r border-gray-200 dark:border-gray-700">2</td>
+								<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true">Python Engineer</td>
+								<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true">Engineering</td>
+								<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true">Score</td>
+								<td class="p-2 outline-none" contenteditable="true">88%</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 
-			<div class="space-y-3">
-				<div class="flex flex-wrap items-center gap-3 text-xs">
-					<label class="tool-sec-btn cursor-pointer">
-						<span>Select PDF</span>
-						<input type="file" id="pdf-input" accept="application/pdf" class="hidden">
-					</label>
-					<span id="pdf-filename" class="text-gray-500 dark:text-gray-400 truncate max-w-xs"></span>
+			<!-- TAB 3: PDF Reader & Viewer -->
+			<div id="tool-view-pdf" class="hidden space-y-3">
+				<div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-gray-100 dark:bg-gray-800/80 rounded-lg border border-gray-200 dark:border-gray-700 text-xs">
+					<div class="flex items-center gap-2">
+						<label class="px-3 py-1.5 bg-primary text-white rounded font-bold cursor-pointer hover:bg-primary/90 transition">
+							<span>📂 Select PDF File</span>
+							<input type="file" id="pdf-input" accept="application/pdf" class="hidden">
+						</label>
+						<span id="pdf-filename" class="text-gray-600 dark:text-gray-300 font-semibold truncate max-w-xs">No PDF loaded</span>
+					</div>
+					<div class="text-gray-500 dark:text-gray-400 font-medium">Native browser rendering</div>
 				</div>
-				<div id="pdf-empty" class="border border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/40 text-center py-10 text-sm text-gray-500 dark:text-gray-400">
-					No PDF loaded yet. Choose a file to preview it here.
+
+				<div id="pdf-empty" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/40 text-center py-12 text-sm text-gray-500 dark:text-gray-400">
+					📄 Click "Select PDF File" above to open and read any PDF document directly in your browser.
 				</div>
-				<div id="pdf-viewer-wrap" class="hidden rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-900">
+				<div id="pdf-viewer-wrap" class="hidden rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-900">
 					<embed id="pdf-viewer" type="application/pdf" class="w-full h-[600px] bg-gray-900">
+				</div>
+			</div>
+
+			<!-- TAB 4: Scratch Notes & Backups -->
+			<div id="tool-view-notes" class="hidden space-y-3">
+				<div class="p-3 bg-gray-100 dark:bg-gray-800/80 rounded-lg border border-gray-200 dark:border-gray-700 space-y-2 text-xs">
+					<p class="font-bold text-gray-700 dark:text-gray-200">Optional: Backup / Restore Notebook JSON</p>
+					<div class="flex flex-wrap items-center gap-2">
+						<button type="button" id="doc-backup-now" class="px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold hover:bg-gray-50">Backup now (.json)</button>
+						<label class="px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded font-semibold cursor-pointer hover:bg-gray-50">
+							<span>Restore from file</span>
+							<input type="file" id="doc-restore-file" accept=".json,application/json" class="hidden">
+						</label>
+					</div>
+					<div class="flex flex-wrap items-center gap-2 pt-1">
+						<label for="doc-restore-backup" class="text-gray-600 dark:text-gray-400">Local Auto-backups:</label>
+						<select id="doc-restore-backup" class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 px-2 py-1 text-xs">
+							<option value="">— Choose one —</option>
+						</select>
+						<button type="button" id="doc-restore-backup-btn" class="px-2.5 py-1 bg-gray-200 dark:bg-gray-700 rounded font-semibold">Restore</button>
+					</div>
+					<p id="doc-backup-status" class="text-[11px] text-green-600 dark:text-green-400 mt-1 hidden"></p>
 				</div>
 			</div>
 		</section>
@@ -281,70 +314,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- AI Coding Agent & Live Debugger Sandbox -->
-		<section class="material-card rounded-xl border border-gray-200 dark:border-gray-700 material-elevation-1 space-y-4">
-			<div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-				<div>
-					<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-						<span>💻 AI Coding &amp; Live Debugger Sandbox</span>
-						<span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">Qwen 2.5 Coder 8K</span>
-					</h2>
-					<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lightweight in-browser AI coding assistant. Paste Python, SQL, or JS code to debug syntax errors, optimize queries, generate tests, and execute live.</p>
-				</div>
-				<div class="flex flex-wrap items-center gap-2 text-xs">
-					<label for="coder-model-select" class="font-bold text-gray-700 dark:text-gray-300">AI Model:</label>
-					<select id="coder-model-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
-						<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K)</option>
-						<option value="qwen25coder">🏆 Pro Coder (Qwen 2.5 Coder 290MB, 8K)</option>
-						<option value="flan">⚡ Instant FAQ (LaMini 77MB, 512)</option>
-					</select>
-					<label for="coder-lang-select" class="font-bold text-gray-700 dark:text-gray-300">Language:</label>
-					<select id="coder-lang-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
-						<option value="python">🐍 Python (Pyodide)</option>
-						<option value="sql">🛢️ SQL (AlaSQL)</option>
-						<option value="javascript">⚡ JavaScript (V8)</option>
-					</select>
-					<label class="tool-sec-btn cursor-pointer">
-						<span>📂 Open File</span>
-						<input type="file" id="coder-file-input" accept=".py,.sql,.js,.txt,.json,.csv" class="hidden">
-					</label>
-				</div>
-			</div>
-
-			<!-- Code Input & AI Debugger Toolbar -->
-			<div class="space-y-3">
-				<div class="flex flex-wrap items-center justify-between gap-2">
-					<div class="flex flex-wrap items-center gap-2">
-						<button type="button" id="coder-btn-run" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow transition flex items-center gap-1">▶ Run Code Live</button>
-						<button type="button" id="coder-btn-debug" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow transition flex items-center gap-1">🛠️ AI Fix &amp; Debug</button>
-						<button type="button" id="coder-btn-optimize" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow transition flex items-center gap-1">⚡ Optimize Code</button>
-						<button type="button" id="coder-btn-test" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow transition flex items-center gap-1">🧪 Generate Tests</button>
-					</div>
-					<button type="button" id="coder-btn-clear" class="text-xs text-gray-500 hover:text-rose-500 font-semibold">Clear Editor</button>
-				</div>
-
-				<!-- Code Editor Textarea -->
-				<div class="relative rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-900 font-mono text-xs">
-					<div class="px-3 py-1.5 bg-gray-800 text-gray-400 border-b border-gray-700 flex items-center justify-between">
-						<span id="coder-filename-label">script.py</span>
-						<span id="coder-ai-status" class="text-[11px] text-emerald-400 font-semibold">Ready for input</span>
-					</div>
-					<textarea id="coder-input-code" rows="10" class="w-full bg-gray-900 text-emerald-300 p-3 font-mono text-xs outline-none resize-y leading-relaxed placeholder-gray-600" placeholder="# Paste your Python code here...&#10;def calculate_revenue(data):&#10;    # Write or paste your function&#10;    return sum(data)"></textarea>
-				</div>
-
-				<!-- Live Execution & AI Fix Output Window -->
-				<div class="rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-950 font-mono text-xs">
-					<div class="px-3 py-1.5 bg-gray-900 text-gray-300 border-b border-gray-800 flex items-center justify-between">
-						<span class="font-bold">🖥️ Live Execution &amp; Debugger Console</span>
-						<button type="button" id="coder-console-clear" class="text-[11px] text-gray-500 hover:text-gray-300">Clear Console</button>
-					</div>
-					<pre id="coder-output-console" class="p-3 text-gray-200 min-h-[100px] max-h-[250px] overflow-y-auto whitespace-pre-wrap leading-relaxed">Output will appear here when you click "Run Code Live" or "AI Fix &amp; Debug"...</pre>
-				</div>
-			</div>
-		</section>
-		</main>
-		</div>
 
 	<!-- <div id="global-music-bar">
 		<div id="global-yt-player-wrap"></div>
