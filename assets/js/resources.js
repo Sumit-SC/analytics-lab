@@ -27,7 +27,41 @@
 			if (boot) boot.textContent = 'Resources booted…';
 		} catch (e) {}
 
-	var params = new URLSearchParams(window.location.search);
+		// 🎓 Personal Study & Practice Hub Tab Switcher & localStorage Memory
+		(function initStudyHub() {
+			var STUDY_TAB_KEY = 'standalone_study_last_tab';
+			var navContainer = document.getElementById('study-hub-nav');
+			if (!navContainer) return;
+
+			var savedTab = 'devdocs';
+			try { savedTab = localStorage.getItem(STUDY_TAB_KEY) || 'devdocs'; } catch (e) {}
+
+			function switchStudyTab(tabId) {
+				var btns = navContainer.querySelectorAll('.study-nav-btn');
+				btns.forEach(function (btn) {
+					var active = btn.getAttribute('data-study-tab') === tabId;
+					btn.className = 'study-nav-btn px-3 py-1.5 rounded-lg border text-xs font-bold transition ' +
+						(active ? 'border-primary bg-primary text-white' : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800');
+				});
+
+				var panes = document.querySelectorAll('#study-practice-hub .study-pane');
+				panes.forEach(function (pane) {
+					var matches = pane.id === ('study-pane-' + tabId);
+					pane.classList.toggle('hidden', !matches);
+				});
+
+				try { localStorage.setItem(STUDY_TAB_KEY, tabId); } catch (e) {}
+			}
+
+			navContainer.addEventListener('click', function (e) {
+				var btn = e.target.closest('.study-nav-btn');
+				if (!btn) return;
+				var tabId = btn.getAttribute('data-study-tab');
+				if (tabId) switchStudyTab(tabId);
+			});
+
+			switchStudyTab(savedTab);
+		})();
 	var initialTopic = (params.get('topic') || 'python').toLowerCase().replace(/[^a-z0-9-]/g, '');
 	var root = document.getElementById('resource-root');
 	var notFound = document.getElementById('resource-not-found');

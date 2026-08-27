@@ -57,7 +57,120 @@
 		</div>
 	</div>
 
-	<main class="max-w-6xl mx-auto px-4 sm:px-8 py-10">
+	<main class="max-w-6xl mx-auto px-4 sm:px-8 py-8 space-y-8">
+		<!-- Interactive Personal Study & Practice Hub -->
+		<section id="study-practice-hub" class="material-card rounded-xl border-2 border-primary/30 p-4 sm:p-6 material-elevation-2 space-y-4 bg-white dark:bg-gray-900">
+			<div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+				<div>
+					<h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+						<span>🎓 Personal Study &amp; Practice Hub</span>
+						<span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-mono">100% Legal &amp; Saved Locally</span>
+					</h2>
+					<p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">DevDocs, JupyterLite, DataLemur, SQLZoo &amp; W3Schools study workspace with auto-saved memory.</p>
+				</div>
+				<div class="flex flex-wrap items-center gap-1.5 text-xs font-bold" id="study-hub-nav">
+					<button type="button" class="study-nav-btn active px-3 py-1.5 rounded-lg border border-primary bg-primary text-white transition" data-study-tab="devdocs">📖 DevDocs</button>
+					<button type="button" class="study-nav-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" data-study-tab="jupyter">🐍 JupyterLite</button>
+					<button type="button" class="study-nav-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" data-study-tab="datalemur">📊 DataLemur</button>
+					<button type="button" class="study-nav-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" data-study-tab="sqlzoo">🌐 SQLZoo</button>
+					<button type="button" class="study-nav-btn px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" data-study-tab="w3schools">📚 W3Schools</button>
+				</div>
+			</div>
+
+			<!-- DevDocs Tab View -->
+			<div id="study-pane-devdocs" class="study-pane space-y-3">
+				<div class="flex items-center justify-between text-xs">
+					<span class="font-bold text-gray-700 dark:text-gray-300">Fast Offline-First Documentation Viewer (MIT Open Source)</span>
+					<a href="https://devdocs.io/" target="_blank" rel="noopener" class="text-primary hover:underline">Open devdocs.io ↗</a>
+				</div>
+				<iframe src="https://devdocs.io/" class="w-full h-[450px] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900" loading="lazy" title="DevDocs"></iframe>
+			</div>
+
+			<!-- JupyterLite Tab View -->
+			<div id="study-pane-jupyter" class="study-pane hidden space-y-3">
+				<div class="flex items-center justify-between text-xs">
+					<span class="font-bold text-gray-700 dark:text-gray-300">Client-Side WebAssembly Python Environment (BSD License)</span>
+					<a href="https://jupyterlite.github.io/demo/lab/index.html" target="_blank" rel="noopener" class="text-primary hover:underline">Open Full JupyterLab ↗</a>
+				</div>
+				<iframe src="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" class="w-full h-[450px] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900" loading="lazy" title="JupyterLite REPL"></iframe>
+			</div>
+
+			<!-- DataLemur Tab View -->
+			<div id="study-pane-datalemur" class="study-pane hidden space-y-3">
+				<div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 space-y-2">
+					<h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center justify-between">
+						<span>📊 DataLemur SQL &amp; Data Science Interview Questions</span>
+						<a href="https://datalemur.com/sql-interview-questions" target="_blank" rel="noopener" class="px-3 py-1 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition">Open DataLemur ↗</a>
+					</h3>
+					<p class="text-xs text-gray-600 dark:text-gray-400">DataLemur security policies require direct tab launching for interactive SQL submission. Select your topic below to track your personal progress:</p>
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
+						<a href="https://datalemur.com/sql-interview-questions" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">Easy SQL Questions</span>
+							<span class="text-[11px] text-gray-500">SELECT, WHERE, JOINs, GROUP BY</span>
+						</a>
+						<a href="https://datalemur.com/sql-interview-questions" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">Medium SQL Questions</span>
+							<span class="text-[11px] text-gray-500">Subqueries, Window Functions (RANK, LEAD)</span>
+						</a>
+						<a href="https://datalemur.com/sql-tutorial" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">SQL Tutorial Course</span>
+							<span class="text-[11px] text-gray-500">Free 1-Hour Interactive SQL Guide</span>
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- SQLZoo Tab View -->
+			<div id="study-pane-sqlzoo" class="study-pane hidden space-y-3">
+				<div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 space-y-2">
+					<h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center justify-between">
+						<span>🌐 SQLZoo Interactive Lessons</span>
+						<a href="https://sqlzoo.net/" target="_blank" rel="noopener" class="px-3 py-1 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition">Open SQLZoo ↗</a>
+					</h3>
+					<p class="text-xs text-gray-600 dark:text-gray-400">SQLZoo provides step-by-step SQL tutorials. Access lessons below and test queries in our built-in SQL Sandbox:</p>
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
+						<a href="https://sqlzoo.net/wiki/SELECT_basics" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">0. SELECT Basics</span>
+							<span class="text-[11px] text-gray-500">World table basics &amp; filtering</span>
+						</a>
+						<a href="https://sqlzoo.net/wiki/SELECT_from_Nobel_Tutorial" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">1. Nobel Tutorial</span>
+							<span class="text-[11px] text-gray-500">Aggregations &amp; pattern matching</span>
+						</a>
+						<a href="https://sqlzoo.net/wiki/The_JOIN_operation" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">2. The JOIN Operation</span>
+							<span class="text-[11px] text-gray-500">INNER JOIN, LEFT JOIN &amp; UEFA Euro 2012</span>
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- W3Schools Tab View -->
+			<div id="study-pane-w3schools" class="study-pane hidden space-y-3">
+				<div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 space-y-2">
+					<h3 class="font-bold text-sm text-gray-800 dark:text-gray-100 flex items-center justify-between">
+						<span>📚 W3Schools Reference Guides</span>
+						<a href="https://www.w3schools.com/sql/" target="_blank" rel="noopener" class="px-3 py-1 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition">Open W3Schools ↗</a>
+					</h3>
+					<p class="text-xs text-gray-600 dark:text-gray-400">Quick cheat-sheets for SQL, Python, JavaScript, and Data Science syntax:</p>
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
+						<a href="https://www.w3schools.com/sql/" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">SQL Tutorial</span>
+							<span class="text-[11px] text-gray-500">Full syntax reference &amp; examples</span>
+						</a>
+						<a href="https://www.w3schools.com/python/" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">Python Tutorial</span>
+							<span class="text-[11px] text-gray-500">Lists, Dictionaries, NumPy, Pandas</span>
+						</a>
+						<a href="https://www.w3schools.com/datascience/" target="_blank" rel="noopener" class="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 hover:border-primary block">
+							<span class="font-bold block text-primary">Data Science Tutorial</span>
+							<span class="text-[11px] text-gray-500">Statistics, Linear Regression &amp; ML</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+
 		<div id="resource-root">
 			<div id="resources-boot-banner" class="mb-4 p-3 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/30 text-xs text-amber-800 dark:text-amber-200">
 				Loading Resources…
