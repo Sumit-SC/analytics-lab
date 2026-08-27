@@ -348,57 +348,69 @@
 	}
 
 	var SELECTED_MODEL_KEY = 'standalone_assistant_model_id_v1';
-	var selectedModelId = (function () {
-		try { return localStorage.getItem(SELECTED_MODEL_KEY) || 'LaMini-77M'; } catch (e) { return 'LaMini-77M'; }
+	var activeMode = (function () {
+		try { return localStorage.getItem(MODE_KEY) || 'light'; } catch (e) { return 'light'; }
 	})();
 
-	async function ensureModelLoaded(modelId) {
-		var targetId = modelId || selectedModelId || 'LaMini-77M';
+	var btnLight = document.getElementById('model-mode-light');
+	var btnSmoll = document.getElementById('model-mode-smoll');
+	var btnQwen = document.getElementById('model-mode-qwen');
+
+	function isMobileViewport() {
+		try { return window.matchMedia && window.matchMedia('(max-width: 767px)').matches; } catch (e) { return false; }
+	}
+
+	function updateModeButtonsUI() {
+		var activeClass = 'px-2 py-1 rounded text-xs font-semibold bg-primary text-white shadow-sm transition';
+		var inactiveClass = 'px-2 py-1 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition';
+
+		if (btnLight) btnLight.className = activeMode === 'light' ? activeClass : inactiveClass;
+		if (btnSmoll) btnSmoll.className = activeMode === 'smoll' ? activeClass : inactiveClass;
+		if (btnQwen) btnQwen.className = activeMode === 'qwen' ? activeClass : inactiveClass;
+
+		if (activeMode === 'light') {
+			setModeStatus('⚡ Normal Mode (0MB download, instant responses).');
+		} else if (activeMode === 'smoll') {
+			setModeStatus('🚀 Advanced Mode: SmollLM2 135M (~90MB). Download on tap.');
+		} else if (activeMode === 'qwen') {
+			setModeStatus('🏆 Pro Mode: Qwen 2.5 0.5B (~250MB). Download on tap.');
+		}
+	}
+	updateModeButtonsUI();
+
+	function selectMode(nextMode) {
+		activeMode = nextMode;
+		try { localStorage.setItem(MODE_KEY, nextMode); } catch (e) {}
+		updateModeButtonsUI();
+
+		if (nextMode !== 'light' && isMobileViewport()) {
+			var mbMsg = '📱 Mobile Notice: Downloading local LLMs (90MB–250MB) consumes mobile data & battery. Normal Mode (0MB) runs instantly!';
+			add('assistant', mbMsg, null);
+			push({ role: 'assistant', text: mbMsg });
+		}
+	}
+
+	if (btnLight) btnLight.addEventListener('click', function () { selectMode('light'); });
+	if (btnSmoll) btnSmoll.addEventListener('click', function () { selectMode('smoll'); });
+	if (btnQwen) btnQwen.addEventListener('click', function () { selectMode('qwen'); });
+
+	async function ensureModelLoaded() {
+		var targetId = activeMode === 'qwen' ? 'qwen' : 'smoll';
 		if (modelPipeline && selectedModelId === targetId) return modelPipeline;
 		modelPipeline = null;
 		modelLoading = null;
-		
+
 		modelLoading = (async function () {
-			var modelRepo = targetId === 'SmollLM2-135M' ? 'onnx-community/SmollLM2-135M-Instruct' : 'Xenova/LaMini-Flan-T5-77M';
-			var modelLabel = targetId === 'SmollLM2-135M' ? 'SmollLM2 135M Instruct (~90MB)' : 'LaMini-Flan-T5 (~77MB)';
+			var modelRepo = targetId === 'qwen' ? 'onnx-community/Qwen2.5-0.5B-Instruct' : 'onnx-community/SmollLM2-135M-Instruct';
+			var modelLabel = targetId === 'qwen' ? 'Qwen 2.5 0.5B (~250MB)' : 'SmollLM2 135M (~90MB)';
 			setModeStatus('Downloading ' + modelLabel + '…');
 			var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-			var task = targetId === 'SmollLM2-135M' ? 'text-generation' : 'text2text-generation';
-			modelPipeline = await mod.pipeline(task, modelRepo);
+			modelPipeline = await mod.pipeline('text-generation', modelRepo);
 			selectedModelId = targetId;
-			try { localStorage.setItem(SELECTED_MODEL_KEY, targetId); } catch (e) {}
-			setModeStatus('Full Chatbot Ready (' + targetId + ').');
+			setModeStatus('Chatbot Ready (' + targetId.toUpperCase() + ').');
 			return modelPipeline;
 		})();
 		return modelLoading;
-	}
-
-	if (enableBtn) {
-		if (mode === 'model') {
-			enableBtn.textContent = 'Full chatbot enabled';
-			enableBtn.disabled = true;
-		}
-		enableBtn.addEventListener('click', function () {
-			mode = 'model';
-			try {
-				localStorage.setItem(MODE_KEY, mode);
-			} catch (e) {}
-			enableBtn.disabled = true;
-			enableBtn.textContent = 'Downloading…';
-			ensureModelLoaded()
-				.then(function () {
-					enableBtn.textContent = 'Full chatbot enabled (LaMini 77MB)';
-				})
-				.catch(function () {
-					mode = 'light';
-					try {
-						localStorage.setItem(MODE_KEY, mode);
-					} catch (e) {}
-					enableBtn.disabled = false;
-					enableBtn.textContent = 'Enable full chatbot (~77MB)';
-					setModeStatus('Light mode.');
-				});
-		});
 	}
 
 	if (clearBtn) {
@@ -422,8 +434,8 @@
 			return { role: it.role === 'user' ? 'user' : 'assistant', content: it.text || '' };
 		});
 
-		if (mode === 'model') {
-			add('assistant', 'Thinking…', text);
+		if (activeMode !== 'light') {
+			add('assistant', 'Thinking… (' + activeMode.toUpperCase() + ')', text);
 			ensureModelLoaded()
 				.then(async function (pipe) {
 					var systemPrompt = 'You are an expert interview coach and data science career mentor. Answer concisely, professionally, and provide concrete examples or actionable steps.';
