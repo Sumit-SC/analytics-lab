@@ -361,7 +361,7 @@
 		'flan': '📦 Standard Local AI (LaMini Flan-T5 ~77MB, 512 Tokens)',
 		'smoll': '🚀 Advanced Local AI (SmollLM2 135M ~90MB, 2K Tokens)',
 		'qwen': '🏆 Pro Local AI (Qwen 1.5 0.5B ~250MB, 4K Tokens)',
-		'llama': '🦙 Ultra Llama 3.2 1B (~700MB, 8K Tokens)'
+		'smoll360': '🦙 Ultra 8K (Qwen 2.5 0.5B ~290MB, 8K Tokens)'
 	};
 
 	function updateSelectUI() {
@@ -373,7 +373,7 @@
 			'flan': '📦 Standard Mode: LaMini Flan-T5 77M (~77MB download, 512 context).',
 			'smoll': '🚀 Advanced Mode: SmollLM2 135M (~90MB download, 2K context).',
 			'qwen': '🏆 Pro Mode: Qwen 1.5 0.5B (~250MB download, 4K context).',
-			'llama': '🦙 Ultra Llama 3.2 1B (~700MB download, 8K context).'
+			'smoll360': '🦙 Ultra 8K Mode: Qwen 2.5 0.5B (~290MB download, 8K context).'
 		};
 		setModeStatus(statusMap[selectedModel] || 'Basic Mode.');
 	}
@@ -553,10 +553,10 @@
 				modelRepo = 'Xenova/Qwen1.5-0.5B-Chat';
 				task = 'text-generation';
 				label = 'Pro Qwen 0.5B (250MB)';
-			} else if (targetId === 'llama') {
-				modelRepo = 'onnx-community/Llama-3.2-1B-Instruct';
+			} else if (targetId === 'smoll360' || targetId === 'qwen8k' || targetId === 'llama') {
+				modelRepo = 'onnx-community/Qwen2.5-0.5B-Instruct';
 				task = 'text-generation';
-				label = 'Ultra Llama 3.2 1B (700MB, 8K Context)';
+				label = 'Ultra 8K Qwen 2.5 0.5B (290MB, 8K Context)';
 			}
 
 			setModeStatus('⌛ Initializing ' + label + '…');
