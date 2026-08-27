@@ -268,14 +268,27 @@
 			});
 	}
 
+	function fetchBackendChat(historyTurns) {
+		var base = (typeof window !== 'undefined' && window.JOB_PROXY_URL) ? String(window.JOB_PROXY_URL).replace(/\/$/, '') : 'https://job-search-engine-api.onrender.com';
+		return fetch(base + '/api/v1/chat', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ messages: historyTurns })
+		})
+		.then(function (r) { return r && r.ok ? r.json() : null; })
+		.then(function (data) { return (data && (data.reply || data.response || data.message)) ? String(data.reply || data.response || data.message).trim() : null; })
+		.catch(function () { return null; });
+	}
+
 	async function ensureModelLoaded() {
 		if (modelPipeline) return modelPipeline;
 		if (modelLoading) return modelLoading;
 		modelLoading = (async function () {
-			setModeStatus('Downloading model (~80MB)…');
+			setModeStatus('Downloading instruction model (~77MB)…');
 			var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-			modelPipeline = await mod.pipeline('text2text-generation', 'Xenova/flan-t5-small');
-			setModeStatus('Full chatbot ready.');
+			// LaMini-Flan-T5-77M is instruction-tuned specifically for chat, Q&A, and interview advice
+			modelPipeline = await mod.pipeline('text2text-generation', 'Xenova/LaMini-Flan-T5-77M');
+			setModeStatus('Full Chatbot Ready (LaMini Instruct).');
 			return modelPipeline;
 		})();
 		return modelLoading;
@@ -295,7 +308,7 @@
 			enableBtn.textContent = 'Downloading…';
 			ensureModelLoaded()
 				.then(function () {
-					enableBtn.textContent = 'Full chatbot enabled';
+					enableBtn.textContent = 'Full chatbot enabled (LaMini 77MB)';
 				})
 				.catch(function () {
 					mode = 'light';
@@ -303,7 +316,7 @@
 						localStorage.setItem(MODE_KEY, mode);
 					} catch (e) {}
 					enableBtn.disabled = false;
-					enableBtn.textContent = 'Enable full chatbot (~80MB)';
+					enableBtn.textContent = 'Enable full chatbot (~77MB)';
 					setModeStatus('Light mode.');
 				});
 		});
@@ -326,63 +339,85 @@
 		add('user', text);
 		push({ role: 'user', text: text });
 
+		var historyTurns = history.slice(-10).map(function (it) {
+			return { role: it.role === 'user' ? 'user' : 'assistant', content: it.text || '' };
+		});
+
 		if (mode === 'model') {
 			add('assistant', 'Thinking…', text);
 			ensureModelLoaded()
 				.then(async function (pipe) {
-					var turns = history.slice(-12).filter(function (it) {
-						return it && it.role && typeof it.text === 'string';
-					});
-					var convo = turns
-						.map(function (it) {
-							return (it.role === 'user' ? 'User: ' : 'Assistant: ') + it.text;
-						})
-						.join('\n');
-					var prompt =
-						'You are a helpful learning assistant. Answer clearly and briefly.\n\nConversation:\n' + convo + '\nAssistant:';
-					var out = await pipe(prompt, { max_new_tokens: 160, do_sample: false });
-					var generated =
-						out && out[0] && out[0].generated_text ? String(out[0].generated_text).trim() : '';
+					var systemPrompt = 'You are an expert interview coach and data science career mentor. Answer concisely, professionally, and provide concrete examples or actionable steps.';
+					var convo = 'System: ' + systemPrompt + '\n\n' + history.slice(-8).map(function (it) {
+						var sender = it.role === 'user' ? 'User' : 'Coach';
+						return sender + ': ' + (it.text || '');
+					}).join('\n') + '\nCoach:';
+
+					var out = await pipe(convo, { max_new_tokens: 220, temperature: 0.7, do_sample: true });
+					var generated = out && out[0] && out[0].generated_text ? String(out[0].generated_text).trim() : '';
+					// Remove prompt prefix if echo back occurs
+					if (generated.indexOf('Coach:') !== -1) {
+						generated = generated.split('Coach:').pop().trim();
+					}
 					add('assistant', generated || 'No response from model.', text);
 					push({ role: 'assistant', text: generated || 'No response from model.', searchQuery: text });
 				})
 				.catch(function () {
-					add('assistant', 'Model failed. Using Wikipedia + Google.', text);
-					fetchWikipedia(text).then(function (w) {
-						add('assistant', w || "I couldn't find a direct answer. Use Google below.", text, w ? null : 'Tap here to search on Google →');
-						push({
-							role: 'assistant',
-							text: w || "I couldn't find a direct answer. Use Google below.",
-							searchQuery: text,
-						});
+					add('assistant', 'Model failed. Trying API backend...', text);
+					fetchBackendChat(historyTurns).then(function (apiReply) {
+						if (apiReply) {
+							add('assistant', apiReply, text);
+							push({ role: 'assistant', text: apiReply, searchQuery: text });
+						} else {
+							fetchWikipedia(text).then(function (w) {
+								add('assistant', w || "I couldn't find a direct answer. Use Google below.", text, w ? null : 'Tap here to search on Google →');
+								push({ role: 'assistant', text: w || "I couldn't find a direct answer. Use Google below.", searchQuery: text });
+							});
+						}
 					});
 				});
 			return;
 		}
 
-		// Job-prep FAQ in light mode (no model needed)
+		// Expanded Job-prep & Career FAQ Engine in Light Mode
 		var qLower = text.toLowerCase();
 		var faqAnswer = null;
-		if (qLower.indexOf('star') !== -1 && (qLower.indexOf('method') !== -1 || qLower.indexOf('interview') !== -1)) {
-			faqAnswer = 'STAR method: Situation (set the scene), Task (your responsibility), Action (what you did, steps you took), Result (outcome, what you learned). Example: "In my previous role (S), I had to improve report accuracy (T). I built validation checks and trained the team (A), which cut errors by 40% (R)." Use it for behavioral questions.';
-		} else if (qLower.indexOf('common') !== -1 && (qLower.indexOf('data analyst') !== -1 || qLower.indexOf('analyst') !== -1) && (qLower.indexOf('question') !== -1 || qLower.indexOf('interview') !== -1)) {
-			faqAnswer = 'Common data analyst interview questions: 1) Tell me about a project where you used data to drive a decision. 2) How do you handle missing or messy data? 3) Explain a time you had to present to non-technical stakeholders. 4) SQL: joins, aggregations, window functions. 5) How do you prioritize when multiple teams need reports? 6) Describe your experience with A/B testing or experimentation. 7) How do you ensure data quality? Prepare 1–2 concrete examples per theme.';
+
+		if (qLower.indexOf('star') !== -1 && (qLower.indexOf('method') !== -1 || qLower.indexOf('interview') !== -1 || qLower.indexOf('example') !== -1)) {
+			faqAnswer = 'STAR Method Guide:\n• Situation: Describe the context & challenge.\n• Task: State your specific responsibility.\n• Action: Explain your technical steps & strategy (SQL, Python, dashboard, stakeholder alignment).\n• Result: Quantify business impact (e.g. "Cut report latency by 35% & saved 10h/week").\n\nTip: Keep your answer under 2 minutes!';
+		} else if (qLower.indexOf('common') !== -1 && (qLower.indexOf('question') !== -1 || qLower.indexOf('interview') !== -1)) {
+			faqAnswer = 'Top Data Analyst Interview Questions:\n1. Tell me about a data project where your insights directly influenced a business decision.\n2. How do you clean messy datasets or handle missing values?\n3. Explain the difference between INNER JOIN, LEFT JOIN, and FULL OUTER JOIN in SQL.\n4. How do you communicate technical findings to non-technical executive stakeholders?\n5. Walk me through how you set up an A/B test or experiment.\n6. Describe a time when your dataset had errors—how did you detect and fix them?';
+		} else if (qLower.indexOf('pitch') !== -1 || qLower.indexOf('tell me about yourself') !== -1 || qLower.indexOf('1-minute') !== -1 || qLower.indexOf('intro') !== -1) {
+			faqAnswer = '1-Minute Elevator Pitch Structure:\n1. Present (30s): Current role, key domain expertise (e.g., Data Analytics, SQL, Python, Tableau).\n2. Past (20s): Notable achievement or project impact (e.g., automated ETL pipelines, built executive dashboards).\n3. Future (10s): Why you are excited about THIS specific role and company.\n\nKeep it energetic, clear, and focused on business value!';
+		} else if (qLower.indexOf('sql') !== -1 && (qLower.indexOf('join') !== -1 || qLower.indexOf('window') !== -1 || qLower.indexOf('cte') !== -1)) {
+			faqAnswer = 'Key SQL Interview Concepts:\n• INNER JOIN: Only matching rows in both tables.\n• LEFT JOIN: All rows from left table, matching rows from right.\n• CTE (WITH clause): Temporary named result set for clean, readable subqueries.\n• Window Functions: ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), LEAD() over PARTITION BY. Useful for top-N per category analysis.';
+		} else if (qLower.indexOf('salary') !== -1 || qLower.indexOf('negotiat') !== -1) {
+			faqAnswer = 'Salary Negotiation Strategy:\n1. Benchmark using Levels.fyi, Glassdoor, and AmbitionBox for your location & YOE.\n2. Never give the first exact number if possible—give a target range (e.g. "Based on market research for Senior Analysts, I am targeting 18–22 LPA").\n3. Highlight competing offers or your unique technical value (SQL + Python + MLOps).';
 		} else if (qLower.indexOf('behavioral') !== -1 || qLower.indexOf('behavioural') !== -1) {
-			faqAnswer = 'Behavioral questions ask for past examples. Use STAR: Situation, Task, Action, Result. Prepare 3–5 stories (e.g. conflict, leadership, failure, tight deadline) that you can adapt. Keep answers under 2 minutes; offer to go deeper if they ask.';
+			faqAnswer = 'Behavioral Interview Tips:\n1. Prepare 4–5 core stories covering: Conflict resolution, Failure & learning, Tight deadlines, Stakeholder pushback, and Leadership.\n2. Always structure using STAR (Situation, Task, Action, Result).\n3. Offer metrics whenever possible (time saved, revenue boost, accuracy increased).';
 		}
+
 		if (faqAnswer) {
 			add('assistant', faqAnswer, text, 'Search Google for more →');
 			push({ role: 'assistant', text: faqAnswer, searchQuery: text });
 			return;
 		}
 
-		fetchWikipedia(text).then(function (w) {
-			add('assistant', w || "I couldn't find a direct answer. Use Google below.", text, w ? null : 'Tap here to search on Google →');
-			push({
-				role: 'assistant',
-				text: w || "I couldn't find a direct answer. Use Google below.",
-				searchQuery: text,
-			});
+		// Try API backend first before fallback
+		fetchBackendChat(historyTurns).then(function (apiReply) {
+			if (apiReply) {
+				add('assistant', apiReply, text);
+				push({ role: 'assistant', text: apiReply, searchQuery: text });
+			} else {
+				fetchWikipedia(text).then(function (w) {
+					add('assistant', w || "I couldn't find a direct answer. Use Google below.", text, w ? null : 'Tap here to search on Google →');
+					push({
+						role: 'assistant',
+						text: w || "I couldn't find a direct answer. Use Google below.",
+						searchQuery: text,
+					});
+				});
+			}
 		});
 	});
 
