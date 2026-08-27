@@ -291,6 +291,9 @@
 		if (btn && typeof btn.focus === 'function') btn.focus();
 	}
 
+	window.openAssistantPanel = openPanel;
+	window.closeAssistantPanel = closePanel;
+
 	panel.setAttribute('aria-hidden', 'true');
 	btn.addEventListener('click', openPanel);
 	if (closeBtn) closeBtn.addEventListener('click', closePanel);
