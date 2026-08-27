@@ -347,86 +347,57 @@
 		.catch(function () { return null; });
 	}
 
-	var SELECTED_SUBMODEL_KEY = 'standalone_assistant_submodel_v1';
-	
-	var engineMode = (function () {
+	var activePill = (function () {
 		try { return localStorage.getItem(MODE_KEY) || 'basic'; } catch (e) { return 'basic'; }
 	})();
 
-	var subModel = (function () {
-		try { return localStorage.getItem(SELECTED_SUBMODEL_KEY) || 'flan'; } catch (e) { return 'flan'; }
-	})();
-
-	var btnEngineBasic = document.getElementById('toggle-engine-basic');
-	var btnEngineBot = document.getElementById('toggle-engine-bot');
-	var subSelectorWrap = document.getElementById('local-ai-sub-selector');
-
-	var btnSubFlan = document.getElementById('model-sub-flan');
-	var btnSubSmoll = document.getElementById('model-sub-smoll');
-	var btnSubLlama = document.getElementById('model-sub-llama');
+	var pillBasic = document.getElementById('model-pill-basic');
+	var pillFlan = document.getElementById('model-pill-flan');
+	var pillSmoll = document.getElementById('model-pill-smoll');
+	var pillQwen = document.getElementById('model-pill-qwen');
 
 	function isMobileViewport() {
 		try { return window.matchMedia && window.matchMedia('(max-width: 767px)').matches; } catch (e) { return false; }
 	}
 
-	function updateModeUI() {
-		var activeTopClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition';
-		var inactiveTopClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition';
+	function updatePillsUI() {
+		var activeClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition whitespace-nowrap';
+		var inactiveClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap';
 
-		var activeSubClass = 'px-2 py-1 rounded-md font-semibold bg-primary text-white shadow-sm transition';
-		var inactiveSubClass = 'px-2 py-1 rounded-md font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition';
+		if (pillBasic) pillBasic.className = activePill === 'basic' ? activeClass : inactiveClass;
+		if (pillFlan) pillFlan.className = activePill === 'flan' ? activeClass : inactiveClass;
+		if (pillSmoll) pillSmoll.className = activePill === 'smoll' ? activeClass : inactiveClass;
+		if (pillQwen) pillQwen.className = activePill === 'qwen' ? activeClass : inactiveClass;
 
-		if (btnEngineBasic) btnEngineBasic.className = engineMode === 'basic' ? activeTopClass : inactiveTopClass;
-		if (btnEngineBot) btnEngineBot.className = engineMode === 'bot' ? activeTopClass : inactiveTopClass;
-
-		if (subSelectorWrap) {
-			subSelectorWrap.classList.toggle('hidden', engineMode !== 'bot');
-		}
-
-		if (btnSubFlan) btnSubFlan.className = subModel === 'flan' ? activeSubClass : inactiveSubClass;
-		if (btnSubSmoll) btnSubSmoll.className = subModel === 'smoll' ? activeSubClass : inactiveSubClass;
-		if (btnSubLlama) btnSubLlama.className = subModel === 'llama' ? activeSubClass : inactiveSubClass;
-
-		if (engineMode === 'basic') {
-			setModeStatus('⚡ Basic Mode (0MB download, instant responses).');
-		} else {
-			var labelMap = {
-				'flan': 'Standard (77M, 512 context)',
-				'smoll': 'Advanced (135M, 2K context)',
-				'llama': 'Pro (Llama 3.2 1B, 8K context ~400MB RAM)'
-			};
-			setModeStatus('🤖 Bot Mode: ' + (labelMap[subModel] || subModel) + '. Download on tap.');
-		}
+		var statusMap = {
+			'basic': '⚡ Basic Mode (0MB download, instant FAQ & API responses).',
+			'flan': '🤖 Standard Mode: LaMini Flan-T5 77M (~77MB download). Fast CPU.',
+			'smoll': '🚀 Advanced Mode: SmollLM2 135M (~90MB download). 2024 SOTA Chat.',
+			'qwen': '🏆 Pro Mode: Qwen 1.5 0.5B (~250MB download). SOTA Technical Model.'
+		};
+		setModeStatus(statusMap[activePill] || 'Basic mode.');
 	}
-	updateModeUI();
+	updatePillsUI();
 
-	function setEngineMode(mode) {
-		engineMode = mode;
+	function selectPill(mode) {
+		activePill = mode;
 		try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
-		updateModeUI();
+		updatePillsUI();
 
-		if (mode === 'bot' && isMobileViewport()) {
-			var mbMsg = '📱 Mobile Notice: Bot Mode downloads local LLMs (~77MB–450MB). Basic Mode (0MB) runs instantly!';
+		if (mode !== 'basic' && isMobileViewport()) {
+			var mbMsg = '📱 Mobile Notice: Local LLM modes (~77MB–250MB) consume mobile data & RAM. Basic Mode (0MB) runs instantly!';
 			add('assistant', mbMsg, null);
 			push({ role: 'assistant', text: mbMsg });
 		}
 	}
 
-	function setSubModel(model) {
-		subModel = model;
-		try { localStorage.setItem(SELECTED_SUBMODEL_KEY, model); } catch (e) {}
-		updateModeUI();
-	}
-
-	if (btnEngineBasic) btnEngineBasic.addEventListener('click', function () { setEngineMode('basic'); });
-	if (btnEngineBot) btnEngineBot.addEventListener('click', function () { setEngineMode('bot'); });
-
-	if (btnSubFlan) btnSubFlan.addEventListener('click', function () { setSubModel('flan'); });
-	if (btnSubSmoll) btnSubSmoll.addEventListener('click', function () { setSubModel('smoll'); });
-	if (btnSubLlama) btnSubLlama.addEventListener('click', function () { setSubModel('llama'); });
+	if (pillBasic) pillBasic.addEventListener('click', function () { selectPill('basic'); });
+	if (pillFlan) pillFlan.addEventListener('click', function () { selectPill('flan'); });
+	if (pillSmoll) pillSmoll.addEventListener('click', function () { selectPill('smoll'); });
+	if (pillQwen) pillQwen.addEventListener('click', function () { selectPill('qwen'); });
 
 	async function ensureModelLoaded() {
-		var targetId = subModel || 'flan';
+		var targetId = activePill || 'flan';
 		if (modelPipeline && selectedModelId === targetId) return modelPipeline;
 		modelPipeline = null;
 		modelLoading = null;
@@ -437,13 +408,13 @@
 			var label = 'Standard LaMini-Flan-T5 (77MB)';
 
 			if (targetId === 'smoll') {
+				modelRepo = 'onnx-community/SmollLM2-135M-Instruct';
+				task = 'text-generation';
+				label = 'Advanced SmollLM2 135M (90MB)';
+			} else if (targetId === 'qwen') {
 				modelRepo = 'Xenova/Qwen1.5-0.5B-Chat';
 				task = 'text-generation';
-				label = 'Advanced Qwen 0.5B (250MB)';
-			} else if (targetId === 'llama') {
-				modelRepo = 'Xenova/LaMini-Flan-T5-77M';
-				task = 'text2text-generation';
-				label = 'Standard LaMini-Flan-T5 (77MB)';
+				label = 'Pro Qwen 0.5B (250MB)';
 			}
 
 			setModeStatus('⌛ Initializing ' + label + '…');
@@ -518,8 +489,8 @@
 			return { role: it.role === 'user' ? 'user' : 'assistant', content: it.text || '' };
 		});
 
-		if (engineMode === 'bot') {
-			add('assistant', 'Thinking… (' + (subModel || 'flan').toUpperCase() + ')', text);
+		if (activePill !== 'basic') {
+			add('assistant', 'Thinking… (' + activePill.toUpperCase() + ')', text);
 			ensureModelLoaded()
 				.then(async function (pipe) {
 					var systemPrompt = 'You are an expert interview coach and data science career mentor. Answer concisely, professionally, and provide concrete examples or actionable steps.';
