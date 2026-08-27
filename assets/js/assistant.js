@@ -347,65 +347,108 @@
 		.catch(function () { return null; });
 	}
 
-	var SELECTED_MODEL_KEY = 'standalone_assistant_model_id_v1';
-	var activeMode = (function () {
-		try { return localStorage.getItem(MODE_KEY) || 'light'; } catch (e) { return 'light'; }
+	var SELECTED_SUBMODEL_KEY = 'standalone_assistant_submodel_v1';
+	
+	var engineMode = (function () {
+		try { return localStorage.getItem(MODE_KEY) || 'basic'; } catch (e) { return 'basic'; }
 	})();
 
-	var btnLight = document.getElementById('model-mode-light');
-	var btnSmoll = document.getElementById('model-mode-smoll');
-	var btnQwen = document.getElementById('model-mode-qwen');
+	var subModel = (function () {
+		try { return localStorage.getItem(SELECTED_SUBMODEL_KEY) || 'flan'; } catch (e) { return 'flan'; }
+	})();
+
+	var btnEngineBasic = document.getElementById('toggle-engine-basic');
+	var btnEngineBot = document.getElementById('toggle-engine-bot');
+	var subSelectorWrap = document.getElementById('local-ai-sub-selector');
+
+	var btnSubFlan = document.getElementById('model-sub-flan');
+	var btnSubSmoll = document.getElementById('model-sub-smoll');
+	var btnSubLlama = document.getElementById('model-sub-llama');
 
 	function isMobileViewport() {
 		try { return window.matchMedia && window.matchMedia('(max-width: 767px)').matches; } catch (e) { return false; }
 	}
 
-	function updateModeButtonsUI() {
-		var activeClass = 'px-2 py-1 rounded text-xs font-semibold bg-primary text-white shadow-sm transition';
-		var inactiveClass = 'px-2 py-1 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition';
+	function updateModeUI() {
+		var activeTopClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition';
+		var inactiveTopClass = 'flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition';
 
-		if (btnLight) btnLight.className = activeMode === 'light' ? activeClass : inactiveClass;
-		if (btnSmoll) btnSmoll.className = activeMode === 'smoll' ? activeClass : inactiveClass;
-		if (btnQwen) btnQwen.className = activeMode === 'qwen' ? activeClass : inactiveClass;
+		var activeSubClass = 'px-2 py-1 rounded-md font-semibold bg-primary text-white shadow-sm transition';
+		var inactiveSubClass = 'px-2 py-1 rounded-md font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition';
 
-		if (activeMode === 'light') {
-			setModeStatus('⚡ Normal Mode (0MB download, instant responses).');
-		} else if (activeMode === 'smoll') {
-			setModeStatus('🚀 Advanced Mode: SmollLM2 135M (~90MB). Download on tap.');
-		} else if (activeMode === 'qwen') {
-			setModeStatus('🏆 Pro Mode: Qwen 2.5 0.5B (~250MB). Download on tap.');
+		if (btnEngineBasic) btnEngineBasic.className = engineMode === 'basic' ? activeTopClass : inactiveTopClass;
+		if (btnEngineBot) btnEngineBot.className = engineMode === 'bot' ? activeTopClass : inactiveTopClass;
+
+		if (subSelectorWrap) {
+			subSelectorWrap.classList.toggle('hidden', engineMode !== 'bot');
+		}
+
+		if (btnSubFlan) btnSubFlan.className = subModel === 'flan' ? activeSubClass : inactiveSubClass;
+		if (btnSubSmoll) btnSubSmoll.className = subModel === 'smoll' ? activeSubClass : inactiveSubClass;
+		if (btnSubLlama) btnSubLlama.className = subModel === 'llama' ? activeSubClass : inactiveSubClass;
+
+		if (engineMode === 'basic') {
+			setModeStatus('⚡ Basic Mode (0MB download, instant responses).');
+		} else {
+			var labelMap = {
+				'flan': 'Standard (77M, 512 context)',
+				'smoll': 'Advanced (135M, 2K context)',
+				'llama': 'Pro (Llama 3.2 1B, 8K context ~400MB RAM)'
+			};
+			setModeStatus('🤖 Bot Mode: ' + (labelMap[subModel] || subModel) + '. Download on tap.');
 		}
 	}
-	updateModeButtonsUI();
+	updateModeUI();
 
-	function selectMode(nextMode) {
-		activeMode = nextMode;
-		try { localStorage.setItem(MODE_KEY, nextMode); } catch (e) {}
-		updateModeButtonsUI();
+	function setEngineMode(mode) {
+		engineMode = mode;
+		try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
+		updateModeUI();
 
-		if (nextMode !== 'light' && isMobileViewport()) {
-			var mbMsg = '📱 Mobile Notice: Downloading local LLMs (90MB–250MB) consumes mobile data & battery. Normal Mode (0MB) runs instantly!';
+		if (mode === 'bot' && isMobileViewport()) {
+			var mbMsg = '📱 Mobile Notice: Bot Mode downloads local LLMs (~77MB–450MB). Basic Mode (0MB) runs instantly!';
 			add('assistant', mbMsg, null);
 			push({ role: 'assistant', text: mbMsg });
 		}
 	}
 
-	if (btnLight) btnLight.addEventListener('click', function () { selectMode('light'); });
-	if (btnSmoll) btnSmoll.addEventListener('click', function () { selectMode('smoll'); });
-	if (btnQwen) btnQwen.addEventListener('click', function () { selectMode('qwen'); });
+	function setSubModel(model) {
+		subModel = model;
+		try { localStorage.setItem(SELECTED_SUBMODEL_KEY, model); } catch (e) {}
+		updateModeUI();
+	}
+
+	if (btnEngineBasic) btnEngineBasic.addEventListener('click', function () { setEngineMode('basic'); });
+	if (btnEngineBot) btnEngineBot.addEventListener('click', function () { setEngineMode('bot'); });
+
+	if (btnSubFlan) btnSubFlan.addEventListener('click', function () { setSubModel('flan'); });
+	if (btnSubSmoll) btnSubSmoll.addEventListener('click', function () { setSubModel('smoll'); });
+	if (btnSubLlama) btnSubLlama.addEventListener('click', function () { setSubModel('llama'); });
 
 	async function ensureModelLoaded() {
-		var targetId = activeMode === 'qwen' ? 'qwen' : 'smoll';
+		var targetId = subModel || 'flan';
 		if (modelPipeline && selectedModelId === targetId) return modelPipeline;
 		modelPipeline = null;
 		modelLoading = null;
 
 		modelLoading = (async function () {
-			var modelRepo = targetId === 'qwen' ? 'onnx-community/Qwen2.5-0.5B-Instruct' : 'onnx-community/SmollLM2-135M-Instruct';
-			var modelLabel = targetId === 'qwen' ? 'Qwen 2.5 0.5B (~250MB)' : 'SmollLM2 135M (~90MB)';
-			setModeStatus('Downloading ' + modelLabel + '…');
+			var modelRepo = 'Xenova/LaMini-Flan-T5-77M';
+			var task = 'text2text-generation';
+			var label = 'Standard LaMini-Flan-T5 (~77MB)';
+
+			if (targetId === 'smoll') {
+				modelRepo = 'onnx-community/SmollLM2-135M-Instruct';
+				task = 'text-generation';
+				label = 'Advanced SmollLM2 135M (~90MB)';
+			} else if (targetId === 'llama') {
+				modelRepo = 'onnx-community/Llama-3.2-1B-Instruct';
+				task = 'text-generation';
+				label = 'Pro Llama 3.2 1B 8K (~450MB)';
+			}
+
+			setModeStatus('Downloading ' + label + '…');
 			var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-			modelPipeline = await mod.pipeline('text-generation', modelRepo);
+			modelPipeline = await mod.pipeline(task, modelRepo);
 			selectedModelId = targetId;
 			setModeStatus('Chatbot Ready (' + targetId.toUpperCase() + ').');
 			return modelPipeline;
@@ -434,8 +477,8 @@
 			return { role: it.role === 'user' ? 'user' : 'assistant', content: it.text || '' };
 		});
 
-		if (activeMode !== 'light') {
-			add('assistant', 'Thinking… (' + activeMode.toUpperCase() + ')', text);
+		if (engineMode === 'bot') {
+			add('assistant', 'Thinking… (' + (subModel || 'flan').toUpperCase() + ')', text);
 			ensureModelLoaded()
 				.then(async function (pipe) {
 					var systemPrompt = 'You are an expert interview coach and data science career mentor. Answer concisely, professionally, and provide concrete examples or actionable steps.';
