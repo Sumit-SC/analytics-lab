@@ -293,6 +293,12 @@
 					<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lightweight in-browser AI coding assistant. Paste Python, SQL, or JS code to debug syntax errors, optimize queries, generate tests, and execute live.</p>
 				</div>
 				<div class="flex flex-wrap items-center gap-2 text-xs">
+					<label for="coder-model-select" class="font-bold text-gray-700 dark:text-gray-300">AI Model:</label>
+					<select id="coder-model-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
+						<option value="smoll">🚀 Lite Tutor (SmollLM2 90MB, 2K)</option>
+						<option value="qwen25coder">🏆 Pro Coder (Qwen 2.5 Coder 290MB, 8K)</option>
+						<option value="flan">⚡ Instant FAQ (LaMini 77MB, 512)</option>
+					</select>
 					<label for="coder-lang-select" class="font-bold text-gray-700 dark:text-gray-300">Language:</label>
 					<select id="coder-lang-select" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2.5 py-1.5 font-semibold text-gray-800 dark:text-gray-200">
 						<option value="python">🐍 Python (Pyodide)</option>

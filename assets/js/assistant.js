@@ -361,7 +361,8 @@
 		'flan': '📦 Standard Local AI (LaMini Flan-T5 ~77MB, 512 Tokens)',
 		'smoll': '🚀 Advanced Local AI (SmollLM2 135M ~90MB, 2K Tokens)',
 		'qwen': '🏆 Pro Local AI (Qwen 1.5 0.5B ~250MB, 4K Tokens)',
-		'smoll360': '🦙 Ultra 8K (Qwen 2.5 0.5B ~290MB, 8K Tokens)'
+		'smoll360': '🦙 Ultra 8K (Qwen 2.5 0.5B ~290MB, 8K Tokens)',
+		'qwen25coder': '💻 Pro 8K Coder (Qwen 2.5 Coder ~290MB, 8K Tokens)'
 	};
 
 	function updateSelectUI() {
@@ -373,7 +374,8 @@
 			'flan': '📦 Standard Mode: LaMini Flan-T5 77M (~77MB download, 512 context).',
 			'smoll': '🚀 Advanced Mode: SmollLM2 135M (~90MB download, 2K context).',
 			'qwen': '🏆 Pro Mode: Qwen 1.5 0.5B (~250MB download, 4K context).',
-			'smoll360': '🦙 Ultra 8K Mode: Qwen 2.5 0.5B (~290MB download, 8K context).'
+			'smoll360': '🦙 Ultra 8K Mode: Qwen 2.5 0.5B (~290MB download, 8K context).',
+			'qwen25coder': '💻 Pro 8K Coder: Qwen 2.5 Coder 0.5B (~290MB download, 8K context).'
 		};
 		setModeStatus(statusMap[selectedModel] || 'Basic Mode.');
 	}
@@ -387,11 +389,11 @@
 			speed: '⚡ Lightning Fast'
 		},
 		'smoll': {
-			name: 'Advanced SmollLM2 135M',
+			name: 'Advanced SmollLM2 135M (Lite Tutor)',
 			size: '~90 MB',
 			ram: '~220 MB – 320 MB',
 			context: '2,048 Tokens (2K)',
-			speed: '🚀 Fast & Precise'
+			speed: '🚀 Fast & Precise Tutor'
 		},
 		'qwen': {
 			name: 'Pro Qwen 1.5 0.5B',
@@ -406,6 +408,13 @@
 			ram: '~450 MB – 600 MB',
 			context: '8,192 Tokens (8K)',
 			speed: '🦙 Long Context SOTA'
+		},
+		'qwen25coder': {
+			name: 'Pro 8K Qwen 2.5 Coder',
+			size: '~290 MB',
+			ram: '~450 MB – 600 MB',
+			context: '8,192 Tokens (8K)',
+			speed: '💻 Code & Debugging SOTA'
 		}
 	};
 
@@ -612,6 +621,10 @@
 				modelRepo = 'Xenova/Qwen1.5-0.5B-Chat';
 				task = 'text-generation';
 				label = 'Pro Qwen 0.5B (250MB)';
+			} else if (targetId === 'qwen25coder') {
+				modelRepo = 'onnx-community/Qwen2.5-Coder-0.5B-Instruct';
+				task = 'text-generation';
+				label = 'Pro 8K Qwen 2.5 Coder (290MB, 8K Context)';
 			} else if (targetId === 'smoll360' || targetId === 'qwen8k' || targetId === 'llama') {
 				modelRepo = 'onnx-community/Qwen2.5-0.5B-Instruct';
 				task = 'text-generation';
