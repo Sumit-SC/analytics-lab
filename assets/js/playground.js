@@ -435,9 +435,9 @@
 		if (duckduckgoResultsWrap && states['duckduckgo-results-wrap']) duckduckgoResultsWrap.classList.toggle('collapsed', states['duckduckgo-results-wrap']);
 	}
 	function showFrame() {
-		if (frameWrap) {
-			frameWrap.classList.remove('hidden');
-			frameWrap.classList.remove('collapsed');
+		if (docsWrap) {
+			docsWrap.classList.remove('hidden');
+			docsWrap.classList.remove('collapsed');
 			var content = document.getElementById('docs-frame-content');
 			if (content) content.classList.remove('hidden');
 			var minBtn = document.getElementById('docs-frame-minimize');
@@ -1102,6 +1102,8 @@
 			if (assistantSelect) {
 				assistantSelect.value = m;
 				assistantSelect.dispatchEvent(new Event('change'));
+			} else if (typeof window.promptModelDownload === 'function') {
+				window.promptModelDownload(m);
 			}
 		});
 	}
