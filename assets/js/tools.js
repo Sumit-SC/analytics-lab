@@ -299,38 +299,84 @@
 	var frame = document.getElementById('word-embed-frame');
 	if (!frame) return;
 
-	var btnFilestash = document.getElementById('word-embed-filestash');
-	var btnOnlineocr = document.getElementById('word-embed-onlineocr');
+	// ----------------------------------------------------
+	// 📄 Office Studio Tab Switcher & Excel Grid Logic
+	// ----------------------------------------------------
+	var tabWord = document.getElementById('tool-tab-word');
+	var tabExcel = document.getElementById('tool-tab-excel');
+	var tabPdf = document.getElementById('tool-tab-pdf');
+	var tabNotes = document.getElementById('tool-tab-notes');
 
-	function setActive(btn) {
-		[btnFilestash, btnOnlineocr].forEach(function (b) {
-			if (!b) return;
-			if (b === btn) {
-				b.classList.add('border-primary', 'text-primary');
+	var viewWord = document.getElementById('tool-view-word');
+	var viewExcel = document.getElementById('tool-view-excel');
+	var viewPdf = document.getElementById('tool-view-pdf');
+	var viewNotes = document.getElementById('tool-view-notes');
+
+	function switchOfficeTab(activeTab, activeView) {
+		[tabWord, tabExcel, tabPdf, tabNotes].forEach(function (t) {
+			if (!t) return;
+			if (t === activeTab) {
+				t.className = 'px-3 py-1.5 rounded-lg bg-primary text-white font-semibold shadow transition flex items-center gap-1';
 			} else {
-				b.classList.remove('border-primary', 'text-primary');
+				t.className = 'px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 transition flex items-center gap-1';
 			}
 		});
+		[viewWord, viewExcel, viewPdf, viewNotes].forEach(function (v) {
+			if (v) v.classList.add('hidden');
+		});
+		if (activeView) activeView.classList.remove('hidden');
 	}
 
-	function load(src, btn) {
-		if (!frame || !src) return;
-		frame.src = src;
-		if (btn) setActive(btn);
+	if (tabWord) tabWord.addEventListener('click', function () { switchOfficeTab(tabWord, viewWord); });
+	if (tabExcel) tabExcel.addEventListener('click', function () { switchOfficeTab(tabExcel, viewExcel); });
+	if (tabPdf) tabPdf.addEventListener('click', function () { switchOfficeTab(tabPdf, viewPdf); });
+	if (tabNotes) tabNotes.addEventListener('click', function () { switchOfficeTab(tabNotes, viewNotes); });
+
+	// Excel Table Grid Handlers
+	var excelTable = document.getElementById('excel-table-grid');
+	var btnAddRow = document.getElementById('excel-btn-add-row');
+	var btnAddCol = document.getElementById('excel-btn-add-col');
+	var btnClearExcel = document.getElementById('excel-btn-clear');
+	var btnExportCsv = document.getElementById('excel-btn-export-csv');
+
+	if (excelTable && btnAddRow) {
+		btnAddRow.addEventListener('click', function () {
+			var tbody = excelTable.querySelector('tbody');
+			if (!tbody) return;
+			var rowCount = tbody.rows.length + 1;
+			var colCount = excelTable.querySelectorAll('thead th').length - 1;
+			var tr = document.createElement('tr');
+			var html = '<td class="p-2 bg-gray-100 dark:bg-gray-800/60 font-bold text-center border-r border-gray-200 dark:border-gray-700">' + rowCount + '</td>';
+			for (var i = 0; i < colCount; i++) {
+				html += '<td class="p-2 border-r border-gray-200 dark:border-gray-700 outline-none" contenteditable="true"></td>';
+			}
+			tr.innerHTML = html;
+			tbody.appendChild(tr);
+		});
 	}
 
-	if (btnFilestash) {
-		btnFilestash.addEventListener('click', function () {
-			load('https://www.filestash.app/word-online.html', btnFilestash);
+	if (excelTable && btnExportCsv) {
+		btnExportCsv.addEventListener('click', function () {
+			var rows = excelTable.querySelectorAll('tr');
+			var csv = [];
+			rows.forEach(function (r) {
+				var cols = r.querySelectorAll('th, td');
+				var rowData = [];
+				cols.forEach(function (c, idx) {
+					if (idx === 0) return;
+					var text = (c.innerText || c.textContent || '').trim().replace(/"/g, '""');
+					rowData.push('"' + text + '"');
+				});
+				if (rowData.length) csv.push(rowData.join(','));
+			});
+			var blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+			var url = URL.createObjectURL(blob);
+			var a = document.createElement('a');
+			a.href = url;
+			a.download = 'spreadsheet_export.csv';
+			a.click();
+			URL.revokeObjectURL(url);
 		});
-	}
-	if (btnOnlineocr) {
-		btnOnlineocr.addEventListener('click', function () {
-			load('https://onlineocr.io/word-online', btnOnlineocr);
-		});
-	}	// Load a default editor on first open (Filestash)
-	if (btnFilestash) {
-		load('https://www.filestash.app/word-online.html', btnFilestash);
 	}
 	// ----------------------------------------------------
 	// 🤖 AI Coding & Live Debugger Sandbox Engine
