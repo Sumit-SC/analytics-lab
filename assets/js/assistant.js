@@ -477,6 +477,46 @@
 		update2TierUI();
 	});
 
+	var progressBarWrap = document.getElementById('model-progress-bar-wrap');
+	var progressBarLabel = document.getElementById('model-progress-bar-label');
+	var progressBarPercent = document.getElementById('model-progress-bar-percent');
+	var progressBarFill = document.getElementById('model-progress-bar-fill');
+
+	function updateProgressBar(pct, labelText) {
+		if (!progressBarWrap) return;
+		if (pct < 0 || pct >= 100) {
+			if (pct >= 100) {
+				if (progressBarFill) progressBarFill.style.width = '100%';
+				if (progressBarPercent) progressBarPercent.textContent = '100%';
+				setTimeout(function () { progressBarWrap.classList.add('hidden'); }, 1500);
+			} else {
+				progressBarWrap.classList.add('hidden');
+			}
+			return;
+		}
+		progressBarWrap.classList.remove('hidden');
+		if (progressBarFill) progressBarFill.style.width = pct + '%';
+		if (progressBarPercent) progressBarPercent.textContent = pct + '%';
+		if (progressBarLabel && labelText) progressBarLabel.textContent = labelText;
+	}
+
+	(function checkSavedDownloadedModel() {
+		try {
+			var savedModel = localStorage.getItem('assistant_downloaded_model');
+			if (savedModel) {
+				confirmedModels[savedModel] = true;
+				activeSubPill = savedModel;
+				if (savedModel === 'smoll' || savedModel === 'qwen') {
+					mainTabMode = 'bot_mode';
+				} else if (savedModel === 'flan') {
+					mainTabMode = 'basic_mode';
+				}
+				update2TierUI();
+				setModeStatus('✅ Cached model ready (' + savedModel.toUpperCase() + '). Tap to chat.');
+			}
+		} catch (e) {}
+	})();
+
 	if (pillSubBasic) pillSubBasic.addEventListener('click', function () { selectSubPill('basic', 'Basic Mode 0MB', ''); });
 	if (pillSubFlan) pillSubFlan.addEventListener('click', function () { selectSubPill('flan', 'Standard LaMini 77M', 'Xenova/LaMini-Flan-T5-77M'); });
 	if (pillSubSmoll) pillSubSmoll.addEventListener('click', function () { selectSubPill('smoll', 'Advanced SmollLM2 90M', 'onnx-community/SmollLM2-135M-Instruct'); });
@@ -504,6 +544,8 @@
 			}
 
 			setModeStatus('⌛ Initializing ' + label + '…');
+			updateProgressBar(0, 'Initializing ' + label + '…');
+
 			try {
 				var mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
 				mod.env.allowLocalModels = false;
@@ -515,19 +557,34 @@
 							var pct = Math.round((info.loaded / info.total) * 100);
 							var fileName = (info.file || '').split('/').pop();
 							setModeStatus('📥 Downloading ' + fileName + ': ' + pct + '%');
+							updateProgressBar(pct, 'Downloading ' + fileName + '…');
 						} else if (info && info.status === 'initiate') {
 							var fName = (info.file || '').split('/').pop();
 							setModeStatus('📥 Starting download: ' + fName + '…');
+							updateProgressBar(0, 'Starting download: ' + fName + '…');
 						} else if (info && info.status === 'done') {
 							setModeStatus('⚡ Processing model weights into WebAssembly…');
+							updateProgressBar(99, 'Loading weights into WebAssembly…');
 						}
 					}
 				});
+
 				selectedModelId = targetId;
+				updateProgressBar(100, 'Model ready!');
 				setModeStatus('✅ Bot Ready (' + targetId.toUpperCase() + ').');
+
+				try {
+					localStorage.setItem('assistant_downloaded_model', targetId);
+				} catch (e) {}
+
+				var greetMsg = '🎉 ' + label + ' downloaded & loaded into browser WebAssembly!\n\nHi there! I am your offline AI interview coach. Ask me any question, paste a job description, or request mock interview practice!';
+				add('assistant', greetMsg, null);
+				push({ role: 'assistant', text: greetMsg });
+
 				return modelPipeline;
 			} catch (err) {
 				console.error('Model download error:', err);
+				updateProgressBar(-1, '');
 				setModeStatus('❌ Model download failed. Using fallback FAQ/API.');
 				throw err;
 			}
