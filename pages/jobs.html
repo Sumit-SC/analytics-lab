@@ -1585,19 +1585,13 @@
 					class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800 transition"
 					aria-label="Close assistant">&#10005;</button>
 			</div>
-			<!-- Always-Visible Model Selector Pill Bar -->
-			<div class="flex items-center gap-1 p-1 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-[11px] overflow-x-auto">
-				<button type="button" id="model-pill-basic" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition whitespace-nowrap" title="0MB download. Instant FAQ & Backend API responses.">
-					⚡ Basic (0MB)
+			<!-- Top Mode Switcher Bar -->
+			<div class="flex items-center gap-1.5 p-1 rounded-xl bg-gray-200/80 dark:bg-gray-800 text-xs">
+				<button type="button" id="model-pill-basic" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center bg-primary text-white shadow-sm transition" title="0MB download. Instant FAQ & Backend API responses.">
+					⚡ Basic Mode (0MB)
 				</button>
-				<button type="button" id="model-pill-flan" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap" title="LaMini Flan-T5 77M (~77MB download, 512 context). Fast CPU execution.">
-					Standard (77M)
-				</button>
-				<button type="button" id="model-pill-smoll" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap" title="SmollLM2 135M (~90MB download, 2K context). 2024 SOTA Chat.">
-					Advanced (135M)
-				</button>
-				<button type="button" id="model-pill-qwen" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition whitespace-nowrap" title="Qwen 1.5 0.5B (~250MB download, 4K context). SOTA Technical Model.">
-					Pro (250M)
+				<button type="button" id="model-pill-ai" class="flex-1 py-1.5 px-2 rounded-lg font-bold text-center text-gray-700 dark:text-gray-300 hover:text-primary transition" title="Enable In-Browser Local AI Bot (Xenova/LaMini-Flan-T5-77M). Download on tap.">
+					🤖 Local AI Bot (~77MB)
 				</button>
 			</div>
 		</div>
