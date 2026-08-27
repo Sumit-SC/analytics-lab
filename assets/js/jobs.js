@@ -3897,8 +3897,9 @@
 			html += '<div class="flex items-center gap-2 flex-wrap">';
 			html += '<button type="button" class="job-send-tg-btn text-xs px-2 py-1 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 rounded font-semibold transition-colors flex items-center gap-1" data-job-id="' + job.id + '" title="Share listing directly to Telegram">✈️ Telegram</button>';
 			html += '<button type="button" class="job-details-btn text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" data-job-id="' + job.id + '" title="Quick view">Details</button>';
-			html += '<button type="button" class="job-prep-chatgpt-btn text-xs px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Copy JD + prompt and open ChatGPT/Gemini">Prepare</button>';
-			html += '<button type="button" class="job-send-to-prep-btn text-xs px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Send JD to Interview Prep assistant for mock questions and tips">Interview Prep</button>';
+			html += '<button type="button" class="job-send-to-prep-btn text-xs px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Open On-Site Bot for interview prep & JD matching">🤖 On-Site Bot</button>';
+			html += '<button type="button" class="job-prep-chatgpt-btn text-xs px-2 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Copy JD prompt & open ChatGPT">💬 ChatGPT</button>';
+			html += '<button type="button" class="job-prep-gemini-btn text-xs px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Copy JD prompt & open Gemini">♊ Gemini</button>';
 			html += '<button type="button" class="job-add-to-planner-btn text-xs px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-semibold transition-colors" data-job-id="' + job.id + '" title="Add to planner">+ Planner</button>';
 			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-xs text-primary hover:underline font-semibold">Apply →</a>';
 			html += '</div>';
@@ -3930,16 +3931,29 @@
 				window.open(tgShareUrl, '_blank', 'noopener');
 				return;
 			}
-			var prepBtn = event.target.closest('.job-prep-chatgpt-btn');
-			if (prepBtn) {
-				var prepJob = jobById[prepBtn.getAttribute('data-job-id')];
-				if (!prepJob) return;
-				var prompt = buildChatGPTPrepPrompt(prepJob);
-				navigator.clipboard.writeText(prompt).then(function () {
+			var gptBtn = event.target.closest('.job-prep-chatgpt-btn');
+			if (gptBtn) {
+				var gptJob = jobById[gptBtn.getAttribute('data-job-id')];
+				if (!gptJob) return;
+				var promptGpt = buildChatGPTPrepPrompt(gptJob);
+				navigator.clipboard.writeText(promptGpt).then(function () {
 					window.open('https://chat.openai.com/', '_blank', 'noopener');
-					window.alert('Prompt copied. Paste it in the new ChatGPT tab. The AI will ask about your background first, then run a mock interview based on this JD.');
+					window.alert('Prompt copied! Paste it in ChatGPT to start your JD interview prep.');
 				}).catch(function () {
-					window.prompt('Copy this prompt and paste into ChatGPT or Gemini:', prompt);
+					window.prompt('Copy this prompt for ChatGPT:', promptGpt);
+				});
+				return;
+			}
+			var geminiBtn = event.target.closest('.job-prep-gemini-btn');
+			if (geminiBtn) {
+				var geminiJob = jobById[geminiBtn.getAttribute('data-job-id')];
+				if (!geminiJob) return;
+				var promptGemini = buildChatGPTPrepPrompt(geminiJob);
+				navigator.clipboard.writeText(promptGemini).then(function () {
+					window.open('https://gemini.google.com/', '_blank', 'noopener');
+					window.alert('Prompt copied! Paste it in Gemini to start your JD interview prep.');
+				}).catch(function () {
+					window.prompt('Copy this prompt for Gemini:', promptGemini);
 				});
 				return;
 			}

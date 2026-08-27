@@ -93,13 +93,25 @@
 	}
 
 	var JOB_PREP_SUGGESTED_PROMPTS = [
-		'Give me one mock behavioral interview question for a data analyst.',
-		'Ask me a technical question for a data analyst role.',
-		'How do I tailor my 1-minute pitch for a product analyst role?',
-		'Explain the STAR method with a short example.',
-		'What are common technical interview questions for data analysts?',
-		'How do I explain a project gap or career change in an interview?',
+		'🐍 Train on Python & Data Science',
+		'🛢️ SQL Query Interview Practice',
+		'🎤 Start Mock Interview on Topics',
+		'📄 Match JD with my Saved Profile',
+		'💼 Tailor my 1-Minute Elevator Pitch',
+		'💡 Explain STAR Method with Real Example',
+		'💰 Salary Negotiation Strategy for Analysts',
 	];
+
+	var PROMPT_MAPPINGS = {
+		'🐍 Train on Python & Data Science': 'Help me train on Python for data analysis, pandas, and data science. Ask me one interview question or coding problem at a time.',
+		'🛢️ SQL Query Interview Practice': 'Let\'s do SQL query practice for a data analyst interview. Ask me one SQL problem (JOINs, CTEs, or window functions) and evaluate my answer.',
+		'🎤 Start Mock Interview on Topics': 'Let\'s do a live mock interview for a Data Analyst role. Ask me one behavioral or technical question at a time and give feedback.',
+		'📄 Match JD with my Saved Profile': 'Compare my core skills (Python, SQL, Pandas, Tableau, A/B Testing) with typical data analyst job requirements and point out gaps to fix.',
+		'💼 Tailor my 1-Minute Elevator Pitch': 'Help me tailor a compelling 1-minute elevator pitch for a Senior Data Analyst role.',
+		'💡 Explain STAR Method with Real Example': 'Explain the STAR method with a real data analyst interview story including Situation, Task, Action, and Result metrics.',
+		'💰 Salary Negotiation Strategy for Analysts': 'Give me a strategic guide to negotiating a data analyst offer and benchmarking compensation.'
+	};
+
 	var MOCK_QUESTIONS = [
 		'Tell me about a time when you had to explain a complex analysis to a non-technical stakeholder. What was the situation and how did you approach it?',
 		'Describe a project where you used data to drive a business decision. What was the outcome?',
@@ -111,6 +123,63 @@
 		'Tell me about a time you disagreed with a colleague about the interpretation of data. How did you resolve it?',
 	];
 
+	function makeExternalAiLinks(searchQuery, fullText) {
+		var wrap = document.createElement('div');
+		wrap.className = 'flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700/60';
+
+		var gLink = document.createElement('a');
+		gLink.href = 'https://www.google.com/search?q=' + encodeURIComponent(searchQuery || 'data analyst interview prep');
+		gLink.target = '_blank';
+		gLink.rel = 'noopener noreferrer';
+		gLink.className = 'px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[11px] font-semibold hover:bg-gray-100 transition';
+		gLink.textContent = '🌐 Google';
+		wrap.appendChild(gLink);
+
+		var gptBtn = document.createElement('button');
+		gptBtn.type = 'button';
+		gptBtn.className = 'px-2 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold hover:bg-emerald-100 transition flex items-center gap-1';
+		gptBtn.textContent = '💬 ChatGPT';
+		gptBtn.addEventListener('click', function () {
+			var prompt = fullText || searchQuery || 'Help me prepare for data analyst interview.';
+			navigator.clipboard.writeText(prompt).then(function () {
+				window.open('https://chat.openai.com/', '_blank', 'noopener');
+			});
+		});
+		wrap.appendChild(gptBtn);
+
+		var geminiBtn = document.createElement('button');
+		geminiBtn.type = 'button';
+		geminiBtn.className = 'px-2 py-1 rounded border border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[11px] font-semibold hover:bg-purple-100 transition flex items-center gap-1';
+		geminiBtn.textContent = '♊ Gemini';
+		geminiBtn.addEventListener('click', function () {
+			var prompt = fullText || searchQuery || 'Help me prepare for data analyst interview.';
+			navigator.clipboard.writeText(prompt).then(function () {
+				window.open('https://gemini.google.com/', '_blank', 'noopener');
+			});
+		});
+		wrap.appendChild(geminiBtn);
+
+		return wrap;
+	}
+
+	function add(role, text, searchQuery, searchLabel) {
+		var outer = document.createElement('div');
+		outer.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
+		var box = document.createElement('div');
+		box.className = 'flex flex-col gap-1 max-w-[88%]';
+		var bubble = document.createElement('div');
+		bubble.className =
+			role === 'user' ? 'rounded-lg px-3 py-2 bg-primary text-white text-sm' : 'rounded-lg px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm leading-relaxed whitespace-pre-wrap';
+		bubble.textContent = text;
+		box.appendChild(bubble);
+		if (role !== 'user') {
+			box.appendChild(makeExternalAiLinks(searchQuery || text, text));
+		}
+		outer.appendChild(box);
+		messagesEl.appendChild(outer);
+		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
 	function addSuggestedPromptsAndMockButton() {
 		if (!messagesEl || !isJobsPage()) return;
 		var wrap = document.createElement('div');
@@ -118,19 +187,20 @@
 		wrap.setAttribute('aria-label', 'Suggested prompts');
 		var label = document.createElement('p');
 		label.className = 'text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2';
-		label.textContent = 'Suggested:';
+		label.textContent = 'Tap to Start Context:';
 		wrap.appendChild(label);
 		var chipsRow = document.createElement('div');
-		chipsRow.className = 'flex flex-wrap gap-2';
-		JOB_PREP_SUGGESTED_PROMPTS.forEach(function (promptText) {
+		chipsRow.className = 'flex flex-wrap gap-1.5';
+		JOB_PREP_SUGGESTED_PROMPTS.forEach(function (promptLabel) {
 			var btn = document.createElement('button');
 			btn.type = 'button';
-			btn.className = 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
-			btn.textContent = promptText.length > 45 ? promptText.slice(0, 42) + '…' : promptText;
-			btn.title = promptText;
+			btn.className = 'px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-primary hover:text-white transition-all text-left';
+			btn.textContent = promptLabel;
+			btn.title = promptLabel;
 			btn.addEventListener('click', function () {
-				inputEl.value = promptText;
-				inputEl.focus();
+				var fullPrompt = PROMPT_MAPPINGS[promptLabel] || promptLabel;
+				inputEl.value = fullPrompt;
+				sendBtn.click();
 			});
 			chipsRow.appendChild(btn);
 		});
@@ -139,15 +209,12 @@
 		mockRow.className = 'pt-2 border-t border-gray-200 dark:border-gray-700';
 		var mockBtn = document.createElement('button');
 		mockBtn.type = 'button';
-		mockBtn.className = 'px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-400/40 transition-colors';
-		mockBtn.textContent = '🎤 Ask me one mock question';
+		mockBtn.className = 'px-3 py-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-400/40 transition-colors w-full text-center';
+		mockBtn.textContent = '🎤 Ask Me a Random Mock Interview Question';
 		mockBtn.addEventListener('click', function () {
 			var q = MOCK_QUESTIONS[Math.floor(Math.random() * MOCK_QUESTIONS.length)];
 			add('assistant', q, null);
 			push({ role: 'assistant', text: q });
-			var hint = 'Practice answering above. Type your answer and send; enable full chatbot for feedback.';
-			add('assistant', hint, null);
-			push({ role: 'assistant', text: hint });
 		});
 		mockRow.appendChild(mockBtn);
 		wrap.appendChild(mockRow);
