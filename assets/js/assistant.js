@@ -461,6 +461,33 @@
 		if (progressBarLabel && labelText) progressBarLabel.textContent = labelText;
 	}
 
+	async function updateCacheStatusBadge(customText, customClass) {
+		var cacheStateEl = document.getElementById('assistant-cache-state');
+		if (!cacheStateEl) return;
+		if (customText) {
+			cacheStateEl.innerHTML = customText;
+			if (customClass) cacheStateEl.className = customClass;
+			return;
+		}
+		if (typeof window !== 'undefined' && window.caches) {
+			try {
+				var cacheNames = await window.caches.keys();
+				var hasModelCache = cacheNames.some(function (n) {
+					return n.indexOf('transformers') !== -1 || n.indexOf('onnx') !== -1;
+				});
+				if (hasModelCache) {
+					var savedModel = (localStorage.getItem('assistant_downloaded_model') || selectedModel || 'flan').toUpperCase();
+					cacheStateEl.className = 'font-bold text-emerald-600 dark:text-emerald-400';
+					cacheStateEl.innerHTML = '✅ Cached in storage (' + savedModel + ') — Offline Ready!';
+					setModeStatus('✅ Cached model ready (' + savedModel + '). Tap send to chat.');
+					return;
+				}
+			} catch (e) {}
+		}
+		cacheStateEl.className = 'font-bold text-gray-500 dark:text-gray-400';
+		cacheStateEl.innerHTML = '⚪ No model cached (Basic 0MB active)';
+	}
+
 	(function checkSavedDownloadedModel() {
 		try {
 			var savedModel = localStorage.getItem('assistant_downloaded_model');
@@ -468,9 +495,9 @@
 				confirmedModels[savedModel] = true;
 				selectedModel = savedModel;
 				updateSelectUI();
-				setModeStatus('✅ Cached model ready (' + savedModel.toUpperCase() + '). Tap send to chat.');
 			}
 		} catch (e) {}
+		updateCacheStatusBadge();
 	})();
 
 	var activeDownloadCard = null;
@@ -534,6 +561,7 @@
 
 			setModeStatus('⌛ Initializing ' + label + '…');
 			updateProgressBar(0, 'Initializing ' + label + '…');
+			updateCacheStatusBadge('📥 Downloading ' + label + ' (0%)…', 'font-bold text-primary animate-pulse');
 			createOrUpdateDownloadCard(label, 'Starting connection to CDN…', 0);
 
 			try {
@@ -554,16 +582,20 @@
 						var fileName = (info.file || '').split('/').pop();
 
 						if (info.status === 'progress' || info.status === 'downloading') {
-							setModeStatus('📥 Downloading ' + fileName + ': ' + Math.round(pct) + '%');
+							var roundPct = Math.round(pct);
+							setModeStatus('📥 Downloading ' + fileName + ': ' + roundPct + '%');
 							updateProgressBar(pct, 'Downloading ' + fileName + '…');
+							updateCacheStatusBadge('📥 Downloading (' + roundPct + '%)', 'font-bold text-primary animate-pulse');
 							createOrUpdateDownloadCard(label, fileName, pct);
 						} else if (info.status === 'initiate') {
 							setModeStatus('📥 Starting download: ' + fileName + '…');
 							updateProgressBar(0, 'Starting download: ' + fileName + '…');
+							updateCacheStatusBadge('📥 Connecting…', 'font-bold text-primary animate-pulse');
 							createOrUpdateDownloadCard(label, fileName, 0);
 						} else if (info.status === 'done') {
 							setModeStatus('⚡ Processing model weights into WebAssembly…');
 							updateProgressBar(99, 'Loading weights into WebAssembly…');
+							updateCacheStatusBadge('⚡ Processing WebAssembly…', 'font-bold text-primary animate-pulse');
 							createOrUpdateDownloadCard(label, 'Processing WebAssembly…', 99);
 						}
 					}
@@ -575,6 +607,7 @@
 				updateSelectUI();
 
 				updateProgressBar(100, 'Model ready!');
+				updateCacheStatusBadge('✅ Cached in storage (' + targetId.toUpperCase() + ') — Offline Ready!', 'font-bold text-emerald-600 dark:text-emerald-400');
 				createOrUpdateDownloadCard(label, 'Complete', 100);
 				setModeStatus('✅ Bot Ready (' + targetId.toUpperCase() + ').');
 
@@ -611,6 +644,8 @@
 					});
 				}).catch(function () {});
 			}
+			try { localStorage.removeItem('assistant_downloaded_model'); } catch (e) {}
+			updateCacheStatusBadge();
 			setModeStatus('🗑️ Model Cache Purged! Disk space freed.');
 			add('assistant', '🗑️ Model storage cache purged from browser. Any future LLM selection will download fresh on-demand.', null);
 		});
