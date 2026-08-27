@@ -20,25 +20,19 @@
 	<script src="../assets/js/nav-data.js" defer></script>
 	<script src="../assets/js/nav-inject.js" defer></script>
 	<script>
-		// Jobs API: Vercel (playground-serveless) or self-hosted job-search-api (Hugging Face, etc.)
-		// Vercel: Uses /api/jobs-snapshot (primary) and /api/jobs-cached (fallback)
-		// job-search-api (FastAPI): Uses /jobs (cached) and /refresh (POST, scrapes fresh)
-		// Default to the secure Vercel backend proxy for private Hugging Face Space:
-		// Default to live Koyeb deployment URL (theoretical-brigida-mitsu96-88a48b04.koyeb.app):
-		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://theoretical-brigida-mitsu96-88a48b04.koyeb.app';
-		// Default (Vercel): window.JOB_PROXY_URL = window.JOB_PROXY_URL || 'https://job-search-backend-vercel.vercel.app';
-		// Same-origin (if served from same Vercel app with /api): window.JOB_PROXY_URL = '';
-		// Local dev convenience: if running on localhost with a proxy dev server, default to same-origin.
+		// Dynamic Backend API Host Configuration
 		var __isLocalhost = false;
 		try { __isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1'); } catch (e) { }
-		// You can also override via query param: ?backend=http://localhost:8000
 		var __backendParam = '';
 		try { __backendParam = (new URLSearchParams(window.location.search)).get('backend') || ''; } catch (e) { __backendParam = ''; }
+		
+		var defaultApiHost = __isLocalhost ? '' : 'https://job-search-engine-api.onrender.com';
 		if (__backendParam && typeof __backendParam === 'string') {
-			window.JOB_PROXY_URL = __backendParam.replace(/\/$/, '');
-		} else {
-			window.JOB_PROXY_URL = window.JOB_PROXY_URL || (__isLocalhost ? '' : 'https://job-search-backend-vercel.vercel.app');
+			defaultApiHost = __backendParam.replace(/\/$/, '');
 		}
+		
+		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || defaultApiHost;
+		window.JOB_PROXY_URL = window.JOB_PROXY_URL || defaultApiHost;
 	</script>
 	<style>
 		.job-card {
@@ -744,25 +738,19 @@
 					in one view.
 				</p>
 
-				<!-- API Backend: Koyeb (job-search-api) | Vercel -->
+				<!-- API Backend: Unified Backend Engine | Vercel -->
 				<div
 					class="flex flex-wrap items-center gap-4 mb-4 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/20">
 					<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Backend:</span>
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input type="radio" name="api-backend" value="koyeb" id="api-backend-koyeb"
-							class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-						<span class="text-sm text-gray-800 dark:text-gray-200">Render Backend</span>
+							class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary" checked>
+						<span class="text-sm text-gray-800 dark:text-gray-200 font-semibold">Unified Backend Engine</span>
 					</label>
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input type="radio" name="api-backend" value="vercel" id="api-backend-vercel"
-							class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
-							checked>
-						<span class="text-sm text-gray-800 dark:text-gray-200">Vercel</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer">
-						<input type="radio" name="api-backend" value="rssjobs" id="api-backend-rssjobs"
 							class="rounded-full border-gray-300 dark:border-gray-600 text-primary focus:ring-primary">
-						<span class="text-sm text-gray-800 dark:text-gray-200">RSSJobs (Direct)</span>
+						<span class="text-sm text-gray-800 dark:text-gray-200">Vercel (Remote APIs)</span>
 					</label>
 					<span id="api-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></span>
 					<span id="job-live-pill"
