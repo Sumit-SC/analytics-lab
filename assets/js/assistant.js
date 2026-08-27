@@ -351,6 +351,7 @@
 		try { return localStorage.getItem(MODE_KEY) || 'basic'; } catch (e) { return 'basic'; }
 	})();
 
+	var isConfirmedDownload = false;
 	var pillBasic = document.getElementById('model-pill-basic');
 	var pillAi = document.getElementById('model-pill-ai');
 
@@ -364,16 +365,58 @@
 		if (activeMode === 'basic') {
 			setModeStatus('⚡ Basic Mode (0MB download, instant FAQ & API responses).');
 		} else {
-			setModeStatus('🤖 Local AI Bot Mode (Xenova/LaMini-Flan-T5-77M). Download on tap.');
+			setModeStatus('🤖 Local AI Bot Mode (Xenova/LaMini-Flan-T5-77M).');
 		}
 	}
 	updatePillsUI();
 
+	function promptDownloadConfirmation() {
+		var confirmWrap = document.createElement('div');
+		confirmWrap.className = 'my-3 p-3.5 rounded-xl border border-primary/40 bg-primary/5 dark:bg-primary/10 space-y-2.5';
+
+		var msg = document.createElement('p');
+		msg.className = 'text-xs text-gray-800 dark:text-gray-200 leading-relaxed font-semibold';
+		msg.textContent = '🤖 Would you like to download the Local AI Model (~77MB ONNX)? This will enable offline AI text generation in your browser.';
+		confirmWrap.appendChild(msg);
+
+		var btnsRow = document.createElement('div');
+		btnsRow.className = 'flex flex-wrap items-center gap-2';
+
+		var btnYes = document.createElement('button');
+		btnYes.type = 'button';
+		btnYes.className = 'px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold shadow hover:bg-primary/90 transition';
+		btnYes.textContent = '✅ Download & Enable (~77MB)';
+		btnYes.addEventListener('click', function () {
+			isConfirmedDownload = true;
+			confirmWrap.remove();
+			selectMode('ai_confirmed');
+		});
+		btnsRow.appendChild(btnYes);
+
+		var btnNo = document.createElement('button');
+		btnNo.type = 'button';
+		btnNo.className = 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition';
+		btnNo.textContent = '❌ Keep Basic Mode (0MB)';
+		btnNo.addEventListener('click', function () {
+			confirmWrap.remove();
+			selectMode('basic');
+		});
+		btnsRow.appendChild(btnNo);
+
+		confirmWrap.appendChild(btnsRow);
+		messagesEl.appendChild(confirmWrap);
+		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
 	function selectMode(m) {
-		activeMode = m;
-		try { localStorage.setItem(MODE_KEY, m); } catch (e) {}
+		if (m === 'ai' && !isConfirmedDownload && !modelPipeline) {
+			promptDownloadConfirmation();
+			return;
+		}
+		activeMode = m === 'ai_confirmed' ? 'ai' : m;
+		try { localStorage.setItem(MODE_KEY, activeMode); } catch (e) {}
 		updatePillsUI();
-		if (m === 'ai') {
+		if (activeMode === 'ai') {
 			ensureModelLoaded().catch(function () {});
 		}
 	}
