@@ -1689,47 +1689,6 @@
 	<script src="../assets/js/assistant.js" defer></script>
 	<script src="../assets/js/jobs.js" defer></script>
 	<script src="../assets/js/register-sw.js" defer></script>
-	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-			const btnFeed = document.getElementById('tab-btn-feed');
-			const btnApi = document.getElementById('tab-btn-api');
-			const btnHub = document.getElementById('tab-btn-hub');
-
-			const viewFeed = document.getElementById('tab-view-feed');
-			const viewApi = document.getElementById('tab-view-api');
-			const viewHub = document.getElementById('tab-view-hub');
-			const plannerSec = document.getElementById('planner-section');
-
-			function switchTab(activeBtn, activeView) {
-				[btnFeed, btnApi, btnHub].forEach(btn => {
-					if (btn) {
-						btn.className = 'px-4 py-2 text-sm font-medium rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2';
-					}
-				});
-				[viewFeed, viewApi, viewHub].forEach(v => {
-					if (v) v.classList.add('hidden');
-				});
-
-				if (activeBtn) {
-					activeBtn.className = 'px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white shadow-sm transition-all flex items-center gap-2';
-				}
-				if (activeView) {
-					activeView.classList.remove('hidden');
-				}
-				if (plannerSec) {
-					if (activeView === viewFeed) {
-						plannerSec.classList.remove('hidden');
-					} else {
-						plannerSec.classList.add('hidden');
-					}
-				}
-			}
-
-			if (btnFeed) btnFeed.addEventListener('click', () => switchTab(btnFeed, viewFeed));
-			if (btnApi) btnApi.addEventListener('click', () => switchTab(btnApi, viewApi));
-			if (btnHub) btnHub.addEventListener('click', () => switchTab(btnHub, viewHub));
-		});
-	</script>
 </body>
 
 </html>

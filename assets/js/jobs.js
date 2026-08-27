@@ -1,6 +1,34 @@
 (function () {
 	'use strict';
 
+	function cleanText(input) {
+		if (!input) return '';
+		var str = String(input);
+		var txt = document.createElement('textarea');
+		for (var i = 0; i < 4; i++) {
+			if (str.indexOf('&') === -1) break;
+			txt.innerHTML = str;
+			var decoded = txt.value;
+			if (decoded === str) break;
+			str = decoded;
+		}
+		str = str.replace(/<[^>]*>/g, ' ');
+		str = str.replace(/&lt;[^&]*&gt;/gi, ' ');
+		str = str.replace(/&lt;\/?[a-z0-9]+&gt;/gi, ' ');
+		str = str.replace(/&lt;[a-z0-9\s="/._:-]+&gt;/gi, ' ');
+		str = str.replace(/&#xA;/g, ' ').replace(/&#xD;/g, ' ');
+		str = str.replace(/[\r\n\t\f\v]+/g, ' ').replace(/\s+/g, ' ').trim();
+		return str;
+	}
+
+	function safeHtmlStr(cleanStr) {
+		if (cleanStr == null) return '';
+		return String(cleanStr)
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
+
 	// Primary roles and locations (single source of truth for UI + rssjobs.app). Used by Role/Location dropdowns and API query.
 	var PRIMARY_ROLES = [
 		{ label: 'Analyst (any)', query: 'analyst' },
@@ -3848,11 +3876,11 @@
 			html += '<div class="flex items-start justify-between mb-2">';
 			html += '<div class="flex-1">';
 			html += '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">';
-			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-primary hover:underline">' + escapeHtml(cleanTitle) + '</a>';
+			html += '<a href="' + job.url + '" target="_blank" rel="noopener" class="text-primary hover:underline">' + safeHtmlStr(cleanTitle) + '</a>';
 			html += '</h3>';
-			var companyLocation = escapeHtml(cleanCompany) + ' &middot; ' + escapeHtml(cleanLoc);
+			var companyLocation = safeHtmlStr(cleanCompany) + ' &middot; ' + safeHtmlStr(cleanLoc);
 			if (job.postedAgo && !job.dateFormatted) {
-				companyLocation += ' &middot; <span class="text-xs text-gray-500 dark:text-gray-500">' + escapeHtml(job.postedAgo) + '</span>';
+				companyLocation += ' &middot; <span class="text-xs text-gray-500 dark:text-gray-500">' + safeHtmlStr(job.postedAgo) + '</span>';
 			}
 			html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">' + companyLocation + '</p>';
 			html += '</div>';
@@ -3873,7 +3901,7 @@
 			if (job.description) {
 				var cleanDesc = cleanText(job.description);
 				var truncatedDesc = cleanDesc.substring(0, 220);
-				html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">' + escapeHtml(truncatedDesc) + (cleanDesc.length > 220 ? '…' : '') + '</p>';
+				html += '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">' + safeHtmlStr(truncatedDesc) + (cleanDesc.length > 220 ? '…' : '') + '</p>';
 			}
 			if (job.tags && job.tags.length > 0) {
 				html += '<div class="flex flex-wrap gap-1 mb-2">';
@@ -3927,9 +3955,30 @@
 			if (tgBtn) {
 				var tgJob = jobById[tgBtn.getAttribute('data-job-id')];
 				if (!tgJob) return;
-				var text = '📢 New Job Listing Found!\n\n💼 Role: ' + (tgJob.title || '') + '\n🏢 Company: ' + (tgJob.company || '') + '\n📍 Location: ' + (tgJob.location || '') + '\n\n🔗 Apply: ' + (tgJob.url || '');
-				var tgShareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(tgJob.url || '') + '&text=' + encodeURIComponent(text);
-				window.open(tgShareUrl, '_blank', 'noopener');
+				var cTitle = cleanText(tgJob.title || 'Job Listing');
+				var cCompany = cleanText(tgJob.company || 'Unknown');
+				var cLoc = cleanText(tgJob.location || 'Remote');
+				var text = '🎯 Job Opportunity Alert!\n\n💼 Role: ' + cTitle + '\n🏢 Company: ' + cCompany + '\n📍 Location: ' + cLoc + '\n📊 Match Score: ' + (tgJob.matchScore || 0) + '%\n\n🔗 Apply Direct: ' + (tgJob.url || '');
+				
+				var botToken = localStorage.getItem('tg_bot_token');
+				var chatId = localStorage.getItem('tg_chat_id');
+				if (botToken && chatId) {
+					fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ chat_id: chatId, text: text })
+					}).then(function (r) {
+						if (r.ok) {
+							window.alert('✈️ Successfully posted to Telegram Channel (' + chatId + ')!');
+						} else {
+							window.open('https://t.me/share/url?url=' + encodeURIComponent(tgJob.url || '') + '&text=' + encodeURIComponent(text), '_blank', 'noopener');
+						}
+					}).catch(function () {
+						window.open('https://t.me/share/url?url=' + encodeURIComponent(tgJob.url || '') + '&text=' + encodeURIComponent(text), '_blank', 'noopener');
+					});
+				} else {
+					window.open('https://t.me/share/url?url=' + encodeURIComponent(tgJob.url || '') + '&text=' + encodeURIComponent(text), '_blank', 'noopener');
+				}
 				return;
 			}
 			var gptBtn = event.target.closest('.job-prep-chatgpt-btn');
