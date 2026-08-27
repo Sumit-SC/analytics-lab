@@ -225,11 +225,17 @@
 	}
 
 	function openPanel() {
-		panel.classList.add('open');
-		if (overlay) overlay.classList.add('show');
-		btn.setAttribute('aria-expanded', 'true');
-		panel.setAttribute('aria-hidden', 'false');
-		if (overlay) overlay.setAttribute('aria-hidden', 'false');
+		if (panel) {
+			panel.classList.remove('hidden');
+			panel.classList.add('open');
+			panel.setAttribute('aria-hidden', 'false');
+		}
+		if (overlay) {
+			overlay.classList.remove('hidden');
+			overlay.classList.add('show');
+			overlay.setAttribute('aria-hidden', 'false');
+		}
+		if (btn) btn.setAttribute('aria-expanded', 'true');
 		if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
 		// Focus trap: keep Tab inside panel when open
 		function handleKey(e) {
@@ -258,29 +264,33 @@
 		if (messagesEl.children.length === 0) {
 			var onJobs = isJobsPage();
 			var welcome = onJobs
-				? 'You\'re on the jobs page. I can help with interview prep, mock questions, or explaining your experience. Use the suggestions below or enable the full chatbot (~80MB). Chat is saved in your browser.'
-				: 'Hi! Ask anything. Default uses Wikipedia/FAQ; optional full chatbot downloads once (~80MB). This chat is saved locally in your browser (Clear chat to remove).';
-			var searchQuery = onJobs ? 'STAR method interview answer' : 'what is flan t5 small model size';
-			add('assistant', welcome, searchQuery);
-			push({ role: 'assistant', text: welcome, searchQuery: searchQuery });
-			if (onJobs) addSuggestedPromptsAndMockButton();
+				? '👋 Welcome to Job-Prep AI! I can help you practice interview questions, refine your resume/pitch, and review SQL/Python coding problems. Select a prompt below or type any question.'
+				: '👋 Welcome to Standalone Playground Assistant! Ask me any learning question or choose a model below.';
+			add('assistant', welcome, null);
+			push({ role: 'assistant', text: welcome });
+			addSuggestedPromptsAndMockButton();
 		}
 	}
+
 	function closePanel() {
-		panel.classList.remove('open');
-		if (overlay) overlay.classList.remove('show');
-		btn.setAttribute('aria-expanded', 'false');
-		panel.setAttribute('aria-hidden', 'true');
-		if (overlay) overlay.setAttribute('aria-hidden', 'true');
-		if (panel._assistantFocusTrap) {
+		if (panel) {
+			panel.classList.remove('open');
+			panel.classList.add('hidden');
+			panel.setAttribute('aria-hidden', 'true');
+		}
+		if (overlay) {
+			overlay.classList.remove('show');
+			overlay.classList.add('hidden');
+			overlay.setAttribute('aria-hidden', 'true');
+		}
+		if (btn) btn.setAttribute('aria-expanded', 'false');
+		if (panel && panel._assistantFocusTrap) {
 			document.removeEventListener('keydown', panel._assistantFocusTrap);
 			panel._assistantFocusTrap = null;
 		}
 		if (btn && typeof btn.focus === 'function') btn.focus();
 	}
 
-	btn.setAttribute('aria-expanded', 'false');
-	btn.setAttribute('aria-controls', 'assistant-panel');
 	panel.setAttribute('aria-hidden', 'true');
 	btn.addEventListener('click', openPanel);
 	if (closeBtn) closeBtn.addEventListener('click', closePanel);
