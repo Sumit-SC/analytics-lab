@@ -2779,55 +2779,25 @@ body:has(#global-music-bar) {
 /* Do NOT hide when sidebar exists: users expect this everywhere. */
 
 #global-resources-toggle {
-	position: fixed;
-	top: 50%;
-	right: 38px;
-	transform: translateY(-50%);
-	z-index: 44;
-	width: 36px;
-	height: 80px;
-	padding: 0;
-	border-radius: 8px 0 0 8px;
-	background: rgba(30, 58, 138, 0.9);
-	color: white;
-	border: 1px solid rgba(30, 58, 138, 1);
-	border-right: none;
-	font-size: 0.6rem;
-	font-weight: 600;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	box-shadow: -2px 0 8px rgba(0,0,0,0.15);
-	writing-mode: vertical-rl;
-	text-orientation: mixed;
-	letter-spacing: 0.05em;
+	display: none !important;
 }
-#global-resources-toggle:hover { opacity: 0.95; }
 #global-yt-panel-toggle { z-index: 45; right: 0; }
 #global-resources-flyout {
 	position: fixed;
 	top: 50%;
-	right: 0;
-	transform: translate(100%, -50%);
+	left: 0;
+	transform: translate(-100%, -50%);
 	width: 100%;
 	max-width: 320px;
 	max-height: 75vh;
 	z-index: 46;
 	background: rgba(255, 255, 255, 0.98);
 	border: 1px solid rgba(148, 163, 184, 0.3);
-	border-right: none;
-	border-radius: 12px 0 0 12px;
-	box-shadow: -8px 4px 24px rgba(15, 23, 42, 0.12);
-	display: flex;
-	flex-direction: column;
-	transition: transform 0.25s ease;
-	overflow: hidden;
-}
-.dark #global-resources-flyout {
-	background: rgba(15, 23, 42, 0.98);
-	border-color: rgba(71, 85, 105, 0.5);
-	box-shadow: -8px 4px 24px rgba(0, 0, 0, 0.35);
+	border-left: none;
+	border-radius: 0 12px 12px 0;
+	box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	overflow-y: auto;
 }
 #global-resources-flyout.global-resources-open {
 	transform: translate(0, -50%);
