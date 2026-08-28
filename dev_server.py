@@ -10,7 +10,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 # Default backend for /api/* when running locally.
 # You can override by setting env var JOB_PROXY_URL, e.g.:
 #   $env:JOB_PROXY_URL="https://playground-serveless.vercel.app"
-DEFAULT_API_ORIGIN = os.environ.get("JOB_PROXY_URL", "https://playground-serveless.vercel.app").rstrip("/")
+DEFAULT_API_ORIGIN = os.environ.get("JOB_PROXY_URL", "https://job-search-engine-api.onrender.com").rstrip("/")
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
