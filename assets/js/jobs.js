@@ -350,14 +350,8 @@
 		setupSavedFilterPresets();
 		setupAutoRefreshUi();
 		setupStatsDashboard();
-		if (!isMobileViewport()) {
-			fetchAllJobs();
-		} else {
-			var totalEl = document.getElementById('job-stats-total');
-			if (totalEl) totalEl.textContent = 'Ready. Tap “Search Jobs” to load results.';
-			var loadingEl = document.getElementById('job-loading');
-			if (loadingEl) loadingEl.style.display = 'none';
-		}
+		// Fetch all feeds automatically on page load across all viewports
+		fetchAllJobs();
 		setupPlannerEventListeners();
 		renderPlanner();
 	}
@@ -679,8 +673,8 @@
 				window.JOB_PROXY_URL = getJobSearchApiBase();
 				if (statusEl) statusEl.textContent = '✓ RSSJobs (Direct)';
 			} else {
-				window.JOB_PROXY_URL = 'https://job-search-backend-vercel.vercel.app';
-				if (statusEl) statusEl.textContent = '✓ Vercel';
+				window.JOB_PROXY_URL = 'https://tg-jobs-engine.vercel.app';
+				if (statusEl) statusEl.textContent = '✓ Vercel Edge Hub';
 			}
 			localStorage.setItem('job_tracker_api_backend', backend);
 			applyBackendVisibility(backend);

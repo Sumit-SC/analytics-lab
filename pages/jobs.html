@@ -26,12 +26,12 @@
 		var __backendParam = '';
 		try { __backendParam = (new URLSearchParams(window.location.search)).get('backend') || ''; } catch (e) { __backendParam = ''; }
 		
-		var defaultApiHost = __isLocalhost ? '' : 'https://job-search-engine-api.onrender.com';
+		var defaultApiHost = __isLocalhost ? '' : 'https://service-3-vercel-hub.vercel.app';
 		if (__backendParam && typeof __backendParam === 'string') {
 			defaultApiHost = __backendParam.replace(/\/$/, '');
 		}
 		
-		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || defaultApiHost;
+		window.JOB_SEARCH_API_BASE = window.JOB_SEARCH_API_BASE || 'https://tg-jobs-engine.onrender.com';
 		window.JOB_PROXY_URL = window.JOB_PROXY_URL || defaultApiHost;
 	</script>
 	<style>
